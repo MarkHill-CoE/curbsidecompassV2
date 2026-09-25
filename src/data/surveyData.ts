@@ -427,6 +427,330 @@ export function calculateSimulationMetricsFromAnswers(
   };
 }
 
+export interface QuestionTradeoffOutcome {
+  questionNumber: number;
+  questionTitle: string;
+  hasAnswer: boolean;
+  selectedOptionLabel?: string;
+  deltaStallsText?: string;
+  deltaStallsValue?: number;
+  tradeoffRationale: string;
+  curbsideImpactSummary: string;
+}
+
+export function getQuestionTradeoffImpact(
+  questionIndex: number,
+  answers: Record<string, string>
+): QuestionTradeoffOutcome {
+  const question = SURVEY_QUESTIONS[questionIndex];
+  if (!question) {
+    return {
+      questionNumber: questionIndex + 1,
+      questionTitle: 'Curbside Parking Policy',
+      hasAnswer: false,
+      tradeoffRationale: 'Answer survey questions to see the live calculated impact on curbside parking stalls.',
+      curbsideImpactSummary: 'Curbside parking demand updates in real-time.'
+    };
+  }
+
+  const selectedAnswerId = answers[question.id];
+  const selectedOption = question.options.find(opt => opt.id === selectedAnswerId);
+
+  if (question.id === 'q1') {
+    if (selectedAnswerId === 'q1_a') {
+      return {
+        questionNumber: 1,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Permit fees by vehicle owners',
+        deltaStallsText: '-1.5 stalls (-10%)',
+        deltaStallsValue: -1.5,
+        tradeoffRationale: 'User permit fees encourage vehicle owners to use private detached garages instead of the street.',
+        curbsideImpactSummary: 'Frees up shared curbside stalls for visitors and delivery couriers.'
+      };
+    }
+    if (selectedAnswerId === 'q1_b') {
+      return {
+        questionNumber: 1,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Taxpayer funded',
+        deltaStallsText: '+1.5 stalls (+10%)',
+        deltaStallsValue: +1.5,
+        tradeoffRationale: 'Free on-street storage encourages residents to leave extra vehicles parked curbside.',
+        curbsideImpactSummary: 'Higher curbside occupancy and less room for short-term visitors.'
+      };
+    }
+    return {
+      questionNumber: 1,
+      questionTitle: question.text,
+      hasAnswer: false,
+      tradeoffRationale: 'Choose between vehicle owner permit fees or general taxpayer funding.',
+      curbsideImpactSummary: 'Calculates the trade-off between private garage use and street crowding.'
+    };
+  }
+
+  if (question.id === 'q2') {
+    if (selectedAnswerId === 'q2_a') {
+      return {
+        questionNumber: 2,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Limit permits per household',
+        deltaStallsText: '-2.0 stalls (-13%)',
+        deltaStallsValue: -2.0,
+        tradeoffRationale: 'Capping permits per home prevents multi-car homes from occupying multiple curb spaces.',
+        curbsideImpactSummary: 'Leaves guaranteed open space for all households along the block.'
+      };
+    }
+    if (selectedAnswerId === 'q2_b') {
+      return {
+        questionNumber: 2,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'No permit limits',
+        deltaStallsText: '+2.0 stalls (+13%)',
+        deltaStallsValue: +2.0,
+        tradeoffRationale: 'Unlimited permits allow multi-car homes to store multiple cars on the street.',
+        curbsideImpactSummary: 'Increased curbside competition and reduced stall turnover.'
+      };
+    }
+    return {
+      questionNumber: 2,
+      questionTitle: question.text,
+      hasAnswer: false,
+      tradeoffRationale: 'Decide whether to cap on-street permits per household.',
+      curbsideImpactSummary: 'Affects how many vehicles each home can park along the curb.'
+    };
+  }
+
+  if (question.id === 'q3') {
+    if (selectedAnswerId === 'q3_a') {
+      return {
+        questionNumber: 3,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Paid commercial permits & zones',
+        deltaStallsText: '-1.5 stalls (-10%)',
+        deltaStallsValue: -1.5,
+        tradeoffRationale: 'Specialized work and loading zones keep couriers and contractors from double-parking in the lane.',
+        curbsideImpactSummary: 'Ensures delivery turnover while keeping street traffic moving smoothly.'
+      };
+    }
+    if (selectedAnswerId === 'q3_b') {
+      return {
+        questionNumber: 3,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'No commercial restrictions',
+        deltaStallsText: '+2.0 stalls (+13%)',
+        deltaStallsValue: +2.0,
+        tradeoffRationale: 'Contractors and delivery vans occupy curbside stalls for extended hours.',
+        curbsideImpactSummary: 'Reduces available parking for residents and visiting guests.'
+      };
+    }
+    return {
+      questionNumber: 3,
+      questionTitle: question.text,
+      hasAnswer: false,
+      tradeoffRationale: 'Choose rules for trade contractors and delivery vans.',
+      curbsideImpactSummary: 'Balances commercial delivery needs with resident parking.'
+    };
+  }
+
+  if (question.id === 'q4') {
+    if (selectedAnswerId === 'q4_a') {
+      return {
+        questionNumber: 4,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Digital visitor registration',
+        deltaStallsText: '-1.5 stalls (-10%)',
+        deltaStallsValue: -1.5,
+        tradeoffRationale: 'Digital registration prevents non-resident commuters from parking for days at a time.',
+        curbsideImpactSummary: 'Maintains predictable, open visitor parking stalls.'
+      };
+    }
+    if (selectedAnswerId === 'q4_b') {
+      return {
+        questionNumber: 4,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'First-come, first-served',
+        deltaStallsText: '+2.5 stalls (+16%)',
+        deltaStallsValue: +2.5,
+        tradeoffRationale: 'Unmonitored visitor parking fills stalls quickly without time turnover.',
+        curbsideImpactSummary: 'High curb pressure during peak evenings and weekends.'
+      };
+    }
+    return {
+      questionNumber: 4,
+      questionTitle: question.text,
+      hasAnswer: false,
+      tradeoffRationale: 'Choose how visitor parking should be managed.',
+      curbsideImpactSummary: 'Balances guest convenience with commuter parking overflow.'
+    };
+  }
+
+  if (question.id === 'q5') {
+    if (selectedAnswerId === 'q5_a') {
+      return {
+        questionNumber: 5,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'User fees & violation fines',
+        deltaStallsText: '-1.5 stalls (-10%)',
+        deltaStallsValue: -1.5,
+        tradeoffRationale: 'Active patrols funded by violators deter long-term overstays and boost turnover.',
+        curbsideImpactSummary: 'Prevents abandoned or stored cars from hogging curbside stalls.'
+      };
+    }
+    if (selectedAnswerId === 'q5_b') {
+      return {
+        questionNumber: 5,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Property taxes',
+        deltaStallsText: '+2.0 stalls (+13%)',
+        deltaStallsValue: +2.0,
+        tradeoffRationale: 'Tax-funded enforcement is infrequent and complaint-driven.',
+        curbsideImpactSummary: 'Cars linger parked along the curb for multiple days without turnover.'
+      };
+    }
+    return {
+      questionNumber: 5,
+      questionTitle: question.text,
+      hasAnswer: false,
+      tradeoffRationale: 'Decide whether parking violators or all property taxpayers fund enforcement.',
+      curbsideImpactSummary: 'Determines how frequently street stalls are patrolled.'
+    };
+  }
+
+  if (question.id === 'q6') {
+    if (selectedAnswerId === 'q6_a') {
+      return {
+        questionNumber: 6,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Paid parking & time limits',
+        deltaStallsText: '-2.5 stalls (-16%)',
+        deltaStallsValue: -2.5,
+        tradeoffRationale: 'Time limits stop hospital and university commuters from taking residential spots.',
+        curbsideImpactSummary: 'Keeps traffic flowing and eliminates circling commuter vehicles.'
+      };
+    }
+    if (selectedAnswerId === 'q6_b') {
+      return {
+        questionNumber: 6,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Free & unenforced',
+        deltaStallsText: '+3.5 stalls (+22%)',
+        deltaStallsValue: +3.5,
+        tradeoffRationale: 'Commuters flood residential streets seeking free parking rather than paid lots.',
+        curbsideImpactSummary: 'Severe congestion with 4 to 5 vehicles circling looking for spots.'
+      };
+    }
+    return {
+      questionNumber: 6,
+      questionTitle: question.text,
+      hasAnswer: false,
+      tradeoffRationale: 'Decide how to protect residential streets near major traffic hubs.',
+      curbsideImpactSummary: 'Controls commuter spillover and circling traffic.'
+    };
+  }
+
+  if (question.id === 'q7') {
+    if (selectedAnswerId === 'q7_a') {
+      return {
+        questionNumber: 7,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Strict eligibility & enforcement',
+        deltaStallsText: '-1.0 stall (-6%)',
+        deltaStallsValue: -1.0,
+        tradeoffRationale: 'Accessible curb stalls remain protected for residents and guests with mobility permits.',
+        curbsideImpactSummary: 'Ensures equitable access and maintains driveway sightlines.'
+      };
+    }
+    if (selectedAnswerId === 'q7_b') {
+      return {
+        questionNumber: 7,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'No event enforcement',
+        deltaStallsText: '+1.5 stalls (+10%)',
+        deltaStallsValue: +1.5,
+        tradeoffRationale: 'Event attendees encroach on accessible stalls and block driveway sightlines.',
+        curbsideImpactSummary: 'Restricts mobility access and increases safety hazards.'
+      };
+    }
+    return {
+      questionNumber: 7,
+      questionTitle: question.text,
+      hasAnswer: false,
+      tradeoffRationale: 'Choose enforcement policy for accessible curbside stalls during events.',
+      curbsideImpactSummary: 'Protects mobility zones during peak neighbourhood events.'
+    };
+  }
+
+  if (question.id === 'q8') {
+    if (selectedAnswerId === 'q8_a') {
+      return {
+        questionNumber: 8,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'City-wide standardized rules',
+        deltaStallsText: '-1.0 stall (-6%)',
+        deltaStallsValue: -1.0,
+        tradeoffRationale: 'Consistent city-wide parking rules prevent drivers from dodging restrictions onto adjacent blocks.',
+        curbsideImpactSummary: 'Prevents parking spillover onto unregulated neighbouring streets.'
+      };
+    }
+    if (selectedAnswerId === 'q8_b') {
+      return {
+        questionNumber: 8,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: selectedOption?.label || 'Block-by-block opt-in',
+        deltaStallsText: '+2.0 stalls (+13%)',
+        deltaStallsValue: +2.0,
+        tradeoffRationale: 'Unregulated blocks absorb overflow from nearby restricted blocks.',
+        curbsideImpactSummary: 'Increases parking spillover pressure on unregulated blocks.'
+      };
+    }
+    return {
+      questionNumber: 8,
+      questionTitle: question.text,
+      hasAnswer: false,
+      tradeoffRationale: 'Choose between city-wide standardized rules and block-by-block opt-in.',
+      curbsideImpactSummary: 'Determines whether parking restrictions push cars to neighbouring streets.'
+    };
+  }
+
+  // Question 9 (Postal code)
+  if (selectedAnswerId) {
+    return {
+      questionNumber: 9,
+      questionTitle: question.text,
+      hasAnswer: true,
+      selectedOptionLabel: selectedAnswerId === 'OPT_OUT' ? 'Opted out' : selectedAnswerId,
+      deltaStallsText: 'Location Recorded',
+      deltaStallsValue: 0,
+      tradeoffRationale: 'Your Edmonton postal code helps city planners understand neighbourhood parking patterns.',
+      curbsideImpactSummary: 'Protected under FOIP k-anonymity privacy guidelines.'
+    };
+  }
+
+  return {
+    questionNumber: 9,
+    questionTitle: question.text,
+    hasAnswer: false,
+    tradeoffRationale: 'Enter your Edmonton postal code to localize survey feedback.',
+    curbsideImpactSummary: 'Data is anonymized to protect personal privacy.'
+  };
+}
+
 export function validatePostalCode(val: string): { isValid: boolean; message?: string } {
   if (val === 'OPT_OUT') return { isValid: true };
   if (!val || !val.trim()) {

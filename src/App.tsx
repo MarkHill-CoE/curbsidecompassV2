@@ -19,7 +19,8 @@ import {
   INITIAL_SIM_CONFIG,
   calculatePersona,
   validatePostalCode,
-  calculateSimulationMetricsFromAnswers
+  calculateSimulationMetricsFromAnswers,
+  getQuestionTradeoffImpact
 } from './data/surveyData';
 import { SimulationConfig } from './types';
 import { Compass, RotateCcw, FileSpreadsheet, CheckCircle, HelpCircle, ZapOff, Eye } from 'lucide-react';
@@ -102,6 +103,10 @@ export default function App() {
     occupiedGaragesCount: computedMetrics.occupiedGaragesCount,
     onReshuffle: () => {}
   }), [computedMetrics]);
+
+  const currentTradeoffOutcome = useMemo(() => {
+    return getQuestionTradeoffImpact(currentStep, selectedAnswers);
+  }, [currentStep, selectedAnswers]);
 
   const [isCompleted, setIsCompleted] = useState<boolean>(() => {
     try {
@@ -471,10 +476,18 @@ export default function App() {
               activeVisitorCars={simulationMetrics.activeVisitorCars}
               totalDwellings={simulationMetrics.totalDwellings}
               totalWeeklyDeliveries={simulationMetrics.totalWeeklyDeliveries}
+              tradeoffOutcome={currentTradeoffOutcome}
+              currentStep={currentStep}
               policyNote={policyNote}
               onSwitchToSimulation={() => handleToggleSimplifiedMode(false)}
               onOpenMagnifiedGauge={() => setShowMagnifiedGauge(true)}
               onOpenManualSliders={() => setShowManualSliders(true)}
+              onCurbsideDemandChange={(newDemand) => {
+                setManualOverride((prev) => ({
+                  ...prev,
+                  householdCarsPerHome: Math.max(1, (newDemand + 10) / 12)
+                }));
+              }}
               onReshuffle={simulationMetrics.onReshuffle}
             />
           ) : (
