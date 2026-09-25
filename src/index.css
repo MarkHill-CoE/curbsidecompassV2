@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+@keyframes marquee {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(-150%); }
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 16s linear infinite;
+}
+
+.animate-marquee-slow {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 128s linear infinite;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f4f6f8;
+}

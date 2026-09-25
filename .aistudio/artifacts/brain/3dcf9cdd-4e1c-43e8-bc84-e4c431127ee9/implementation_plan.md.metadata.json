@@ -1,0 +1,6 @@
+{
+  "summary":  "Implementation plan for introducing Curbside Compass to users who may be unfamiliar with gamified simulation surveys. Features a 3-step interactive welcome modal with civic context, educational street model framing, a simplified static view toggle, and first-visit persistence with a header re-launch button.",
+  "updatedAt":  "2026-09-25T19:43:09.750388757Z",
+  "requestFeedback":  true,
+  "userFacing":  true
+}

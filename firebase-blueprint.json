@@ -1,0 +1,72 @@
+{
+  "entities": {
+    "SurveyResponse": {
+      "title": "SurveyResponse",
+      "description": "User responses from the Curbside Compass public parking trade-off survey and feedback form",
+      "type": "object",
+      "properties": {
+        "personaId": {
+          "type": "string",
+          "description": "Identifier of the resulting persona (e.g., q1_transit_champion, q2_pragmatic_resident)"
+        },
+        "personaTitle": {
+          "type": "string",
+          "description": "Display title of the user's calculated persona"
+        },
+        "quadrant": {
+          "type": "string",
+          "description": "Compass quadrant: Q1, Q2, Q3, or Q4"
+        },
+        "totalX": {
+          "type": "number",
+          "description": "Cumulative fiscal axis score (-2: Taxpayer ... +2: User)"
+        },
+        "totalY": {
+          "type": "number",
+          "description": "Cumulative regulatory axis score (-2: Open ... +2: Regulated)"
+        },
+        "answers": {
+          "type": "object",
+          "description": "Map of survey question IDs to chosen option IDs"
+        },
+        "simConfig": {
+          "type": "object",
+          "description": "Final parking simulation configuration resulting from choices"
+        },
+        "rating": {
+          "type": ["number", "null"],
+          "description": "User 1-5 rating of Edmonton parking program trade-off outcomes"
+        },
+        "feedback": {
+          "type": "string",
+          "description": "Optional open-ended user commentary or rationale"
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Edmonton postal code FSA or entered code for spatial analysis"
+        },
+        "authUid": {
+          "type": ["string", "null"],
+          "description": "Anonymous user UID if authenticated"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Initial creation timestamp"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp"
+        }
+      },
+      "required": ["personaId", "personaTitle", "quadrant", "totalX", "totalY", "answers", "simConfig"]
+    }
+  },
+  "firestore": {
+    "/survey_responses/{responseId}": {
+      "entity": "SurveyResponse",
+      "description": "Individual survey and feedback submissions"
+    }
+  }
+}

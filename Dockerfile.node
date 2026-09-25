@@ -1,0 +1,32 @@
+# ==========================================
+# Node.js Production Dockerfile (Alternative)
+# ==========================================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json* bun.lock* ./
+RUN npm install --frozen-lockfile 2>/dev/null || npm install
+
+COPY . .
+RUN npm run build
+
+# Runner stage using Node.js
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+COPY package.json package-lock.json* bun.lock* ./
+RUN npm install --omit=dev --ignore-scripts
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/vite.config.ts ./
+COPY --from=builder /app/node_modules ./node_modules
+
+EXPOSE 3000
+
+# Serve with vite preview
+CMD ["npx", "vite", "preview", "--host", "0.0.0.0", "--port", "3000"]

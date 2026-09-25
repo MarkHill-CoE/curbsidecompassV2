@@ -1,0 +1,254 @@
+Text Key,Page number,Page Name,Container Name,On screen text,text font size,font style,font attribute
+header_yeg,Header,Global Top Navigation,Brand Logo Badge,YEG,10px - 12px,Open Sans,Black (900)
+header_title_curbside,Header,Global Top Navigation,Brand Title,Curbside,12px - 14px,Open Sans,"Black (900), Tracking-wide"
+header_title_compass,Header,Global Top Navigation,Brand Title,Compass,12px - 14px,Open Sans,"Black (900), Tracking-wide"
+header_live_trend,Header,Global Top Navigation,Live Persona Trend Pill,Live Trend:,11px,Open Sans,Normal (400)
+header_final_persona,Header,Global Top Navigation,Live Persona Trend Pill,Final Persona:,11px,Open Sans,Normal (400)
+header_reset_btn,Header,Global Top Navigation,Header Actions,Reset,11px - 12px,Open Sans,Semibold (600)
+header_retake_btn,Header,Global Top Navigation,Header Actions,Retake,11px - 12px,Open Sans,Bold (700)
+nav_btn_previous,Global,Navigation Footer,Navigation Action,Previous,12px - 14px,Open Sans,Semibold (600)
+nav_btn_next,Global,Navigation Footer,Navigation Action,Next,12px - 14px,Open Sans,Bold (700)
+nav_alert_select_option,Global,Question Card,Validation Alert,Please select an option to advance.,12px - 14px,Open Sans,Semibold (600)
+q1_progress_title,1,Page 1 - Question 1 (Residential Policy),Progress Bar Header,QUESTION 1 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q1_category,1,Page 1 - Question 1 (Residential Policy),Progress Bar Header,Residential Policy,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q1_question,1,Page 1 - Question 1 (Residential Policy),Question Card,Who should pay for residential parking programs?,14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q1_option_a,1,Page 1 - Question 1 (Residential Policy),Option A Radio Card,Residents with vehicles in residential parking program areas pay permit fees that cover all program costs.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q1_option_b,1,Page 1 - Question 1 (Residential Policy),Option B Radio Card,Tax-payers cover program costs through property tax revenues.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q1_hint_a,1,Page 1 - Question 1 (Residential Policy),Simulation Feedback Hint A,"Residents with vehicles in the program area pay permit fees, which fully cover program costs and reduce street parking by encouraging off-street driveway parking.",11px - 12px,Open Sans,"Normal (400), Italic"
+q1_hint_b,1,Page 1 - Question 1 (Residential Policy),Simulation Feedback Hint B,"Since no fee is charged, more vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q2_progress_title,2,Page 2 - Question 2 (Visitors Policy),Progress Bar Header,QUESTION 2 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q2_category,2,Page 2 - Question 2 (Visitors Policy),Progress Bar Header,Visitors Policy,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q2_question,2,Page 2 - Question 2 (Visitors Policy),Question Card,Should your neighbourhood limit the number of on-street parking permits residents can hold?,14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q2_option_a,2,Page 2 - Question 2 (Visitors Policy),Option A Radio Card,Yes.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q2_option_b,2,Page 2 - Question 2 (Visitors Policy),Option B Radio Card,No.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q2_hint_a,2,Page 2 - Question 2 (Visitors Policy),Simulation Feedback Hint A,Limiting on-street parking permits reduces the number of vehicles parked on the street and encourages off-street or driveway parking.,11px - 12px,Open Sans,"Normal (400), Italic"
+q2_hint_b,2,Page 2 - Question 2 (Visitors Policy),Simulation Feedback Hint B,"Since no fee is charged, more vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q3_progress_title,3,Page 3 - Question 3 (Commercial Policy),Progress Bar Header,QUESTION 3 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q3_category,3,Page 3 - Question 3 (Commercial Policy),Progress Bar Header,Commercial Policy,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q3_question,3,Page 3 - Question 3 (Commercial Policy),Question Card,What restrictions should be placed on commercial and trade vehicles in residential areas?,14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q3_option_a,3,Page 3 - Question 3 (Commercial Policy),Option A Radio Card,Specialized paid permits are required to access work/loading zones.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q3_option_b,3,Page 3 - Question 3 (Commercial Policy),Option B Radio Card,No restrictions - commercial and trade vehicles have access and do not require paid permits.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q3_hint_a,3,Page 3 - Question 3 (Commercial Policy),Simulation Feedback Hint A,"Since a fee is charged, fewer vehicles park on the street and more park in driveways.",11px - 12px,Open Sans,"Normal (400), Italic"
+q3_hint_b,3,Page 3 - Question 3 (Commercial Policy),Simulation Feedback Hint B,"Since parking is on a first-come, first-served basis, available spots fill up quickly and remaining vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q4_progress_title,4,Page 4 - Question 4 (Visitors Policy),Progress Bar Header,QUESTION 4 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q4_category,4,Page 4 - Question 4 (Visitors Policy),Progress Bar Header,Visitors Policy,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q4_question,4,Page 4 - Question 4 (Visitors Policy),Question Card,How would you manage visitor parking in your neighbourhood?,14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q4_option_a,4,Page 4 - Question 4 (Visitors Policy),Option A Radio Card,"Visitors digitally register their vehicles, with enforcement conducted regularly.",12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q4_option_b,4,Page 4 - Question 4 (Visitors Policy),Option B Radio Card,"Visitor parking is on a first-come, first-served basis.",12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q4_hint_a,4,Page 4 - Question 4 (Visitors Policy),Simulation Feedback Hint A,"Since no fee is charged, more vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q4_hint_b,4,Page 4 - Question 4 (Visitors Policy),Simulation Feedback Hint B,"Since no fee is charged, more vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q5_progress_title,5,Page 5 - Question 5 (Finance Policy),Progress Bar Header,QUESTION 5 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q5_category,5,Page 5 - Question 5 (Finance Policy),Progress Bar Header,Finance Policy,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q5_question,5,Page 5 - Question 5 (Finance Policy),Question Card,Who should pay for residential parking enforcement?,14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q5_option_a,5,Page 5 - Question 5 (Finance Policy),Option A Radio Card,"Residents and visitors — through permit fees, guest pass sales and violation fines.",12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q5_option_b,5,Page 5 - Question 5 (Finance Policy),Option B Radio Card,Edmontonians — through property taxes.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q5_hint_a,5,Page 5 - Question 5 (Finance Policy),Simulation Feedback Hint A,"Since a fee is charged, fewer vehicles park on the street and more park in driveways.",11px - 12px,Open Sans,"Normal (400), Italic"
+q5_hint_b,5,Page 5 - Question 5 (Finance Policy),Simulation Feedback Hint B,"Since no fee is charged, more vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q6_progress_title,6,Page 6 - Question 6 (Enforcement Policy),Progress Bar Header,QUESTION 6 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q6_category,6,Page 6 - Question 6 (Enforcement Policy),Progress Bar Header,Enforcement Policy,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q6_question,6,Page 6 - Question 6 (Enforcement Policy),Question Card,"How would you manage parking near major traffic generators, like educational institutions and hospitals?",14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q6_option_a,6,Page 6 - Question 6 (Enforcement Policy),Option A Radio Card,Paid parking with time limits and frequent enforcement.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q6_option_b,6,Page 6 - Question 6 (Enforcement Policy),Option B Radio Card,"Maintain free, unenforced parking for visitors.",12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q6_hint_a,6,Page 6 - Question 6 (Enforcement Policy),Simulation Feedback Hint A,"Since a fee is charged, fewer vehicles park on the street and more park in driveways.",11px - 12px,Open Sans,"Normal (400), Italic"
+q6_hint_b,6,Page 6 - Question 6 (Enforcement Policy),Simulation Feedback Hint B,"Since no fee is charged, more vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q7_progress_title,7,Page 7 - Question 7 (Residential Policy),Progress Bar Header,QUESTION 7 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q7_category,7,Page 7 - Question 7 (Residential Policy),Progress Bar Header,Residential Policy,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q7_question,7,Page 7 - Question 7 (Residential Policy),Question Card,How would you manage accessible parking zones during events?,14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q7_option_a,7,Page 7 - Question 7 (Residential Policy),Option A Radio Card,"Conduct strict eligibility and digital pass checks, plus regular enforcement.",12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q7_option_b,7,Page 7 - Question 7 (Residential Policy),Option B Radio Card,"No active enforcement, relying on public courtesy to obey zone signage.",12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q7_hint_a,7,Page 7 - Question 7 (Residential Policy),Simulation Feedback Hint A,"Since no fee is charged, more vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q7_hint_b,7,Page 7 - Question 7 (Residential Policy),Simulation Feedback Hint B,"Since no fee is charged, more vehicles park on the street.",11px - 12px,Open Sans,"Normal (400), Italic"
+q8_progress_title,8,Page 8 - Question 8 (Residential Policy),Progress Bar Header,QUESTION 8 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q8_category,8,Page 8 - Question 8 (Residential Policy),Progress Bar Header,Residential Policy,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q8_question,8,Page 8 - Question 8 (Residential Policy),Question Card,How should parking rules respond to the individual needs of each neighbourhood?,14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q8_option_a,8,Page 8 - Question 8 (Residential Policy),Option A Radio Card,Allow neighbourhoods to opt into fee-based parking solutions.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q8_option_b,8,Page 8 - Question 8 (Residential Policy),Option B Radio Card,Apply one city-wide set of rules.,12px - 16px (up to 16pt / 21.3px),Open Sans,"Semibold (600), Leading-snug"
+q8_hint_a,8,Page 8 - Question 8 (Residential Policy),Simulation Feedback Hint A,"Since a fee is charged, fewer vehicles park on the street and more park in driveways.",11px - 12px,Open Sans,"Normal (400), Italic"
+q8_hint_b,8,Page 8 - Question 8 (Residential Policy),Simulation Feedback Hint B,"Without a fee, more vehicles park on the street. If a fee is charged, fewer vehicles park on the street and more residents park in their driveways.",11px - 12px,Open Sans,"Normal (400), Italic"
+q9_progress_title,9,Page 9 - Question 9 (Neighbourhood Location),Progress Bar Header,QUESTION 9 OF 9,12px - 14px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+q9_category,9,Page 9 - Question 9 (Neighbourhood Location),Progress Bar Header,Neighbourhood Location,12px - 14px,Open Sans,"Normal (400), Capitalize"
+q9_question,9,Page 9 - Question 9 (Neighbourhood Location),Question Card,Please enter your full postal code.,14px - 18px (up to 16pt / 21.3px),Open Sans,"Bold (700), Leading-snug"
+q9_helper_text,9,Page 9 - Question 9 (Neighbourhood Location),Postal Code Input Container,"Please enter a 6 or 7 character alphanumeric postal code (e.g., T5J 2R7 or T5J2R7).",12px - 16px,Open Sans,"Normal (400), Leading-relaxed"
+q9_input_placeholder,9,Page 9 - Question 9 (Neighbourhood Location),Postal Code Input Container,e.g. T5J 2R7,14px,Open Sans,Normal (400)
+q9_opt_out_label,9,Page 9 - Question 9 (Neighbourhood Location),Postal Code Opt-Out Checkbox,I prefer not to provide my postal code,14px,Open Sans,Semibold (600)
+q9_error_required,9,Page 9 - Question 9 (Neighbourhood Location),Validation Alert (on error),Please enter your full postal code to continue.,12px - 14px,Open Sans,Semibold (600)
+q9_error_alphanumeric,9,Page 9 - Question 9 (Neighbourhood Location),Validation Alert (on error),Postal code must contain only letters and numbers.,12px - 14px,Open Sans,Semibold (600)
+q9_error_length,9,Page 9 - Question 9 (Neighbourhood Location),Validation Alert (on error),Postal code must be 6 or 7 alphanumeric characters (currently [N]).,12px - 14px,Open Sans,Semibold (600)
+nav_btn_calc_persona,9,Page 9 - Question 9 (Neighbourhood Location),Navigation Footer,Calculate Final Persona,12px - 14px,Open Sans,Bold (700)
+watch_title,10,Page 10 - Watch the Street! Simulation Intermission,Intermission Card,Watch the Street!,24px - 30px,Open Sans,Black (900)
+watch_desc,10,Page 10 - Watch the Street! Simulation Intermission,Intermission Card,"Based on your policy choices, the neighborhood parking demand has been set. Observe the simulation to see if your policies lead to harmony or chaos!",14px - 16px,Open Sans,"Normal (400), Leading-relaxed"
+watch_btn_back,10,Page 10 - Watch the Street! Simulation Intermission,Intermission Navigation,Back,14px - 16px,Open Sans,Bold (700)
+watch_btn_results,10,Page 10 - Watch the Street! Simulation Intermission,Intermission Navigation,See Final Results,14px - 16px,Open Sans,Bold (700)
+results_btn_share,11,Page 11 - Results: Policy Compass & Persona,Results Header,Share,12px - 14px,Open Sans,Bold (700)
+compass_top_axis,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Top Axis,▲ Regulated Management,11px - 14px,Open Sans,"Black (900), Uppercase, Tracking-tight"
+compass_bottom_axis,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Bottom Axis,▼ Open Access,11px - 14px,Open Sans,"Black (900), Uppercase, Tracking-tight"
+compass_left_axis_line1,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Left Axis,◀ Taxpayer,10px - 14px,Open Sans,"Black (900), Uppercase, Tracking-tight"
+compass_left_axis_line2,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Left Axis,Funded,9px - 12px,Open Sans,"Bold (700), Uppercase"
+compass_right_axis_line1,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Right Axis,User-Fee,10px - 14px,Open Sans,"Black (900), Uppercase, Tracking-tight"
+compass_right_axis_line2,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Right Axis,Funded ▶,9px - 12px,Open Sans,"Bold (700), Uppercase"
+compass_q1_line1,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Quadrant 1,Regulated,10px - 14px,Open Sans,Bold (700)
+compass_q1_line2,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Quadrant 1,User-Fee,8.5px - 12px,Open Sans,Medium (500)
+compass_q2_line1,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Quadrant 2,Protective,10px - 14px,Open Sans,Bold (700)
+compass_q2_line2,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Quadrant 2,Taxpayer,8.5px - 12px,Open Sans,Medium (500)
+compass_q3_line1,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Quadrant 3,Free & Easy,10px - 14px,Open Sans,Bold (700)
+compass_q3_line2,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Quadrant 3,Open Access,8.5px - 12px,Open Sans,Medium (500)
+compass_q4_line1,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Quadrant 4,Flat Rate,10px - 14px,Open Sans,Bold (700)
+compass_q4_line2,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Quadrant 4,Simple Fee,8.5px - 12px,Open Sans,Medium (500)
+compass_badge_your_result,11,Page 11 - Results: Policy Compass & Persona,Policy Compass Graph - Result Badge,Your Result,8px - 12px,Open Sans,"Black (900), Uppercase"
+results_btn_next_feedback,11,Page 11 - Results: Policy Compass & Persona,Results Navigation Footer,Next: Share Feedback,12px - 14px,Open Sans,Bold (700)
+results_step2_title,12,Page 12 - Results: Policy Details & Planner Feedback,Summary Section Header,Your Curbside Compass Result,10px - 12px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+results_fee_model_label,12,Page 12 - Results: Policy Details & Planner Feedback,Summary Section - Curbside Fee Card,Curbside Fee Model,10px - 12px,Open Sans,Normal (400)
+results_enforcement_label,12,Page 12 - Results: Policy Details & Planner Feedback,Summary Section - Enforcement Card,Enforcement Level,10px - 12px,Open Sans,Normal (400)
+results_you_believe_title,12,Page 12 - Results: Policy Details & Planner Feedback,Priorities Card,You Believe,10px - 12px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+results_tradeoff_outcomes_title,12,Page 12 - Results: Policy Details & Planner Feedback,Parking Program Trade-off Outcomes Card,Parking Program Trade-off Outcomes,10px - 12px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+results_parking_program_outcomes_title,12,Page 12 - Results: Policy Details & Planner Feedback,Parking Program Trade-off Outcomes Card,Parking Program Trade-off Outcomes,10px - 12px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+results_outcome_title,12,Page 12 - Results: Policy Details & Planner Feedback,Parking Program Trade-off Outcomes Card,Parking Program Trade-off Outcomes,10px - 12px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+results_alignment_title,12,Page 12 - Results: Policy Details & Planner Feedback,Parking Program Trade-off Outcomes Card,Parking Program Trade-off Outcomes,10px - 12px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+feedback_question,12,Page 12 - Results: Policy Details & Planner Feedback,Planner Feedback Form,Do you feel this represents your view on neighbourhood parking?,12px - 14px,Open Sans,"Bold (700), Leading-tight"
+feedback_rating_legend_min,12,Page 12 - Results: Policy Details & Planner Feedback,Planner Feedback Form - Rating Legend,1 - Strongly Disagree,10px - 12px,Open Sans,Semibold (600)
+feedback_rating_legend_max,12,Page 12 - Results: Policy Details & Planner Feedback,Planner Feedback Form - Rating Legend,5 - Strongly Agree,10px - 12px,Open Sans,Semibold (600)
+feedback_comment_label,12,Page 12 - Results: Policy Details & Planner Feedback,Planner Feedback Form - Comment,Why or why not? (Optional),11px - 12px,Open Sans,Bold (700)
+feedback_comment_placeholder,12,Page 12 - Results: Policy Details & Planner Feedback,Planner Feedback Form - Textarea,Share your thoughts with City of Edmonton planners...,12px,Open Sans,Normal (400)
+results_btn_back_compass,12,Page 12 - Results: Policy Details & Planner Feedback,Step 2 Navigation Footer,Back to Compass,12px - 14px,Open Sans,Semibold (600)
+results_btn_finish_share,12,Page 12 - Results: Policy Details & Planner Feedback,Step 2 Navigation Footer,Finish & Share,12px - 14px,Open Sans,Bold (700)
+feedback_saved_badge,12,Page 12 - Results: Policy Details & Planner Feedback,Step 2 Navigation Footer,Feedback Saved,12px,Open Sans,Bold (700)
+thankyou_status,13,Page 13 - Thank You & Social Share,Top Status Bar,Feedback Completed,12px,Open Sans,Bold (700)
+thankyou_btn_start_over,13,Page 13 - Thank You & Social Share,Top Status Bar,Start Over,12px,Open Sans,Bold (700)
+thankyou_heading,13,Page 13 - Thank You & Social Share,Thank You Card Header,Thank You for Your Feedback! Share the Curbside Compass,14px - 16px,Open Sans,"Black (900), Tracking-tight"
+thankyou_desc,13,Page 13 - Thank You & Social Share,Thank You Card Header,"Your perspectives on neighbourhood parking provide valuable insight for the City of Edmonton. Encourage your neighbours, friends, and community members to discover their parking persona and have their say on curbside policies:",12px,Open Sans,"Normal (400), Leading-snug"
+thankyou_share_mode_label,13,Page 13 - Thank You & Social Share,Share Mode Toggle,Choose What to Share,10px,Open Sans,"Bold (700), Uppercase, Tracking-wider"
+thankyou_mode_persona_title,13,Page 13 - Thank You & Social Share,Share Mode Toggle - Option 1,Include My Persona,11px,Open Sans,Bold (700)
+thankyou_mode_general_title,13,Page 13 - Thank You & Social Share,Share Mode Toggle - Option 2,General Invite Only,11px,Open Sans,Bold (700)
+thankyou_mode_general_sub,13,Page 13 - Thank You & Social Share,Share Mode Toggle - Option 2,Encouraging post without persona results,9.5px,Open Sans,Normal (400)
+thankyou_preview_card_title,13,Page 13 - Thank You & Social Share,Social Post Preview Card,Social Post Preview,9.5px,Open Sans,"Bold (700), Uppercase, Tracking-wide"
+thankyou_btn_save_image,13,Page 13 - Thank You & Social Share,Social Post Preview Card,Save image,9px,Open Sans,Semibold (600)
+thankyou_btn_download,13,Page 13 - Thank You & Social Share,Social Post Preview Image,Download,9px,Open Sans,Bold (700)
+thankyou_preview_general_text,13,Page 13 - Thank You & Social Share,Social Post Preview Text (General Mode),Where do you stand on Edmonton's neighbourhood parking and curbside policies? Have your say and try the Curbside Compass public engagement tool:,10px - 10.5px,Open Sans,"Normal (400), Italic, Leading-snug"
+thankyou_btn_facebook,13,Page 13 - Thank You & Social Share,Social Share Buttons,Facebook,12px,Open Sans,Bold (700)
+thankyou_btn_x,13,Page 13 - Thank You & Social Share,Social Share Buttons,X (Twitter),12px,Open Sans,Bold (700)
+thankyou_btn_instagram,13,Page 13 - Thank You & Social Share,Social Share Buttons,Instagram,12px,Open Sans,Bold (700)
+thankyou_btn_copy_clipboard,13,Page 13 - Thank You & Social Share,Clipboard Copy Button,Copy Full Post Text to Clipboard,12px - 14px,Open Sans,Bold (700)
+thankyou_btn_copied_clipboard,13,Page 13 - Thank You & Social Share,Clipboard Copy Button,Copied to Clipboard!,12px - 14px,Open Sans,Bold (700)
+thankyou_copy_helper,13,Page 13 - Thank You & Social Share,Clipboard Copy Helper,Copies your Curbside Compass result and the survey link to paste and share anywhere,12px,Open Sans,Normal (400)
+thankyou_btn_view_persona,13,Page 13 - Thank You & Social Share,Share Screen Footer,View Parking Persona,12px - 14px,Open Sans,Bold (700)
+thankyou_btn_retake,13,Page 13 - Thank You & Social Share,Share Screen Footer,Retake Assessment,12px - 14px,Open Sans,Bold (700)
+sim_btn_controls,Sim,Neighborhood Simulation View (Canvas & HUD),Simulation Top-Right HUD,Controls,12px,Open Sans,Semibold (600)
+sim_gauge_curbside,Sim,Neighborhood Simulation View (Canvas & HUD),Simulation Curbside Gauge,Curbside,10px - 12px,Open Sans,Bold (700)
+sim_drawer_title,Sim,Neighborhood Simulation View (Canvas & HUD),Manual Sliders Drawer - Header,Manual Sliders,12px - 14px,Open Sans,Bold (700)
+sim_cars_home_label,Sim,Neighborhood Simulation View (Canvas & HUD),Manual Sliders Drawer - Household Cars,Cars/Home,12px,Open Sans,Normal (400)
+sim_visitor_passes_label,Sim,Neighborhood Simulation View (Canvas & HUD),Manual Sliders Drawer - Visitor Passes,Visitor Passes,12px,Open Sans,Normal (400)
+sim_driveway_spots_label,Sim,Neighborhood Simulation View (Canvas & HUD),Manual Sliders Drawer - Driveway Spots,Driveway Spots,12px,Open Sans,Normal (400)
+sim_deliveries_label,Sim,Neighborhood Simulation View (Canvas & HUD),Manual Sliders Drawer - Deliveries,Weekly Deliveries,12px,Open Sans,Normal (400)
+sim_fire_ignite,Sim,Neighborhood Simulation View (Canvas & HUD),Manual Sliders Drawer - Fire Toggle,Road Fire,10px,Open Sans,Bold (700)
+sim_fire_extinguish,Sim,Neighborhood Simulation View (Canvas & HUD),Manual Sliders Drawer - Fire Toggle,Extinguish,10px,Open Sans,Bold (700)
+sim_reshuffle,Sim,Neighborhood Simulation View (Canvas & HUD),Manual Sliders Drawer - Reshuffle,Reshuffle,12px,Open Sans,Semibold (600)
+sim_harmony_badge,Sim,Neighborhood Simulation View (Canvas & HUD),Harmony Commendation Overlay,⭐ EXCELLENCE,10px - 12px,Open Sans,Extra Bold (800)
+sim_harmony_title,Sim,Neighborhood Simulation View (Canvas & HUD),Harmony Commendation Overlay,CITY PLANNING COMMENDATION,10px - 14px,Open Sans,"Bold (700), Tracking-wider"
+sim_harmony_award,Sim,Neighborhood Simulation View (Canvas & HUD),Harmony Commendation Overlay,AWARD: OPTIMAL CURB MANAGEMENT,9px - 12px,Open Sans,"Black (900), Uppercase, Tracking-widest"
+sim_harmony_headline,Sim,Neighborhood Simulation View (Canvas & HUD),Harmony Commendation Overlay,NEIGHBORHOOD ACHIEVES PERFECT TRAFFIC HARMONY,12px - 14px,Open Sans,"Black (900), Uppercase, Tracking-wide"
+sim_harmony_subheadline,Sim,Neighborhood Simulation View (Canvas & HUD),Harmony Commendation Overlay,SMART POLICIES KEEP STREETS CLEAR • BUSINESSES BOOMING • RESIDENTS HAPPY,9px - 12px,Open Sans,Bold (700)
+sim_harmony_reporter,Sim,Neighborhood Simulation View (Canvas & HUD),Harmony Commendation Overlay,REPORTER,9px,Open Sans,Black (900)
+sim_harmony_quote,Sim,Neighborhood Simulation View (Canvas & HUD),Harmony Commendation Overlay,"""It's beautiful out here. Delivery vans have space, visitors are finding spots easily, and the air is clear. A masterclass in urban planning!""",9px - 10px,Open Sans,"Bold (700), Uppercase"
+sim_riot_badge,Sim,Neighborhood Simulation View (Canvas & HUD),Breaking News Riot Overlay,🔴 LIVE,10px - 12px,Open Sans,Extra Bold (800)
+sim_riot_title,Sim,Neighborhood Simulation View (Canvas & HUD),Breaking News Riot Overlay,EDMONTON NEWS • INCIDENT REPORT,10px - 14px,Open Sans,"Bold (700), Tracking-wider"
+sim_riot_banner,Sim,Neighborhood Simulation View (Canvas & HUD),Breaking News Riot Overlay,BREAKING: ROADWAY VEHICLE FIRE & DEMONSTRATION,9px - 12px,Open Sans,"Black (900), Uppercase, Tracking-widest"
+sim_riot_headline,Sim,Neighborhood Simulation View (Canvas & HUD),Breaking News Riot Overlay,CAR BURNING ON ROADWAY • PROTESTERS BLOCKING TRAFFIC,12px - 14px,Open Sans,"Black (900), Uppercase, Tracking-wide"
+sim_riot_subheadline,Sim,Neighborhood Simulation View (Canvas & HUD),Breaking News Riot Overlay,PROTESTERS ASSEMBLED IN ROAD LANES • BYSTANDERS OBSERVING SAFELY FROM SIDEWALK,9px - 12px,Open Sans,Bold (700)
+sim_riot_ticker_tag,Sim,Neighborhood Simulation View (Canvas & HUD),Breaking News Riot Overlay,TICKER,9px,Open Sans,Black (900)
+sim_riot_ticker,Sim,Neighborhood Simulation View (Canvas & HUD),Breaking News Riot Overlay,⚠️ VEHICLE BURNING ON ROADWAY — PROTESTERS GATHER ON ROAD STOPPING TRAFFIC — BYSTANDERS SAFELY ON SIDEWALK — DRIVEWAYS UNAFFECTED — ⚠️,10px - 12px,Open Sans,Bold (700)
+persona_block_resident_title,Results,Persona: Block Resident,Persona Title,Block Resident,14px - 20px,Open Sans,Black (900)
+persona_block_resident_subtitle,Results,Persona: Block Resident,Persona Subtitle,Strict Rules • General Taxation,12px - 14px,Open Sans,Bold (700)
+persona_block_resident_desc,Results,Persona: Block Resident,Persona Description,"You like strict parking rules to keep order. You prefer that everyone shares the costs through taxes, rather than just car owners.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_block_resident_priority_1,Results,Persona: Block Resident,Key Priority 1,Strict enforcement,12px - 14px,Open Sans,Normal (400)
+persona_block_resident_priority_2,Results,Persona: Block Resident,Key Priority 2,General tax funding,12px - 14px,Open Sans,Normal (400)
+persona_block_resident_edmonton_fit,Results,Persona: Block Resident,Edmonton Policy Fit,Aligns with highly regulated mature neighbourhoods.,12px,Open Sans,Normal (400)
+persona_tidy_resident_title,Results,Persona: Tidy Resident,Persona Title,Tidy Resident,14px - 20px,Open Sans,Black (900)
+persona_tidy_resident_subtitle,Results,Persona: Tidy Resident,Persona Subtitle,Some Rules • General Taxation,12px - 14px,Open Sans,Bold (700)
+persona_tidy_resident_desc,Results,Persona: Tidy Resident,Persona Description,"You like some parking rules to keep streets neat. You feel everyone should share the costs through taxes, not just drivers.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_tidy_resident_priority_1,Results,Persona: Tidy Resident,Key Priority 1,Clear guidelines,12px - 14px,Open Sans,Normal (400)
+persona_tidy_resident_priority_2,Results,Persona: Tidy Resident,Key Priority 2,Shared costs,12px - 14px,Open Sans,Normal (400)
+persona_tidy_resident_edmonton_fit,Results,Persona: Tidy Resident,Edmonton Policy Fit,Aligns with standard residential parking guidelines.,12px,Open Sans,Normal (400)
+persona_picky_parker_title,Results,Persona: Picky Parker,Persona Title,Picky Parker,14px - 20px,Open Sans,Black (900)
+persona_picky_parker_subtitle,Results,Persona: Picky Parker,Persona Subtitle,Clear Rules • User-Fee,12px - 14px,Open Sans,Bold (700)
+persona_picky_parker_desc,Results,Persona: Picky Parker,Persona Description,"You like clear parking rules. You prefer that car owners pay for parking, rather than everyone sharing the costs through taxes.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_picky_parker_priority_1,Results,Persona: Picky Parker,Key Priority 1,Clear restrictions,12px - 14px,Open Sans,Normal (400)
+persona_picky_parker_priority_2,Results,Persona: Picky Parker,Key Priority 2,User-pay model,12px - 14px,Open Sans,Normal (400)
+persona_picky_parker_edmonton_fit,Results,Persona: Picky Parker,Edmonton Policy Fit,Aligns with targeted permit zones.,12px,Open Sans,Normal (400)
+persona_safety_parker_title,Results,Persona: Safety Parker,Persona Title,Safety Parker,14px - 20px,Open Sans,Black (900)
+persona_safety_parker_subtitle,Results,Persona: Safety Parker,Persona Subtitle,Strict Rules • Strong User-Fee,12px - 14px,Open Sans,Bold (700)
+persona_safety_parker_desc,Results,Persona: Safety Parker,Persona Description,"You like strict parking rules to keep streets safe. You strongly believe car owners should pay for their own parking, not everyone.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_safety_parker_priority_1,Results,Persona: Safety Parker,Key Priority 1,Strict safety enforcement,12px - 14px,Open Sans,Normal (400)
+persona_safety_parker_priority_2,Results,Persona: Safety Parker,Key Priority 2,Direct user fees,12px - 14px,Open Sans,Normal (400)
+persona_safety_parker_edmonton_fit,Results,Persona: Safety Parker,Edmonton Policy Fit,Aligns with high-traffic pedestrian safety corridors.,12px,Open Sans,Normal (400)
+persona_rule_resident_title,Results,Persona: Rule Resident,Persona Title,Rule Resident,14px - 20px,Open Sans,Black (900)
+persona_rule_resident_subtitle,Results,Persona: Rule Resident,Persona Subtitle,Clear Rules • Shared Costs,12px - 14px,Open Sans,Bold (700)
+persona_rule_resident_desc,Results,Persona: Rule Resident,Persona Description,"You like clear parking rules. You think everyone should share the costs through taxes, not just car owners.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_rule_resident_priority_1,Results,Persona: Rule Resident,Key Priority 1,Defined zones,12px - 14px,Open Sans,Normal (400)
+persona_rule_resident_priority_2,Results,Persona: Rule Resident,Key Priority 2,Tax-supported maintenance,12px - 14px,Open Sans,Normal (400)
+persona_rule_resident_edmonton_fit,Results,Persona: Rule Resident,Edmonton Policy Fit,Aligns with protected residential areas.,12px,Open Sans,Normal (400)
+persona_balanced_resident_title,Results,Persona: Balanced Resident,Persona Title,Balanced Resident,14px - 20px,Open Sans,Black (900)
+persona_balanced_resident_subtitle,Results,Persona: Balanced Resident,Persona Subtitle,Fair Balance • Shared Costs,12px - 14px,Open Sans,Bold (700)
+persona_balanced_resident_desc,Results,Persona: Balanced Resident,Persona Description,"You like a fair balance of parking rules. You slightly prefer that everyone shares the costs through taxes, instead of just drivers.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_balanced_resident_priority_1,Results,Persona: Balanced Resident,Key Priority 1,Balanced access,12px - 14px,Open Sans,Normal (400)
+persona_balanced_resident_priority_2,Results,Persona: Balanced Resident,Key Priority 2,Community funding,12px - 14px,Open Sans,Normal (400)
+persona_balanced_resident_edmonton_fit,Results,Persona: Balanced Resident,Edmonton Policy Fit,Aligns with flexible neighbourhood parking.,12px,Open Sans,Normal (400)
+persona_sensible_parker_title,Results,Persona: Sensible Parker,Persona Title,Sensible Parker,14px - 20px,Open Sans,Black (900)
+persona_sensible_parker_subtitle,Results,Persona: Sensible Parker,Persona Subtitle,Fair Balance • User-Fee,12px - 14px,Open Sans,Bold (700)
+persona_sensible_parker_desc,Results,Persona: Sensible Parker,Persona Description,"You like a fair balance of parking rules. You prefer that drivers pay for their own parking, instead of everyone sharing the costs.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_sensible_parker_priority_1,Results,Persona: Sensible Parker,Key Priority 1,Balanced enforcement,12px - 14px,Open Sans,Normal (400)
+persona_sensible_parker_priority_2,Results,Persona: Sensible Parker,Key Priority 2,Driver-paid infrastructure,12px - 14px,Open Sans,Normal (400)
+persona_sensible_parker_edmonton_fit,Results,Persona: Sensible Parker,Edmonton Policy Fit,Aligns with hybrid paid-parking zones.,12px,Open Sans,Normal (400)
+persona_fair_parker_title,Results,Persona: Fair Parker,Persona Title,Fair Parker,14px - 20px,Open Sans,Black (900)
+persona_fair_parker_subtitle,Results,Persona: Fair Parker,Persona Subtitle,Fair Balance • Strong User-Fee,12px - 14px,Open Sans,Bold (700)
+persona_fair_parker_desc,Results,Persona: Fair Parker,Persona Description,"You like a fair balance of parking rules. You strongly feel that drivers should pay for parking, instead of everyone.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_fair_parker_priority_1,Results,Persona: Fair Parker,Key Priority 1,Fair access,12px - 14px,Open Sans,Normal (400)
+persona_fair_parker_priority_2,Results,Persona: Fair Parker,Key Priority 2,Full cost-recovery from drivers,12px - 14px,Open Sans,Normal (400)
+persona_fair_parker_edmonton_fit,Results,Persona: Fair Parker,Edmonton Policy Fit,Aligns with self-sustaining parking districts.,12px,Open Sans,Normal (400)
+persona_easy_neighbor_title,Results,Persona: Easy Neighbor,Persona Title,Easy Neighbor,14px - 20px,Open Sans,Black (900)
+persona_easy_neighbor_subtitle,Results,Persona: Easy Neighbor,Persona Subtitle,Fewer Rules • Shared Costs,12px - 14px,Open Sans,Bold (700)
+persona_easy_neighbor_desc,Results,Persona: Easy Neighbor,Persona Description,"You like fewer parking rules to make things easy. You prefer that everyone shares the costs through taxes, rather than just drivers.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_easy_neighbor_priority_1,Results,Persona: Easy Neighbor,Key Priority 1,Easy access,12px - 14px,Open Sans,Normal (400)
+persona_easy_neighbor_priority_2,Results,Persona: Easy Neighbor,Key Priority 2,Taxpayer funding,12px - 14px,Open Sans,Normal (400)
+persona_easy_neighbor_edmonton_fit,Results,Persona: Easy Neighbor,Edmonton Policy Fit,Aligns with open suburban parking.,12px,Open Sans,Normal (400)
+persona_chill_neighbour_title,Results,Persona: Chill Neighbour,Persona Title,Chill Neighbour,14px - 20px,Open Sans,Black (900)
+persona_chill_neighbour_subtitle,Results,Persona: Chill Neighbour,Persona Subtitle,Few Rules • Shared Costs,12px - 14px,Open Sans,Bold (700)
+persona_chill_neighbour_desc,Results,Persona: Chill Neighbour,Persona Description,"You like having few parking rules. You believe everyone should share the costs through taxes, not just car owners.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_chill_neighbour_priority_1,Results,Persona: Chill Neighbour,Key Priority 1,Minimal restrictions,12px - 14px,Open Sans,Normal (400)
+persona_chill_neighbour_priority_2,Results,Persona: Chill Neighbour,Key Priority 2,Publicly funded,12px - 14px,Open Sans,Normal (400)
+persona_chill_neighbour_edmonton_fit,Results,Persona: Chill Neighbour,Edmonton Policy Fit,Aligns with low-density residential guidelines.,12px,Open Sans,Normal (400)
+persona_simple_driver_title,Results,Persona: Simple Driver,Persona Title,Simple Driver,14px - 20px,Open Sans,Black (900)
+persona_simple_driver_subtitle,Results,Persona: Simple Driver,Persona Subtitle,Fewer Rules • User-Fee,12px - 14px,Open Sans,Bold (700)
+persona_simple_driver_desc,Results,Persona: Simple Driver,Persona Description,"You like fewer parking rules to keep life simple. You slightly prefer that car owners pay for parking, rather than everyone sharing the costs.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_simple_driver_priority_1,Results,Persona: Simple Driver,Key Priority 1,Simple access,12px - 14px,Open Sans,Normal (400)
+persona_simple_driver_priority_2,Results,Persona: Simple Driver,Key Priority 2,Light user fees,12px - 14px,Open Sans,Normal (400)
+persona_simple_driver_edmonton_fit,Results,Persona: Simple Driver,Edmonton Policy Fit,Aligns with simplified flat-rate zones.,12px,Open Sans,Normal (400)
+persona_casual_cruiser_title,Results,Persona: Casual Cruiser,Persona Title,Casual Cruiser,14px - 20px,Open Sans,Black (900)
+persona_casual_cruiser_subtitle,Results,Persona: Casual Cruiser,Persona Subtitle,Very Few Rules • Strong User-Fee,12px - 14px,Open Sans,Bold (700)
+persona_casual_cruiser_desc,Results,Persona: Casual Cruiser,Persona Description,"You like very few parking rules on our streets. You strongly believe car owners must pay for their own parking, not everyone.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_casual_cruiser_priority_1,Results,Persona: Casual Cruiser,Key Priority 1,Unrestricted access,12px - 14px,Open Sans,Normal (400)
+persona_casual_cruiser_priority_2,Results,Persona: Casual Cruiser,Key Priority 2,Direct user payments,12px - 14px,Open Sans,Normal (400)
+persona_casual_cruiser_edmonton_fit,Results,Persona: Casual Cruiser,Edmonton Policy Fit,Aligns with unregulated paid public lots.,12px,Open Sans,Normal (400)
+persona_happy_neighbor_title,Results,Persona: Happy Neighbor,Persona Title,Happy Neighbor,14px - 20px,Open Sans,Black (900)
+persona_happy_neighbor_subtitle,Results,Persona: Happy Neighbor,Persona Subtitle,Almost No Rules • Strong Taxpayer,12px - 14px,Open Sans,Bold (700)
+persona_happy_neighbor_desc,Results,Persona: Happy Neighbor,Persona Description,"You want almost no parking rules. You strongly believe everyone should share the costs through taxes, not just drivers.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_happy_neighbor_priority_1,Results,Persona: Happy Neighbor,Key Priority 1,Complete freedom,12px - 14px,Open Sans,Normal (400)
+persona_happy_neighbor_priority_2,Results,Persona: Happy Neighbor,Key Priority 2,Fully public funding,12px - 14px,Open Sans,Normal (400)
+persona_happy_neighbor_edmonton_fit,Results,Persona: Happy Neighbor,Edmonton Policy Fit,Aligns with historically unregulated rural/suburban edges.,12px,Open Sans,Normal (400)
+persona_zen_neighbor_title,Results,Persona: Zen Neighbor,Persona Title,Zen Neighbor,14px - 20px,Open Sans,Black (900)
+persona_zen_neighbor_subtitle,Results,Persona: Zen Neighbor,Persona Subtitle,Very Few Rules • Shared Costs,12px - 14px,Open Sans,Bold (700)
+persona_zen_neighbor_desc,Results,Persona: Zen Neighbor,Persona Description,"You want very few parking rules for more freedom. You slightly prefer that everyone shares the costs through taxes, not just car owners.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_zen_neighbor_priority_1,Results,Persona: Zen Neighbor,Key Priority 1,High freedom,12px - 14px,Open Sans,Normal (400)
+persona_zen_neighbor_priority_2,Results,Persona: Zen Neighbor,Key Priority 2,Shared municipal cost,12px - 14px,Open Sans,Normal (400)
+persona_zen_neighbor_edmonton_fit,Results,Persona: Zen Neighbor,Edmonton Policy Fit,Aligns with unenforced open streets.,12px,Open Sans,Normal (400)
+persona_happy_driver_title,Results,Persona: Happy Driver,Persona Title,Happy Driver,14px - 20px,Open Sans,Black (900)
+persona_happy_driver_subtitle,Results,Persona: Happy Driver,Persona Subtitle,Almost No Rules • User-Fee,12px - 14px,Open Sans,Bold (700)
+persona_happy_driver_desc,Results,Persona: Happy Driver,Persona Description,"You want almost no parking rules. You prefer that drivers pay for parking, rather than everyone sharing the costs through taxes.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_happy_driver_priority_1,Results,Persona: Happy Driver,Key Priority 1,No restrictions,12px - 14px,Open Sans,Normal (400)
+persona_happy_driver_priority_2,Results,Persona: Happy Driver,Key Priority 2,Flat user fees,12px - 14px,Open Sans,Normal (400)
+persona_happy_driver_edmonton_fit,Results,Persona: Happy Driver,Edmonton Policy Fit,Aligns with open flat-rate parking regions.,12px,Open Sans,Normal (400)
+persona_free_wheeler_title,Results,Persona: Free Wheeler,Persona Title,Free Wheeler,14px - 20px,Open Sans,Black (900)
+persona_free_wheeler_subtitle,Results,Persona: Free Wheeler,Persona Subtitle,Almost No Rules • Strong User-Fee,12px - 14px,Open Sans,Bold (700)
+persona_free_wheeler_desc,Results,Persona: Free Wheeler,Persona Description,"You want almost no parking rules so people are free. You strongly believe drivers should pay for their own parking, not everyone.",12px - 16px,Open Sans,"Medium (500), Leading-snug"
+persona_free_wheeler_priority_1,Results,Persona: Free Wheeler,Key Priority 1,Absolute freedom,12px - 14px,Open Sans,Normal (400)
+persona_free_wheeler_priority_2,Results,Persona: Free Wheeler,Key Priority 2,100% user-funded,12px - 14px,Open Sans,Normal (400)
+persona_free_wheeler_edmonton_fit,Results,Persona: Free Wheeler,Edmonton Policy Fit,Aligns with private unregulated toll/parking models.,12px,Open Sans,Normal (400)

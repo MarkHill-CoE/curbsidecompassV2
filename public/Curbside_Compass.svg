@@ -1,0 +1,195 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 580' width='600' height='580'>
+  <defs>
+    <clipPath id='card-clip'>
+      <rect x='16' y='16' width='568' height='548' rx='20' ry='20' />
+    </clipPath>
+    <linearGradient id='gauge-grad' x1='0%' y1='0%' x2='100%' y2='0%'>
+      <stop offset='0%' stop-color='#009A44' />
+      <stop offset='60%' stop-color='#FFC72C' />
+      <stop offset='100%' stop-color='#ef4444' />
+    </linearGradient>
+  </defs>
+
+  <!-- Container shadow and background -->
+  <rect x='16' y='16' width='568' height='548' rx='20' ry='20' fill='#ffffff' stroke='#cbd5e1' stroke-width='1.5' />
+
+  <g clip-path='url(#card-clip)'>
+    <!-- Header bar -->
+    <rect x='16' y='16' width='568' height='56' fill='#004B8D' />
+    <rect x='34' y='28' width='38' height='32' rx='6' fill='#FFC72C' />
+    <text x='53' y='50' font-family='system-ui, -apple-system, sans-serif' font-weight='900' font-size='14' fill='#004B8D' text-anchor='middle'>YEG</text>
+    
+    <text x='84' y='51' font-family='system-ui, -apple-system, sans-serif' font-weight='900' font-size='17' fill='#ffffff'>Curbside</text>
+    <text x='164' y='51' font-family='system-ui, -apple-system, sans-serif' font-weight='900' font-size='17' fill='#FFC72C'>Compass</text>
+
+    <!-- Header Reset Button -->
+    <rect x='532' y='28' width='34' height='32' rx='8' fill='rgba(255,255,255,0.15)' />
+    <path d='M 549 37 A 6.5 6.5 0 1 1 544 40 L 542 37 M 544 40 L 544 35' fill='none' stroke='#ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' />
+
+    <!-- Isometric Simulation Area -->
+    <rect x='16' y='72' width='568' height='300' fill='#193A5A' />
+
+    <!-- Sound & Controls Capsule -->
+    <rect x='422' y='86' width='144' height='44' rx='10' fill='rgba(0, 75, 141, 0.45)' stroke='rgba(255,255,255,0.2)' stroke-width='1' />
+    <!-- Volume Muted -->
+    <path d='M 436 108 L 442 108 L 448 114 L 448 102 L 442 108 Z M 452 105 L 458 111 M 458 105 L 452 111' fill='#94a3b8' stroke='#94a3b8' stroke-width='1.5' stroke-linecap='round' />
+    <!-- Sliders -->
+    <path d='M 482 100 L 482 116 M 489 100 L 489 116 M 496 100 L 496 116 M 480 105 L 484 105 M 487 111 L 491 111 M 494 103 L 498 103' stroke='#94a3b8' stroke-width='1.5' stroke-linecap='round' />
+    <!-- Refresh -->
+    <path d='M 534 103 A 5.5 5.5 0 1 1 530 106 L 528 103' fill='none' stroke='#94a3b8' stroke-width='1.5' stroke-linecap='round' />
+
+    <!-- Speedometer Gauge Card -->
+    <rect x='474' y='142' width='92' height='88' rx='10' fill='rgba(0, 75, 141, 0.45)' stroke='rgba(0, 154, 68, 0.4)' stroke-width='1' />
+    <text x='520' y='162' font-family='system-ui, -apple-system, sans-serif' font-weight='800' font-size='14' fill='#009A44' text-anchor='middle'>0%</text>
+    <path d='M 496 194 A 24 24 0 0 1 544 194' fill='none' stroke='url(#gauge-grad)' stroke-width='3.5' stroke-linecap='round' />
+    <line x1='520' y1='194' x2='500' y2='194' stroke='#ffffff' stroke-width='2' stroke-linecap='round' />
+    <circle cx='520' cy='194' r='2.5' fill='#ffffff' />
+    <text x='520' y='218' font-family='system-ui, -apple-system, sans-serif' font-weight='800' font-size='12' fill='#ffffff' text-anchor='middle'>0/14 Cars</text>
+
+    <!-- Isometric Street & Neighborhood -->
+    <g transform='translate(60, 40)'>
+      <!-- Grass Base -->
+      <polygon points='180,80 440,210 240,310 -20,180' fill='#7bb369' />
+      <polygon points='180,95 440,225 240,325 -20,195' fill='#6aa05a' />
+
+      <!-- Asphalt Road -->
+      <polygon points='110,130 380,265 260,325 -10,190' fill='#505357' />
+      <!-- Road Dashed Centerline -->
+      <line x1='130' y1='145' x2='150' y2='155' stroke='#e0e0e0' stroke-width='2.5' stroke-linecap='round' />
+      <line x1='180' y1='170' x2='200' y2='180' stroke='#e0e0e0' stroke-width='2.5' stroke-linecap='round' />
+      <line x1='230' y1='195' x2='250' y2='205' stroke='#e0e0e0' stroke-width='2.5' stroke-linecap='round' />
+      <line x1='280' y1='220' x2='300' y2='230' stroke='#e0e0e0' stroke-width='2.5' stroke-linecap='round' />
+
+      <!-- Sidewalk -->
+      <polygon points='145,115 410,248 395,255 130,123' fill='#b5bac0' />
+
+      <!-- Orange Van top-left -->
+      <g transform='translate(45, 115)'>
+        <polygon points='10,10 26,18 20,28 4,20' fill='#d97706' />
+        <polygon points='10,10 26,18 26,10 10,2' fill='#f59e0b' />
+        <polygon points='26,18 20,28 20,20 26,10' fill='#b45309' />
+      </g>
+
+      <!-- House 1: Blue House -->
+      <g transform='translate(130, 60)'>
+        <polygon points='20,30 50,45 35,65 5,50' fill='#004B8D' />
+        <polygon points='20,30 35,65 35,50 20,15' fill='#003366' />
+        <!-- Pitched Roof -->
+        <polygon points='20,15 35,5 50,30 35,40' fill='#1e3a8a' />
+        <polygon points='20,15 35,40 5,35' fill='#172554' />
+        <!-- Driveway & Car -->
+        <polygon points='48,46 64,54 56,66 40,58' fill='#94a3b8' />
+        <polygon points='50,48 60,53 56,61 46,56' fill='#06b6d4' />
+      </g>
+
+      <!-- Tree 1 -->
+      <g transform='translate(180, 115)'>
+        <polygon points='8,12 16,16 12,22 4,18' fill='#15803d' />
+        <polygon points='8,4 16,8 16,16 8,12' fill='#22c55e' />
+        <polygon points='16,8 12,14 12,22 16,16' fill='#166534' />
+      </g>
+
+      <!-- House 2: Yellow House -->
+      <g transform='translate(185, 88)'>
+        <polygon points='20,30 50,45 35,65 5,50' fill='#eab308' />
+        <polygon points='20,15 35,5 50,30 35,40' fill='#ca8a04' />
+        <polygon points='20,15 35,40 5,35' fill='#a16207' />
+        <!-- Driveway & Car -->
+        <polygon points='48,46 64,54 56,66 40,58' fill='#94a3b8' />
+        <polygon points='50,48 60,53 56,61 46,56' fill='#f8fafc' />
+      </g>
+
+      <!-- Tree 2 -->
+      <g transform='translate(235, 142)'>
+        <polygon points='8,4 16,8 16,16 8,12' fill='#22c55e' />
+        <polygon points='16,8 12,14 12,22 16,16' fill='#166534' />
+      </g>
+
+      <!-- House 3: Green House -->
+      <g transform='translate(240, 115)'>
+        <polygon points='20,30 50,45 35,65 5,50' fill='#16a34a' />
+        <polygon points='20,15 35,5 50,30 35,40' fill='#15803d' />
+        <polygon points='20,15 35,40 5,35' fill='#14532d' />
+        <!-- Driveway & Car -->
+        <polygon points='48,46 64,54 56,66 40,58' fill='#94a3b8' />
+        <polygon points='50,48 60,53 56,61 46,56' fill='#10b981' />
+      </g>
+
+      <!-- Tree 3 -->
+      <g transform='translate(290, 170)'>
+        <polygon points='8,4 16,8 16,16 8,12' fill='#22c55e' />
+        <polygon points='16,8 12,14 12,22 16,16' fill='#166534' />
+      </g>
+
+      <!-- House 4: Red House -->
+      <g transform='translate(295, 142)'>
+        <polygon points='20,30 50,45 35,65 5,50' fill='#dc2626' />
+        <polygon points='20,15 35,5 50,30 35,40' fill='#b91c1c' />
+        <polygon points='20,15 35,40 5,35' fill='#7f1d1d' />
+        <!-- Driveway & Car -->
+        <polygon points='48,46 64,54 56,66 40,58' fill='#94a3b8' />
+        <polygon points='50,48 60,53 56,61 46,56' fill='#ef4444' />
+      </g>
+
+      <!-- House 5: Purple House -->
+      <g transform='translate(350, 170)'>
+        <polygon points='20,30 50,45 35,65 5,50' fill='#581c87' />
+        <polygon points='20,15 35,5 50,30 35,40' fill='#4c1d95' />
+        <polygon points='20,15 35,40 5,35' fill='#2e1065' />
+        <!-- Driveway & Car -->
+        <polygon points='48,46 64,54 56,66 40,58' fill='#94a3b8' />
+        <polygon points='50,48 60,53 56,61 46,56' fill='#a855f7' />
+      </g>
+
+      <!-- Parked Curbside Cars along the street -->
+      <!-- Car 1: Yellow -->
+      <g transform='translate(120, 155)'>
+        <polygon points='6,6 18,12 14,18 2,12' fill='#eab308' />
+      </g>
+      <!-- Car 2: Orange -->
+      <g transform='translate(145, 168)'>
+        <polygon points='6,6 18,12 14,18 2,12' fill='#ea580c' />
+      </g>
+      <!-- Car 3: Cyan -->
+      <g transform='translate(170, 180)'>
+        <polygon points='6,6 18,12 14,18 2,12' fill='#06b6d4' />
+      </g>
+      <!-- Car 4: Red -->
+      <g transform='translate(200, 195)'>
+        <polygon points='6,6 18,12 14,18 2,12' fill='#ef4444' />
+      </g>
+      <!-- White Box Truck -->
+      <g transform='translate(230, 210)'>
+        <polygon points='8,8 24,16 20,24 4,16' fill='#f1f5f9' />
+        <polygon points='8,8 24,16 24,6 8,-2' fill='#ffffff' />
+        <polygon points='24,16 20,24 20,14 24,6' fill='#cbd5e1' />
+      </g>
+      <!-- Car 5: Blue -->
+      <g transform='translate(270, 230)'>
+        <polygon points='6,6 18,12 14,18 2,12' fill='#2563eb' />
+      </g>
+      <!-- Car 6: Purple -->
+      <g transform='translate(295, 243)'>
+        <polygon points='6,6 18,12 14,18 2,12' fill='#9333ea' />
+      </g>
+    </g>
+
+    <!-- Bottom Question Section -->
+    <rect x='16' y='372' width='568' height='192' fill='#ffffff' />
+
+    <!-- Question Indicator & Progress -->
+    <circle cx='38' cy='408' r='6' fill='#004B8D' />
+    <text x='54' y='413' font-family='system-ui, -apple-system, sans-serif' font-weight='800' font-size='14' fill='#004B8D' letter-spacing='0.5'>QUESTION 1 OF 7</text>
+    <circle cx='208' cy='408' r='2.5' fill='#94a3b8' />
+    <text x='222' y='413' font-family='system-ui, -apple-system, sans-serif' font-weight='600' font-size='14' fill='#64748b'>Residential Policy</text>
+    <text x='560' y='413' font-family='system-ui, -apple-system, sans-serif' font-weight='700' font-size='14' fill='#94a3b8' text-anchor='end'>14%</text>
+
+    <!-- Progress Bar Track & Indicator -->
+    <rect x='34' y='428' width='532' height='6' rx='3' fill='#e2e8f0' />
+    <rect x='34' y='428' width='75' height='6' rx='3' fill='#004B8D' />
+
+    <!-- Question Title -->
+    <text x='34' y='472' font-family='system-ui, -apple-system, sans-serif' font-weight='800' font-size='20' fill='#004B8D'>What is most important when parking on the</text>
+    <text x='34' y='502' font-family='system-ui, -apple-system, sans-serif' font-weight='800' font-size='20' fill='#004B8D'>street in front of your home?</text>
+  </g>
+</svg>

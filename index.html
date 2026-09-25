@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Curbside Compass</title>
+    <meta name="description" content="Try to solve Edmonton's Residential Parking Puzzle as an Urban Planner " />
+    <meta property="og:title" content="Curbside Compass" />
+    <meta property="og:description" content="Try to solve Edmonton's Residential Parking Puzzle as an Urban Planner " />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://ais-pre-etyu4evixkws5ltvxrniwi-460515158127.us-east1.run.app/Curbside_Compass_fb.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://ais-pre-etyu4evixkws5ltvxrniwi-460515158127.us-east1.run.app/Curbside_Compass_fb.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="/SafeMobility_Compass_icon.png" />
+  </head>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWiWWa5XsmkKeuB7XTGvS6WTMCuNt1zu8",
+    authDomain: "apps-parking-tradeoff-dev.firebaseapp.com",
+    projectId: "apps-parking-tradeoff-dev",
+    storageBucket: "apps-parking-tradeoff-dev.firebasestorage.app",
+    messagingSenderId: "1073690749503",
+    appId: "1:1073690749503:web:d3d0c0dd5c15047ba4668a",
+    measurementId: "G-GTSPXG6VD9"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
