@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { Sliders, Gauge, CheckCircle, X } from 'lucide-react';
 import { SimulationConfig } from '../types';
 import { triggerFeedback } from '../utils/feedback';
+import { useAppText } from '../context/TextContentContext';
+import { getStreetLayoutInfo } from '../data/edmontonNeighbourhoods';
 
 interface ManualSlidersDrawerProps {
   showControls: boolean;
@@ -29,6 +31,8 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
   circlingCarCount,
   onOpenGauge
 }) => {
+  const { t } = useAppText();
+
   // Listen for Escape key to close the drawer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -69,9 +73,11 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
             </div>
             <div>
               <h3 id="manual-sliders-title" className="font-bold text-white text-xs sm:text-sm md:text-base leading-none">
-                Adjust the Neighbourhood
+                {t('drawer_sliders_title', 'Adjust the Neighbourhood')}
               </h3>
-              <span className="text-[9px] sm:text-[10px] text-gray-300">Live simulation controls & density factors</span>
+              <span className="text-[9px] sm:text-[10px] text-gray-300">
+                {t('drawer_sliders_subtitle', 'Live simulation controls & density factors')}
+              </span>
             </div>
           </div>
           <button
@@ -87,17 +93,60 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </button>
         </div>
 
+        {/* 4 Edmonton Street Layout Typologies Quick Switcher */}
+        <div className="flex flex-col gap-1 pb-1.5 border-b border-white/10">
+          <div className="flex justify-between items-center text-[11px]">
+            <span className="text-gray-300 font-bold uppercase tracking-wider">Street Layout Typology:</span>
+            <span className="font-semibold text-[#FFC72C]">
+              {getStreetLayoutInfo(config.streetLayout).shortTitle}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 gap-1.5">
+            {([
+              { id: 'mature_laned', icon: '🏡', name: 'Mature Laned', cap: '16 stalls' },
+              { id: 'infill_skinny', icon: '🏘️', name: 'Infill & Duplex', cap: '16 stalls' },
+              { id: 'suburban_front_driveway', icon: '🚗', name: 'Front Driveway', cap: '10 stalls' },
+              { id: 'contemporary_townhomes', icon: '🏢', name: 'Townhomes', cap: '12 stalls' }
+            ] as const).map((item) => {
+              const isSelected = (config.streetLayout || 'mature_laned') === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => {
+                    triggerFeedback('choice');
+                    onConfigChange?.({ streetLayout: item.id });
+                  }}
+                  className={`flex items-center justify-between px-2 py-1.5 rounded-lg border text-left cursor-pointer transition-all ${
+                    isSelected
+                      ? 'bg-[#0081BC] text-white border-white shadow-xs font-bold'
+                      : 'bg-black/30 hover:bg-white/10 text-gray-200 border-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 truncate">
+                    <span className="text-sm">{item.icon}</span>
+                    <span className="text-[11px] truncate">{item.name}</span>
+                  </div>
+                  <span className="text-[9px] opacity-80 shrink-0 font-mono">
+                    {item.cap}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Cars per household */}
         <div className="flex flex-col gap-0.5">
           <div className="flex justify-between">
-            <span className="text-gray-300 font-medium">Cars/Home</span>
+            <span className="text-gray-300 font-medium">{t('sim_cars_home_label', 'Average Vehicles Per Home')}</span>
             <span className="font-bold text-[#FFC72C]">
               {config.householdCarsPerHome.toFixed(1)} ({activeHouseholdCars})
             </span>
           </div>
           <input
             type="range"
-            aria-label="Cars per household"
+            aria-label="Average vehicles per home"
             min="0"
             max="5"
             step="0.25"
@@ -112,7 +161,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
         {/* Visitor parking passes */}
         <div className="flex flex-col gap-0.5">
           <div className="flex justify-between">
-            <span className="text-gray-300 font-medium">Visitor Passes</span>
+            <span className="text-gray-300 font-medium">{t('sim_visitor_passes_label', 'Visitor Passes Per Home')}</span>
             <span className="font-bold text-white">
               {config.visitorPassesPerHome.toFixed(1)} ({activeVisitorCars})
             </span>
@@ -131,17 +180,17 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           />
         </div>
 
-        {/* Infill Homes */}
+        {/* Home Density */}
         <div className="flex flex-col gap-0.5">
           <div className="flex justify-between">
-            <span className="text-gray-300 font-medium">Infill Homes</span>
+            <span className="text-gray-300 font-medium">{t('drawer_infill_label', 'Home Density')}</span>
             <span className="font-bold text-[#009A44]">
-              {totalDwellings} Dwellings
+              {totalDwellings} {t('drawer_dwellings_unit', 'Dwellings')}
             </span>
           </div>
           <input
             type="range"
-            aria-label="Infill homes"
+            aria-label="Home density"
             min="2"
             max="12"
             step="2"
@@ -156,7 +205,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
         {/* Deliveries Per Home */}
         <div className="flex flex-col gap-0.5">
           <div className="flex justify-between">
-            <span className="text-gray-300 font-medium">Weekly Deliveries</span>
+            <span className="text-gray-300 font-medium">{t('sim_deliveries_label', 'Weekly Deliveries')}</span>
             <span className="font-bold text-[#FF5500]">
               {config.deliveriesPerHomePerWeek.toFixed(1)} ({totalWeeklyDeliveries}/wk)
             </span>
@@ -177,9 +226,9 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
 
         {/* Circling Traffic */}
         <div className="flex justify-between items-center text-xs py-1.5 border-t border-white/10">
-          <span className="text-gray-300">Circling Traffic</span>
+          <span className="text-gray-300">{t('drawer_circling_label', 'Circling Traffic')}</span>
           <span className={`font-bold ${circlingCarCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
-            {circlingCarCount > 0 ? `${circlingCarCount} Circling for Parking` : 'Smooth Flow'}
+            {circlingCarCount > 0 ? `${circlingCarCount} ${t('drawer_circling_text', 'Circling for Parking')}` : t('drawer_smooth_flow', 'Smooth Flow')}
           </span>
         </div>
 
@@ -195,10 +244,10 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
               onClose();
             }}
             className="w-full py-1.5 px-3 bg-[#002B49] hover:bg-[#001D33] border border-[#3B82F6]/60 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer text-xs min-h-[36px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
-            title="Test 20-second lane blockage: dispatches EPS police cruiser with lights & sirens to clear traffic"
+            title={t('drawer_police_test_title', 'Test 20-second lane blockage: dispatches EPS police cruiser with lights & sirens to clear traffic')}
           >
             <span className="text-base">🚨</span>
-            <span>Simulate 20s Jam (Dispatch Police)</span>
+            <span>{t('drawer_police_test_btn', 'Call EPS')}</span>
           </button>
         </div>
 
@@ -214,7 +263,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
               className="flex-1 py-2 px-3 bg-[#004B8D] hover:bg-[#003566] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-xs min-h-[40px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
             >
               <Gauge className="w-4 h-4 text-[#FFC72C]" />
-              View Gauge
+              {t('drawer_view_gauge_btn', 'View Gauge')}
             </button>
           )}
           <button
@@ -226,7 +275,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
             className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-xs min-h-[40px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
           >
             <CheckCircle className="w-4 h-4 text-[#4ade80]" />
-            Back to Parking Survey
+            {t('drawer_back_survey_btn', 'Back to Parking Survey')}
           </button>
         </div>
       </div>

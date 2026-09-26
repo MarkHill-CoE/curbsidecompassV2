@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { SimulationConfig } from '../types';
+import { SimulationConfig, StreetLayoutTypology } from '../types';
+import { getStreetLayoutInfo } from '../data/edmontonNeighbourhoods';
 import { Volume2, VolumeX, Sliders, RefreshCw, AlertTriangle, ShieldCheck, RotateCcw, CheckCircle, Home, ZapOff } from 'lucide-react';
 import { feedback, triggerFeedback } from '../utils/feedback';
 import { ambientAudio } from '../utils/ambientAudio';
@@ -767,86 +768,200 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
     function renderGroundBackground() {
       bgGroundCtx.clearRect(0, 0, bgGroundCanvas.width, bgGroundCanvas.height);
-
-      // 1. Rear Gravel Back Alley / Lane (running full block length behind properties)
-      drawFlatRect(-15, -24, blockLength + 30, 18, '#B2AA9D', bgGroundCtx);
-      drawFlatRect(-15, -24, blockLength + 30, 0.8, '#9A9184', bgGroundCtx);
-      drawFlatRect(-15, -6.8, blockLength + 30, 0.8, '#9A9184', bgGroundCtx);
-
-      // Dual vehicle tire ruts along gravel alley
-      drawFlatRect(-15, -19, blockLength + 30, 2.5, '#999083', bgGroundCtx);
-      drawFlatRect(-15, -12, blockLength + 30, 2.5, '#999083', bgGroundCtx);
-
-      // 2. Backyard lawns (between bungalows and gravel alley)
-      drawFlatRect(-15, -6, blockLength + 30, 20, '#7DB86B', bgGroundCtx);
-
-      // 3. Front manicured open lawns (from bungalow facade y = 14 to sidewalk y = 70)
-      drawFlatRect(-15, 14, blockLength + 30, 56, '#86c274', bgGroundCtx);
-
-      // 4. Lush green grass boulevard (between sidewalk y = 78 and curb y = 93)
-      drawFlatRect(-15, 78, blockLength + 30, 15, '#7bb369', bgGroundCtx);
-
-      // 5. Rear parking pads & front walkways for all 12 mid-century homes
-      // ZERO FRONT DRIVEWAYS OR FRONT CURB CUTS
+      const layout: StreetLayoutTypology = configRef.current.streetLayout || 'mature_laned';
       const lotWidth = 30.5;
-      for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
-        const startX = 8 + h * lotWidth;
 
-        // Rear concrete apron connecting detached garage to gravel alley (y = -6 to 0)
-        drawFlatRect(startX + 17.5, -6, 11.5, 6, '#9CA0A4', bgGroundCtx);
-        drawFlatRect(startX + 17.5, -3, 11.5, 0.4, '#7E8387', bgGroundCtx);
+      if (layout === 'suburban_front_driveway') {
+        // 1. Private enclosed backyard lawns (NO rear gravel alley in modern subdivisions!)
+        drawFlatRect(0, -24, blockLength, 38, '#76af65', bgGroundCtx);
+        drawFlatRect(0, -24, blockLength, 1.2, '#5e8e4e', bgGroundCtx);
 
-        // Concrete pad apron in front of garage facing side yard (y = 16 to 22)
-        drawFlatRect(startX + 17.5, 16, 11.5, 6, '#9CA0A4', bgGroundCtx);
+        // 2. Front manicured lawns
+        drawFlatRect(0, 14, blockLength, 56, '#86c274', bgGroundCtx);
 
-        // Rear gravel parking pad beside garage (y = -6 to 6) for second off-street car
-        drawFlatRect(startX + 4.5, -6, 9.5, 8, '#B2AA9D', bgGroundCtx);
+        // 3. Boulevard grass swale
+        drawFlatRect(0, 78, blockLength, 15, '#7bb369', bgGroundCtx);
 
-        // Neat concrete front pedestrian walkway from veranda steps (y = 50) to municipal sidewalk (y = 70)
-        drawFlatRect(startX + 7.8, 50, 3.0, 20, '#D0D4D8', bgGroundCtx);
-        drawFlatRect(startX + 7.8, 56, 3.0, 0.3, '#B5BAC0', bgGroundCtx);
-        drawFlatRect(startX + 7.8, 63, 3.0, 0.3, '#B5BAC0', bgGroundCtx);
-      }
+        // 4. Sidewalk
+        drawFlatRect(0, 70, blockLength, 8, '#b5bac0', bgGroundCtx);
+        for (let s = 0; s < blockLength; s += 8) {
+          drawFlatRect(s, 70, 0.5, 8, '#9a9fa3', bgGroundCtx);
+        }
 
-      // 6. Continuous Municipal Sidewalk with scored joint lines (y = 70 to 78)
-      drawFlatRect(0, 70, blockLength, 8, '#b5bac0', bgGroundCtx);
-      drawFlatRect(0, 69.6, blockLength, 0.5, '#8a8f94', bgGroundCtx);
-      drawFlatRect(0, 77.9, blockLength, 0.5, '#8a8f94', bgGroundCtx);
-      for (let s = 0; s < blockLength; s += 8) {
-        drawFlatRect(s, 70, 0.5, 8, '#9a9fa3', bgGroundCtx);
-      }
+        // 5. Front Concrete Driveways & Curb Cuts for all suburban homes
+        for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          const startX = 8 + h * lotWidth;
+          // Concrete double driveway pad from garage (y = 48) through lawn, sidewalk, boulevard, and curb into street (y = 93)
+          drawFlatRect(startX + 13.5, 48, 13.5, 45, '#CBD5E1', bgGroundCtx);
+          // Driveway expansion joints
+          drawFlatRect(startX + 13.5, 63, 13.5, 0.4, '#94A3B8', bgGroundCtx);
+          drawFlatRect(startX + 13.5, 70, 13.5, 0.4, '#94A3B8', bgGroundCtx);
+          drawFlatRect(startX + 13.5, 78, 13.5, 0.4, '#94A3B8', bgGroundCtx);
 
-      // 7. Unbroken Continuous Street Curb (NO FRONT DRIVEWAYS, ZERO CURB CUTS!)
-      drawFlatRect(0, 92.4, blockLength, 1.2, '#B5BAC0', bgGroundCtx);
-      drawFlatRect(0, 93.3, blockLength, 0.4, '#8E9398', bgGroundCtx);
+          // Front entry pedestrian walkway from porch deck to driveway
+          drawFlatRect(startX + 5, 50, 2.5, 20, '#D0D4D8', bgGroundCtx);
+        }
 
-      // 8. Fire Hydrant 5m No-Parking Zone Road Markings (Hydrant at x = 27)
-      // Zone spans from x = 10.5 to x = 43.5 along the curb and street (y = 92.5 to 97.5)
-      // Safety Yellow Painted Curb
-      drawFlatRect(10.5, 92.5, 33, 1.2, '#FBBF24', bgGroundCtx);
-      // Yellow Pavement Chevron / Cross-Hatching on Asphalt
-      drawFlatRect(10.5, 93.7, 33, 0.6, '#FBBF24', bgGroundCtx);
-      for (let hx = 12; hx <= 42; hx += 3.5) {
-        drawFlatRect(hx, 94.3, 0.9, 3.2, 'rgba(251, 191, 36, 0.75)', bgGroundCtx);
-      }
-      // 5m Distance Limit Boundary Lines
-      drawFlatRect(10.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
-      drawFlatRect(43.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
-      // Stenciled "NO PARKING 5m" road stencil text
-      const roadLabelPos = project(27, 96, 0);
-      bgGroundCtx.save();
-      bgGroundCtx.fillStyle = '#FBBF24';
-      bgGroundCtx.font = 'bold 8px "Open Sans", sans-serif';
-      bgGroundCtx.textAlign = 'center';
-      bgGroundCtx.fillText('NO PARKING 5m', roadLabelPos.x, roadLabelPos.y);
-      bgGroundCtx.restore();
+        // 6. Curb between driveways
+        drawFlatRect(0, 92.4, blockLength, 1.2, '#B5BAC0', bgGroundCtx);
+        drawFlatRect(0, 93.3, blockLength, 0.4, '#8E9398', bgGroundCtx);
 
-      // 9. Asphalt roadway
-      drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
+        // Depressed driveway curb cut aprons over curbline
+        for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          const startX = 8 + h * lotWidth;
+          drawFlatRect(startX + 13.5, 92.4, 13.5, 1.2, '#CBD5E1', bgGroundCtx);
+        }
 
-      // Center dashed road markings
-      for (let i = 10; i < blockLength; i += 25) {
-        drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
+        // 7. Fire Hydrant safety zone at x = 27
+        drawFlatRect(10.5, 92.5, 33, 1.2, '#FBBF24', bgGroundCtx);
+        drawFlatRect(10.5, 93.7, 33, 0.6, '#FBBF24', bgGroundCtx);
+        for (let hx = 12; hx <= 42; hx += 3.5) {
+          drawFlatRect(hx, 94.3, 0.9, 3.2, 'rgba(251, 191, 36, 0.75)', bgGroundCtx);
+        }
+        drawFlatRect(10.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+        drawFlatRect(43.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+
+        // 8. Asphalt roadway
+        drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
+        for (let i = 10; i < blockLength; i += 25) {
+          drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
+        }
+      } else if (layout === 'contemporary_townhomes') {
+        // 1. Paved rear service lane
+        drawFlatRect(0, -24, blockLength, 18, '#4A4E54', bgGroundCtx);
+        drawFlatRect(0, -6, blockLength, 20, '#7DB86B', bgGroundCtx);
+
+        // 2. Front modern landscaped lawns
+        drawFlatRect(0, 14, blockLength, 56, '#86c274', bgGroundCtx);
+
+        // 3. Boulevard
+        drawFlatRect(0, 78, blockLength, 15, '#7bb369', bgGroundCtx);
+
+        // 4. Modern wide sidewalk
+        drawFlatRect(0, 70, blockLength, 8, '#c2c7cc', bgGroundCtx);
+        for (let s = 0; s < blockLength; s += 8) {
+          drawFlatRect(s, 70, 0.5, 8, '#9a9fa3', bgGroundCtx);
+        }
+
+        // 5. Stoop walkways & rear tuck-under aprons
+        for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          const startX = 8 + h * lotWidth;
+          drawFlatRect(startX + 14, -6, 12, 6, '#9CA0A4', bgGroundCtx);
+          drawFlatRect(startX + 5, 50, 3.5, 20, '#D0D4D8', bgGroundCtx);
+        }
+
+        // 6. Curb with Bulb-Outs & Pocket Bays
+        drawFlatRect(0, 92.4, blockLength, 1.2, '#B5BAC0', bgGroundCtx);
+
+        // Landscaped Bioswale Bulb-outs extending into street
+        const bulbOutXs = [20, 112, 204, 296];
+        for (const bx of bulbOutXs) {
+          drawFlatRect(bx, 80, 18, 14, '#94A3B8', bgGroundCtx);
+          drawFlatRect(bx + 1.5, 82, 15, 10, '#5e9450', bgGroundCtx);
+          drawFlatRect(bx + 3, 84, 12, 6, '#3c6e32', bgGroundCtx);
+        }
+
+        // Pocket bay stall markings
+        const pocketBayXs = [
+          46, 68, 90,
+          138, 160, 182,
+          230, 252, 274,
+          322, 344, 366
+        ];
+        for (const px of pocketBayXs) {
+          drawFlatRect(px - 1, 93, 0.4, 7.5, '#FFFFFF', bgGroundCtx);
+        }
+
+        // 7. Hydrant safety zone
+        drawFlatRect(10.5, 92.5, 33, 1.2, '#FBBF24', bgGroundCtx);
+
+        // 8. Asphalt roadway
+        drawFlatRect(0, 93, blockLength, 45, '#45484C', bgGroundCtx);
+        for (let i = 10; i < blockLength; i += 25) {
+          drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
+        }
+      } else if (layout === 'infill_skinny') {
+        // Paved rear alley with smooth asphalt
+        drawFlatRect(0, -24, blockLength, 18, '#585C60', bgGroundCtx);
+        drawFlatRect(0, -6, blockLength, 20, '#7DB86B', bgGroundCtx);
+        drawFlatRect(0, 14, blockLength, 56, '#86c274', bgGroundCtx);
+        drawFlatRect(0, 78, blockLength, 15, '#7bb369', bgGroundCtx);
+
+        // Concrete rear parking pads for garage suites & dual walkways
+        for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          const startX = 8 + h * lotWidth;
+          drawFlatRect(startX + 16, -6, 12, 6, '#9CA0A4', bgGroundCtx);
+          drawFlatRect(startX + 4, -6, 10, 6, '#9CA0A4', bgGroundCtx);
+
+          // Dual modern paver walkways for the skinny duplex units
+          drawFlatRect(startX + 5, 50, 2.2, 20, '#D0D4D8', bgGroundCtx);
+          drawFlatRect(startX + 19, 50, 2.2, 20, '#D0D4D8', bgGroundCtx);
+        }
+
+        // Continuous sidewalk & curb
+        drawFlatRect(0, 70, blockLength, 8, '#b5bac0', bgGroundCtx);
+        drawFlatRect(0, 92.4, blockLength, 1.2, '#B5BAC0', bgGroundCtx);
+        drawFlatRect(0, 93.3, blockLength, 0.4, '#8E9398', bgGroundCtx);
+
+        // Hydrant zone
+        drawFlatRect(10.5, 92.5, 33, 1.2, '#FBBF24', bgGroundCtx);
+
+        // Asphalt roadway
+        drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
+        for (let i = 10; i < blockLength; i += 25) {
+          drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
+        }
+      } else {
+        // Mature Laned (Authentic Heritage Mid-Century Layout)
+        drawFlatRect(0, -24, blockLength, 18, '#B2AA9D', bgGroundCtx);
+        drawFlatRect(0, -24, blockLength, 0.8, '#9A9184', bgGroundCtx);
+        drawFlatRect(0, -6.8, blockLength, 0.8, '#9A9184', bgGroundCtx);
+        drawFlatRect(0, -19, blockLength, 2.5, '#999083', bgGroundCtx);
+        drawFlatRect(0, -12, blockLength, 2.5, '#999083', bgGroundCtx);
+        drawFlatRect(0, -6, blockLength, 20, '#7DB86B', bgGroundCtx);
+        drawFlatRect(0, 14, blockLength, 56, '#86c274', bgGroundCtx);
+        drawFlatRect(0, 78, blockLength, 15, '#7bb369', bgGroundCtx);
+
+        for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          const startX = 8 + h * lotWidth;
+          drawFlatRect(startX + 17.5, -6, 11.5, 6, '#9CA0A4', bgGroundCtx);
+          drawFlatRect(startX + 17.5, 16, 11.5, 6, '#9CA0A4', bgGroundCtx);
+          drawFlatRect(startX + 4.5, -6, 9.5, 8, '#B2AA9D', bgGroundCtx);
+          drawFlatRect(startX + 7.8, 50, 3.0, 20, '#D0D4D8', bgGroundCtx);
+          drawFlatRect(startX + 7.8, 56, 3.0, 0.3, '#B5BAC0', bgGroundCtx);
+          drawFlatRect(startX + 7.8, 63, 3.0, 0.3, '#B5BAC0', bgGroundCtx);
+        }
+
+        drawFlatRect(0, 70, blockLength, 8, '#b5bac0', bgGroundCtx);
+        drawFlatRect(0, 69.6, blockLength, 0.5, '#8a8f94', bgGroundCtx);
+        drawFlatRect(0, 77.9, blockLength, 0.5, '#8a8f94', bgGroundCtx);
+        for (let s = 0; s < blockLength; s += 8) {
+          drawFlatRect(s, 70, 0.5, 8, '#9a9fa3', bgGroundCtx);
+        }
+
+        drawFlatRect(0, 92.4, blockLength, 1.2, '#B5BAC0', bgGroundCtx);
+        drawFlatRect(0, 93.3, blockLength, 0.4, '#8E9398', bgGroundCtx);
+
+        drawFlatRect(10.5, 92.5, 33, 1.2, '#FBBF24', bgGroundCtx);
+        drawFlatRect(10.5, 93.7, 33, 0.6, '#FBBF24', bgGroundCtx);
+        for (let hx = 12; hx <= 42; hx += 3.5) {
+          drawFlatRect(hx, 94.3, 0.9, 3.2, 'rgba(251, 191, 36, 0.75)', bgGroundCtx);
+        }
+        drawFlatRect(10.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+        drawFlatRect(43.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+
+        const roadLabelPos = project(27, 96, 0);
+        bgGroundCtx.save();
+        bgGroundCtx.fillStyle = '#FBBF24';
+        bgGroundCtx.font = 'bold 8px "Open Sans", sans-serif';
+        bgGroundCtx.textAlign = 'center';
+        bgGroundCtx.fillText('NO PARKING 5m', roadLabelPos.x, roadLabelPos.y);
+        bgGroundCtx.restore();
+
+        drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
+        for (let i = 10; i < blockLength; i += 25) {
+          drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
+        }
       }
     }
 
@@ -909,6 +1024,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     function renderHousesBackground() {
       bgHousesCtx.clearRect(0, 0, bgHousesCanvas.width, bgHousesCanvas.height);
       bgTreesCtx.clearRect(0, 0, bgTreesCanvas.width, bgTreesCanvas.height);
+      const layout: StreetLayoutTypology = configRef.current.streetLayout || 'mature_laned';
       const lotWidth = 30.5;
 
       for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
@@ -919,173 +1035,203 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const rightC = adjustColor(brand.hex, -30);
         const roofC = adjustColor(brand.hex, -45);
 
-        // 1. Backyard cedar privacy fence along property lines (between lots)
-        drawBlock(startX + lotWidth - 0.5, -6, 0, 0.6, 26, 4.0, '#8C6D52', '#72563F', '#57412E', bgHousesCtx);
-        // Back alley rear boundary fence behind bungalow and pad
-        drawBlock(startX, -6, 0, 17.0, 0.6, 4.0, '#8C6D52', '#72563F', '#57412E', bgHousesCtx);
+        if (layout === 'suburban_front_driveway') {
+          // 1. Backyard cedar privacy fence along property lines & rear boundary
+          drawBlock(startX + lotWidth - 0.5, -6, 0, 0.6, 26, 4.0, '#8C6D52', '#72563F', '#57412E', bgHousesCtx);
+          drawBlock(startX, -6, 0, 30.5, 0.6, 4.0, '#8C6D52', '#72563F', '#57412E', bgHousesCtx);
 
-        // 2. Rear Detached Garage in backyard backing onto gravel alley
-        // Authentic 1950s-1960s detached single-car garage with authentic proportions,
-        // horizontal lap siding, white corner boards, and an unmistakable overhead sectional garage door.
-        const garageX = startX + 17.5;
-        const garageY = 0;
-        const garageW = 11.0;
-        const garageD = 14.5;
-        const garageWallH = 7.2;
-        const garageRoofH = 3.4;
+          // 2. Spacious 2-Storey Suburban Home on left side of lot
+          drawBlock(startX + 2.0, 20, 0, 11.5, 25.0, 15.5, topC, leftC, rightC, bgHousesCtx);
+          drawPitchedRoof(startX + 1.5, 18.5, 15.5, 12.5, 27.0, 6.5, roofC, rightC, bgHousesCtx);
 
-        const garageTop = adjustColor(brand.hex, -8);
-        const garageLeft = adjustColor(brand.hex, -20);
-        const garageRight = adjustColor(brand.hex, -32);
+          // Front covered entry porch
+          drawBlock(startX + 3.0, 45, 0, 6.5, 4.5, 1.8, '#CBD5E1', '#94A3B8', '#64748B', bgHousesCtx);
+          drawBlock(startX + 2.5, 45, 9.0, 7.5, 5.0, 1.0, roofC, rightC, rightC, bgHousesCtx);
+          drawBlock(startX + 3.2, 49.2, 1.8, 0.8, 0.8, 7.2, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(startX + 8.5, 49.2, 1.8, 0.8, 0.8, 7.2, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(startX + 5.0, 49.5, 0, 2.5, 2.0, 0.9, '#D0D4D8', '#B5BAC0', '#9A9FA3', bgHousesCtx);
+          drawBlock(startX + 4.5, 45.0, 1.8, 3.0, 0.5, 6.8, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
 
-        // Concrete foundation slab footing extending 0.4 units beyond walls
-        drawBlock(garageX - 0.4, garageY - 0.4, 0, garageW + 0.8, garageD + 0.8, 0.5, '#A8ADB2', '#8E9398', '#757A7F', bgHousesCtx);
+          // Second floor front windows
+          drawBlock(startX + 3.5, 45.1, 9.5, 4.0, 0.3, 3.8, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
 
-        // Main garage wall structure
-        drawBlock(garageX, garageY, 0.5, garageW, garageD, garageWallH, garageTop, garageLeft, garageRight, bgHousesCtx);
+          // 3. FRONT-ATTACHED DOUBLE GARAGE on right side of lot (facing street!)
+          const garageX = startX + 13.5;
+          const garageY = 32;
+          const garageW = 14.5;
+          const garageD = 16.0;
+          const garageWallH = 8.5;
+          const garageRoofH = 4.2;
+          const garageTop = adjustColor(brand.hex, -8);
+          const garageLeft = adjustColor(brand.hex, -20);
+          const garageRight = adjustColor(brand.hex, -32);
 
-        // Horizontal lap siding shadow lines on visible front face (facing yard/camera at y = garageY + garageD)
-        const sidingC1 = adjustColor(brand.hex, -26);
-        const sidingC2 = adjustColor(brand.hex, -28);
-        const sidingC3 = adjustColor(brand.hex, -34);
-        for (const sz of [2.0, 3.4, 4.8, 6.2]) {
-          drawBlock(garageX + 0.2, garageY + garageD, sz, garageW - 0.4, 0.1, 0.2, sidingC1, sidingC2, sidingC3, bgHousesCtx);
+          // Garage structure & gabled roof
+          drawBlock(garageX, garageY, 0.5, garageW, garageD, garageWallH, garageTop, garageLeft, garageRight, bgHousesCtx);
+          drawPitchedRoof(garageX - 0.5, garageY - 0.5, 0.5 + garageWallH, garageW + 1.0, garageD + 1.0, garageRoofH, roofC, garageRight, bgHousesCtx);
+
+          // Double-wide sectional overhead garage door facing street at y = garageY + garageD (48)
+          const doorX = garageX + 1.2;
+          const doorW = 12.0;
+          const doorH = 6.4;
+          const doorZ = 0.5;
+          drawBlock(doorX, garageY + garageD + 0.05, doorZ, doorW, 0.25, doorH, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(doorX + 0.3, garageY + garageD + 0.1, doorZ + 0.15, doorW - 0.6, 0.2, doorH - 0.25, '#F8FAFC', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          for (const sz of [1.6, 3.1, 4.6]) {
+            drawBlock(doorX + 0.3, garageY + garageD + 0.15, doorZ + sz, doorW - 0.6, 0.1, 0.12, '#94A3B8', '#64748B', '#475569', bgHousesCtx);
+          }
+          // Upper glass inserts
+          for (let wp = 0; wp < 4; wp++) {
+            drawBlock(doorX + 0.8 + wp * 2.8, garageY + garageD + 0.16, doorZ + 4.9, 2.2, 0.1, 1.0, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
+          }
+          // Coach lights
+          drawBlock(garageX + 0.4, garageY + garageD + 0.1, 0.5 + doorH - 0.2, 0.5, 0.3, 0.8, '#1F2937', '#111827', '#0F172A', bgHousesCtx);
+          drawBlock(garageX + garageW - 0.9, garageY + garageD + 0.1, 0.5 + doorH - 0.2, 0.5, 0.3, 0.8, '#1F2937', '#111827', '#0F172A', bgHousesCtx);
+
+          // Front yard shrubs
+          drawBlock(startX + 1.5, 46, 0, 2.0, 2.0, 3.5, '#047857', '#065F46', '#064E3B', bgHousesCtx);
+        } else if (layout === 'infill_skinny') {
+          // Paved rear lane & 2-Storey Garage Suite at rear
+          const gX = startX + 16.5;
+          const gY = 0;
+          const gW = 12.0;
+          const gD = 14.5;
+          const gH = 11.5;
+          drawBlock(gX, gY, 0.5, gW, gD, gH, adjustColor(brand.hex, -10), adjustColor(brand.hex, -22), adjustColor(brand.hex, -35), bgHousesCtx);
+          drawPitchedRoof(gX - 0.4, gY - 0.4, 0.5 + gH, gW + 0.8, gD + 0.8, 3.5, roofC, rightC, bgHousesCtx);
+          // Garage suite upper windows
+          drawBlock(gX + 2.5, gY + gD + 0.1, 7.5, 4.0, 0.2, 3.0, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
+          drawBlock(gX + 1.5, gY + gD + 0.05, 0.5, 9.0, 0.25, 5.5, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+
+          // Lot Split: Unit A (left skinny home)
+          drawBlock(startX + 1.5, 22, 0, 12.0, 24.0, 17.5, '#F8FAFC', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawPitchedRoof(startX + 1.0, 21.0, 17.5, 13.0, 25.5, 4.5, '#334155', '#1E293B', bgHousesCtx);
+          // Warm cedar vertical slat accents
+          drawBlock(startX + 8.5, 46.0, 2.0, 4.5, 0.2, 13.5, '#B45309', '#92400E', '#78350F', bgHousesCtx);
+          // Contemporary windows
+          drawBlock(startX + 2.8, 46.1, 4.5, 4.5, 0.2, 8.0, '#0F172A', '#020617', '#000000', bgHousesCtx);
+          drawBlock(startX + 3.2, 46.2, 4.9, 3.7, 0.1, 7.2, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
+          drawBlock(startX + 3.0, 46, 0, 5.0, 4.0, 1.8, '#CBD5E1', '#94A3B8', '#64748B', bgHousesCtx);
+
+          // Lot Split: Unit B (right skinny home)
+          drawBlock(startX + 15.5, 22, 0, 12.0, 24.0, 17.5, '#1E293B', '#0F172A', '#020617', bgHousesCtx);
+          drawPitchedRoof(startX + 15.0, 21.0, 17.5, 13.0, 25.5, 4.5, '#0F172A', '#020617', bgHousesCtx);
+          drawBlock(startX + 16.5, 46.0, 2.0, 4.5, 0.2, 13.5, '#F8FAFC', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(startX + 22.0, 46.1, 4.5, 4.5, 0.2, 8.0, '#0F172A', '#020617', '#000000', bgHousesCtx);
+          drawBlock(startX + 22.4, 46.2, 4.9, 3.7, 0.1, 7.2, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
+        } else if (layout === 'contemporary_townhomes') {
+          // 3-Storey Connected Contemporary Townhomes
+          drawBlock(startX + 1.0, 22, 0, 28.5, 24.0, 6.5, '#334155', '#1E293B', '#0F172A', bgHousesCtx);
+          drawBlock(startX + 1.0, 22, 6.5, 28.5, 24.0, 11.5, '#E2E8F0', '#CBD5E1', '#94A3B8', bgHousesCtx);
+          // Parapet line
+          drawBlock(startX + 0.5, 21.5, 18.0, 29.5, 25.0, 1.0, '#0F172A', '#020617', '#000000', bgHousesCtx);
+          drawBlock(startX + 15.0, 22.0, 0, 0.5, 24.2, 18.0, '#0F172A', '#020617', '#000000', bgHousesCtx);
+          // Architectural stoops
+          drawBlock(startX + 4.0, 46.0, 0, 7.0, 4.5, 2.2, '#CBD5E1', '#94A3B8', '#64748B', bgHousesCtx);
+          drawBlock(startX + 18.0, 46.0, 0, 7.0, 4.5, 2.2, '#CBD5E1', '#94A3B8', '#64748B', bgHousesCtx);
+          // Balconies
+          drawBlock(startX + 4.0, 46.0, 11.0, 6.5, 0.3, 2.5, '#93C5FD', '#60A5FA', '#3B82F6', bgHousesCtx);
+          drawBlock(startX + 18.0, 46.0, 11.0, 6.5, 0.3, 2.5, '#93C5FD', '#60A5FA', '#3B82F6', bgHousesCtx);
+        } else {
+          // Mature Laned (Heritage Mid-Century Bungalow with rear detached garage)
+          drawBlock(startX + lotWidth - 0.5, -6, 0, 0.6, 26, 4.0, '#8C6D52', '#72563F', '#57412E', bgHousesCtx);
+          drawBlock(startX, -6, 0, 17.0, 0.6, 4.0, '#8C6D52', '#72563F', '#57412E', bgHousesCtx);
+
+          const garageX = startX + 17.5;
+          const garageY = 0;
+          const garageW = 11.0;
+          const garageD = 14.5;
+          const garageWallH = 7.2;
+          const garageRoofH = 3.4;
+          const garageTop = adjustColor(brand.hex, -8);
+          const garageLeft = adjustColor(brand.hex, -20);
+          const garageRight = adjustColor(brand.hex, -32);
+
+          drawBlock(garageX - 0.4, garageY - 0.4, 0, garageW + 0.8, garageD + 0.8, 0.5, '#A8ADB2', '#8E9398', '#757A7F', bgHousesCtx);
+          drawBlock(garageX, garageY, 0.5, garageW, garageD, garageWallH, garageTop, garageLeft, garageRight, bgHousesCtx);
+
+          const sidingC1 = adjustColor(brand.hex, -26);
+          const sidingC2 = adjustColor(brand.hex, -28);
+          const sidingC3 = adjustColor(brand.hex, -34);
+          for (const sz of [2.0, 3.4, 4.8, 6.2]) {
+            drawBlock(garageX + 0.2, garageY + garageD, sz, garageW - 0.4, 0.1, 0.2, sidingC1, sidingC2, sidingC3, bgHousesCtx);
+          }
+
+          drawBlock(garageX - 0.1, garageY + garageD - 0.3, 0.5, 0.5, 0.35, garageWallH, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(garageX + garageW - 0.4, garageY + garageD - 0.3, 0.5, 0.5, 0.35, garageWallH, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(garageX, garageY + garageD - 0.3, 0.5 + garageWallH - 0.4, garageW, 0.35, 0.4, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+
+          const doorX = garageX + 1.2;
+          const doorW = 8.6;
+          const doorH = 5.6;
+          const doorZ = 0.5;
+          drawBlock(doorX, garageY + garageD + 0.05, doorZ, doorW, 0.25, doorH, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(doorX + 0.3, garageY + garageD + 0.1, doorZ + 0.15, doorW - 0.6, 0.2, doorH - 0.25, '#F8FAFC', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+
+          for (const sz of [1.4, 2.7, 4.0]) {
+            drawBlock(doorX + 0.3, garageY + garageD + 0.15, doorZ + sz, doorW - 0.6, 0.1, 0.12, '#94A3B8', '#64748B', '#475569', bgHousesCtx);
+          }
+
+          const roofX = garageX - 0.5;
+          const roofY = garageY - 0.5;
+          const roofW = garageW + 1.0;
+          const roofD = garageD + 1.0;
+          drawPitchedRoof(roofX, roofY, 0.5 + garageWallH, roofW, roofD, garageRoofH, roofC, garageRight, bgHousesCtx);
+
+          // Bungalow
+          drawBlock(startX + 1.5, 22, 0, 15.0, 21.0, 13.0, topC, leftC, rightC, bgHousesCtx);
+          drawPitchedRoof(startX + 1.0, 20.5, 13.0, 16.0, 24.0, 6.5, roofC, rightC, bgHousesCtx);
+          drawBlock(startX + 2.5, 27, 13.0, 2.2, 2.2, 8.5, '#B91C1C', '#991B1B', '#7F1D1D', bgHousesCtx);
+
+          // Veranda
+          drawBlock(startX + 2.8, 43, 0, 12.4, 7.0, 1.8, '#CBD5E1', '#94A3B8', '#64748B', bgHousesCtx);
+          drawBlock(startX + 2.3, 43, 9.5, 13.4, 7.5, 1.0, roofC, rightC, rightC, bgHousesCtx);
+          drawBlock(startX + 3.2, 49.2, 1.8, 0.8, 0.8, 7.7, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(startX + 14.2, 49.2, 1.8, 0.8, 0.8, 7.7, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(startX + 7.5, 50.0, 0, 3.5, 2.0, 0.9, '#D0D4D8', '#B5BAC0', '#9A9FA3', bgHousesCtx);
+          drawBlock(startX + 3.5, 43, 3.2, 6.5, 0.5, 5.0, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
+          drawBlock(startX + 11.2, 43, 1.8, 3.0, 0.5, 6.8, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
+          drawBlock(startX + 1.2, 44, 0, 2.2, 2.2, 3.2, '#15803D', '#166534', '#14532D', bgHousesCtx);
         }
-
-        // White exterior corner boards
-        drawBlock(garageX - 0.1, garageY + garageD - 0.3, 0.5, 0.5, 0.35, garageWallH, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-        drawBlock(garageX + garageW - 0.4, garageY + garageD - 0.3, 0.5, 0.5, 0.35, garageWallH, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-
-        // Top frieze / fascia trim board below roofline
-        drawBlock(garageX, garageY + garageD - 0.3, 0.5 + garageWallH - 0.4, garageW, 0.35, 0.4, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-
-        // Overhead Sectional Vehicle Garage Door (facing yard / camera at y = garageY + garageD)
-        const doorX = garageX + 1.2;
-        const doorW = 8.6;
-        const doorH = 5.6;
-        const doorZ = 0.5;
-
-        // White outer door frame casing
-        drawBlock(doorX, garageY + garageD + 0.05, doorZ, doorW, 0.25, doorH, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-        // Recessed door face
-        drawBlock(doorX + 0.3, garageY + garageD + 0.1, doorZ + 0.15, doorW - 0.6, 0.2, doorH - 0.25, '#F8FAFC', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-
-        // Sectional horizontal joint grooves (dividing the door into 4 horizontal roll-up panels)
-        drawBlock(doorX + 0.3, garageY + garageD + 0.15, doorZ + 1.4, doorW - 0.6, 0.1, 0.12, '#94A3B8', '#64748B', '#475569', bgHousesCtx);
-        drawBlock(doorX + 0.3, garageY + garageD + 0.15, doorZ + 2.7, doorW - 0.6, 0.1, 0.12, '#94A3B8', '#64748B', '#475569', bgHousesCtx);
-        drawBlock(doorX + 0.3, garageY + garageD + 0.15, doorZ + 4.0, doorW - 0.6, 0.1, 0.12, '#94A3B8', '#64748B', '#475569', bgHousesCtx);
-
-        // Embossed raised panels on the 3 lower tiers
-        for (let p = 0; p < 4; p++) {
-          const px = doorX + 0.55 + p * 1.95;
-          drawBlock(px, garageY + garageD + 0.16, doorZ + 0.3, 1.5, 0.08, 0.8, '#E2E8F0', '#CBD5E1', '#94A3B8', bgHousesCtx);
-          drawBlock(px, garageY + garageD + 0.16, doorZ + 1.6, 1.5, 0.08, 0.8, '#E2E8F0', '#CBD5E1', '#94A3B8', bgHousesCtx);
-          drawBlock(px, garageY + garageD + 0.16, doorZ + 2.9, 1.5, 0.08, 0.8, '#E2E8F0', '#CBD5E1', '#94A3B8', bgHousesCtx);
-        }
-
-        // Lift handle at center of bottom panel
-        drawBlock(doorX + doorW * 0.5 - 0.5, garageY + garageD + 0.2, doorZ + 0.5, 1.0, 0.12, 0.2, '#1F2937', '#111827', '#0F172A', bgHousesCtx);
-
-        // Side pedestrian service door on the right wall (x = garageX + garageW, facing right)
-        drawBlock(garageX + garageW + 0.05, 8.0, 0.5, 0.2, 3.2, 5.8, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-        drawBlock(garageX + garageW + 0.1, 8.25, 0.7, 0.15, 2.7, 5.4, '#F1F5F9', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-        drawBlock(garageX + garageW + 0.15, 8.55, 3.2, 0.12, 0.2, 0.2, '#F59E0B', '#D97706', '#B45309', bgHousesCtx);
-
-        // Side window on right wall
-        drawBlock(garageX + garageW + 0.05, 2.5, 3.4, 0.2, 3.2, 2.4, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
-        drawBlock(garageX + garageW + 0.1, 4.0, 3.4, 0.15, 0.2, 2.4, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-
-        // Exterior gooseneck coach lantern fixture mounted above the overhead garage door
-        drawBlock(garageX + 0.6, garageY + garageD + 0.1, 0.5 + doorH + 0.2, 0.35, 0.25, 0.7, '#1F2937', '#111827', '#0F172A', bgHousesCtx);
-        drawBlock(garageX + 0.5, garageY + garageD + 0.18, 0.5 + doorH - 0.2, 0.55, 0.35, 0.55, '#374151', '#1F2937', '#111827', bgHousesCtx);
-
-        // Gabled roof with authentic asphalt shingles
-        const roofX = garageX - 0.5;
-        const roofY = garageY - 0.5;
-        const roofW = garageW + 1.0;
-        const roofD = garageD + 1.0;
-        drawPitchedRoof(roofX, roofY, 0.5 + garageWallH, roofW, roofD, garageRoofH, roofC, garageRight, bgHousesCtx);
-        // Eave drip edge trim
-        drawBlock(roofX, roofY + roofD, 0.5 + garageWallH, roofW, 0.25, 0.3, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-
-        // 3. 1.5-Storey Mid-Century Bungalow on left side of lot (x = startX + 1.5 to 16.5, y = 22 to 43)
-        drawBlock(startX + 1.5, 22, 0, 15.0, 21.0, 13.0, topC, leftC, rightC, bgHousesCtx);
-        drawPitchedRoof(startX + 1.0, 20.5, 13.0, 16.0, 24.0, 6.5, roofC, rightC, bgHousesCtx);
-
-        // Authentic red brick masonry chimney on roofline
-        drawBlock(startX + 2.5, 27, 13.0, 2.2, 2.2, 8.5, '#B91C1C', '#991B1B', '#7F1D1D', bgHousesCtx);
-        drawBlock(startX + 2.3, 26.8, 21.5, 2.6, 2.6, 0.6, '#374151', '#1F2937', '#111827', bgHousesCtx);
-
-        // Front Veranda / Covered Porch (y = 43 to 50, facing street)
-        // Porch deck
-        drawBlock(startX + 2.8, 43, 0, 12.4, 7.0, 1.8, '#CBD5E1', '#94A3B8', '#64748B', bgHousesCtx);
-        // Veranda roof canopy
-        drawBlock(startX + 2.3, 43, 9.5, 13.4, 7.5, 1.0, roofC, rightC, rightC, bgHousesCtx);
-        // Porch support posts
-        drawBlock(startX + 3.2, 49.2, 1.8, 0.8, 0.8, 7.7, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-        drawBlock(startX + 14.2, 49.2, 1.8, 0.8, 0.8, 7.7, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-        // Porch concrete steps leading down to front walkway
-        drawBlock(startX + 7.5, 50.0, 0, 3.5, 2.0, 0.9, '#D0D4D8', '#B5BAC0', '#9A9FA3', bgHousesCtx);
-
-        // Large Horizontal Mid-Century Picture Window on front facade
-        drawBlock(startX + 3.5, 43, 3.2, 6.5, 0.5, 5.0, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
-        // White picture window divided mullions
-        drawBlock(startX + 6.7, 43.1, 3.2, 0.3, 0.3, 5.0, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-        drawBlock(startX + 3.5, 43.1, 5.7, 6.5, 0.3, 0.3, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-
-        // Front Entry Door under the veranda
-        drawBlock(startX + 11.2, 43, 1.8, 3.0, 0.5, 6.8, '#FFFFFF', '#E2E8F0', '#CBD5E1', bgHousesCtx);
-        drawBlock(startX + 11.8, 43.1, 4.8, 1.6, 0.2, 2.2, '#EEF5F9', '#A2C8E0', '#6BA1C4', bgHousesCtx);
-
-        // Foundation coniferous shrubs in front yard
-        drawBlock(startX + 1.2, 44, 0, 2.2, 2.2, 3.2, '#15803D', '#166534', '#14532D', bgHousesCtx);
-        drawBlock(startX + 15.6, 44, 0, 2.2, 2.2, 3.0, '#047857', '#065F46', '#064E3B', bgHousesCtx);
       }
 
-      // Boulevard Trees (City of Edmonton Urban Forest - Stately White Birch & Green Ashes)
-      // Evenly spaced along the green grass boulevard (y = 84, between sidewalk y = 78 and curb y = 93)
-      const treePalette = [
-        { main: '#009A44', dark: '#007a36', deep: '#005927', highlight: '#43b865', top: '#32964e' },
-        { main: '#15803D', dark: '#166534', deep: '#14532D', highlight: '#22C55E', top: '#16A34A' },
-        { main: '#047857', dark: '#065F46', deep: '#064E3B', highlight: '#10B981', top: '#059669' },
-        { main: '#1E7E34', dark: '#155724', deep: '#0F3E1A', highlight: '#28A745', top: '#218838' }
-      ];
-
+      // Boulevard Trees tailored by layout
       const treePositions = [18, 65, 110, 155, 205, 255, 305, 355];
       for (let t = 0; t < treePositions.length; t++) {
         const treeX = treePositions[t];
         const treeY = 84;
-        const palette = treePalette[t % treePalette.length];
 
-        // Dark organic bark mulch ring around tree base on the grass boulevard
-        const mulchPos = project(treeX + 1, treeY + 1, 0);
-        bgTreesCtx.save();
-        bgTreesCtx.fillStyle = '#2c1e16';
-        bgTreesCtx.beginPath();
-        bgTreesCtx.ellipse(mulchPos.x, mulchPos.y, 7.5, 4, 0, 0, Math.PI * 2);
-        bgTreesCtx.fill();
-        bgTreesCtx.restore();
-
-        // White Birch / Green Ash trunk with distinctive Edmonton birch bark
-        const isBirch = t % 2 === 1;
-        const trunkTop = isBirch ? '#F8FAFC' : '#5c4033';
-        const trunkLeft = isBirch ? '#E2E8F0' : '#4a332a';
-        const trunkRight = isBirch ? '#CBD5E1' : '#38261f';
-        drawBlock(treeX, treeY, 0, 2, 2, 8, trunkTop, trunkLeft, trunkRight, bgTreesCtx);
-        if (isBirch) {
-          // Birch dark bark lenticel markings
-          drawBlock(treeX - 0.1, treeY + 0.5, 3, 2.2, 0.4, 0.5, '#334155', '#1E293B', '#0F172A', bgTreesCtx);
-          drawBlock(treeX - 0.1, treeY + 0.5, 5.5, 2.2, 0.4, 0.5, '#334155', '#1E293B', '#0F172A', bgTreesCtx);
+        if (layout === 'infill_skinny') {
+          // Slender Columnar Swedish Aspens
+          drawBlock(treeX, treeY, 0, 1.8, 1.8, 8, '#5c4033', '#4a332a', '#38261f', bgTreesCtx);
+          drawBlock(treeX - 2, treeY - 2, 8, 5.5, 5.5, 18, '#15803D', '#166534', '#14532D', bgTreesCtx);
+        } else if (layout === 'suburban_front_driveway') {
+          // Flowering crabapples & spruce
+          drawBlock(treeX, treeY, 0, 2, 2, 6, '#5c4033', '#4a332a', '#38261f', bgTreesCtx);
+          drawBlock(treeX - 3.5, treeY - 3.5, 6, 9, 9, 8, '#047857', '#065F46', '#064E3B', bgTreesCtx);
+          drawBlock(treeX - 2, treeY - 2, 14, 6, 6, 6, '#065F46', '#047857', '#022C22', bgTreesCtx);
+        } else if (layout === 'contemporary_townhomes') {
+          // Urban tree grates & compact drought-tolerant oaks
+          drawBlock(treeX, treeY, 0, 2, 2, 7, '#4a332a', '#38261f', '#2c1e16', bgTreesCtx);
+          drawBlock(treeX - 3, treeY - 3, 7, 8, 8, 8, '#1E7E34', '#155724', '#0F3E1A', bgTreesCtx);
+        } else {
+          // Mature American Elms and White Birches
+          const isBirch = t % 2 === 1;
+          const trunkTop = isBirch ? '#F8FAFC' : '#5c4033';
+          const trunkLeft = isBirch ? '#E2E8F0' : '#4a332a';
+          const trunkRight = isBirch ? '#CBD5E1' : '#38261f';
+          drawBlock(treeX, treeY, 0, 2, 2, 8, trunkTop, trunkLeft, trunkRight, bgTreesCtx);
+          if (isBirch) {
+            drawBlock(treeX - 0.1, treeY + 0.5, 3, 2.2, 0.4, 0.5, '#334155', '#1E293B', '#0F172A', bgTreesCtx);
+            drawBlock(treeX - 0.1, treeY + 0.5, 5.5, 2.2, 0.4, 0.5, '#334155', '#1E293B', '#0F172A', bgTreesCtx);
+          }
+          drawBlock(treeX - 4, treeY - 4, 8, 10, 10, 9, '#009A44', '#007a36', '#005927', bgTreesCtx);
+          drawBlock(treeX - 2.5, treeY - 2.5, 17, 7, 7, 7, '#43b865', '#32964e', '#007a36', bgTreesCtx);
         }
-
-        // Stepped cubic foliage canopy
-        drawBlock(treeX - 4, treeY - 4, 8, 10, 10, 9, palette.main, palette.dark, palette.deep, bgTreesCtx);
-        drawBlock(treeX - 2.5, treeY - 2.5, 17, 7, 7, 7, palette.highlight, palette.top, palette.dark, bgTreesCtx);
       }
 
-      // Fire Hydrant on boulevard at x = 27, y = 85.5
+      // Fire Hydrant at x = 27
       drawFireHydrant(27, 85.5, 0, bgHousesCtx);
-      // City of Edmonton statutory 5m no-parking sign on boulevard post
       drawHydrantSign(30.5, 84, 0, bgHousesCtx);
     }
 
@@ -1103,71 +1249,168 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       homeIndex?: number;
     }
 
-    function generateHouseCarAssignments(drivewayCap: number): HouseCarAssignment[] {
+    function generateHouseCarAssignments(drivewayCap: number, layout: StreetLayoutTypology = configRef.current.streetLayout || 'mature_laned'): HouseCarAssignment[] {
       const assignments: HouseCarAssignment[] = [];
       const typesY = ['sedanY', 'suvY', 'pickupY'];
       const typesX = ['sedan', 'suv', 'pickup'];
       const lotWidth = 30.5;
-
-      // 1. Off-Street Parking: Detached Garages & Rear Parking Pads in Backyards along the Gravel Alley
       const effectiveCap = Math.min(2, Math.max(1, drivewayCap));
+
+      // 1. Off-Street Parking: based on layout
       for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
         const color = edmontonPalette[h % edmontonPalette.length].hex;
         const startX = 8 + h * lotWidth;
 
-        // Spot 1: In detached rear garage
-        assignments.push({
-          type: typesY[h % 3],
-          x: startX + 17.5,
-          y: 4.5,
-          w: 7.5,
-          d: 11,
-          color,
-          isGarage: true,
-          homeIndex: h
-        });
-
-        // Spot 2: Rear outdoor gravel/concrete parking pad (if capacity == 2)
-        if (effectiveCap >= 2) {
+        if (layout === 'suburban_front_driveway') {
+          // Spot 1: In front-attached double garage
+          assignments.push({
+            type: typesY[h % 3],
+            x: startX + 16,
+            y: 39,
+            w: 8.5,
+            d: 11,
+            color,
+            isGarage: true,
+            homeIndex: h
+          });
+          // Spot 2: In front concrete driveway pad
           assignments.push({
             type: typesY[(h + 1) % 3],
-            x: startX + 5.5,
-            y: -1,
-            w: 7.5,
-            d: 11,
+            x: startX + 16,
+            y: 54,
+            w: 8,
+            d: 12,
             color,
             isGarage: false,
             homeIndex: h
           });
+          // Spot 3: Lower driveway spot if cap >= 2
+          if (effectiveCap >= 2) {
+            assignments.push({
+              type: typesY[(h + 2) % 3],
+              x: startX + 16,
+              y: 70,
+              w: 8,
+              d: 12,
+              color,
+              isGarage: false,
+              homeIndex: h
+            });
+          }
+        } else if (layout === 'contemporary_townhomes') {
+          // Spot 1: Tuck-under rear garage
+          assignments.push({
+            type: typesY[h % 3],
+            x: startX + 16,
+            y: 12,
+            w: 8.5,
+            d: 11,
+            color,
+            isGarage: true,
+            homeIndex: h
+          });
+          if (effectiveCap >= 2) {
+            assignments.push({
+              type: typesY[(h + 1) % 3],
+              x: startX + 5.5,
+              y: -1,
+              w: 7.5,
+              d: 11,
+              color,
+              isGarage: false,
+              homeIndex: h
+            });
+          }
+        } else {
+          // Mature Laned & Infill Skinny: Detached rear garage & rear parking pad
+          assignments.push({
+            type: typesY[h % 3],
+            x: startX + 17.5,
+            y: 4.5,
+            w: 7.5,
+            d: 11,
+            color,
+            isGarage: true,
+            homeIndex: h
+          });
+
+          if (effectiveCap >= 2) {
+            assignments.push({
+              type: typesY[(h + 1) % 3],
+              x: startX + 5.5,
+              y: -1,
+              w: 7.5,
+              d: 11,
+              color,
+              isGarage: false,
+              homeIndex: h
+            });
+          }
         }
       }
 
-      // 2. On-Street Curbside Stalls: Unbroken continuous curbline parking!
-      // Continuous curbside stalls from x = 47 (clearing fire hydrant) to x = 365
-      const curbsideStartX = 47;
-      const stallWidth = 16;
-      const stallSpacing = 19.8;
-      for (let s = 0; s < 16; s++) {
-        const stallX = curbsideStartX + s * stallSpacing;
-        if (stallX + stallWidth > 375) break;
-        assignments.push({
-          type: typesX[s % 3],
-          x: stallX,
-          y: 94,
-          w: stallWidth,
-          d: 7.5,
-          color: edmontonPalette[s % edmontonPalette.length].hex,
-          isGarage: false
-        });
+      // 2. On-Street Curbside Stalls based on layout
+      if (layout === 'suburban_front_driveway') {
+        // 10 legal curbside spots situated safely between driveway curb cuts
+        const suburbanStallXs = [47, 78, 108, 139, 169, 200, 230, 261, 291, 322];
+        for (let s = 0; s < suburbanStallXs.length; s++) {
+          assignments.push({
+            type: typesX[s % 3],
+            x: suburbanStallXs[s],
+            y: 94,
+            w: 15,
+            d: 7.5,
+            color: edmontonPalette[s % edmontonPalette.length].hex,
+            isGarage: false
+          });
+        }
+      } else if (layout === 'contemporary_townhomes') {
+        // 12 stalls in 4 pocket bays of 3 stalls each
+        const pocketBayXs = [
+          46, 68, 90,
+          138, 160, 182,
+          230, 252, 274,
+          322, 344, 366
+        ];
+        for (let s = 0; s < pocketBayXs.length; s++) {
+          assignments.push({
+            type: typesX[s % 3],
+            x: pocketBayXs[s],
+            y: 94,
+            w: 15,
+            d: 7.5,
+            color: edmontonPalette[s % edmontonPalette.length].hex,
+            isGarage: false
+          });
+        }
+      } else {
+        // Mature Laned & Infill Skinny: 16 unbroken continuous curbside stalls
+        const curbsideStartX = 47;
+        const stallWidth = 16;
+        const stallSpacing = 19.8;
+        for (let s = 0; s < 16; s++) {
+          const stallX = curbsideStartX + s * stallSpacing;
+          if (stallX + stallWidth > 375) break;
+          assignments.push({
+            type: typesX[s % 3],
+            x: stallX,
+            y: 94,
+            w: stallWidth,
+            d: 7.5,
+            color: edmontonPalette[s % edmontonPalette.length].hex,
+            isGarage: false
+          });
+        }
       }
 
       return assignments;
     }
 
     let currentDrivewayCap = configRef.current.drivewayCapacity;
+    let currentStreetLayout = configRef.current.streetLayout || 'mature_laned';
     let currentSplitLots = getSplitInfillCount();
     let currentTotalHomesCount = (6 - Math.floor(currentSplitLots / 2)) + (Math.floor(currentSplitLots / 2) * 2);
-    let houseCarAssignments = generateHouseCarAssignments(currentDrivewayCap);
+    let houseCarAssignments = generateHouseCarAssignments(currentDrivewayCap, currentStreetLayout);
     let activeIndices = Array.from({ length: houseCarAssignments.length }, (_, i) => i);
 
     function shuffleSlots() {
@@ -2255,9 +2498,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       gaugeCtx.clearRect(0, 0, gaugeCanvas.width, gaugeCanvas.height);
 
       const cx = gaugeCanvas.width / 2;
-      const cy = gaugeCanvas.height - Math.max(10, Math.round(gaugeCanvas.height * 0.2));
-      const radius = Math.min(cx - 12, cy - 14); // Reduced radius to make room for text at top
-      const lineWidth = Math.max(5, Math.round(radius * 0.16));
+      const cy = gaugeCanvas.height - 4;
+      const radius = Math.min(cx - 6, cy - 8);
+      const lineWidth = Math.max(3.5, Math.round(radius * 0.14));
 
       const percentage = (curbsideCars / totalLegalStalls) * 100;
       const clampedPct = Math.min(200, Math.max(0, percentage));
@@ -2285,32 +2528,32 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       gaugeCtx.stroke();
 
       // Tick Labels
-      const fontSize = Math.max(7, Math.round(radius * 0.15));
+      const fontSize = Math.max(6.5, Math.round(radius * 0.18));
       gaugeCtx.fillStyle = '#ffffff';
       gaugeCtx.font = `bold ${fontSize}px "Open Sans", sans-serif`;
       gaugeCtx.textAlign = 'center';
-      gaugeCtx.fillText('0%', cx - radius + 2, cy + fontSize + 2);
-      gaugeCtx.fillText('100%', cx, cy - radius - 10);
-      gaugeCtx.fillText('200%', cx + radius - 2, cy + fontSize + 2);
+      gaugeCtx.fillText('0%', cx - radius + 2, cy + fontSize);
+      gaugeCtx.fillText('100%', cx, cy - radius - 2);
+      gaugeCtx.fillText('200%', cx + radius - 2, cy + fontSize);
 
       // Pointer Needle
       const needleAngle = Math.PI + (clampedPct / 200) * Math.PI;
-      const needleLen = radius - 3;
+      const needleLen = radius - 2;
 
       gaugeCtx.save();
       gaugeCtx.translate(cx, cy);
       gaugeCtx.rotate(needleAngle);
 
       gaugeCtx.strokeStyle = '#ffffff';
-      gaugeCtx.lineWidth = Math.max(1.8, Math.round(radius * 0.04));
+      gaugeCtx.lineWidth = 1.4;
       gaugeCtx.beginPath();
-      gaugeCtx.moveTo(-3, 0);
+      gaugeCtx.moveTo(-2, 0);
       gaugeCtx.lineTo(needleLen, 0);
       gaugeCtx.stroke();
 
       gaugeCtx.fillStyle = '#FFC72C';
       gaugeCtx.beginPath();
-      gaugeCtx.arc(0, 0, Math.max(2.5, Math.round(radius * 0.06)), 0, Math.PI * 2);
+      gaugeCtx.arc(0, 0, 2.2, 0, Math.PI * 2);
       gaugeCtx.fill();
       gaugeCtx.restore();
     }
@@ -2339,13 +2582,15 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         p.life -= 0.03;
 
         if (p.life > 0) {
-          const posX = (p.x - p.y) * ISO_X + offsetX;
-          const posY = (p.x + p.y) * ISO_Y - p.z * ISO_Z + offsetY;
-          ctx!.fillStyle = p.color;
-          ctx!.globalAlpha = Math.max(0, p.life);
-          ctx!.beginPath();
-          ctx!.arc(posX, posY, 2.5 * p.life + 1, 0, Math.PI * 2);
-          ctx!.fill();
+          if (p.x >= 0 && p.x <= blockLength && p.y >= 91.5 && p.y <= 142) {
+            const posX = (p.x - p.y) * ISO_X + offsetX;
+            const posY = (p.x + p.y) * ISO_Y - p.z * ISO_Z + offsetY;
+            ctx!.fillStyle = p.color;
+            ctx!.globalAlpha = Math.max(0, p.life);
+            ctx!.beginPath();
+            ctx!.arc(posX, posY, 2.5 * p.life + 1, 0, Math.PI * 2);
+            ctx!.fill();
+          }
 
           particles[writeIdx++] = p;
         }
@@ -2758,11 +3003,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         shuffleSlots();
       }
 
-      // Check if driveway capacity changed
-      if (currentDrivewayCap !== configRef.current.drivewayCapacity) {
+      // Check if driveway capacity or street layout changed
+      const newStreetLayout = configRef.current.streetLayout || 'mature_laned';
+      if (currentDrivewayCap !== configRef.current.drivewayCapacity || currentStreetLayout !== newStreetLayout) {
         currentDrivewayCap = configRef.current.drivewayCapacity;
+        currentStreetLayout = newStreetLayout;
         rebuildResidentsAndFlowers();
-        houseCarAssignments = generateHouseCarAssignments(currentDrivewayCap);
+        houseCarAssignments = generateHouseCarAssignments(currentDrivewayCap, currentStreetLayout);
         activeIndices = Array.from({ length: houseCarAssignments.length }, (_, i) => i);
         shuffleSlots();
         renderGroundBackground();
@@ -3651,17 +3898,50 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       }
 
       const midCenturyLotWidth = 30.5;
+      const currentLayout: StreetLayoutTypology = configRef.current.streetLayout || 'mature_laned';
       for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
         const startX = 8 + h * midCenturyLotWidth;
-        const garageX = startX + 17.5;
-        const garageY = 0;
-        const garageW = 11.0;
-        const garageD = 14.5;
-        const garageWallH = 7.2;
-        const garageRoofH = 3.4;
-        const doorX = garageX + 1.2;
-        const doorH = 5.6;
-        const doorZ = 0.5;
+        let garageX = startX + 17.5;
+        let garageY = 0;
+        let garageW = 11.0;
+        let garageD = 14.5;
+        let garageWallH = 7.2;
+        let garageRoofH = 3.4;
+        let doorX = garageX + 1.2;
+        let doorH = 5.6;
+        let doorZ = 0.5;
+
+        if (currentLayout === 'infill_skinny') {
+          garageX = startX + 16.5;
+          garageY = 0;
+          garageW = 12.0;
+          garageD = 14.5;
+          garageWallH = 11.5;
+          garageRoofH = 3.5;
+          doorX = garageX + 1.5;
+          doorH = 5.5;
+          doorZ = 0.5;
+        } else if (currentLayout === 'contemporary_townhomes') {
+          garageX = startX + 14.0;
+          garageY = -6.0;
+          garageW = 12.0;
+          garageD = 6.0;
+          garageWallH = 6.5;
+          garageRoofH = 1.0;
+          doorX = garageX + 1.2;
+          doorH = 5.2;
+          doorZ = 0.5;
+        } else if (currentLayout === 'suburban_front_driveway') {
+          garageX = startX + 13.5;
+          garageY = 32.0;
+          garageW = 14.5;
+          garageD = 16.0;
+          garageWallH = 8.5;
+          garageRoofH = 4.2;
+          doorX = garageX + 1.2;
+          doorH = 6.4;
+          doorZ = 0.5;
+        }
 
         const isOccupied = occupiedGarages.has(h);
         const carInfo = occupiedGarages.get(h);
@@ -3705,95 +3985,96 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawBlock(lampX + 0.05, lampY + 0.05, lampZ + 0.05, 0.35, 0.15, 0.35, '#94A3B8', '#64748B', '#475569');
         }
 
-        // 3. 2.5D Garage Occupancy Indicator Badge floating directly above the garage roof
-        if (showGarageIndicatorsRef.current) {
-          const badgePos = project(garageX + garageW * 0.5, garageY + garageD * 0.5, 0.5 + garageWallH + garageRoofH + 1.2);
-          ctx!.save();
-          if (isOccupied) {
-            // HIGHLIGHT IN GREEN
-            const pillW = 68;
-            const pillH = 17;
-            const px = badgePos.x - pillW / 2;
-            const py = badgePos.y - pillH - 4;
+        // 3. 2.5D Garage Occupancy Indicator Coloured Pill Badge floating directly above the garage roof
+        const badgePos = project(garageX + garageW * 0.5, garageY + garageD * 0.5, 0.5 + garageWallH + garageRoofH + 1.5);
+        ctx!.save();
+        if (isOccupied) {
+          // HIGHLIGHT IN GREEN
+          const pillW = 68;
+          const pillH = 17;
+          const px = badgePos.x - pillW / 2;
+          const py = badgePos.y - pillH - 4;
 
-            // Pointer tick down towards roof - Green
-            ctx!.fillStyle = '#059669';
-            ctx!.beginPath();
-            ctx!.moveTo(badgePos.x - 4, py + pillH);
-            ctx!.lineTo(badgePos.x, py + pillH + 4);
-            ctx!.lineTo(badgePos.x + 4, py + pillH);
-            ctx!.closePath();
-            ctx!.fill();
+          // Pointer tick down towards roof - Green
+          ctx!.fillStyle = '#059669';
+          ctx!.beginPath();
+          ctx!.moveTo(badgePos.x - 4, py + pillH);
+          ctx!.lineTo(badgePos.x, py + pillH + 4);
+          ctx!.lineTo(badgePos.x + 4, py + pillH);
+          ctx!.closePath();
+          ctx!.fill();
 
-            // Pill container - Vibrant Green
-            ctx!.fillStyle = '#059669';
-            ctx!.strokeStyle = '#34D399';
-            ctx!.lineWidth = 1.4;
-            ctx!.beginPath();
-            if (ctx!.roundRect) {
-              ctx!.roundRect(px, py, pillW, pillH, 8.5);
-            } else {
-              ctx!.rect(px, py, pillW, pillH);
-            }
-            ctx!.fill();
-            ctx!.stroke();
-
-            // Status dot
-            ctx!.fillStyle = '#A7F3D0';
-            ctx!.beginPath();
-            ctx!.arc(px + 9, py + pillH / 2, 3, 0, Math.PI * 2);
-            ctx!.fill();
-
-            // Text label
-            ctx!.fillStyle = '#FFFFFF';
-            ctx!.font = 'bold 8.5px "Open Sans", -apple-system, sans-serif';
-            ctx!.textAlign = 'left';
-            ctx!.textBaseline = 'middle';
-            ctx!.fillText('OCCUPIED', px + 16, py + pillH / 2 + 0.5);
+          // Pill container - Vibrant Green
+          ctx!.fillStyle = '#059669';
+          ctx!.strokeStyle = '#34D399';
+          ctx!.lineWidth = 1.4;
+          ctx!.beginPath();
+          if (ctx!.roundRect) {
+            ctx!.roundRect(px, py, pillW, pillH, 8.5);
           } else {
-            // HIGHLIGHT IN YELLOW (if vacant highlight pill colour as yellow)
-            const pillW = 56;
-            const pillH = 17;
-            const px = badgePos.x - pillW / 2;
-            const py = badgePos.y - pillH - 4;
-
-            // Pointer tick down towards roof - Yellow
-            ctx!.fillStyle = '#FBBF24';
-            ctx!.beginPath();
-            ctx!.moveTo(badgePos.x - 4, py + pillH);
-            ctx!.lineTo(badgePos.x, py + pillH + 4);
-            ctx!.lineTo(badgePos.x + 4, py + pillH);
-            ctx!.closePath();
-            ctx!.fill();
-
-            // Pill container - Vibrant Yellow
-            ctx!.fillStyle = '#FBBF24';
-            ctx!.strokeStyle = '#D97706';
-            ctx!.lineWidth = 1.4;
-            ctx!.beginPath();
-            if (ctx!.roundRect) {
-              ctx!.roundRect(px, py, pillW, pillH, 8.5);
-            } else {
-              ctx!.rect(px, py, pillW, pillH);
-            }
-            ctx!.fill();
-            ctx!.stroke();
-
-            // Status dot - Dark amber
-            ctx!.fillStyle = '#78350F';
-            ctx!.beginPath();
-            ctx!.arc(px + 9, py + pillH / 2, 3, 0, Math.PI * 2);
-            ctx!.fill();
-
-            // Text label - High-contrast dark amber on bright yellow
-            ctx!.fillStyle = '#78350F';
-            ctx!.font = 'bold 8.5px "Open Sans", -apple-system, sans-serif';
-            ctx!.textAlign = 'left';
-            ctx!.textBaseline = 'middle';
-            ctx!.fillText('VACANT', px + 16, py + pillH / 2 + 0.5);
+            ctx!.rect(px, py, pillW, pillH);
           }
-          ctx!.restore();
+          ctx!.fill();
+          ctx!.stroke();
+
+          // Status dot - showing vehicle color if available or bright emerald
+          ctx!.fillStyle = carInfo?.color || '#A7F3D0';
+          ctx!.beginPath();
+          ctx!.arc(px + 9, py + pillH / 2, 3.2, 0, Math.PI * 2);
+          ctx!.fill();
+          ctx!.strokeStyle = '#FFFFFF';
+          ctx!.lineWidth = 0.8;
+          ctx!.stroke();
+
+          // Text label
+          ctx!.fillStyle = '#FFFFFF';
+          ctx!.font = 'bold 8.5px "Open Sans", -apple-system, sans-serif';
+          ctx!.textAlign = 'left';
+          ctx!.textBaseline = 'middle';
+          ctx!.fillText('OCCUPIED', px + 16, py + pillH / 2 + 0.5);
+        } else {
+          // HIGHLIGHT IN YELLOW (if vacant highlight pill colour as yellow)
+          const pillW = 56;
+          const pillH = 17;
+          const px = badgePos.x - pillW / 2;
+          const py = badgePos.y - pillH - 4;
+
+          // Pointer tick down towards roof - Yellow
+          ctx!.fillStyle = '#FBBF24';
+          ctx!.beginPath();
+          ctx!.moveTo(badgePos.x - 4, py + pillH);
+          ctx!.lineTo(badgePos.x, py + pillH + 4);
+          ctx!.lineTo(badgePos.x + 4, py + pillH);
+          ctx!.closePath();
+          ctx!.fill();
+
+          // Pill container - Vibrant Yellow
+          ctx!.fillStyle = '#FBBF24';
+          ctx!.strokeStyle = '#D97706';
+          ctx!.lineWidth = 1.4;
+          ctx!.beginPath();
+          if (ctx!.roundRect) {
+            ctx!.roundRect(px, py, pillW, pillH, 8.5);
+          } else {
+            ctx!.rect(px, py, pillW, pillH);
+          }
+          ctx!.fill();
+          ctx!.stroke();
+
+          // Status dot - Dark amber
+          ctx!.fillStyle = '#78350F';
+          ctx!.beginPath();
+          ctx!.arc(px + 9, py + pillH / 2, 3, 0, Math.PI * 2);
+          ctx!.fill();
+
+          // Text label - High-contrast dark amber on bright yellow
+          ctx!.fillStyle = '#78350F';
+          ctx!.font = 'bold 8.5px "Open Sans", -apple-system, sans-serif';
+          ctx!.textAlign = 'left';
+          ctx!.textBaseline = 'middle';
+          ctx!.fillText('VACANT', px + 16, py + pillH / 2 + 0.5);
         }
+        ctx!.restore();
       }
 
       // Render delivered parcels sitting at the front doors of houses
@@ -3860,23 +4141,27 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           ...car,
           color: carColor,
           isFlipped: false,
+          isParkedHousehold: true,
           w,
           d,
           depthKey: getIsometricDepthKey(car.x, car.y, w, d)
         });
       }
 
-      // Render outdoor driveway pad parked cars
+      // Render outdoor driveway pad parked cars (exclude back alley cars when there are garages)
       const padCarsToRender = Math.min(drivewayPads.length, Math.max(0, activeHouseholdCars - targetOccupiedGarages));
       for (let p = 0; p < padCarsToRender; p++) {
         const car = drivewayPads[p];
         if (!car) continue;
+        // Remove all car images from the back alleys (y <= 20) when there are garages
+        if (car.y <= 20) continue;
         const w = car.w || 15;
         const d = car.d || 7;
         renderQueue.push({
           ...car,
           color: car.color,
           isFlipped: false,
+          isParkedHousehold: true,
           w,
           d,
           depthKey: getIsometricDepthKey(car.x, car.y, w, d)
@@ -3890,6 +4175,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           ...van,
           color: van.color || '#FF5500',
           isFlipped: false,
+          isAnimatedTraffic: true,
           w: 21,
           d: 8,
           state: van.state,
@@ -3917,6 +4203,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           ...v,
           color: v.color || '#ffffff',
           isFlipped: false,
+          isAnimatedTraffic: true,
           w,
           d,
           depthKey: getIsometricDepthKey(v.x, v.y, w, d)
@@ -3929,6 +4216,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           ...policeTrafficCar,
           color: '#ffffff',
           isFlipped: false,
+          isAnimatedTraffic: true,
           w: 15,
           d: 7,
           policeBubbleText: policeTrafficCar.policeBubbleText,
@@ -3957,6 +4245,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           ...v,
           color: v.color || '#0081BC',
           isFlipped: false,
+          isAnimatedTraffic: true,
           w,
           d,
           honkBubbleTimer: v.honkBubbleTimer,
@@ -3978,6 +4267,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const d = mm.d || 4;
         renderQueue.push({
           ...mm,
+          isAnimatedTraffic: true,
           w,
           d,
           depthKey: getIsometricDepthKey(mm.x, mm.y, w, d)
@@ -4136,10 +4426,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawPedestrian(item.x, item.y, 0, item.color, item.pose);
         } else if (item.type === 'parkedWalker' || item.type === 'busPassenger') {
           drawPedestrian(item.x, item.y, 0, item.color, 'normal');
-        } else if (item.type === 'bike') {
-          drawCyclist(item.x, item.y, 0, item.color);
-        } else if (item.type === 'scooter') {
-          drawScooter(item.x, item.y, 0, item.color);
         } else if (item.type === 'deliveryDriver') {
           drawPedestrian(item.x, item.y, 0, '#009A44');
           if (item.hasPackage) {
@@ -4147,30 +4433,69 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             drawBlock(item.x + 0.2, item.y - 0.8, 4.0, 0.5, 1.6, 0.04, '#c29b68', '#b08a56', '#9f7845');
             drawBlock(item.x - 0.2, item.y - 0.6, 4.0, 0.7, 0.7, 0.05, '#ffffff', '#e8e8e8', '#d0d0d0');
           }
-        } else {
-          drawVehicle(item.x, item.y, 0, item.type, item.color, false, item.state);
+        } else if (item.isAnimatedTraffic) {
+          // Mask all animated traffic to appear strictly on the roadway and not off the roadway
+          const itemWidth = item.w || (item.type === 'bike' || item.type === 'scooter' ? 8 : 20);
+          // 1. Longitudinal & Lateral Cull: if item is completely outside the roadway, do not render
+          if (item.x + itemWidth < 0 || item.x > blockLength || item.y < 91.5 || item.y > 142) {
+            continue;
+          }
 
-          if (item.policeBubbleText) {
-            drawPoliceBubble(item.x, item.y, 0, item.policeBubbleText);
-          } else if (item.honkBubbleTimer && item.honkBubbleTimer > 0) {
-            drawHonkBubble(item.x, item.y, 0);
-          } else if (item.parkingBubbleText && item.parkingState !== 'parked') {
-            const status = item.parkingState === 'giving_up' 
-              ? 'giveup' 
-              : item.parkingState === 'docking' 
-                ? 'success' 
-                : 'attempt';
-            drawParkingAttemptBubble(item.x, item.y, 0, item.parkingBubbleText, status);
-          } else if (item.isCircling && item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
-            drawCirclingBubble(item.x, item.y, 0, item.circlingLap || 1, curbsideDemand >= currentLegalCurbsideStalls);
-          } else if (item.type === 'etsBus') {
-            if (item.busStopState === 'dwelling') {
-              drawBusBubble(item.x, item.y, 0, 'ETS Bus Stop - Boarding');
-            } else if (item.isExtraBus && item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
-              item.searchingBubbleTimer--;
-              drawBusBubble(item.x, item.y, 0, 'Frequent ETS Service (10+ homes)');
+          // 2. Precise Roadway Canvas Mask in isometric projection
+          ctx!.save();
+          ctx!.beginPath();
+          const p1 = project(0, 142, 36);
+          const p2 = project(0, 91.5, 36);
+          const p3 = project(blockLength, 91.5, 36);
+          const p4 = project(blockLength, 91.5, -2);
+          const p5 = project(blockLength, 142, -2);
+          const p6 = project(0, 142, -2);
+          ctx!.moveTo(p1.x, p1.y);
+          ctx!.lineTo(p2.x, p2.y);
+          ctx!.lineTo(p3.x, p3.y);
+          ctx!.lineTo(p4.x, p4.y);
+          ctx!.lineTo(p5.x, p5.y);
+          ctx!.lineTo(p6.x, p6.y);
+          ctx!.closePath();
+          ctx!.clip();
+
+          if (item.type === 'bike') {
+            drawCyclist(item.x, item.y, 0, item.color);
+          } else if (item.type === 'scooter') {
+            drawScooter(item.x, item.y, 0, item.color);
+          } else {
+            drawVehicle(item.x, item.y, 0, item.type, item.color, false, item.state);
+
+            if (item.policeBubbleText) {
+              drawPoliceBubble(item.x, item.y, 0, item.policeBubbleText);
+            } else if (item.honkBubbleTimer && item.honkBubbleTimer > 0) {
+              drawHonkBubble(item.x, item.y, 0);
+            } else if (item.parkingBubbleText && item.parkingState !== 'parked') {
+              const status = item.parkingState === 'giving_up' 
+                ? 'giveup' 
+                : item.parkingState === 'docking' 
+                  ? 'success' 
+                  : 'attempt';
+              drawParkingAttemptBubble(item.x, item.y, 0, item.parkingBubbleText, status);
+            } else if (item.isCircling && item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
+              drawCirclingBubble(item.x, item.y, 0, item.circlingLap || 1, curbsideDemand >= currentLegalCurbsideStalls);
+            } else if (item.type === 'etsBus') {
+              if (item.busStopState === 'dwelling') {
+                drawBusBubble(item.x, item.y, 0, 'ETS Bus Stop - Boarding');
+              } else if (item.isExtraBus && item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
+                item.searchingBubbleTimer--;
+                drawBusBubble(item.x, item.y, 0, 'Frequent ETS Service (10+ homes)');
+              }
             }
           }
+          ctx!.restore();
+        } else if (item.type === 'bike') {
+          drawCyclist(item.x, item.y, 0, item.color);
+        } else if (item.type === 'scooter') {
+          drawScooter(item.x, item.y, 0, item.color);
+        } else {
+          // Parked household cars (curbside stalls and driveway pads)
+          drawVehicle(item.x, item.y, 0, item.type, item.color, false, item.state);
         }
       }
 
@@ -4203,6 +4528,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
       // Check if user clicked on moving road traffic vehicle
       for (let v of activeVehicles) {
+        if (v.x + (v.w || 15) < 0 || v.x > blockLength || v.y < 91.5 || v.y > 142) continue;
         const pos = project(v.x + (v.w / 2), v.y + (v.d / 2), 3);
         if (Math.hypot(clickX - pos.x, clickY - pos.y) < Math.max(32, v.w)) {
           playHonk(v.type || 'sedan');
@@ -4324,8 +4650,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         )}
 
         {/* Top Right HUD: Audio + Gauge + Manual Controls Toggle */}
-        <div className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-20 flex flex-col items-end gap-1 sm:gap-2">
-          <div className="flex items-center gap-0.5 sm:gap-1 bg-[#193A5A]/90 backdrop-blur-md border border-[#0081BC]/40 p-0.5 sm:p-1.5 rounded-md sm:rounded-lg shadow-lg">
+        <div className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-20 flex flex-col items-end gap-1 sm:gap-1.5">
+          <div className="flex items-center gap-0.5 sm:gap-1 bg-[#193A5A]/90 backdrop-blur-md border border-[#0081BC]/40 p-0.5 sm:p-1 rounded-md sm:rounded-lg shadow-lg">
             {/* Audio Toggle */}
             <button
               type="button"
@@ -4335,7 +4661,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 feedback.toggleSound();
               }}
               title={soundEnabled ? 'Mute Simulation & City Traffic Noise' : 'Enable City Traffic Ambience (5%) & SFX (15%)'}
-              className={`min-h-[44px] min-w-[44px] p-2 flex items-center justify-center rounded-md transition-colors cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
+              className={`min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] p-1.5 sm:p-2 flex items-center justify-center rounded-md transition-colors cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
                 soundEnabled
                   ? 'bg-[#0081BC] text-white hover:bg-[#005087]'
                   : 'bg-black/40 text-gray-400 hover:text-white'
@@ -4355,7 +4681,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               title="Toggle Manual Simulation Sliders"
               aria-expanded={showControls}
               aria-controls="manual-sliders-drawer"
-              className={`min-h-[44px] min-w-[44px] px-2.5 sm:px-3 rounded-md transition-colors flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
+              className={`min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] px-2 sm:px-3 rounded-md transition-colors flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
                 showControls
                   ? 'bg-[#0081BC] text-white'
                   : 'bg-black/40 text-gray-300 hover:text-white'
@@ -4375,7 +4701,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               }}
               title="Randomize Parking Distribution"
               aria-label="Randomize Parking Distribution"
-              className="min-h-[44px] min-w-[44px] p-2 rounded-md bg-black/40 text-gray-300 hover:text-white transition-colors cursor-pointer active:scale-95 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
+              className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] p-1.5 sm:p-2 rounded-md bg-black/40 text-gray-300 hover:text-white transition-colors cursor-pointer active:scale-95 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -4391,7 +4717,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 }}
                 title="Switch to Simplified Static View (Low Motion)"
                 aria-label="Switch to Simplified Static View"
-                className="min-h-[44px] min-w-[44px] p-2 rounded-md bg-black/40 text-gray-300 hover:text-white transition-colors cursor-pointer active:scale-95 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
+                className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] p-1.5 sm:p-2 rounded-md bg-black/40 text-gray-300 hover:text-white transition-colors cursor-pointer active:scale-95 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
               >
                 <ZapOff className="w-4 h-4" />
               </button>
@@ -4425,18 +4751,18 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             title="Curbside Parking Gauge: Click to view magnified gauge analysis"
             aria-label="Curbside Parking Gauge - Click to view magnified gauge analysis"
             aria-haspopup="dialog"
-            className={`bg-[#193A5A]/90 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-2 rounded-md sm:rounded-lg shadow-lg flex flex-col items-center transition-all self-end origin-top-right scale-50 lg:scale-100 [@media(orientation:landscape)_and_(max-height:540px)]:scale-50 [@media(max-height:540px)]:scale-50 -mb-[42px] lg:mb-0 [@media(orientation:landscape)_and_(max-height:540px)]:-mb-[42px] [@media(max-height:540px)]:-mb-[42px] w-[130px] sm:w-[140px] cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] group ${
+            className={`bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-1.5 rounded-md sm:rounded-lg shadow-md flex flex-col items-center transition-all self-end w-[82px] sm:w-[94px] cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] group ${
               curbsidePct >= 150 ? 'animate-bounce border-[#E8552D]' : ''
             }`}
           >
-            <div className="flex items-center justify-between w-full text-[10px] sm:text-xs font-bold text-gray-200 mb-0.5 sm:mb-1 gap-1">
-              <span>Curbside</span>
-              <span className={`px-1.5 py-0.5 rounded border text-[10px] sm:text-xs font-bold ${getGaugeStatusColor()}`}>
+            <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200 mb-0.5 gap-0.5">
+              <span className="truncate">Curb</span>
+              <span className={`px-1 py-0.2 rounded border text-[8px] sm:text-[9px] font-bold leading-none ${getGaugeStatusColor()}`}>
                 {curbsidePct}%
               </span>
             </div>
-            <canvas ref={gaugeCanvasRef} width={120} height={60} className="w-full h-auto block" />
-            <span className="text-[10px] sm:text-xs font-semibold text-gray-200 mt-0.5 whitespace-nowrap">
+            <canvas ref={gaugeCanvasRef} width={84} height={44} className="w-full h-auto block" />
+            <span className="text-[8.5px] sm:text-[9.5px] font-semibold text-gray-200 mt-0.5 whitespace-nowrap leading-tight">
               {curbsideDemandCount}/{curbsideStallsCapacity || totalLegalCurbsideStalls} Cars
             </span>
 
@@ -4444,34 +4770,31 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             {circlingCarCount > 0 ? (
               <div 
                 id="hud-circling-traffic-indicator"
-                className="w-full mt-1 pt-1 border-t border-white/10 flex items-center justify-center gap-1 text-[9px] sm:text-[10px] font-semibold text-amber-300"
+                className="w-full mt-0.5 pt-0.5 border-t border-white/10 flex items-center justify-center gap-0.5 text-[8px] sm:text-[8.5px] font-semibold text-amber-300 leading-tight"
                 title={`${circlingCarCount} vehicles circling looking for parking as curbside fills up`}
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block" />
-                <span className="truncate">{circlingCarCount} {circlingCarCount === 1 ? 'car' : 'cars'} circling</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block flex-shrink-0" />
+                <span className="truncate">{circlingCarCount} {circlingCarCount === 1 ? 'car' : 'cars'}</span>
               </div>
             ) : (
               <div 
                 id="hud-circling-traffic-indicator"
-                className="w-full mt-1 pt-1 border-t border-white/10 flex items-center justify-center gap-1 text-[9px] sm:text-[10px] font-medium text-emerald-300/90"
+                className="w-full mt-0.5 pt-0.5 border-t border-white/10 flex items-center justify-center gap-0.5 text-[8px] sm:text-[8.5px] font-medium text-emerald-300/90 leading-tight"
                 title="Curbside parking open - through traffic flowing smoothly"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
-                <span className="truncate">Traffic flowing</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block flex-shrink-0" />
+                <span className="truncate">Open</span>
               </div>
             )}
           </div>
-
-
         </div>
 
         {/* Zoom Controls (Bottom Left) */}
-
-        <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 z-10 flex flex-col gap-1 bg-black/60 backdrop-blur-sm p-1 rounded-lg border border-white/10 origin-bottom-left scale-50 lg:scale-100 [@media(orientation:landscape)_and_(max-height:540px)]:scale-50 [@media(max-height:540px)]:scale-50 transition-transform">
+        <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 z-10 flex flex-col gap-0.5 sm:gap-1 bg-black/65 backdrop-blur-md p-0.5 sm:p-1 rounded-lg border border-white/15 transition-transform">
           <button 
             type="button"
             onClick={() => setZoomScale(s => Math.min(4, s + 0.25))}
-            className="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-lg sm:text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
             title="Zoom In"
             aria-label="Zoom In"
           >
@@ -4480,16 +4803,16 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           <button 
             type="button"
             onClick={() => setZoomScale(1.33)}
-            className="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-xs sm:text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
             title="Reset Camera View (Default 1.33x)"
             aria-label="Reset Camera View"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
           <button 
             type="button"
             onClick={() => setZoomScale(s => Math.max(0.5, s - 0.25))}
-            className="w-11 h-11 flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-lg sm:text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
             title="Zoom Out"
             aria-label="Zoom Out"
           >
@@ -4498,7 +4821,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         </div>
 
         {/* Bottom Center Status: Rear Garages Container */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:bottom-3 z-20 pointer-events-auto max-w-[calc(100%-88px)]">
+        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:bottom-3 z-20 pointer-events-auto max-w-[calc(100%-80px)]">
           <div
             id="hud-garage-status"
             role="button"
@@ -4514,18 +4837,18 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 setShowGarageIndicators((prev) => !prev);
               }
             }}
-            className="flex items-center gap-1.5 sm:gap-2 bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/70 hover:bg-[#1f476e]/95 px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-md sm:rounded-lg shadow-xl text-white pointer-events-auto transition-all cursor-pointer select-none active:scale-95"
+            className="flex items-center gap-1.5 sm:gap-2 bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/70 hover:bg-[#1f476e]/95 px-2 py-1 sm:px-3 sm:py-2 rounded-md sm:rounded-lg shadow-xl text-white pointer-events-auto transition-all cursor-pointer select-none active:scale-95"
             title="Detached Laned Garages: Real-time off-street vehicle parking across all 12 properties (Click to toggle garage roof indicators)"
             aria-label={`Rear Garages Status: ${occupiedGaragesCount} of 12 occupied. Click to toggle garage badges.`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-[#10B981] animate-pulse shrink-0" />
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5 text-xs font-black tracking-wide whitespace-nowrap">
-                <span>🏠 REAR GARAGES</span>
-                <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1.5 py-0.2 rounded text-[10px] font-bold">
-                  {occupiedGaragesCount}/12 Occupied
+            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#10B981] animate-pulse shrink-0" />
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-black tracking-wide whitespace-nowrap">
+                <span>🏠 <span className="hidden xs:inline">REAR </span>GARAGES</span>
+                <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1 sm:px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-bold">
+                  {occupiedGaragesCount}/12
                 </span>
-                <span className="bg-[#FBBF24] text-[#78350F] border border-[#D97706]/60 px-1.5 py-0.2 rounded text-[10px] font-bold">
+                <span className="bg-[#FBBF24] text-[#78350F] border border-[#D97706]/60 px-1 sm:px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-bold hidden sm:inline">
                   {12 - occupiedGaragesCount} Vacant
                 </span>
               </div>

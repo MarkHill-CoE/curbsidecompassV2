@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Gauge, Sliders, Car, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
+import { useAppText } from '../context/TextContentContext';
 
 interface MagnifiedGaugeDrawerProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
   totalDwellings,
   onOpenManualSliders
 }) => {
+  const { t } = useAppText();
   // Listen for Escape key to close the drawer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -55,10 +57,10 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
   const isHealthy = curbsidePct < 80;
 
   const statusLabel = isCritical
-    ? 'Critical Overload'
+    ? t('gauge_status_critical', 'Critical Overload')
     : isStrained
-    ? 'High Utilization'
-    : 'Space Available';
+    ? t('gauge_status_strained', 'High Utilization')
+    : t('gauge_status_healthy', 'Space Available');
 
   const statusBadgeColor = isCritical
     ? 'bg-[#E8552D]/20 text-[#ff7043] border-[#E8552D]'
@@ -127,9 +129,11 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
             </div>
             <div>
               <h3 id="magnified-gauge-title" className="font-bold text-white text-xs sm:text-sm md:text-base leading-none">
-                Curbside Parking Demand Gauge
+                {t('gauge_drawer_title', 'Curbside Parking Demand Gauge')}
               </h3>
-              <span className="text-[9px] sm:text-[10px] text-gray-300">Live street utilization & capacity analysis</span>
+              <span className="text-[9px] sm:text-[10px] text-gray-300">
+                {t('gauge_drawer_subtitle', 'Live street utilization & capacity analysis')}
+              </span>
             </div>
           </div>
           <button
@@ -259,8 +263,8 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 </span>
               </div>
               <p className="text-[11px] sm:text-xs font-semibold text-gray-200 mt-0.5 text-center">
-                <span className="text-[#FFC72C] font-bold">{curbsideDemandCount}</span> of{' '}
-                <span className="text-white font-bold">{curbsideStallsCapacity}</span> Legal Curbside Stalls Occupied
+                <span className="text-[#FFC72C] font-bold">{curbsideDemandCount}</span> {t('gauge_occupied_of', 'of')}{' '}
+                <span className="text-white font-bold">{curbsideStallsCapacity}</span> {t('gauge_occupied_suffix', 'Legal Curbside Stalls Occupied')}
               </p>
             </div>
           </div>
@@ -271,31 +275,31 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
             <div className="grid grid-cols-2 gap-1.5 text-xs">
               <div className="bg-[#193A5A]/80 border border-white/10 rounded-lg p-1.5 sm:p-2 flex flex-col">
                 <span className="text-gray-300 text-[9px] sm:text-[10px] font-medium flex items-center gap-1">
-                  <Car className="w-3 h-3 text-[#0081BC] shrink-0" /> Curb Availability
+                  <Car className="w-3 h-3 text-[#0081BC] shrink-0" /> {t('gauge_curb_availability_label', 'Curb Availability')}
                 </span>
                 <span className={`font-bold text-xs sm:text-sm mt-0.5 leading-tight ${availableStalls > 0 ? 'text-[#4ade80]' : 'text-[#ff7043]'}`}>
-                  {availableStalls > 0 ? `${availableStalls} Stalls Free` : `Deficit: ${deficitStalls} Cars`}
+                  {availableStalls > 0 ? `${availableStalls} ${t('gauge_stalls_free', 'Stalls Free')}` : `${t('gauge_deficit_prefix', 'Deficit:')} ${deficitStalls} ${t('gauge_deficit_suffix', 'Cars')}`}
                 </span>
               </div>
 
               <div className="bg-[#193A5A]/80 border border-white/10 rounded-lg p-1.5 sm:p-2 flex flex-col">
                 <span className="text-gray-300 text-[9px] sm:text-[10px] font-medium flex items-center gap-1">
-                  <AlertTriangle className={`w-3 h-3 shrink-0 ${circlingCarCount > 0 ? 'text-[#FFC72C]' : 'text-[#4ade80]'}`} /> Circling Cars
+                  <AlertTriangle className={`w-3 h-3 shrink-0 ${circlingCarCount > 0 ? 'text-[#FFC72C]' : 'text-[#4ade80]'}`} /> {t('gauge_circling_cars_label', 'Circling Cars')}
                 </span>
                 <span className={`font-bold text-xs sm:text-sm mt-0.5 leading-tight ${circlingCarCount > 0 ? 'text-[#FFC72C]' : 'text-[#4ade80]'}`}>
-                  {circlingCarCount > 0 ? `${circlingCarCount} Cruising` : '0 (Smooth)'}
+                  {circlingCarCount > 0 ? `${circlingCarCount} ${t('gauge_cruising_label', 'Cruising')}` : t('gauge_smooth_label', '0 (Smooth)')}
                 </span>
               </div>
 
               <div className="bg-[#193A5A]/80 border border-white/10 rounded-lg p-1.5 sm:p-2 flex flex-col">
-                <span className="text-gray-300 text-[9px] sm:text-[10px] font-medium">Homes on Block</span>
-                <span className="font-bold text-xs sm:text-sm text-white mt-0.5 leading-tight">{totalDwellings} Dwellings</span>
+                <span className="text-gray-300 text-[9px] sm:text-[10px] font-medium">{t('gauge_homes_block_label', 'Homes on Block')}</span>
+                <span className="font-bold text-xs sm:text-sm text-white mt-0.5 leading-tight">{totalDwellings} {t('gauge_dwellings_label', 'Dwellings')}</span>
               </div>
 
               <div className="bg-[#193A5A]/80 border border-white/10 rounded-lg p-1.5 sm:p-2 flex flex-col">
-                <span className="text-gray-300 text-[9px] sm:text-[10px] font-medium">Active Demand</span>
+                <span className="text-gray-300 text-[9px] sm:text-[10px] font-medium">{t('gauge_active_demand_label', 'Active Demand')}</span>
                 <span className="font-bold text-[11px] sm:text-xs text-[#FFC72C] mt-0.5 leading-tight">
-                  {activeHouseholdCars} Res • {activeVisitorCars} Vis
+                  {activeHouseholdCars} {t('gauge_res_abbr', 'Res')} • {activeVisitorCars} {t('gauge_vis_abbr', 'Vis')}
                 </span>
               </div>
             </div>
@@ -306,17 +310,17 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
               <div>
                 {isHealthy && (
                   <p>
-                    <strong className="text-white">Curbside Balanced:</strong> Space is available. Residents, visitors, and deliveries park easily without cruising.
+                    <strong className="text-white">{t('gauge_insight_healthy_title', 'Curbside Balanced:')}</strong> {t('gauge_insight_healthy_desc', 'Space is available. Residents, visitors, and deliveries park easily without cruising.')}
                   </p>
                 )}
                 {isStrained && (
                   <p>
-                    <strong className="text-white">Approaching Capacity:</strong> Curb reaches ~85% occupancy. Minor cruising occurs during peak demand periods.
+                    <strong className="text-white">{t('gauge_insight_strained_title', 'Approaching Capacity:')}</strong> {t('gauge_insight_strained_desc', 'Curb reaches ~85% occupancy. Minor cruising occurs during peak demand periods.')}
                   </p>
                 )}
                 {isCritical && (
                   <p>
-                    <strong className="text-white">Severe Curb Deficit:</strong> Vehicle demand exceeds legal spaces. Circling traffic causes blockages and emissions.
+                    <strong className="text-white">{t('gauge_insight_critical_title', 'Severe Curb Deficit:')}</strong> {t('gauge_insight_critical_desc', 'Vehicle demand exceeds legal spaces. Circling traffic causes blockages and emissions.')}
                   </p>
                 )}
               </div>
@@ -334,7 +338,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                   className="flex-1 py-1.5 sm:py-2 px-2.5 bg-[#004B8D] hover:bg-[#003566] text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-xs min-h-[38px] active:scale-95"
                 >
                   <Sliders className="w-3.5 h-3.5 text-[#FFC72C]" />
-                  Adjust Sliders
+                  {t('gauge_adjust_sliders_btn', 'Adjust Sliders')}
                 </button>
               )}
               <button
@@ -346,7 +350,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 className="flex-1 py-1.5 sm:py-2 px-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-xs min-h-[38px] active:scale-95"
               >
                 <CheckCircle className="w-3.5 h-3.5 text-[#4ade80]" />
-                Back to Parking Survey
+                {t('gauge_back_survey_btn', 'Back to Parking Survey')}
               </button>
             </div>
           </div>

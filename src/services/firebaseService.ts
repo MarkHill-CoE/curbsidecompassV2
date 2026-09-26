@@ -105,7 +105,7 @@ export async function saveSurveyResponse(data: {
       }
     }
 
-    const rawPostal = sanitizedAnswers['q_demographics_fsa'] || sanitizedAnswers['q_demographics_fsa_input'] || sanitizedAnswers['q9'] || '';
+    const rawPostal = sanitizedAnswers['q_demographics_fsa'] || sanitizedAnswers['q_demographics_fsa_input'] || sanitizedAnswers['q0'] || sanitizedAnswers['q9'] || '';
     const parsedPostal = parseAndNormalizePostalCode(rawPostal);
     const finalPostal = parsedPostal.isOptOut ? 'OPT_OUT' : (parsedPostal.normalized || rawPostal.slice(0, 8));
     const finalFsa = parsedPostal.isOptOut ? 'OPT_OUT' : (parsedPostal.fsa || '');

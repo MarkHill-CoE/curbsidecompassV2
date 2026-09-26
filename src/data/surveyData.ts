@@ -1,4 +1,5 @@
-import { SurveyQuestion, PersonaResult, SimulationConfig } from '../types';
+import { SurveyQuestion, PersonaResult, SimulationConfig, StreetLayoutTypology } from '../types';
+import { getTypologyFromPostalCode, getStreetLayoutInfo } from './edmontonNeighbourhoods';
 
 export const INITIAL_SIM_CONFIG: SimulationConfig = {
   householdCarsPerHome: 2.0,
@@ -8,10 +9,21 @@ export const INITIAL_SIM_CONFIG: SimulationConfig = {
   deliveriesPerHomePerWeek: 1.0,
   enforcementLevel: 'standard',
   cruisingTrafficLevel: 'moderate',
-  curbsideFeeModel: 'free'
+  curbsideFeeModel: 'free',
+  streetLayout: 'mature_laned'
 };
 
 export const SURVEY_QUESTIONS: SurveyQuestion[] = [
+  {
+    id: 'q0',
+    number: 0,
+    category: 'location',
+    type: 'text',
+    text: 'Share your Edmonton postal code or neighbourhood first to explore your street layout.',
+    placeholder: 'e.g. T5J 2R7 or Strathcona',
+    helperText: 'Enter your Edmonton postal code or select your neighbourhood to match your local street layout type and predetermine the live simulation.',
+    options: []
+  },
   {
     id: 'q1',
     number: 1,
@@ -255,16 +267,6 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         }
       }
     ]
-  },
-  {
-    id: 'q9',
-    number: 9,
-    category: 'location',
-    type: 'text',
-    text: 'Please enter your full postal code.',
-    placeholder: 'e.g. T5J 2R7',
-    helperText: 'Please enter a 6 or 7 character alphanumeric postal code (e.g., T5J 2R7 or T5J2R7).',
-    options: []
   }
 ];
 
@@ -282,18 +284,36 @@ export interface ComputedSimulationMetrics {
 }
 
 export function calculateSimulationMetricsFromAnswers(
-  answers: Record<string, string>
+  answers: Record<string, string>,
+  layoutOverride?: StreetLayoutTypology
 ): ComputedSimulationMetrics {
   const totalDwellings = 12;
-  const curbsideStallsCapacity = 16;
 
-  // Baseline calibration: 10 cars out of 16 legal stalls (62.5% balanced occupancy)
-  let curbsideDemand = 10.0;
-  let occupiedGarages = 10;
-  let deliveriesPerWeek = 1.0;
+  // Determine active street layout typology (predetermined by q0 or fallback q9)
+  const activeLayout: StreetLayoutTypology =
+    layoutOverride ||
+    (answers['q0_layout'] as StreetLayoutTypology) ||
+    (answers['q9_layout'] as StreetLayoutTypology) ||
+    (answers['q0'] ? getTypologyFromPostalCode(answers['q0']) : (answers['q9'] ? getTypologyFromPostalCode(answers['q9']) : 'mature_laned'));
+
+  const layoutInfo = getStreetLayoutInfo(activeLayout);
+  const curbsideStallsCapacity = layoutInfo.curbsideCapacity;
+
+  // Baseline calibration tuned to ~60-62% occupancy for each street layout:
+  // - Mature Laned / Infill: 10 cars out of 16 legal stalls (62.5%)
+  // - Suburban Front Driveway: 6.2 cars out of 10 legal stalls (62%)
+  // - Contemporary Townhomes: 7.5 cars out of 12 legal stalls (62.5%)
+  let curbsideDemand = activeLayout === 'suburban_front_driveway'
+    ? 6.2
+    : activeLayout === 'contemporary_townhomes'
+    ? 7.5
+    : 10.0;
+
+  let occupiedGarages = activeLayout === 'suburban_front_driveway' ? 12 : 10;
+  let deliveriesPerWeek = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
   let visitorDemand = 4;
   let householdCars = 24;
-  let drivewayCap = 2;
+  let drivewayCap = activeLayout === 'suburban_front_driveway' ? 2 : 2;
   let feeModel: 'free' | 'permit' = 'free';
   let enforcement: 'strict' | 'standard' | 'lenient' = 'standard';
   let cruisingLevel: 'low' | 'moderate' | 'high' = 'moderate';
@@ -386,19 +406,19 @@ export function calculateSimulationMetricsFromAnswers(
     curbsideDemand += 2.0;
   }
 
-  // Clamp demand between 2 and 26 cars
-  const roundedDemand = Math.max(2, Math.min(26, Math.round(curbsideDemand)));
+  // Clamp demand between 1 and max capacity + 10
+  const roundedDemand = Math.max(1, Math.min(26, Math.round(curbsideDemand)));
   const curbsidePct = Math.round((roundedDemand / curbsideStallsCapacity) * 100);
 
-  // Circling vehicles: when demand approaches or exceeds capacity (16 stalls)
+  // Circling vehicles: when demand approaches or exceeds capacity
   let circlingCarCount = 0;
-  if (roundedDemand >= 20) {
+  if (roundedDemand >= curbsideStallsCapacity + 4) {
     circlingCarCount = 5;
-  } else if (roundedDemand >= 17) {
+  } else if (roundedDemand >= curbsideStallsCapacity + 1) {
     circlingCarCount = 4;
-  } else if (roundedDemand >= 15) {
+  } else if (roundedDemand >= curbsideStallsCapacity) {
     circlingCarCount = 2;
-  } else if (roundedDemand >= 13) {
+  } else if (roundedDemand >= Math.round(curbsideStallsCapacity * 0.85)) {
     circlingCarCount = 1;
   }
 
@@ -410,7 +430,10 @@ export function calculateSimulationMetricsFromAnswers(
     deliveriesPerHomePerWeek: deliveriesPerWeek,
     enforcementLevel: enforcement,
     cruisingTrafficLevel: cruisingLevel,
-    curbsideFeeModel: feeModel
+    curbsideFeeModel: feeModel,
+    streetLayout: activeLayout,
+    neighbourhoodName: answers['q0_neighbourhood'] || answers['q9_neighbourhood'] || undefined,
+    postalCode: answers['q0'] || answers['q9'] || undefined
   };
 
   return {
@@ -728,49 +751,68 @@ export function getQuestionTradeoffImpact(
     };
   }
 
-  // Question 9 (Postal code)
-  if (selectedAnswerId) {
+  // Location question (q0 or q9 - Postal code & Neighbourhood layout)
+  if (question.id === 'q0' || question.id === 'q9' || question.type === 'text') {
+    if (selectedAnswerId) {
+      const isOptOut = selectedAnswerId === 'OPT_OUT';
+      const layout = isOptOut ? 'mature_laned' : getTypologyFromPostalCode(selectedAnswerId);
+      const layoutInfo = getStreetLayoutInfo(layout);
+      return {
+        questionNumber: 0,
+        questionTitle: question.text,
+        hasAnswer: true,
+        selectedOptionLabel: isOptOut ? 'Location Opted Out' : layoutInfo.title,
+        deltaStallsText: `${layoutInfo.curbsideCapacity} Stalls Capacity`,
+        deltaStallsValue: layoutInfo.curbsideCapacity,
+        tradeoffRationale: isOptOut
+          ? 'Using standard Mature Laned baseline. Your feedback is kept anonymous.'
+          : `Predetermined street model: ${layoutInfo.title} (${layoutInfo.era}). ${layoutInfo.subtitle}. Legal curbside capacity: ${layoutInfo.curbsideCapacity} stalls.`,
+        curbsideImpactSummary: `Predetermined street model calibrated to ${layoutInfo.curbsideCapacity} legal curbside stalls (${layoutInfo.drivewayType}).`
+      };
+    }
+
     return {
-      questionNumber: 9,
+      questionNumber: 0,
       questionTitle: question.text,
-      hasAnswer: true,
-      selectedOptionLabel: selectedAnswerId === 'OPT_OUT' ? 'Opted out' : selectedAnswerId,
-      deltaStallsText: 'Location Recorded',
-      deltaStallsValue: 0,
-      tradeoffRationale: 'Your Edmonton postal code helps city planners understand neighbourhood parking patterns.',
-      curbsideImpactSummary: 'Protected under FOIP k-anonymity privacy guidelines.'
+      hasAnswer: false,
+      tradeoffRationale: 'Share your Edmonton postal code or neighbourhood first to predetermine your street layout type and show the simulation closest to your neighbourhood.',
+      curbsideImpactSummary: 'Data is protected under FOIP k-anonymity privacy guidelines.'
     };
   }
 
   return {
-    questionNumber: 9,
+    questionNumber: questionIndex + 1,
     questionTitle: question.text,
     hasAnswer: false,
-    tradeoffRationale: 'Enter your Edmonton postal code to localize survey feedback.',
-    curbsideImpactSummary: 'Data is anonymized to protect personal privacy.'
+    tradeoffRationale: 'Answer this question to see its calculated impact on curbside parking.',
+    curbsideImpactSummary: 'Curbside parking demand updates in real-time.'
   };
 }
 
 export function validatePostalCode(val: string): { isValid: boolean; message?: string } {
   if (val === 'OPT_OUT') return { isValid: true };
   if (!val || !val.trim()) {
-    return { isValid: false, message: 'Please enter your full postal code to continue.' };
+    return { isValid: false, message: 'Please enter your postal code or select your neighbourhood to continue.' };
   }
   const trimmed = val.trim();
   const alphaNum = trimmed.replace(/[\s-]/g, '');
 
-  if (!/^[a-zA-Z0-9]+$/.test(alphaNum)) {
-    return { isValid: false, message: 'Postal code must contain only letters and numbers.' };
+  // If user entered a recognized neighbourhood name, layout ID, or text string >= 2 chars
+  if (/^[a-zA-Z\s'()._-]+$/.test(trimmed) && trimmed.length >= 2) {
+    return { isValid: true };
   }
 
-  if (alphaNum.length < 6 || alphaNum.length > 7) {
-    return {
-      isValid: false,
-      message: `Postal code must be 6 or 7 alphanumeric characters (currently ${alphaNum.length}).`
-    };
+  // Postal code check: alphanumeric 3 to 7 characters (accepts FSA or full postal code)
+  if (/^[a-zA-Z0-9]+$/.test(alphaNum)) {
+    if (alphaNum.length >= 3 && alphaNum.length <= 7) {
+      return { isValid: true };
+    }
   }
 
-  return { isValid: true };
+  return {
+    isValid: false,
+    message: 'Please enter a valid postal code (e.g. T5J 2R7) or select an Edmonton neighbourhood.'
+  };
 }
 
 export const PERSONA_PROFILES: Record<string, PersonaResult> = {

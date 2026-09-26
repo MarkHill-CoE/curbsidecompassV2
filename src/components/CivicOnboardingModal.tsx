@@ -12,6 +12,7 @@ import {
   ZapOff
 } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
+import { useAppText } from '../context/TextContentContext';
 
 interface CivicOnboardingModalProps {
   isOpen: boolean;
@@ -28,6 +29,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
   onToggleSimplifiedMode,
   onStartSurvey,
 }) => {
+  const { t } = useAppText();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const totalSteps = 5;
   const modalRef = useRef<HTMLDivElement>(null);
@@ -106,10 +108,10 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             </div>
             <div className="min-w-0">
               <h2 id="civic-modal-title" className="text-base sm:text-xl font-black tracking-tight leading-tight truncate">
-                Curbside Compass
+                {t('intro_header_title', 'Curbside Compass')}
               </h2>
               <p className="text-base text-blue-100 font-semibold leading-tight hidden xs:block">
-                City of Edmonton Guide
+                {t('intro_header_subtitle', 'City of Edmonton Guide')}
               </p>
             </div>
           </div>
@@ -120,19 +122,19 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
               type="button"
               onClick={handleFinish}
               className="flex items-center gap-2 px-3.5 sm:px-5 py-2 bg-[#FFC72C] hover:bg-[#ffe066] active:bg-[#f5bc20] text-[#004B8D] font-black text-base sm:text-lg rounded-xl shadow-md transition-all cursor-pointer min-h-[46px] border-2 border-[#003566]/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              title="Skip this guide and start the survey right now"
-              aria-label="Skip introduction and start survey"
+              title={t('intro_btn_skip_title', 'Skip this guide and start the survey right now')}
+              aria-label={t('intro_btn_skip_aria', 'Skip introduction and start survey')}
             >
               <FastForward className="w-5 h-5 stroke-[2.5]" />
-              <span className="font-black">Skip Intro</span>
+              <span className="font-black">{t('intro_btn_skip', 'Skip Intro')}</span>
             </button>
 
             <button
               type="button"
               onClick={handleFinish}
               className="p-2 text-white/80 hover:text-white hover:bg-white/15 rounded-xl transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
-              title="Close guide"
-              aria-label="Close guide"
+              title={t('intro_btn_close_title', 'Close guide')}
+              aria-label={t('intro_btn_close_aria', 'Close guide')}
             >
               <X className="w-6 h-6" />
             </button>
@@ -159,14 +161,14 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                 }`}
                 aria-label={`Go to step ${step}`}
               >
-                <span>Step {step}</span>
+                <span>{t('intro_step_label', 'Step')} {step}</span>
                 {currentStep > step && <CheckCircle2 className="w-4 h-4 text-emerald-600 inline ml-1" />}
               </button>
             ))}
           </div>
 
           <span className="text-base font-bold text-gray-700 hidden md:inline">
-            Screen {currentStep} of {totalSteps}
+            {t('intro_screen_counter_label', 'Screen')} {currentStep} {t('intro_screen_counter_of', 'of')} {totalSteps}
           </span>
         </div>
 
@@ -177,25 +179,25 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             <div className="space-y-2.5 sm:space-y-3.5 animate-in fade-in duration-150">
               <div className="border-l-4 border-[#004B8D] pl-3">
                 <h3 className="text-xl sm:text-2xl font-black text-[#004B8D] leading-tight">
-                  Welcome to Curbside Compass!
+                  {t('intro_s1_title', 'Welcome to Curbside Compass!')}
                 </h3>
                 <p className="text-base sm:text-lg text-gray-700 font-bold mt-1">
-                  A City of Edmonton Public Survey
+                  {t('intro_s1_subtitle', 'A City of Edmonton Public Survey')}
                 </p>
               </div>
 
               <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-3 sm:p-4 space-y-1.5">
                 <p className="text-base sm:text-lg text-gray-900 leading-snug">
-                  Help Edmonton plan street parking for your neighbourhood.
+                  {t('intro_s1_body1', 'Help Edmonton plan street parking for your neighbourhood.')}
                 </p>
                 <p className="text-base sm:text-lg text-gray-900 leading-snug font-bold">
-                  There are no wrong answers. It takes just 3 to 5 minutes!
+                  {t('intro_s1_body2', 'There are no wrong answers. It takes just 3 to 5 minutes!')}
                 </p>
               </div>
 
               <p className="text-base sm:text-lg text-emerald-800 font-bold flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                <span>Your answers are 100% private and protected.</span>
+                <span>{t('intro_s1_privacy', 'Your answers are 100% private and protected.')}</span>
               </p>
             </div>
           )}
@@ -204,7 +206,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
           {currentStep === 2 && (
             <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-150">
               <h3 className="text-xl sm:text-2xl font-black text-[#004B8D] leading-tight">
-                How Our Streets Work
+                {t('intro_s2_title', 'How Our Streets Work')}
               </h3>
 
               <div className="space-y-2">
@@ -213,8 +215,8 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                     <Home className="w-5 h-5" />
                   </div>
                   <div className="text-base text-gray-900">
-                    <strong className="block font-bold">1. Back Garages:</strong>
-                    <span>Homes have private garages in the back lane.</span>
+                    <strong className="block font-bold">{t('intro_s2_garages_title', '1. Back Garages:')}</strong>
+                    <span>{t('intro_s2_garages_desc', 'Homes have private garages in the back lane.')}</span>
                   </div>
                 </div>
 
@@ -223,14 +225,14 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                     <Car className="w-5 h-5" />
                   </div>
                   <div className="text-base text-gray-900">
-                    <strong className="block font-bold">2. Curb Spots:</strong>
-                    <span>Residents, visitors, and delivery vans share street spots.</span>
+                    <strong className="block font-bold">{t('intro_s2_curb_title', '2. Curb Spots:')}</strong>
+                    <span>{t('intro_s2_curb_desc', 'Residents, visitors, and delivery vans share street spots.')}</span>
                   </div>
                 </div>
               </div>
 
               <p className="text-base text-gray-700 font-bold leading-snug">
-                When curb spots fill up, drivers have to circle the block looking for parking.
+                {t('intro_s2_takeaway', 'When curb spots fill up, drivers have to circle the block looking for parking.')}
               </p>
             </div>
           )}
@@ -239,20 +241,20 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
           {currentStep === 3 && (
             <div className="space-y-2.5 sm:space-y-3.5 animate-in fade-in duration-150">
               <h3 className="text-xl sm:text-2xl font-black text-[#004B8D] leading-tight">
-                See What Happens Live
+                {t('intro_s3_title', 'See What Happens Live')}
               </h3>
 
               <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-3 sm:p-4 space-y-2">
                 <p className="text-base sm:text-lg text-gray-900 leading-snug">
-                  Every time you answer a question, the street picture updates right away.
+                  {t('intro_s3_body1', 'Every time you answer a question, the street picture updates right away.')}
                 </p>
                 <p className="text-base sm:text-lg text-gray-900 leading-snug font-bold">
-                  You can see if parking spots open up, or if cars start circling.
+                  {t('intro_s3_body2', 'You can see if parking spots open up, or if cars start circling.')}
                 </p>
               </div>
 
               <p className="text-base sm:text-lg text-gray-700 font-semibold leading-snug">
-                This helps you see how each parking rule affects your neighbourhood street.
+                {t('intro_s3_summary', 'This helps you see how each parking rule affects your neighbourhood street.')}
               </p>
             </div>
           )}
@@ -262,10 +264,10 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-150">
               <div>
                 <h3 className="text-xl sm:text-2xl font-black text-[#004B8D] leading-tight">
-                  Choose Your Street Picture
+                  {t('intro_s4_title', 'Choose Your Street Picture')}
                 </h3>
                 <p className="text-base text-gray-700 font-semibold">
-                  Pick the view you like best:
+                  {t('intro_s4_subtitle', 'Pick the view you like best:')}
                 </p>
               </div>
 
@@ -291,16 +293,16 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="font-black text-base sm:text-lg text-gray-900">
-                        Moving Street Picture
+                        {t('intro_s4_opt1_title', 'Moving Street Picture')}
                       </span>
                       {!isSimplifiedMode && (
                         <span className="text-base font-black text-[#004B8D] bg-white border border-[#004B8D] px-2 py-0.5 rounded">
-                          Selected ✓
+                          {t('intro_s4_badge_selected', 'Selected ✓')}
                         </span>
                       )}
                     </div>
                     <p className="text-base text-gray-700 leading-tight">
-                      Watch cars and delivery vans drive on the street.
+                      {t('intro_s4_opt1_desc', 'Watch cars and delivery vans drive on the street.')}
                     </p>
                   </div>
                 </button>
@@ -326,23 +328,23 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="font-black text-base sm:text-lg text-gray-900">
-                        Still Picture (No Motion)
+                        {t('intro_s4_opt2_title', 'Still Picture (No Motion)')}
                       </span>
                       {isSimplifiedMode && (
                         <span className="text-base font-black text-[#004B8D] bg-white border border-[#004B8D] px-2 py-0.5 rounded">
-                          Selected ✓
+                          {t('intro_s4_badge_selected', 'Selected ✓')}
                         </span>
                       )}
                     </div>
                     <p className="text-base text-gray-700 leading-tight">
-                      A calm screen with clear numbers and no moving cars.
+                      {t('intro_s4_opt2_desc', 'A calm screen with clear numbers and no moving cars.')}
                     </p>
                   </div>
                 </button>
               </div>
 
               <p className="text-base text-gray-600 italic">
-                You can switch views anytime during the survey!
+                {t('intro_s4_switch_note', 'You can switch views anytime during the survey!')}
               </p>
             </div>
           )}
@@ -352,30 +354,30 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             <div className="space-y-2.5 sm:space-y-3.5 animate-in fade-in duration-150">
               <div className="border-l-4 border-[#059669] pl-3">
                 <h3 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">
-                  You Are Ready to Begin!
+                  {t('intro_s5_title', 'You Are Ready to Begin!')}
                 </h3>
                 <p className="text-base sm:text-lg text-gray-700 font-bold mt-1">
-                  Just 3 things to remember:
+                  {t('intro_s5_subtitle', 'Just 3 things to remember:')}
                 </p>
               </div>
 
               <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-3 sm:p-4 space-y-2 text-base sm:text-lg text-gray-900 font-semibold">
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>Answer 9 quick questions about parking rules.</span>
+                  <span>{t('intro_s5_point1', 'Set your neighbourhood and answer 8 quick parking questions.')}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>Go at your own speed. There is no rush.</span>
+                  <span>{t('intro_s5_point2', 'Go at your own speed. There is no rush.')}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>Click &quot;How It Works&quot; at the top if you need this guide again.</span>
+                  <span>{t('intro_s5_point3', 'Click "How It Works" at the top if you need this guide again.')}</span>
                 </div>
               </div>
 
               <p className="text-base sm:text-lg text-gray-900 font-black">
-                Thank you for helping plan Edmonton&apos;s neighbourhood streets!
+                {t('intro_s5_thankyou', "Thank you for helping plan Edmonton's neighbourhood streets!")}
               </p>
             </div>
           )}
@@ -392,7 +394,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                 className="px-4 sm:px-5 py-2 text-base font-bold text-gray-800 bg-white border-2 border-gray-300 hover:bg-gray-200 active:scale-95 rounded-xl transition-all cursor-pointer min-h-[46px] flex items-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span>Back</span>
+                <span>{t('intro_btn_back', 'Back')}</span>
               </button>
             ) : (
               <button
@@ -400,7 +402,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                 onClick={handleFinish}
                 className="px-4 py-2 text-base font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-xl transition-all cursor-pointer min-h-[46px]"
               >
-                Skip Intro
+                {t('intro_btn_skip', 'Skip Intro')}
               </button>
             )}
           </div>
@@ -417,7 +419,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                   : 'bg-[#004B8D] hover:bg-[#003566] text-white'
               }`}
             >
-              <span>{currentStep === totalSteps ? 'Start Survey' : 'Next Step'}</span>
+              <span>{currentStep === totalSteps ? t('intro_btn_start', 'Start Survey') : t('intro_btn_next', 'Next Step')}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </div>

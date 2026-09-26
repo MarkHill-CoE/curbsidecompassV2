@@ -18,6 +18,12 @@ export interface SurveyQuestion {
   options: SurveyOption[];
 }
 
+export type StreetLayoutTypology =
+  | 'mature_laned'
+  | 'infill_skinny'
+  | 'suburban_front_driveway'
+  | 'contemporary_townhomes';
+
 export interface SimulationConfig {
   householdCarsPerHome: number; // 0 - 5 (default 2.5)
   visitorPassesPerHome: number; // 0 - 5 (default 0.5)
@@ -27,6 +33,9 @@ export interface SimulationConfig {
   enforcementLevel: 'strict' | 'standard' | 'lenient';
   cruisingTrafficLevel: 'low' | 'moderate' | 'high';
   curbsideFeeModel: 'free' | 'permit' | 'demand';
+  streetLayout?: StreetLayoutTypology;
+  neighbourhoodName?: string;
+  postalCode?: string;
 }
 
 export interface PersonaResult {

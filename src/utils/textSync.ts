@@ -392,9 +392,9 @@ export function applyTextsToData(texts: Record<string, string>): void {
       }
     }
 
-    if (q.number === 9) {
-      if (texts.q9_helper_text) q.helperText = texts.q9_helper_text;
-      if (texts.q9_input_placeholder) q.placeholder = texts.q9_input_placeholder;
+    if (q.id === 'q0' || q.number === 0 || q.number === 9) {
+      if (texts.q0_helper_text || texts.q9_helper_text) q.helperText = texts.q0_helper_text || texts.q9_helper_text;
+      if (texts.q0_input_placeholder || texts.q9_input_placeholder) q.placeholder = texts.q0_input_placeholder || texts.q9_input_placeholder;
     }
   });
 
