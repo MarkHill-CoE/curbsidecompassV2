@@ -1,6 +1,8 @@
 {
   "name": "CurbsideCompass-Revisions",
-  "description": "Analyze HTML source code to generate clear summaries of your website\u0027s structural layout and core functional elements.",
+  "description": "Try to solve Edmonton's Residential Parking Puzzle as an Urban Planner",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

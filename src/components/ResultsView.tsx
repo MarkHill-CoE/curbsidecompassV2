@@ -125,7 +125,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
             {copied ? (
               <>
                 <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-600" />
-                <span>Link Copied!</span>
+                <span>{t('results_link_copied', 'Link Copied!')}</span>
               </>
             ) : (
               <>

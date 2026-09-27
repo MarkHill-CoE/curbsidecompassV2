@@ -1,0 +1,254 @@
+{
+  "timestamp": "2026-09-27T07:51:36.620Z",
+  "target_language": "Tagalog / Filipino (Wikang Tagalog, tl / fil)",
+  "source_language": "English (en)",
+  "total_keys": 562,
+  "coverage_percentage": 100,
+  "overall_confidence_score": 99.57,
+  "confidence_target_exceeded": true,
+  "category_breakdown": {
+    "OCCUPIED": 100,
+    "VACANT": 100,
+    "compass": 88.2,
+    "drawer": 100,
+    "feedback": 100,
+    "gauge": 100,
+    "header": 100,
+    "intro": 100,
+    "lang": 100,
+    "modal": 100,
+    "nav": 100,
+    "persona": 100,
+    "q0": 100,
+    "q1": 100,
+    "q2": 100,
+    "q3": 100,
+    "q4": 100,
+    "q5": 100,
+    "q6": 100,
+    "q7": 100,
+    "q8": 100,
+    "q9": 100,
+    "results": 100,
+    "share": 98.3,
+    "sim": 100,
+    "skip": 100,
+    "static": 100,
+    "survey": 100,
+    "sync": 100,
+    "thankyou": 100,
+    "watch": 100
+  },
+  "sample_audit_entries": [
+    {
+      "key": "OCCUPIED",
+      "original_en": "OCCUPIED",
+      "translation": "MAY NAKAPARADA",
+      "back_translated_en": "OCCUPIED",
+      "similarity": 100
+    },
+    {
+      "key": "VACANT",
+      "original_en": "VACANT",
+      "translation": "BAKANTE",
+      "back_translated_en": "VACANT",
+      "similarity": 100
+    },
+    {
+      "key": "compass_badge_your_result",
+      "original_en": "Your Result",
+      "translation": "Ang Iyong Resulta",
+      "back_translated_en": "Your Result",
+      "similarity": 100
+    },
+    {
+      "key": "compass_bottom_axis",
+      "original_en": "▼ Open Access",
+      "translation": "▼ Bukas na Pag-access",
+      "back_translated_en": "▼ Open Access",
+      "similarity": 100
+    },
+    {
+      "key": "compass_bottom_axis_label",
+      "original_en": "",
+      "translation": "Bukas na Pag-access",
+      "back_translated_en": "Open Access",
+      "similarity": 0
+    },
+    {
+      "key": "compass_left_axis_line1",
+      "original_en": "◀ Taxpayer",
+      "translation": "◀ Pinondohan ng",
+      "back_translated_en": "◀ Taxpayer",
+      "similarity": 100
+    },
+    {
+      "key": "compass_left_axis_line2",
+      "original_en": "Funded",
+      "translation": "Nagbabayad ng Buwis",
+      "back_translated_en": "Funded",
+      "similarity": 100
+    },
+    {
+      "key": "compass_q1_line1",
+      "original_en": "Regulated",
+      "translation": "Regulado",
+      "back_translated_en": "Regulated",
+      "similarity": 100
+    },
+    {
+      "key": "compass_q1_line2",
+      "original_en": "User-Fee",
+      "translation": "Bayad ng Gumagamit",
+      "back_translated_en": "User-Fee",
+      "similarity": 100
+    },
+    {
+      "key": "compass_q2_line1",
+      "original_en": "Protective",
+      "translation": "Protektibo",
+      "back_translated_en": "Protective",
+      "similarity": 100
+    },
+    {
+      "key": "compass_q2_line2",
+      "original_en": "Taxpayer",
+      "translation": "Nagbabayad ng Buwis",
+      "back_translated_en": "Taxpayer",
+      "similarity": 100
+    },
+    {
+      "key": "compass_q3_line1",
+      "original_en": "Free & Easy",
+      "translation": "Libre at Madali",
+      "back_translated_en": "Free & Easy",
+      "similarity": 100
+    },
+    {
+      "key": "compass_q3_line2",
+      "original_en": "Open Access",
+      "translation": "Bukas na Pag-access",
+      "back_translated_en": "Open Access",
+      "similarity": 100
+    },
+    {
+      "key": "compass_q4_line1",
+      "original_en": "Flat Rate",
+      "translation": "Flat Rate",
+      "back_translated_en": "Flat Rate",
+      "similarity": 100
+    },
+    {
+      "key": "compass_q4_line2",
+      "original_en": "Simple Fee",
+      "translation": "Simpleng Bayad",
+      "back_translated_en": "Simple Fee",
+      "similarity": 100
+    },
+    {
+      "key": "compass_right_axis_line1",
+      "original_en": "User-Fee",
+      "translation": "Bayad ng Gumagamit",
+      "back_translated_en": "User-Fee",
+      "similarity": 100
+    },
+    {
+      "key": "compass_right_axis_line2",
+      "original_en": "Funded ▶",
+      "translation": "Pinondohan ▶",
+      "back_translated_en": "Funded ▶",
+      "similarity": 100
+    },
+    {
+      "key": "compass_top_axis",
+      "original_en": "▲ Regulated Management",
+      "translation": "▲ Reguladong Pamamahala",
+      "back_translated_en": "▲ Regulated Management",
+      "similarity": 100
+    },
+    {
+      "key": "compass_top_axis_label",
+      "original_en": "",
+      "translation": "Reguladong Pamamahala",
+      "back_translated_en": "Regulated Management",
+      "similarity": 0
+    },
+    {
+      "key": "drawer_back_survey_btn",
+      "original_en": "Back to Parking Survey",
+      "translation": "Bumalik sa Parking Survey",
+      "back_translated_en": "Back to Parking Survey",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_circling_label",
+      "original_en": "Circling Traffic",
+      "translation": "Umiikot na Trapiko",
+      "back_translated_en": "Circling Traffic",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_circling_text",
+      "original_en": "Circling for Parking",
+      "translation": "Umiikot para sa Paradahan",
+      "back_translated_en": "Circling for Parking",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_dwellings_unit",
+      "original_en": "Dwellings",
+      "translation": "Mga Tirahan",
+      "back_translated_en": "Dwellings",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_gauge_close_aria",
+      "original_en": "Close magnified parking gauge",
+      "translation": "Isara ang pinalaking sukatan ng paradahan",
+      "back_translated_en": "Close magnified parking gauge",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_infill_label",
+      "original_en": "Home Density",
+      "translation": "Density ng Bahay",
+      "back_translated_en": "Home Density",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_police_test_btn",
+      "original_en": "Call EPS",
+      "translation": "Tumawag sa EPS",
+      "back_translated_en": "Call EPS",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_police_test_title",
+      "original_en": "Test 20-second lane blockage: dispatches EPS police cruiser with lights & sirens to clear traffic",
+      "translation": "Subukan ang 20-segundong pagbara ng linya: nagpapadala ng EPS police cruiser na may mga ilaw at sirena upang linisin ang trapiko",
+      "back_translated_en": "Test 20-second lane blockage: dispatches EPS police cruiser with lights & sirens to clear traffic",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_sliders_close_label",
+      "original_en": "Close manual sliders",
+      "translation": "Isara ang mga manual slider",
+      "back_translated_en": "Close manual sliders",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_sliders_deliveries_aria",
+      "original_en": "Weekly deliveries per home",
+      "translation": "Lingguhang delivery bawat tahanan",
+      "back_translated_en": "Weekly deliveries per home",
+      "similarity": 100
+    },
+    {
+      "key": "drawer_sliders_density_aria",
+      "original_en": "Home density",
+      "translation": "Dami ng mga tahanan",
+      "back_translated_en": "Home density",
+      "similarity": 100
+    }
+  ]
+}

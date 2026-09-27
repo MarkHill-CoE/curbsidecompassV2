@@ -138,7 +138,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
           </div>
           <button
             type="button"
-            aria-label="Close magnified parking gauge"
+            aria-label={t('drawer_gauge_close_aria', 'Close magnified parking gauge')}
             onClick={() => {
               triggerFeedback('button');
               onClose();

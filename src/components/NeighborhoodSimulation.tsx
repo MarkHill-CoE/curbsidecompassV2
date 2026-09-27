@@ -4,6 +4,7 @@ import { getStreetLayoutInfo } from '../data/edmontonNeighbourhoods';
 import { Volume2, VolumeX, Sliders, RefreshCw, AlertTriangle, ShieldCheck, RotateCcw, CheckCircle, Home, ZapOff } from 'lucide-react';
 import { feedback, triggerFeedback } from '../utils/feedback';
 import { ambientAudio } from '../utils/ambientAudio';
+import { useAppText } from '../context/TextContentContext';
 
 interface NeighborhoodSimulationProps {
   config: SimulationConfig;
@@ -69,6 +70,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
   onSimulationMetricsChange,
   onHarmonyActiveChange
 }) => {
+  const { t } = useAppText();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const gaugeCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -3316,7 +3318,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                   A.spaceRatio = evaluatedRatio;
                   A.parkingState = 'found_spot';
                   A.parkingTimer = 45; // Pause alongside open stall to inspect
-                  A.parkingBubbleText = evaluatedRatio >= 1.5 ? 'Spot fits (150%+) - Parking' : 'Spot 80% size - Trying to park';
+                  A.parkingBubbleText = evaluatedRatio >= 1.5 ? t('sim_bubble_spot_fits', 'Spot fits (150%+) - Parking') : t('sim_bubble_spot_tight_try', 'Spot 80% size - Trying to park');
                   break;
                 }
               }
@@ -3331,7 +3333,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             if (A.parkingTimer <= 0) {
               A.parkingState = 'attempting_reverse';
               A.parkingTimer = 90; // ~1.5s angle maneuver
-              A.parkingBubbleText = A.spaceRatio! >= 1.5 ? 'Reverse parallel parking...' : 'Reversing into tight spot...';
+              A.parkingBubbleText = A.spaceRatio! >= 1.5 ? t('sim_bubble_parallel_park', 'Reverse parallel parking...') : t('sim_bubble_reverse_tight', 'Reversing into tight spot...');
             }
           } else if (A.parkingState === 'attempting_reverse') {
             // Vehicle steers into the curbside stall (y -> 94)
@@ -3343,12 +3345,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 // 80% spot: too small to fit! Give up and rejoin traffic
                 A.parkingState = 'giving_up';
                 A.parkingTimer = 85;
-                A.parkingBubbleText = 'Too tight (80%)! Giving up';
+                A.parkingBubbleText = t('sim_bubble_too_tight', 'Too tight (80%)! Giving up');
               } else {
                 // 150%+ spot: finish parking into the stall
                 A.parkingState = 'docking';
                 A.parkingTimer = 50;
-                A.parkingBubbleText = 'Parked!';
+                A.parkingBubbleText = t('sim_bubble_parked', 'Parked!');
               }
             }
           } else if (A.parkingState === 'giving_up') {
@@ -4611,9 +4613,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           height={800}
           className="w-full h-full max-h-[100%] object-contain rounded-lg shadow-2xl block cursor-crosshair origin-center"
           style={{ transform: `scale(${zoomScale})` }}
-          title="Live Edmonton Multimodal Neighborhood Simulation - Click vehicles to honk"
+          title={t('sim_canvas_title', 'Live Edmonton Multimodal Neighborhood Simulation - Click vehicles to honk')}
           role="img"
-          aria-label="Live 2.5D Isometric Neighborhood Simulation showing residential parking, driveways, and road traffic based on the active policy settings."
+          aria-label={t('sim_canvas_aria', 'Live 2.5D Isometric Neighborhood Simulation showing residential parking, driveways, and road traffic based on the active policy settings.')}
           onClick={(e) => {
             getAudioContext();
             const canvas = canvasRef.current;
@@ -4626,7 +4628,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             handleCanvasClickRef.current?.(clickX, clickY);
           }}
         >
-          <p>Your browser does not support the canvas element needed to render the neighborhood simulation.</p>
+          <p>{t('sim_canvas_unsupported', 'Your browser does not support the canvas element needed to render the neighborhood simulation.')}</p>
         </canvas>
 
         {/* Top-Left Status: Emergency Alerts */}
@@ -4639,10 +4641,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444] animate-ping shrink-0" />
               <div className="flex flex-col">
                 <span className="text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 leading-tight">
-                  🚨 EPS TRAFFIC INVESTIGATION
+                  {t('sim_eps_title', '🚨 EPS TRAFFIC INVESTIGATION')}
                 </span>
                 <span className="text-[#93C5FD] text-[10px] sm:text-xs font-semibold leading-tight">
-                  Traffic blockage detected &gt;20s • Cruiser clearing lane
+                  {t('sim_eps_desc', 'Traffic blockage detected >20s • Cruiser clearing lane')}
                 </span>
               </div>
             </div>
@@ -4660,7 +4662,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 getAudioContext();
                 feedback.toggleSound();
               }}
-              title={soundEnabled ? 'Mute Simulation & City Traffic Noise' : 'Enable City Traffic Ambience (5%) & SFX (15%)'}
+              title={soundEnabled ? t('sim_audio_mute_title', 'Mute Simulation & City Traffic Noise') : t('sim_audio_enable_title', 'Enable City Traffic Ambience (5%) & SFX (15%)')}
               className={`min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] p-1.5 sm:p-2 flex items-center justify-center rounded-md transition-colors cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
                 soundEnabled
                   ? 'bg-[#0081BC] text-white hover:bg-[#005087]'
@@ -4678,7 +4680,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 triggerFeedback('button');
                 setShowControls((prev) => !prev);
               }}
-              title="Toggle Manual Simulation Sliders"
+              title={t('sim_controls_title', 'Toggle Manual Simulation Sliders')}
               aria-expanded={showControls}
               aria-controls="manual-sliders-drawer"
               className={`min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] px-2 sm:px-3 rounded-md transition-colors flex items-center justify-center gap-1.5 text-xs font-semibold cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
@@ -4688,7 +4690,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               }`}
             >
               <Sliders className="w-4 h-4" />
-              <span className="hidden sm:inline">Controls</span>
+              <span className="hidden sm:inline">{t('sim_controls_btn', 'Controls')}</span>
             </button>
 
             {/* Reshuffle */}
@@ -4699,8 +4701,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 triggerFeedback('button');
                 handleReshuffle();
               }}
-              title="Randomize Parking Distribution"
-              aria-label="Randomize Parking Distribution"
+              title={t('sim_reshuffle_title', 'Randomize Parking Distribution')}
+              aria-label={t('sim_reshuffle_title', 'Randomize Parking Distribution')}
               className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] p-1.5 sm:p-2 rounded-md bg-black/40 text-gray-300 hover:text-white transition-colors cursor-pointer active:scale-95 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
             >
               <RefreshCw className="w-4 h-4" />
@@ -4715,8 +4717,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                   triggerFeedback('button');
                   onToggleSimplifiedMode();
                 }}
-                title="Switch to Simplified Static View (Low Motion)"
-                aria-label="Switch to Simplified Static View"
+                title={t('sim_simplified_title', 'Switch to Simplified Static View (Low Motion)')}
+                aria-label={t('sim_simplified_title', 'Switch to Simplified Static View (Low Motion)')}
                 className="min-h-[38px] min-w-[38px] sm:min-h-[44px] sm:min-w-[44px] p-1.5 sm:p-2 rounded-md bg-black/40 text-gray-300 hover:text-white transition-colors cursor-pointer active:scale-95 flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
               >
                 <ZapOff className="w-4 h-4" />
@@ -4748,22 +4750,22 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 }
               }
             }}
-            title="Curbside Parking Gauge: Click to view magnified gauge analysis"
-            aria-label="Curbside Parking Gauge - Click to view magnified gauge analysis"
+            title={t('sim_curb_gauge_title', 'Curbside Parking Gauge: Click to view magnified gauge analysis')}
+            aria-label={t('sim_curb_gauge_title', 'Curbside Parking Gauge: Click to view magnified gauge analysis')}
             aria-haspopup="dialog"
             className={`bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-1.5 rounded-md sm:rounded-lg shadow-md flex flex-col items-center transition-all self-end w-[82px] sm:w-[94px] cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] group ${
               curbsidePct >= 150 ? 'animate-bounce border-[#E8552D]' : ''
             }`}
           >
             <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200 mb-0.5 gap-0.5">
-              <span className="truncate">Curb</span>
+              <span className="truncate">{t('sim_curb_label', 'Curb')}</span>
               <span className={`px-1 py-0.2 rounded border text-[8px] sm:text-[9px] font-bold leading-none ${getGaugeStatusColor()}`}>
                 {curbsidePct}%
               </span>
             </div>
             <canvas ref={gaugeCanvasRef} width={84} height={44} className="w-full h-auto block" />
             <span className="text-[8.5px] sm:text-[9.5px] font-semibold text-gray-200 mt-0.5 whitespace-nowrap leading-tight">
-              {curbsideDemandCount}/{curbsideStallsCapacity || totalLegalCurbsideStalls} Cars
+              {curbsideDemandCount}/{curbsideStallsCapacity || totalLegalCurbsideStalls} {t('sim_cars_unit', 'Cars')}
             </span>
 
             {/* Circling / Cruising Traffic Indicator */}
@@ -4774,16 +4776,16 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 title={`${circlingCarCount} vehicles circling looking for parking as curbside fills up`}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block flex-shrink-0" />
-                <span className="truncate">{circlingCarCount} {circlingCarCount === 1 ? 'car' : 'cars'}</span>
+                <span className="truncate">{circlingCarCount} {circlingCarCount === 1 ? t('sim_car_unit_singular', 'car') : t('sim_cars_unit_lowercase', 'cars')}</span>
               </div>
             ) : (
               <div 
                 id="hud-circling-traffic-indicator"
                 className="w-full mt-0.5 pt-0.5 border-t border-white/10 flex items-center justify-center gap-0.5 text-[8px] sm:text-[8.5px] font-medium text-emerald-300/90 leading-tight"
-                title="Curbside parking open - through traffic flowing smoothly"
+                title={t('sim_curb_open_title', 'Curbside parking open - through traffic flowing smoothly')}
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block flex-shrink-0" />
-                <span className="truncate">Open</span>
+                <span className="truncate">{t('sim_traffic_open', 'Open')}</span>
               </div>
             )}
           </div>
@@ -4795,8 +4797,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             type="button"
             onClick={() => setZoomScale(s => Math.min(4, s + 0.25))}
             className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-lg sm:text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
-            title="Zoom In"
-            aria-label="Zoom In"
+            title={t('sim_zoom_in', 'Zoom In')}
+            aria-label={t('sim_zoom_in', 'Zoom In')}
           >
             +
           </button>
@@ -4804,8 +4806,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             type="button"
             onClick={() => setZoomScale(1.33)}
             className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-xs sm:text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
-            title="Reset Camera View (Default 1.33x)"
-            aria-label="Reset Camera View"
+            title={t('sim_zoom_reset', 'Reset Camera View (Default 1.33x)')}
+            aria-label={t('sim_zoom_reset', 'Reset Camera View (Default 1.33x)')}
           >
             <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>
@@ -4813,8 +4815,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             type="button"
             onClick={() => setZoomScale(s => Math.max(0.5, s - 0.25))}
             className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-lg sm:text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
-            title="Zoom Out"
-            aria-label="Zoom Out"
+            title={t('sim_zoom_out', 'Zoom Out')}
+            aria-label={t('sim_zoom_out', 'Zoom Out')}
           >
             -
           </button>
@@ -4838,18 +4840,18 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               }
             }}
             className="flex items-center gap-1.5 sm:gap-2 bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/70 hover:bg-[#1f476e]/95 px-2 py-1 sm:px-3 sm:py-2 rounded-md sm:rounded-lg shadow-xl text-white pointer-events-auto transition-all cursor-pointer select-none active:scale-95"
-            title="Detached Laned Garages: Real-time off-street vehicle parking across all 12 properties (Click to toggle garage roof indicators)"
-            aria-label={`Rear Garages Status: ${occupiedGaragesCount} of 12 occupied. Click to toggle garage badges.`}
+            title={t('sim_garages_tooltip', 'Detached Laned Garages: Real-time off-street vehicle parking across all 12 properties (Click to toggle garage roof indicators)')}
+            aria-label={t('sim_garages_aria', 'Rear Garages Status: {count} of 12 occupied. Click to toggle garage badges.').replace('{count}', String(occupiedGaragesCount))}
           >
             <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#10B981] animate-pulse shrink-0" />
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-black tracking-wide whitespace-nowrap">
-                <span>🏠 <span className="hidden xs:inline">REAR </span>GARAGES</span>
+                <span>🏠 <span className="hidden xs:inline">{t('sim_rear_garages_label', 'REAR GARAGES')}</span></span>
                 <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1 sm:px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-bold">
                   {occupiedGaragesCount}/12
                 </span>
                 <span className="bg-[#FBBF24] text-[#78350F] border border-[#D97706]/60 px-1 sm:px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-bold hidden sm:inline">
-                  {12 - occupiedGaragesCount} Vacant
+                  {12 - occupiedGaragesCount} {t('sim_vacant_label', 'Vacant')}
                 </span>
               </div>
             </div>

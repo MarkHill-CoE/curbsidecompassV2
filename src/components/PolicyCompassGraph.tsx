@@ -1,5 +1,6 @@
 import React from 'react';
 import { PersonaResult } from '../types';
+import { useAppText } from '../context/TextContentContext';
 
 interface PolicyCompassGraphProps {
   persona: PersonaResult;
@@ -14,6 +15,7 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
   totalY,
   className = ''
 }) => {
+  const { t } = useAppText();
   // Normalize X and Y to percentage for compass marker
   // totalX: negative = Taxpayer (Left), positive = User-Fee (Right)
   // totalY in survey scoring: negative = Regulated/Restrictive (Top / Q1 & Q2), positive = Open Access/Free (Bottom / Q3 & Q4)
@@ -51,7 +53,7 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
       {/* Top Outer Axis Label (Outside Graph, No Abbreviations) */}
       <div className="flex items-center justify-center gap-1 text-[11px] sm:text-xs md:text-sm font-black text-gray-800 uppercase tracking-tight pb-0.5 sm:pb-1 text-center flex-shrink-0">
         <span className="text-[#004B8D] text-[10px] sm:text-xs">▲</span>
-        <span>Regulated Management</span>
+        <span>{t('compass_top_axis_label', t('compass_top_axis', '▲ Regulated Management').replace('▲', '').trim())}</span>
       </div>
 
       {/* Horizontal Middle Row: Left Label + Square Graph + Right Label */}
@@ -60,10 +62,10 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
         <div className="flex flex-col items-end justify-center text-right pr-0.5 sm:pr-1.5 w-16 sm:w-20 md:w-24 flex-shrink-0">
           <span className="text-[10px] sm:text-xs md:text-sm font-black text-gray-800 uppercase tracking-tighter sm:tracking-tight leading-tight flex items-center gap-0.5 sm:gap-1">
             <span className="text-[#004B8D] text-[10px] sm:text-xs">◀</span>
-            <span>Taxpayer</span>
+            <span>{t('compass_left_axis_line1', '◀ Taxpayer').replace('◀', '').trim()}</span>
           </span>
           <span className="text-[9px] sm:text-[11px] md:text-xs font-bold text-gray-600 uppercase tracking-tighter sm:tracking-tight leading-tight">
-            Funded
+            {t('compass_left_axis_line2', 'Funded')}
           </span>
         </div>
 
@@ -83,11 +85,11 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
                 : 'text-gray-500 font-semibold hover:bg-gray-100/40'
             }`}
           >
-            <span className="text-[10px] sm:text-xs md:text-sm font-bold leading-tight">Regulated</span>
-            <span className="text-[8.5px] sm:text-[11px] md:text-xs opacity-80 font-medium block">User-Fee</span>
+            <span className="text-[10px] sm:text-xs md:text-sm font-bold leading-tight">{t('compass_q1_line1', 'Regulated')}</span>
+            <span className="text-[8.5px] sm:text-[11px] md:text-xs opacity-80 font-medium block">{t('compass_q1_line2', 'User-Fee')}</span>
             {persona.quadrant === 'Q1' && (
               <span className="mt-0.5 text-[8px] sm:text-[10px] md:text-xs font-black uppercase px-1 sm:px-1.5 py-0.2 sm:py-0.5 bg-[#0081BC] text-white rounded-full shadow-2xs">
-                Your Result
+                {t('compass_badge_your_result', 'Your Result')}
               </span>
             )}
           </div>
@@ -100,11 +102,11 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
                 : 'text-gray-500 font-semibold hover:bg-gray-100/40'
             }`}
           >
-            <span className="text-[10px] sm:text-xs md:text-sm font-bold leading-tight">Protective</span>
-            <span className="text-[8.5px] sm:text-[11px] md:text-xs opacity-80 font-medium block">Taxpayer</span>
+            <span className="text-[10px] sm:text-xs md:text-sm font-bold leading-tight">{t('compass_q2_line1', 'Protective')}</span>
+            <span className="text-[8.5px] sm:text-[11px] md:text-xs opacity-80 font-medium block">{t('compass_q2_line2', 'Taxpayer')}</span>
             {persona.quadrant === 'Q2' && (
               <span className="mt-0.5 text-[8px] sm:text-[10px] md:text-xs font-black uppercase px-1 sm:px-1.5 py-0.2 sm:py-0.5 bg-[#005087] text-white rounded-full shadow-2xs">
-                Your Result
+                {t('compass_badge_your_result', 'Your Result')}
               </span>
             )}
           </div>
@@ -117,11 +119,11 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
                 : 'text-gray-500 font-semibold hover:bg-gray-100/40'
             }`}
           >
-            <span className="text-[10px] sm:text-xs md:text-sm font-bold leading-tight">Free & Easy</span>
-            <span className="text-[8.5px] sm:text-[11px] md:text-xs opacity-80 font-medium block">Open Access</span>
+            <span className="text-[10px] sm:text-xs md:text-sm font-bold leading-tight">{t('compass_q3_line1', 'Free & Easy')}</span>
+            <span className="text-[8.5px] sm:text-[11px] md:text-xs opacity-80 font-medium block">{t('compass_q3_line2', 'Open Access')}</span>
             {persona.quadrant === 'Q3' && (
               <span className="mt-0.5 text-[8px] sm:text-[10px] md:text-xs font-black uppercase px-1 sm:px-1.5 py-0.2 sm:py-0.5 bg-[#009A44] text-white rounded-full shadow-2xs">
-                Your Result
+                {t('compass_badge_your_result', 'Your Result')}
               </span>
             )}
           </div>
@@ -134,11 +136,11 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
                 : 'text-gray-500 font-semibold hover:bg-gray-100/40'
             }`}
           >
-            <span className="text-[10px] sm:text-xs md:text-sm font-bold leading-tight">Flat Rate</span>
-            <span className="text-[8.5px] sm:text-[11px] md:text-xs opacity-80 font-medium block">Simple Fee</span>
+            <span className="text-[10px] sm:text-xs md:text-sm font-bold leading-tight">{t('compass_q4_line1', 'Flat Rate')}</span>
+            <span className="text-[8.5px] sm:text-[11px] md:text-xs opacity-80 font-medium block">{t('compass_q4_line2', 'Simple Fee')}</span>
             {persona.quadrant === 'Q4' && (
               <span className="mt-0.5 text-[8px] sm:text-[10px] md:text-xs font-black uppercase px-1 sm:px-1.5 py-0.2 sm:py-0.5 bg-[#d49b00] text-white rounded-full shadow-2xs">
-                Your Result
+                {t('compass_badge_your_result', 'Your Result')}
               </span>
             )}
           </div>
@@ -171,11 +173,11 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
         {/* Right Outer Axis Label (Outside Graph, No Abbreviations) */}
         <div className="flex flex-col items-start justify-center text-left pl-0.5 sm:pl-1.5 w-16 sm:w-20 md:w-24 flex-shrink-0">
           <span className="text-[10px] sm:text-xs md:text-sm font-black text-gray-800 uppercase tracking-tighter sm:tracking-tight leading-tight flex items-center gap-0.5 sm:gap-1">
-            <span>User-Fee</span>
+            <span>{t('compass_right_axis_line1', 'User-Fee')}</span>
             <span className="text-[#004B8D] text-[10px] sm:text-xs">▶</span>
           </span>
           <span className="text-[9px] sm:text-[11px] md:text-xs font-bold text-gray-600 uppercase tracking-tighter sm:tracking-tight leading-tight">
-            Funded
+            {t('compass_right_axis_line2', 'Funded ▶').replace('▶', '').trim()}
           </span>
         </div>
       </div>
@@ -183,7 +185,7 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
       {/* Bottom Outer Axis Label (Outside Graph, No Abbreviations) */}
       <div className="flex items-center justify-center gap-1 text-[11px] sm:text-xs md:text-sm font-black text-gray-800 uppercase tracking-tight pt-0.5 sm:pt-1 text-center flex-shrink-0">
         <span className="text-[#004B8D] text-[10px] sm:text-xs">▼</span>
-        <span>Open Access</span>
+        <span>{t('compass_bottom_axis_label', t('compass_bottom_axis', '▼ Open Access').replace('▼', '').trim())}</span>
       </div>
     </div>
   );

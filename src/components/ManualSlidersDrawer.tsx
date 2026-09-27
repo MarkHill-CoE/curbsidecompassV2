@@ -82,7 +82,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </div>
           <button
             type="button"
-            aria-label="Close manual sliders"
+            aria-label={t('drawer_sliders_close_label', 'Close manual sliders')}
             onClick={() => {
               triggerFeedback('button');
               onClose();
@@ -96,17 +96,17 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
         {/* 4 Edmonton Street Layout Typologies Quick Switcher */}
         <div className="flex flex-col gap-1 pb-1.5 border-b border-white/10">
           <div className="flex justify-between items-center text-[11px]">
-            <span className="text-gray-300 font-bold uppercase tracking-wider">Street Layout Typology:</span>
+            <span className="text-gray-300 font-bold uppercase tracking-wider">{t('drawer_sliders_typology_label', 'Street Layout Typology:')}</span>
             <span className="font-semibold text-[#FFC72C]">
               {getStreetLayoutInfo(config.streetLayout).shortTitle}
             </span>
           </div>
           <div className="grid grid-cols-2 gap-1.5">
             {([
-              { id: 'mature_laned', icon: '🏡', name: 'Mature Laned', cap: '16 stalls' },
-              { id: 'infill_skinny', icon: '🏘️', name: 'Infill & Duplex', cap: '16 stalls' },
-              { id: 'suburban_front_driveway', icon: '🚗', name: 'Front Driveway', cap: '10 stalls' },
-              { id: 'contemporary_townhomes', icon: '🏢', name: 'Townhomes', cap: '12 stalls' }
+              { id: 'mature_laned', icon: '🏡', nameKey: 'drawer_sliders_typology_mature_laned', defaultName: 'Mature Laned', count: 16 },
+              { id: 'infill_skinny', icon: '🏘️', nameKey: 'drawer_sliders_typology_infill_skinny', defaultName: 'Infill & Duplex', count: 16 },
+              { id: 'suburban_front_driveway', icon: '🚗', nameKey: 'drawer_sliders_typology_suburban_front', defaultName: 'Front Driveway', count: 10 },
+              { id: 'contemporary_townhomes', icon: '🏢', nameKey: 'drawer_sliders_typology_townhomes', defaultName: 'Townhomes', count: 12 }
             ] as const).map((item) => {
               const isSelected = (config.streetLayout || 'mature_laned') === item.id;
               return (
@@ -125,10 +125,10 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
                 >
                   <div className="flex items-center gap-1.5 truncate">
                     <span className="text-sm">{item.icon}</span>
-                    <span className="text-[11px] truncate">{item.name}</span>
+                    <span className="text-[11px] truncate">{t(item.nameKey, item.defaultName)}</span>
                   </div>
                   <span className="text-[9px] opacity-80 shrink-0 font-mono">
-                    {item.cap}
+                    {t('drawer_sliders_stalls_unit', '{count} stalls').replace('{count}', String(item.count))}
                   </span>
                 </button>
               );
@@ -146,7 +146,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </div>
           <input
             type="range"
-            aria-label="Average vehicles per home"
+            aria-label={t('drawer_sliders_veh_per_home_aria', 'Average vehicles per home')}
             min="0"
             max="5"
             step="0.25"
@@ -168,7 +168,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </div>
           <input
             type="range"
-            aria-label="Visitor passes per home"
+            aria-label={t('drawer_sliders_visitor_passes_aria', 'Visitor passes per home')}
             min="0"
             max="5"
             step="0.25"
@@ -190,7 +190,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </div>
           <input
             type="range"
-            aria-label="Home density"
+            aria-label={t('drawer_sliders_density_aria', 'Home density')}
             min="2"
             max="12"
             step="2"
@@ -212,7 +212,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </div>
           <input
             type="range"
-            aria-label="Weekly deliveries per home"
+            aria-label={t('drawer_sliders_deliveries_aria', 'Weekly deliveries per home')}
             min="1"
             max="4"
             step="0.25"

@@ -153,7 +153,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                   </span>
                 </div>
                 <div className="text-[0.59375rem] text-gray-600 leading-tight line-clamp-1">
-                  Includes: <strong className="text-[#004B8D]">{persona.title}</strong>
+                  {t('share_opt_persona_includes', 'Includes: {persona}').replace('{persona}', persona.title)}
                 </div>
               </button>
 
@@ -178,7 +178,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                   </span>
                 </div>
                 <div className="text-[0.59375rem] text-gray-600 leading-tight">
-                  Encouraging post without persona results
+                  {t('share_opt_general_desc', 'Encouraging post without persona results')}
                 </div>
               </button>
             </div>
@@ -200,7 +200,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                       download="Curbside_Compass_fb.png"
                       onClick={() => triggerFeedback('button')}
                       className="p-1 bg-white/90 rounded text-gray-800 text-[0.5625rem] font-bold flex items-center gap-0.5 no-underline active:scale-95"
-                      title="Download image"
+                      title={t('share_download_img_title', 'Download image')}
                     >
                       <Download className="w-2.5 h-2.5" />
                     </a>
@@ -212,17 +212,17 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1">
                       <span className="text-[0.59375rem] font-bold text-[#004B8D] uppercase tracking-wide">
-                        Social Post Preview
+                        {t('share_preview_label', 'Social Post Preview')}
                       </span>
                       <a
                         href={curbsideSocialImg}
                         download="Curbside_Compass_fb.png"
                         onClick={() => triggerFeedback('button')}
                         className="text-[0.5625rem] text-gray-500 hover:text-[#004B8D] flex items-center gap-1 font-semibold active:scale-95"
-                        title="Download image to save or attach"
+                        title={t('share_download_attach_title', 'Download image to save or attach')}
                       >
                         <Download className="w-2.5 h-2.5" />
-                        <span>Save image</span>
+                        <span>{t('share_save_image_btn', 'Save image')}</span>
                       </a>
                     </div>
                     <p className="text-[0.625rem] sm:text-[0.65625rem] text-gray-700 leading-snug line-clamp-3 italic">
@@ -251,10 +251,10 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
               }}
               id="share-facebook-button"
               className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-[#1877F2] hover:bg-[#1565cf] text-white text-xs font-bold shadow-xs transition-transform active:scale-95 cursor-pointer no-underline min-h-[44px] min-w-[44px]"
-              title="Share on Facebook"
+              title={t('share_on_facebook', 'Share on Facebook')}
             >
               <Facebook className="w-4 h-4 fill-current" />
-              <span>Facebook</span>
+              <span>{t('share_facebook', 'Facebook')}</span>
             </a>
 
             {/* X (formerly Twitter) */}
@@ -268,10 +268,10 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
               }}
               id="share-x-button"
               className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-black hover:bg-neutral-800 text-white text-xs font-bold shadow-xs transition-transform active:scale-95 cursor-pointer no-underline min-h-[44px] min-w-[44px]"
-              title="Share on X"
+              title={t('share_on_x', 'Share on X')}
             >
               <Twitter className="w-4 h-4 fill-current" />
-              <span>X (Twitter)</span>
+              <span>{t('share_x', 'X (Twitter)')}</span>
             </a>
 
             {/* Instagram */}
@@ -285,10 +285,10 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
               }}
               id="share-instagram-button"
               className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] hover:opacity-95 text-white text-xs font-bold shadow-xs transition-transform active:scale-95 cursor-pointer no-underline min-h-[44px] min-w-[44px]"
-              title="Share on Instagram"
+              title={t('share_on_instagram', 'Share on Instagram')}
             >
               <Instagram className="w-4 h-4" />
-              <span>Instagram</span>
+              <span>{t('share_instagram', 'Instagram')}</span>
             </a>
           </div>
 
@@ -305,7 +305,8 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                 'text-gray-700'
               }`} />
               <span>
-                <strong>Share caption copied!</strong> Opening {platformNotice} so you can paste your post.
+                <strong>{t('share_caption_copied_title', 'Share caption copied!')}</strong>{' '}
+                {t('share_opening_platform', 'Opening {platform} so you can paste your post.').replace('{platform}', platformNotice)}
               </span>
             </div>
           )}

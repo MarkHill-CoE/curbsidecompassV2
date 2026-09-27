@@ -24,7 +24,7 @@ import {
 } from './data/surveyData';
 import { SimulationConfig, StreetLayoutTypology } from './types';
 import { getStreetLayoutInfo, getTypologyFromPostalCode, detectLayoutAndNeighbourhood } from './data/edmontonNeighbourhoods';
-import { Compass, RotateCcw, FileSpreadsheet, CheckCircle, HelpCircle, ZapOff, Eye } from 'lucide-react';
+import { Compass, RotateCcw, FileSpreadsheet, CheckCircle, HelpCircle, ZapOff, Eye, Sparkles } from 'lucide-react';
 import { feedback, triggerFeedback } from './utils/feedback';
 import { ambientAudio } from './utils/ambientAudio';
 
@@ -343,35 +343,40 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {/* # BEGIN TEMPORARY SHEETS SYNC */}
-          {/* Google Sheets Sync Button - To be removed prior to public production release */}
+          {/* Communications Team: Text Inventory & Google Sheets Sync */}
           <button
             type="button"
             onClick={() => setIsSyncModalOpen(true)}
-            title={isCustomActive ? `Google Sheet Synced (${itemCount} items) - Click to Manage` : 'Sync Copy from Google Sheets'}
-            aria-label="Google Sheet Content Sync"
-            className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded transition-all min-h-[38px] sm:min-h-[44px] cursor-pointer border ${
+            title={
               isCustomActive
-                ? 'bg-emerald-700/80 hover:bg-emerald-600 text-white border-emerald-400'
-                : 'bg-white/10 hover:bg-white/20 text-gray-200 border-white/20'
+                ? `App Text Sync Active (${itemCount} items) - Click to browse inventory or update copy`
+                : 'App Text Inventory & Google Sheet Sync (Communications Tool)'
+            }
+            aria-label="App text inventory and copy sync tool"
+            className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all min-h-[38px] sm:min-h-[44px] cursor-pointer border ${
+              isCustomActive
+                ? 'bg-emerald-700 hover:bg-emerald-600 text-white border-emerald-400 shadow-sm'
+                : 'bg-white/10 hover:bg-white/20 text-[#FFC72C] border-white/20'
             }`}
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-[#FFC72C]" />
-            <span className="hidden md:inline font-bold">
-              {isCustomActive ? 'Sheet Synced' : 'Sync Sheet'}
+            <FileSpreadsheet className="w-4 h-4 text-[#FFC72C]" />
+            <span className="font-bold flex items-center gap-1">
+              <span className="hidden sm:inline">App Text</span>
+              <span>Inventory</span>
+              {isCustomActive && (
+                <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-emerald-400 text-emerald-950 font-black">
+                  {itemCount}
+                </span>
+              )}
             </span>
-            {isCustomActive && (
-              <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse" />
-            )}
           </button>
-          {/* # END TEMPORARY SHEETS SYNC */}
 
-          <div className="flex items-center bg-[#003566] rounded-md border border-[#002244] overflow-hidden flex-shrink-0">
+          <div className="hidden md:flex items-center bg-[#003566] rounded-md border border-[#002244] overflow-hidden flex-shrink-0">
             <button
               onClick={() => { setHasManuallyChangedFont(true); setFontSizePt(f => Math.max(8, f - 2)); }}
               className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center text-gray-300 hover:bg-[#002244] hover:text-white active:bg-black/30 transition-all font-bold text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] focus-visible:ring-inset cursor-pointer"
-              title="Decrease font size (-2pt)"
-              aria-label="Decrease font size"
+              title={t('header_font_decrease_title', 'Decrease font size (-2pt)')}
+              aria-label={t('header_font_decrease_aria', 'Decrease font size')}
             >
               A-
             </button>
@@ -379,8 +384,8 @@ export default function App() {
             <button
               onClick={() => { setHasManuallyChangedFont(true); setFontSizePt(f => Math.min(24, f + 2)); }}
               className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center text-gray-300 hover:bg-[#002244] hover:text-white active:bg-black/30 transition-all font-bold text-xs sm:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] focus-visible:ring-inset cursor-pointer"
-              title="Increase font size (+2pt)"
-              aria-label="Increase font size"
+              title={t('header_font_increase_title', 'Increase font size (+2pt)')}
+              aria-label={t('header_font_increase_aria', 'Increase font size')}
             >
               A+
             </button>
@@ -394,10 +399,10 @@ export default function App() {
               setShowOnboarding(true);
             }}
             title={t('header_how_it_works_title', 'About the Street Model & Consultation Guide')}
-            aria-label="How This Works"
-            className="text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded transition-all min-h-[38px] sm:min-h-[44px] cursor-pointer bg-white/10 hover:bg-white/20 text-gray-200 hover:text-white border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
+            aria-label={t('header_how_it_works_aria', 'How This Works')}
+            className="text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded transition-all min-h-[44px] min-w-[44px] cursor-pointer bg-white/10 hover:bg-white/20 text-gray-200 hover:text-white border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
           >
-            <HelpCircle className="w-3.5 h-3.5 text-[#FFC72C]" />
+            <HelpCircle className="w-4 h-4 text-[#FFC72C]" />
             <span className="hidden sm:inline font-bold">
               {t('header_how_it_works', 'How It Works')}
             </span>
@@ -412,7 +417,7 @@ export default function App() {
             }}
             title={isSimplifiedMode ? 'Switch to Live Animated Simulation' : 'Switch to Simplified Static Summary (Low Motion)'}
             aria-label={isSimplifiedMode ? 'Switch to Live Simulation' : 'Switch to Simplified View'}
-            className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2 sm:px-2.5 py-1 rounded transition-all min-h-[38px] sm:min-h-[44px] cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
+            className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded transition-all min-h-[44px] min-w-[44px] cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
               isSimplifiedMode
                 ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border-amber-400/40'
                 : 'bg-white/10 hover:bg-white/20 text-gray-200 border-white/20'
@@ -420,12 +425,12 @@ export default function App() {
           >
             {isSimplifiedMode ? (
               <>
-                <ZapOff className="w-3.5 h-3.5 text-amber-300" />
+                <ZapOff className="w-4 h-4 text-amber-300" />
                 <span className="hidden sm:inline font-bold">{t('header_mode_simplified', 'Simplified')}</span>
               </>
             ) : (
               <>
-                <Eye className="w-3.5 h-3.5 text-[#FFC72C]" />
+                <Eye className="w-4 h-4 text-[#FFC72C]" />
                 <span className="hidden sm:inline font-bold">{t('header_mode_live', 'Live Model')}</span>
               </>
             )}
@@ -446,20 +451,20 @@ export default function App() {
             <button
               type="button"
               onClick={handleRetake}
-              title="Retake Assessment"
-              className="text-[0.6875rem] sm:text-xs font-bold flex items-center justify-center gap-1.5 bg-[#FFC72C] text-[#004B8D] hover:bg-[#ffe066] active:bg-[#f5bc20] active:scale-95 px-2.5 sm:px-3 py-1 rounded shadow-xs transition-all cursor-pointer min-h-[38px] sm:min-h-[44px] min-w-[38px] sm:min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] focus-visible:ring-offset-1 focus-visible:ring-offset-[#193A5A]"
+              title={t('header_retake_title', 'Retake Assessment')}
+              className="text-[0.6875rem] sm:text-xs font-bold flex items-center justify-center gap-1.5 bg-[#FFC72C] text-[#004B8D] hover:bg-[#ffe066] active:bg-[#f5bc20] active:scale-95 px-2.5 sm:px-3 py-1 rounded shadow-xs transition-all cursor-pointer min-h-[44px] min-w-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] focus-visible:ring-offset-1 focus-visible:ring-offset-[#193A5A]"
             >
-              <RotateCcw className="w-3.5 h-3.5 stroke-[2.5]" />
+              <RotateCcw className="w-4 h-4 stroke-[2.5]" />
               <span className="hidden sm:inline">{t('header_retake_btn', 'Retake')}</span>
             </button>
           ) : (
             <button
               type="button"
               onClick={handleRetake}
-              title="Reset Survey and Simulation"
-              className="text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 bg-white/15 hover:bg-white/25 active:bg-white/30 active:scale-95 text-white px-2 sm:px-2.5 py-1 rounded transition-colors min-h-[38px] sm:min-h-[44px] min-w-[38px] sm:min-w-[44px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] focus-visible:ring-offset-1 focus-visible:ring-offset-[#193A5A]"
+              title={t('header_reset_title', 'Reset Survey and Simulation')}
+              className="text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 bg-white/15 hover:bg-white/25 active:bg-white/30 active:scale-95 text-white px-2.5 sm:px-3 py-1 rounded transition-colors min-h-[44px] min-w-[44px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] focus-visible:ring-offset-1 focus-visible:ring-offset-[#193A5A]"
             >
-              <RotateCcw className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              <RotateCcw className="w-4 h-4" />
               <span className="hidden sm:inline font-semibold">{t('header_reset_btn', 'Reset')}</span>
             </button>
           )}
@@ -485,15 +490,15 @@ export default function App() {
           }}
         />
 
-        {/* Simulation Section: Ergonomic mobile vertical height (35vh, max 295px) giving survey section 65vh of breathing room */}
+        {/* Simulation Section: Calibrated mobile vertical height (32vh, max 260px) ensuring survey section remains 100% above the fold */}
         <section
           id="simulation-section"
           className={`relative bg-[#193A5A] flex-shrink-0 shadow-inner overflow-hidden border-[#004B8D] border-b-2 lg:border-b-0 lg:border-r-2 ${
             isCompleted
               ? "hidden lg:block"
-              : "w-full h-[35vh] min-h-[190px] max-h-[295px] sm:h-[38vh] sm:max-h-[350px] md:h-[40vh] md:max-h-[420px]"
+              : "w-full h-[32vh] min-h-[175px] max-h-[260px] sm:h-[36vh] sm:max-h-[320px] md:h-[40vh] md:max-h-[400px]"
           } lg:h-full lg:max-h-none lg:w-[48%] xl:w-[50%] 2xl:w-[52%] [@media(orientation:landscape)_and_(max-height:540px)]:h-full [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 [@media(orientation:landscape)_and_(max-height:540px)]:border-b-0 [@media(orientation:landscape)_and_(max-height:540px)]:border-r-2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
-          aria-label="Neighborhood Parking Simulation View"
+          aria-label={t('header_sim_view_aria', 'Neighborhood Parking Simulation View')}
         >
           {isSimplifiedMode ? (
             <SimplifiedStreetSummary
@@ -545,7 +550,7 @@ export default function App() {
         <section
           id="survey-section"
           className={`relative w-full flex-1 flex flex-col justify-between overflow-hidden min-h-0 bg-[#ffffff] lg:h-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full ${isCompleted ? "w-full lg:w-[52%] xl:w-[50%] 2xl:w-[48%]" : "lg:w-[52%] xl:w-[50%] 2xl:w-[48%] [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2"} ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
-          aria-label="Parking Policy Persona Survey"
+          aria-label={t('header_survey_aria', 'Parking Policy Persona Survey')}
         >
           {/* Manual Sliders Overlay: positioned over the question container, blurring question content underneath while the neighborhood canvas remains crisp and unblurred */}
           <ManualSlidersDrawer
