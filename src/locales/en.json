@@ -418,7 +418,8 @@
   "sim_harmony_reporter": "REPORTER",
   "sim_harmony_subheadline": "SMART POLICIES KEEP STREETS CLEAR • BUSINESSES BOOMING • RESIDENTS HAPPY",
   "sim_harmony_title": "CITY PLANNING COMMENDATION",
-  "sim_rear_garages_label": "REAR GARAGES",
+  "sim_garage_use_label": "Garage Use",
+  "sim_rear_garages_label": "Garage Use",
   "sim_reshuffle": "Reshuffle",
   "sim_reshuffle_title": "Randomize Parking Distribution",
   "sim_riot_badge": "🔴 LIVE",
@@ -565,5 +566,8 @@
   "watch_btn_results": "See Final Results",
   "watch_btn_view_persona": "View Your Curbside Persona",
   "watch_desc": "Based on your policy choices, neighbourhood parking demand and curbside regulations have been applied. Observe the live street simulation or stalls overview above, then proceed to view your curbside persona.",
-  "watch_title": "Your Neighbourhood Parking Program Outcome"
+  "watch_title": "Your Neighbourhood Parking Program Outcome",
+  "rotate_screen_title": "Please Rotate to Vertical (Portrait)",
+  "rotate_screen_desc": "Curbside Compass is designed for vertical portrait view on mobile phones to experience the live neighborhood simulation and answer survey questions clearly.",
+  "rotate_screen_continue_anyway": "Continue in Horizontal view anyway"
 }

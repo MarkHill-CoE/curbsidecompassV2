@@ -22,9 +22,12 @@ import {
   Info
 } from 'lucide-react';
 
+import { getDirectGoogleSheetWebUrl, isEditableGoogleSheetUrl } from '../utils/textSync';
+
 interface GoogleSheetSyncModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialTab?: 'inventory' | 'url' | 'paste' | 'guide';
 }
 
 const CATEGORY_FILTERS = [
@@ -40,7 +43,7 @@ const CATEGORY_FILTERS = [
   'Privacy & Feedback'
 ] as const;
 
-export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOpen, onClose }) => {
+export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOpen, onClose, initialTab }) => {
   const {
     t,
     sheetUrl,
@@ -60,6 +63,26 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
   const [inputUrl, setInputUrl] = useState(sheetUrl);
   const [pastedCsv, setPastedCsv] = useState('');
   const [activeTab, setActiveTab] = useState<'inventory' | 'url' | 'paste' | 'guide'>('inventory');
+
+  // Check if current connected URL is an active editable sheet (vs static published CSV feed)
+  const isDirectEditable = useMemo(() => {
+    return isEditableGoogleSheetUrl(inputUrl || sheetUrl);
+  }, [inputUrl, sheetUrl]);
+
+  // Sync initial tab and URL on open
+  React.useEffect(() => {
+    if (isOpen) {
+      if (initialTab) {
+        setActiveTab(initialTab);
+      }
+      setInputUrl(sheetUrl);
+    }
+  }, [isOpen, initialTab, sheetUrl]);
+
+  // Direct clickable link to open Google Sheet in browser
+  const directSheetUrl = useMemo(() => {
+    return getDirectGoogleSheetWebUrl(inputUrl || sheetUrl);
+  }, [inputUrl, sheetUrl]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -363,17 +386,56 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
               </div>
             </div>
 
-            {isCustomActive && (
+            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+              {isDirectEditable ? (
+                <a
+                  href={directSheetUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2.5 sm:px-3 py-1.5 bg-[#004B8D] hover:bg-[#00386a] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  title="Opens the active editable Google Sheet directly in a new browser tab"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#FFC72C]" />
+                  <span className="hidden sm:inline">Open</span>
+                  <span>Google Sheet</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('url')}
+                  className="px-2.5 sm:px-3 py-1.5 bg-[#004B8D] hover:bg-[#00386a] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  title="Connect your team's live Google Sheet to edit copy"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5 text-[#FFC72C]" />
+                  <span>Connect Live Sheet</span>
+                </button>
+              )}
+
               <button
                 type="button"
-                onClick={resetToDefaults}
-                className="px-2.5 py-1 text-xs font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-md transition-colors cursor-pointer whitespace-nowrap flex-shrink-0 flex items-center gap-1"
-                title="Revert all customized text back to the default English copy"
+                onClick={() => syncNow(inputUrl || sheetUrl)}
+                disabled={syncStatus === 'loading'}
+                className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap shadow-xs"
+                title="Sync and apply the latest text edits directly from the Google Sheet into the app"
               >
-                <RotateCcw className="w-3 h-3" />
-                <span>Reset All to Defaults</span>
+                <RefreshCw className={`w-3.5 h-3.5 ${syncStatus === 'loading' ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">Sync</span>
+                <span>Now</span>
               </button>
-            )}
+
+              {isCustomActive && (
+                <button
+                  type="button"
+                  onClick={resetToDefaults}
+                  className="px-2 py-1.5 text-xs font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors cursor-pointer whitespace-nowrap flex items-center gap-1"
+                  title="Revert all customized text back to the default English copy"
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span className="hidden md:inline">Reset</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {feedbackNotice && (
@@ -398,6 +460,30 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {isDirectEditable ? (
+                    <a
+                      href={directSheetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-700 hover:bg-emerald-600 text-white transition-all shadow-xs cursor-pointer"
+                      title="Opens the active editable Google Sheet directly in a new tab"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-[#FFC72C]" />
+                      <span>Open Google Sheet</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('url')}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-[#004B8D] hover:bg-[#00386a] text-white transition-all shadow-xs cursor-pointer"
+                      title="Connect your team's live Google Sheet to edit copy"
+                    >
+                      <FileSpreadsheet className="w-3.5 h-3.5 text-[#FFC72C]" />
+                      <span>Connect Live Sheet</span>
+                    </button>
+                  )}
+
                   <button
                     type="button"
                     onClick={handleCopyAllForGoogleSheets}
@@ -428,7 +514,7 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
                     title="Download complete 562-row CSV template with Text Key, Current text, and Revised text columns"
                   >
                     <Download className="w-3.5 h-3.5 text-[#004B8D]" />
-                    <span>Download CSV Template</span>
+                    <span>Download CSV</span>
                   </a>
                 </div>
               </div>
@@ -634,6 +720,83 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
           {/* ========================================================================= */}
           {activeTab === 'url' && (
             <div className="space-y-4">
+              {/* Direct Google Sheet Connection Banner */}
+              {isDirectEditable ? (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-emerald-50 border border-emerald-300 rounded-xl shadow-xs">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className="p-2 rounded-lg bg-emerald-700 text-white shrink-0">
+                      <FileSpreadsheet className="w-5 h-5 text-[#FFC72C]" />
+                    </div>
+                    <div className="min-w-0">
+                      <div className="font-bold text-xs sm:text-sm text-emerald-950 flex items-center gap-1.5">
+                        <CheckCircle className="w-4 h-4 text-emerald-600 inline" />
+                        <span>Live Editable Google Sheet Connected</span>
+                      </div>
+                      <div className="text-[11px] text-emerald-800 truncate font-mono mt-0.5">{directSheetUrl}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <a
+                      href={directSheetUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-3.5 py-2 bg-emerald-700 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                      title="Opens your active Google Sheet directly in a new browser tab for live editing"
+                    >
+                      <span>Open in Google Sheets</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </a>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-amber-50/90 border border-amber-300 rounded-xl space-y-3">
+                  <div className="flex items-start gap-2.5">
+                    <div className="p-2 rounded-lg bg-amber-600 text-white shrink-0 mt-0.5">
+                      <FileSpreadsheet className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="space-y-1">
+                      <div className="font-bold text-xs sm:text-sm text-amber-950">
+                        Connect Your Team&apos;s Active Google Sheet
+                      </div>
+                      <p className="text-xs text-amber-900 leading-relaxed">
+                        The app is currently reading from the built-in default copy feed. To enable live in-browser editing for your Communications team, connect an active Google Sheet in your Google Drive:
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                    <a
+                      href="https://sheets.new"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2.5 bg-white border border-amber-300 hover:border-amber-400 rounded-lg text-xs font-semibold text-gray-800 flex items-center justify-between shadow-2xs hover:bg-amber-100/40 transition-colors"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-[10px]">1</span>
+                        <span>Create New Google Sheet</span>
+                      </span>
+                      <ExternalLink className="w-3.5 h-3.5 text-gray-500" />
+                    </a>
+
+                    <button
+                      type="button"
+                      onClick={handleCopyAllForGoogleSheets}
+                      className="p-2.5 bg-white border border-amber-300 hover:border-amber-400 rounded-lg text-xs font-semibold text-gray-800 flex items-center justify-between shadow-2xs hover:bg-amber-100/40 transition-colors cursor-pointer"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span className="w-5 h-5 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-[10px]">2</span>
+                        <span>{copyAllStatus ? '✓ Copied to Clipboard!' : 'Copy All Text Inventory'}</span>
+                      </span>
+                      <Copy className="w-3.5 h-3.5 text-gray-500" />
+                    </button>
+                  </div>
+
+                  <p className="text-[11px] text-amber-900 leading-normal">
+                    <strong>Step 3:</strong> Paste into cell A1 in your new sheet, click <em>Share &rarr; General Access: &ldquo;Anyone with the link can view&rdquo;</em>, then paste the link below and click <strong>Save &amp; Sync Now</strong>.
+                  </p>
+                </div>
+              )}
+
               <form onSubmit={handleSync} className="space-y-3 bg-white p-4 border border-gray-200 rounded-xl shadow-xs">
                 <div>
                   <label htmlFor="sheet-url-input" className="block font-bold text-gray-800 mb-1 text-xs sm:text-sm">

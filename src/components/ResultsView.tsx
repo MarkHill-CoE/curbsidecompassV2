@@ -170,7 +170,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
                 {persona.title}
               </h2>
             </div>
-            <p className="text-[14pt] sm:text-[16pt] font-medium text-gray-800 leading-snug overflow-y-auto">
+            <p className="text-[11pt] font-medium text-gray-800 leading-relaxed overflow-y-auto">
               {persona.description}
             </p>
           </div>
@@ -209,7 +209,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
               {persona.title}
             </span>
           </div>
-          <p className="text-[14pt] sm:text-[15pt] text-gray-800 leading-snug">
+          <p className="text-[11pt] text-gray-800 leading-normal">
             {persona.description}
           </p>
         </div>
@@ -224,10 +224,10 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
             <h4 className="text-[10pt] font-bold uppercase tracking-wider text-gray-600 mb-1.5">
               {t('results_you_believe_title', 'You Believe')}
             </h4>
-            <ul className="space-y-1.5 text-[14pt] sm:text-[15pt] text-gray-800 w-full px-0.5">
+            <ul className="space-y-1.5 text-[11pt] text-gray-800 w-full px-0.5">
               {persona.keyPriorities.map((priority, idx) => (
-                <li key={idx} className="flex items-start gap-2 leading-snug">
-                  <CheckCircle className="w-4 h-4 text-[#009A44] flex-shrink-0 mt-1" />
+                <li key={idx} className="flex items-start gap-2 leading-normal">
+                  <CheckCircle className="w-4 h-4 text-[#009A44] flex-shrink-0 mt-0.5" />
                   <span>{priority}</span>
                 </li>
               ))}
@@ -246,7 +246,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
                 {t('results_tradeoff_outcomes_title', t('results_parking_program_outcomes_title', 'Parking Program Trade-off Outcomes'))}
               </h3>
             </div>
-            <p className="text-[14pt] sm:text-[15pt] text-gray-700 leading-snug bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+            <p className="text-[11pt] text-gray-700 leading-normal bg-gray-50 p-2.5 rounded-lg border border-gray-200">
               {persona.outcome || persona.description}
             </p>
           </div>
@@ -257,7 +257,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
       {/* Feedback Section */}
       <div className="bg-white border border-gray-200 rounded-xl p-2.5 sm:p-3 shadow-xs flex-shrink-0">
         <div className="bg-[#193A5A]/5 border border-[#004B8D]/20 rounded-lg p-2.5 sm:p-3 flex flex-col">
-          <label className="block text-[14pt] sm:text-[16pt] font-bold text-[#004B8D] mb-2 leading-snug">
+          <label className="block text-[11pt] font-bold text-[#004B8D] mb-2 leading-snug">
             {t('results_feedback_prompt', 'Do you feel this represents your view on neighbourhood parking?')}
           </label>
           
@@ -272,7 +272,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
                     triggerFeedback('choice');
                     setRating(val);
                   }}
-                  className={`flex-1 min-h-[48px] min-w-[44px] py-2 rounded-xl text-[14pt] sm:text-[16pt] font-bold transition-all cursor-pointer border-2 flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
+                  className={`flex-1 min-h-[44px] min-w-[40px] py-1.5 rounded-xl text-[11pt] font-bold transition-all cursor-pointer border-2 flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
                     isSelected
                       ? 'bg-[#004B8D] text-white border-[#004B8D] shadow-xs ring-1 ring-[#004B8D]'
                       : 'bg-white text-gray-800 hover:bg-blue-50 hover:border-blue-300 border-gray-300'
@@ -285,13 +285,13 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
               );
             })}
           </div>
-          <div className="flex justify-between text-[10pt] sm:text-xs text-gray-600 font-semibold px-0.5 mb-2">
+          <div className="flex justify-between text-[10pt] text-gray-600 font-semibold px-0.5 mb-2">
             <span>{t('results_scale_1', '1 - Strongly Disagree')}</span>
             <span>{t('results_scale_5', '5 - Strongly Agree')}</span>
           </div>
           
           <div className="flex items-center justify-between text-xs mb-1">
-            <label htmlFor="why-feedback" className="font-bold text-gray-800 text-[14pt] sm:text-[15pt]">
+            <label htmlFor="why-feedback" className="font-bold text-gray-800 text-[11pt]">
               {t('results_why_label', 'Why or why not? (Optional)')}
             </label>
             <span className={`text-[10pt] sm:text-xs font-semibold ${500 - feedback.length < 50 ? 'text-amber-700 font-bold' : 'text-gray-500'}`}>
@@ -309,7 +309,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
             maxLength={500}
             rows={2}
             placeholder={t('results_why_placeholder', 'Share your thoughts with City of Edmonton planners...')}
-            className={`w-full text-[14pt] sm:text-[15pt] text-gray-800 p-2.5 border rounded-lg focus:outline-none focus:ring-2 resize-none bg-white leading-normal placeholder:text-gray-400 min-h-[52px] ${
+            className={`w-full text-[11pt] text-gray-800 p-2.5 border rounded-lg focus:outline-none focus:ring-2 resize-none bg-white leading-normal placeholder:text-gray-400 min-h-[52px] ${
               detectPII(feedback).hasPII 
                 ? 'border-amber-400 focus:ring-amber-500 focus:border-amber-500' 
                 : 'border-gray-300 focus:ring-[#0081BC] focus:border-[#0081BC]'

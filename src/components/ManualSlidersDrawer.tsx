@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Sliders, Gauge, CheckCircle, X } from 'lucide-react';
+import { Sliders, Gauge, CheckCircle, X, ChevronDown } from 'lucide-react';
 import { SimulationConfig } from '../types';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
@@ -49,7 +49,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
   return (
     <div
       id="manual-sliders-overlay-container"
-      className="absolute inset-0 z-40 bg-[#0c1f31]/75 backdrop-blur-md flex flex-col justify-start p-3 sm:p-5 overflow-y-auto animate-in fade-in duration-200"
+      className="absolute inset-0 z-40 bg-[#0c1f31]/75 backdrop-blur-md flex flex-col justify-start p-2 sm:p-4 md:p-5 overflow-y-auto animate-in fade-in duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           triggerFeedback('button');
@@ -62,7 +62,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="manual-sliders-title"
-        className="relative bg-[#11283f]/95 border-2 border-[#0081BC] p-3.5 sm:p-4 rounded-xl shadow-2xl w-full max-w-md mx-auto my-auto flex flex-col gap-2.5 text-xs text-white"
+        className="relative bg-[#11283f]/95 border-2 border-[#0081BC] p-3 sm:p-4 rounded-xl shadow-2xl w-full max-w-md mx-auto my-1 sm:my-auto flex flex-col gap-2.5 text-xs text-white"
       >
         {/* Header - Styled to match Parking Gauge container header */}
         <div className="flex items-center justify-between pb-1.5 sm:pb-2 border-b border-white/10 shrink-0">
@@ -92,46 +92,44 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </button>
         </div>
 
-        {/* 4 Edmonton Street Layout Typologies Quick Switcher */}
+        {/* Edmonton Street Layout Typologies Dropdown Selection */}
         <div className="flex flex-col gap-1 pb-1.5 border-b border-white/10">
-          <div className="flex justify-between items-center text-[11px]">
-            <span className="text-gray-300 font-bold uppercase tracking-wider">{t('drawer_sliders_typology_label', 'Street Layout Typology:')}</span>
-            <span className="font-semibold text-[#FFC72C]">
+          <label 
+            htmlFor="street-typology-select" 
+            className="flex justify-between items-center text-[11px] font-bold text-gray-200 cursor-pointer"
+          >
+            <span className="uppercase tracking-wider text-gray-300">{t('drawer_sliders_typology_label', 'Street Layout Typology:')}</span>
+            <span className="text-[#FFC72C] font-semibold text-[11px]">
               {getStreetLayoutInfo(config.streetLayout).shortTitle}
             </span>
-          </div>
-          <div className="grid grid-cols-2 gap-1.5">
-            {([
-              { id: 'mature_laned', icon: '🏡', nameKey: 'drawer_sliders_typology_mature_laned', defaultName: 'Mature Laned', count: 16 },
-              { id: 'infill_skinny', icon: '🏘️', nameKey: 'drawer_sliders_typology_infill_skinny', defaultName: 'Infill & Duplex', count: 16 },
-              { id: 'suburban_front_driveway', icon: '🚗', nameKey: 'drawer_sliders_typology_suburban_front', defaultName: 'Front Driveway', count: 10 },
-              { id: 'contemporary_townhomes', icon: '🏢', nameKey: 'drawer_sliders_typology_townhomes', defaultName: 'Townhomes', count: 12 }
-            ] as const).map((item) => {
-              const isSelected = (config.streetLayout || 'mature_laned') === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => {
-                    triggerFeedback('choice');
-                    onConfigChange?.({ streetLayout: item.id });
-                  }}
-                  className={`flex items-center justify-between px-2 py-1.5 rounded-lg border text-left cursor-pointer transition-all ${
-                    isSelected
-                      ? 'bg-[#0081BC] text-white border-white shadow-xs font-bold'
-                      : 'bg-black/30 hover:bg-white/10 text-gray-200 border-white/10'
-                  }`}
-                >
-                  <div className="flex items-center gap-1.5 truncate">
-                    <span className="text-sm">{item.icon}</span>
-                    <span className="text-[11px] truncate">{t(item.nameKey, item.defaultName)}</span>
-                  </div>
-                  <span className="text-[9px] opacity-80 shrink-0 font-mono">
-                    {t('drawer_sliders_stalls_unit', '{count} stalls').replace('{count}', String(item.count))}
-                  </span>
-                </button>
-              );
-            })}
+          </label>
+          <div className="relative">
+            <select
+              id="street-typology-select"
+              value={config.streetLayout || 'mature_laned'}
+              onChange={(e) => {
+                triggerFeedback('choice');
+                onConfigChange?.({ streetLayout: e.target.value as any });
+              }}
+              aria-label={t('drawer_sliders_typology_label', 'Street Layout Typology')}
+              className="w-full appearance-none bg-black/40 hover:bg-black/55 text-white font-medium text-xs sm:text-sm py-2 pl-3 pr-9 rounded-lg border-2 border-white/20 hover:border-[#0081BC] focus:border-[#FFC72C] focus:outline-none focus:ring-2 focus:ring-[#FFC72C]/30 transition-all cursor-pointer shadow-inner"
+            >
+              <option value="mature_laned" className="bg-[#11283f] text-white">
+                🏡 {t('drawer_sliders_typology_mature_laned', 'Mature Laned (16 stalls)')} — Detached Rear Garages
+              </option>
+              <option value="infill_skinny" className="bg-[#11283f] text-white">
+                🏘️ {t('drawer_sliders_typology_infill_skinny', 'Infill & Duplex (16 stalls)')} — Laneway & Skinny Lots
+              </option>
+              <option value="suburban_front_driveway" className="bg-[#11283f] text-white">
+                🚗 {t('drawer_sliders_typology_suburban_front', 'Front Driveway (10 stalls)')} — Front-Attached Garages
+              </option>
+              <option value="contemporary_townhomes" className="bg-[#11283f] text-white">
+                🏢 {t('drawer_sliders_typology_townhomes', 'Townhomes (12 stalls)')} — Multi-Unit Row Housing
+              </option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-300">
+              <ChevronDown className="w-4 h-4 text-[#FFC72C]" />
+            </div>
           </div>
         </div>
 
@@ -262,24 +260,6 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </span>
         </div>
 
-        {/* Test 20s Traffic Jam & Police Response */}
-        <div className="pt-1">
-          <button
-            type="button"
-            onClick={() => {
-              triggerFeedback('button');
-              if (typeof (window as any).__dispatchPoliceBlockageTest === 'function') {
-                (window as any).__dispatchPoliceBlockageTest();
-              }
-              onClose();
-            }}
-            className="w-full py-1.5 px-3 bg-[#002B49] hover:bg-[#001D33] border border-[#3B82F6]/60 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-2 cursor-pointer text-xs min-h-[36px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
-            title={t('drawer_police_test_title', 'Test 20-second lane blockage: dispatches EPS police cruiser with lights & sirens to clear traffic')}
-          >
-            <span className="text-base">🚨</span>
-            <span>{t('drawer_police_test_btn', 'Call EPS')}</span>
-          </button>
-        </div>
 
         {/* Bottom Action Buttons: Replaced enforcement level and reshuffle */}
         <div className="flex gap-2 pt-2 border-t border-white/10">

@@ -560,5 +560,8 @@
   "watch_btn_back": "Bumalik",
   "watch_btn_results": "Tingnan ang mga Huling Resulta",
   "watch_desc": "Batay sa iyong mga piniling patakaran, naitakda na ang demand sa paradahan ng kapitbahayan. Obserbahan ang simulation upang makita kung ang iyong mga patakaran ay humahantong sa harmoniya o kaguluhan!",
-  "watch_title": "Panoorin ang Kalsada!"
+  "watch_title": "Panoorin ang Kalsada!",
+  "rotate_screen_title": "Pakiikot sa Patayo (Portrait)",
+  "rotate_screen_desc": "Ang Curbside Compass ay dinisenyo para sa patayong portrait view sa mobile upang maranasan ang live simulation ng komunidad at masagot ang mga tanong nang malinaw.",
+  "rotate_screen_continue_anyway": "Magpatuloy sa pahalang na view pa rin"
 }

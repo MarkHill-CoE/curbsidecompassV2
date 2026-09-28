@@ -67,13 +67,13 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
 
   // Lay out answer choices in responsive columns so cards fit comfortably without excessive scrolling
   const optionCount = currentQuestion.options.length;
-  let gridClasses = 'grid grid-cols-1 gap-1.5 sm:gap-2 md:gap-2.5 w-full';
+  let gridClasses = 'grid grid-cols-1 gap-1 sm:gap-1.5 md:gap-2 w-full';
   if (optionCount === 3) {
     gridClasses =
-      'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-3 gap-1.5 sm:gap-2 md:gap-2.5 w-full';
+      'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-3 gap-1 sm:gap-1.5 md:gap-2 w-full';
   } else if (optionCount === 2 || optionCount === 4) {
     gridClasses =
-      'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-2 gap-1.5 sm:gap-2 md:gap-2.5 w-full';
+      'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-2 gap-1 sm:gap-1.5 md:gap-2 w-full';
   }
 
   const [q0SubScreen, setQ0SubScreen] = useState<0 | 1>(0);
@@ -199,7 +199,9 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
   const handleSelectLayout = (layoutId: StreetLayoutTypology) => {
     triggerFeedback('choice');
     onLayoutChange?.(layoutId, neighbourhoodQuery, postalInput);
-    onSelectOption(currentQuestion.id, postalInput || neighbourhoodQuery || layoutId);
+    if (!currentAnswer || ['mature_laned', 'infill_skinny', 'suburban_front_driveway', 'contemporary_townhomes'].includes(currentAnswer)) {
+      onSelectOption(currentQuestion.id, layoutId);
+    }
   };
 
   return (
@@ -250,7 +252,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       </div>
 
       {/* Animated Question Card with adaptive layout & momentum scroll */}
-      <div className="relative flex-1 flex flex-col justify-start min-h-0 overflow-y-auto overscroll-contain pt-0.5 pb-2.5 sm:pt-1 sm:pb-3 pr-0.5">
+      <div className="relative flex-1 flex flex-col justify-start min-h-0 overflow-y-auto overscroll-contain pt-0.5 pb-1 sm:pt-1 sm:pb-2 pr-0.5">
         <AnimatePresence mode="wait">
           <motion.div
             key={`${currentQuestion.id}_${q0SubScreen}`}
@@ -260,7 +262,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             transition={{ duration: 0.18 }}
             className="flex flex-col w-full"
           >
-            <h3 className="text-[13pt] sm:text-[16pt] md:text-[18pt] font-bold text-[#193A5A] mb-1.5 sm:mb-2 leading-snug tracking-tight">
+            <h3 className="text-[13pt] sm:text-[15pt] md:text-[17pt] font-bold text-[#193A5A] mb-1 sm:mb-1.5 leading-snug tracking-tight">
               {currentQuestion.id === 'q0'
                 ? q0SubScreen === 0
                   ? t('q0_title_step1', 'Where do you live in Edmonton?')
@@ -458,25 +460,31 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                   </div>
 
                   {/* 4 Cards Grid - Compact 2x2 to fit 100% above the fold */}
-                  <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
+                  <div
+                    className="grid grid-cols-2 gap-2 sm:gap-2.5"
+                    role="radiogroup"
+                    aria-label="Edmonton Street Style Choices"
+                  >
                     {layoutOptions.map((layout) => {
                       const isSelected = currentStreetLayout === layout.id;
                       return (
                         <button
                           key={layout.id}
                           type="button"
+                          role="radio"
+                          aria-checked={isSelected}
                           onClick={() => handleSelectLayout(layout.id)}
-                          className={`text-left p-2 sm:p-2.5 rounded-lg border-2 transition-all cursor-pointer flex flex-col justify-between gap-1 relative ${
+                          className={`text-left p-2.5 sm:p-3 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-1.5 relative active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
                             isSelected
-                              ? 'border-[#004B8D] bg-[#004B8D]/6 shadow-2xs ring-1 ring-[#004B8D]'
-                              : 'border-gray-200 bg-white hover:border-[#004B8D]/40 hover:bg-gray-50/80'
+                              ? 'border-[#004B8D] bg-blue-50/80 shadow-xs ring-2 ring-[#004B8D]'
+                              : 'border-gray-200 bg-white hover:border-[#004B8D]/50 hover:bg-gray-50'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-1">
-                            <div className="flex items-center gap-1.5 min-w-0">
-                              <span className="text-lg leading-none shrink-0" role="img" aria-label={layout.title}>{layout.icon}</span>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-xl leading-none shrink-0" role="img" aria-label={layout.title}>{layout.icon}</span>
                               <div className="min-w-0">
-                                <h4 className="font-bold text-xs sm:text-sm text-black leading-tight truncate">
+                                <h4 className={`font-bold text-xs sm:text-sm leading-tight truncate ${isSelected ? 'text-[#004B8D]' : 'text-black'}`}>
                                   {layout.title}
                                 </h4>
                                 <span className="text-[10px] text-gray-500 font-semibold block leading-tight truncate">
@@ -484,11 +492,15 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                                 </span>
                               </div>
                             </div>
-                            {isSelected && (
-                              <span className="text-[#004B8D] font-bold text-xs flex items-center shrink-0">
-                                <Check className="w-3.5 h-3.5" />
-                              </span>
-                            )}
+                            <div className="shrink-0 pt-0.5">
+                              {isSelected ? (
+                                <span className="w-4 h-4 rounded-full bg-[#004B8D] text-white flex items-center justify-center shadow-xs">
+                                  <Check className="w-2.5 h-2.5 stroke-[3]" />
+                                </span>
+                              ) : (
+                                <div className="w-4 h-4 rounded-full border-2 border-gray-300 bg-white" />
+                              )}
+                            </div>
                           </div>
 
                           <p className="text-[10px] sm:text-[11px] text-gray-600 leading-tight line-clamp-1">
@@ -498,6 +510,22 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       );
                     })}
                   </div>
+
+                  {/* Active selection feedback pill */}
+                  {(() => {
+                    const activeInfo = getStreetLayoutInfo(currentStreetLayout);
+                    return (
+                      <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200 text-xs text-[#004B8D] mt-1 shadow-2xs">
+                        <span className="truncate">
+                          {t('survey_active_style_label', 'Active street style:')}{' '}
+                          <strong className="font-bold text-[#193A5A]">{activeInfo.title}</strong>
+                        </span>
+                        <span className="text-[10px] font-bold bg-[#004B8D] text-white px-2 py-0.5 rounded-full shrink-0 ml-2">
+                          {activeInfo.curbsideCapacity} stalls
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               )
             ) : (
@@ -547,26 +575,26 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                         triggerFeedback('choice');
                         onSelectOption(currentQuestion.id, option.id);
                       }}
-                      className={`w-full text-left p-3.5 sm:p-4 rounded-xl border-2 transition-all flex items-start gap-3 sm:gap-3.5 cursor-pointer relative min-h-[52px] sm:min-h-[56px] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] focus-visible:ring-offset-2 ${
+                      className={`w-full text-left py-2 px-2.5 sm:py-2.5 sm:px-3 rounded-lg border-2 transition-all flex items-start gap-2.5 cursor-pointer relative min-h-[44px] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] focus-visible:ring-offset-2 ${
                         isSelected
-                          ? 'border-[#004B8D] bg-[#004B8D]/8 shadow-xs ring-1 ring-[#004B8D]'
+                          ? 'border-[#004B8D] bg-[#004B8D]/8 shadow-2xs ring-1 ring-[#004B8D]'
                           : 'border-gray-200 bg-white hover:border-[#004B8D]/40 hover:bg-gray-50/80'
                       }`}
                     >
-                      <div className="pt-1 flex-shrink-0">
+                      <div className="pt-0.5 flex-shrink-0">
                         <div
-                          className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all ${
                             isSelected
                               ? 'border-[#004B8D] bg-[#004B8D]'
                               : 'border-gray-400 bg-white'
                           }`}
                         >
-                          {isSelected && <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-white" />}
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                         </div>
                       </div>
 
                       <div className="flex flex-col flex-grow min-w-0">
-                        <span className="text-[14pt] sm:text-[15pt] font-semibold leading-snug tracking-tight text-black">
+                        <span className="text-[12pt] font-semibold leading-tight tracking-tight text-black">
                           {t(`q${currentQuestion.number}_option_${option.id.slice(-1)}`, option.label)}
                         </span>
                       </div>
@@ -582,36 +610,44 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                 id="tradeoff-education-card"
                 role="region"
                 aria-live="polite"
-                className="mt-2.5 bg-white border-2 border-[#004B8D]/30 rounded-xl p-2.5 sm:p-3 shadow-xs transition-all animate-in fade-in slide-in-from-bottom-2 duration-200"
+                className="mt-1.5 bg-white border border-[#004B8D]/30 rounded-lg p-1.5 sm:p-2 shadow-2xs transition-all animate-in fade-in slide-in-from-bottom-1 duration-150"
               >
-                <div className="flex items-center gap-1.5 mb-1.5 pb-1 border-b border-gray-100">
-                  <span className="text-[10pt] font-extrabold uppercase tracking-wider text-[#004B8D] flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#FFC72C] fill-[#FFC72C]" />
+                <div className="flex items-center gap-1 mb-1 pb-0.5 border-b border-gray-100">
+                  <Sparkles className="w-3 h-3 text-[#FFC72C] fill-[#FFC72C] shrink-0" />
+                  <span className="text-[9pt] sm:text-[9.5pt] font-extrabold uppercase tracking-wider text-[#004B8D] leading-none">
                     {t('tradeoff_card_header', 'The Real-World Trade-Off For Your Choice')}
                   </span>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  {/* The Gain / Benefit Pill */}
-                  <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-300 rounded-lg px-2.5 py-1.5 text-emerald-950 shadow-2xs">
-                    <span className="self-start shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider bg-emerald-700 text-white shadow-2xs mt-0.5">
+                  {/* The Gain Container with container-wide highlighted header */}
+                  <div className="overflow-hidden bg-emerald-50/70 border border-emerald-300 rounded-md text-emerald-950 shadow-2xs">
+                    <div className="w-full bg-emerald-700 px-2 py-0.5 flex items-center gap-1.5 text-white">
                       <Check className="w-3 h-3 stroke-[3]" />
-                      {t('tradeoff_gain_pill', 'The Gain')}
-                    </span>
-                    <p className="text-[11.5pt] sm:text-[12pt] font-normal leading-snug text-emerald-950">
-                      {tradeoffOutcome?.benefitText || tradeoffOutcome?.curbsideImpactSummary}
-                    </p>
+                      <span className="text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider leading-none">
+                        {t('tradeoff_gain_pill', 'The Gain')}
+                      </span>
+                    </div>
+                    <div className="px-2 py-1.5">
+                      <p className="text-[12pt] font-normal leading-tight text-emerald-950">
+                        {tradeoffOutcome?.benefitText || tradeoffOutcome?.curbsideImpactSummary}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* The Trade-off / Cost Pill */}
-                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg px-2.5 py-1.5 text-amber-950 shadow-2xs">
-                    <span className="self-start shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider bg-amber-700 text-white shadow-2xs mt-0.5">
+                  {/* The Cost Container with container-wide highlighted header */}
+                  <div className="overflow-hidden bg-amber-50/70 border border-amber-300 rounded-md text-amber-950 shadow-2xs">
+                    <div className="w-full bg-amber-700 px-2 py-0.5 flex items-center gap-1.5 text-white">
                       <span className="text-[10px] leading-none">⚡</span>
-                      {t('tradeoff_cost_pill', 'The Cost')}
-                    </span>
-                    <p className="text-[11.5pt] sm:text-[12pt] font-normal leading-snug text-amber-950">
-                      {tradeoffOutcome?.costText || tradeoffOutcome?.tradeoffRationale}
-                    </p>
+                      <span className="text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider leading-none">
+                        {t('tradeoff_cost_pill', 'The Cost')}
+                      </span>
+                    </div>
+                    <div className="px-2 py-1.5">
+                      <p className="text-[12pt] font-normal leading-tight text-amber-950">
+                        {tradeoffOutcome?.costText || tradeoffOutcome?.tradeoffRationale}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

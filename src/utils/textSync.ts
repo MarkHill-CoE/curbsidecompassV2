@@ -527,6 +527,47 @@ export function getActiveSheetUrl(): string {
 }
 
 /**
+ * Checks whether a given or active URL corresponds to an editable Google Sheet document (i.e. /d/{id}/edit).
+ * Published links (/d/e/2PACX-) are read-only export feeds and not editable Google Sheets.
+ */
+export function isEditableGoogleSheetUrl(rawUrl?: string): boolean {
+  const url = (rawUrl || getActiveSheetUrl() || '').trim();
+  if (!url) return false;
+  return /\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/.test(url) && !url.includes('/d/e/');
+}
+
+/**
+ * Resolves the direct browser-viewable or editable Google Sheets URL from any configured sheet link.
+ */
+export function getDirectGoogleSheetWebUrl(rawUrl?: string): string {
+  const url = (rawUrl || getActiveSheetUrl() || DEFAULT_GOOGLE_SHEET_URL).trim();
+  if (!url) {
+    return 'https://docs.google.com/spreadsheets';
+  }
+
+  // 1. Standard Google Sheet URL with ID: /spreadsheets/d/{ID}
+  const idMatch = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if (idMatch && idMatch[1]) {
+    const gidMatch = url.match(/[?&#]gid=([0-9]+)/);
+    const gidHash = gidMatch ? `#gid=${gidMatch[1]}` : '';
+    return `https://docs.google.com/spreadsheets/d/${idMatch[1]}/edit${gidHash}`;
+  }
+
+  // 2. Published Google Sheet link: /d/e/2PACX-.../pub...
+  if (url.includes('/d/e/')) {
+    const gidMatch = url.match(/[?&#]gid=([0-9]+)/);
+    const gidParam = gidMatch ? `?gid=${gidMatch[1]}&single=true` : '';
+    const pubBase = url.replace(/\/pub(\?.*)?$/, '/pubhtml');
+    if (pubBase.includes('/pubhtml')) {
+      return pubBase.includes('?') ? pubBase : `${pubBase}${gidParam}`;
+    }
+    return url;
+  }
+
+  return url;
+}
+
+/**
  * Save custom sheet URL.
  */
 export function setActiveSheetUrl(url: string): void {

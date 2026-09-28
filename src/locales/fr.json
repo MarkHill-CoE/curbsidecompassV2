@@ -560,5 +560,8 @@
   "watch_btn_back": "Retour",
   "watch_btn_results": "Voir les résultats finaux",
   "watch_desc": "Selon vos choix de politiques, la demande de stationnement dans le quartier a été établie. Observez la simulation pour voir si vos politiques mènent à l'harmonie ou au chaos!",
-  "watch_title": "Observez la rue!"
+  "watch_title": "Observez la rue!",
+  "rotate_screen_title": "Veuillez tourner votre appareil à la verticale (portrait)",
+  "rotate_screen_desc": "La Boussole du stationnement est conçue pour le mode portrait vertical sur mobile afin d'explorer la simulation de quartier et répondre aux questions clairement.",
+  "rotate_screen_continue_anyway": "Continuer en vue horizontale malgré tout"
 }

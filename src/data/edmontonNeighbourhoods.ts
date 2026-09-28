@@ -353,6 +353,15 @@ export function detectLayoutAndNeighbourhood(input: string): {
     return { typology: 'mature_laned', neighbourhood: null, detectedBy: 'default' };
   }
 
+  // 0. Direct typology match (e.g. user selected suburban_front_driveway, contemporary_townhomes, etc.)
+  if (input in STREET_LAYOUTS) {
+    return {
+      typology: input as StreetLayoutTypology,
+      neighbourhood: null,
+      detectedBy: 'default'
+    };
+  }
+
   // 1. Direct neighbourhood match
   const matchedNeighbourhood = findNeighbourhood(input);
   if (matchedNeighbourhood) {

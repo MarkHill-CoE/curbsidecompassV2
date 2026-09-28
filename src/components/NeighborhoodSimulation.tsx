@@ -21,6 +21,8 @@ interface NeighborhoodSimulationProps {
   curbsidePct?: number;
   circlingCarCount?: number;
   occupiedGaragesCount?: number;
+  hideGaragePill?: boolean;
+  isExpanded?: boolean;
   onSimulationMetricsChange?: (metrics: {
     activeHouseholdCars: number;
     activeVisitorCars: number;
@@ -67,6 +69,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
   curbsidePct: propCurbsidePct,
   circlingCarCount: propCirclingCarCount,
   occupiedGaragesCount: propOccupiedGaragesCount,
+  hideGaragePill = false,
+  isExpanded = false,
   onSimulationMetricsChange,
   onHarmonyActiveChange
 }) => {
@@ -141,6 +145,15 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       setOccupiedGaragesCount(propOccupiedGaragesCount);
     }
   }, [propOccupiedGaragesCount]);
+
+  // When the Neighborhood Simulation is expanded, zoom in to 1.75 (175%)
+  useEffect(() => {
+    if (isExpanded) {
+      setZoomScale(1.75);
+    } else {
+      setZoomScale(1.33);
+    }
+  }, [isExpanded]);
 
   const triggerVisualAudioAlert = useCallback((_text: string, _icon: 'horn' | 'siren' | 'alarm' | 'medal' = 'horn') => {
     // Visual sound caption removed per user request
@@ -4611,7 +4624,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           id="cityCanvas"
           width={1200}
           height={800}
-          className="w-full h-full max-h-[100%] object-contain rounded-lg shadow-2xl block cursor-crosshair origin-center"
+          className="w-full h-full max-h-[100%] object-contain rounded-lg shadow-2xl block cursor-crosshair origin-center transition-transform duration-300 ease-out"
           style={{ transform: `scale(${zoomScale})` }}
           title={t('sim_canvas_title', 'Live Edmonton Multimodal Neighborhood Simulation - Click vehicles to honk')}
           role="img"
@@ -4789,41 +4802,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               </div>
             )}
           </div>
-        </div>
 
-        {/* Zoom Controls (Bottom Left) */}
-        <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 z-10 flex flex-col gap-0.5 sm:gap-1 bg-black/65 backdrop-blur-md p-0.5 sm:p-1 rounded-lg border border-white/15 transition-transform">
-          <button 
-            type="button"
-            onClick={() => setZoomScale(s => Math.min(4, s + 0.25))}
-            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-lg sm:text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
-            title={t('sim_zoom_in', 'Zoom In')}
-            aria-label={t('sim_zoom_in', 'Zoom In')}
-          >
-            +
-          </button>
-          <button 
-            type="button"
-            onClick={() => setZoomScale(1.33)}
-            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-xs sm:text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
-            title={t('sim_zoom_reset', 'Reset Camera View (Default 1.33x)')}
-            aria-label={t('sim_zoom_reset', 'Reset Camera View (Default 1.33x)')}
-          >
-            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-          </button>
-          <button 
-            type="button"
-            onClick={() => setZoomScale(s => Math.max(0.5, s - 0.25))}
-            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-lg sm:text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
-            title={t('sim_zoom_out', 'Zoom Out')}
-            aria-label={t('sim_zoom_out', 'Zoom Out')}
-          >
-            -
-          </button>
-        </div>
-
-        {/* Bottom Center Status: Rear Garages Container */}
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:bottom-3 z-20 pointer-events-auto max-w-[calc(100%-80px)]">
+          {/* Garage Status - Positioned directly below Curbside Dial Gauge */}
           <div
             id="hud-garage-status"
             role="button"
@@ -4839,23 +4819,58 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 setShowGarageIndicators((prev) => !prev);
               }
             }}
-            className="flex items-center gap-1.5 sm:gap-2 bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/70 hover:bg-[#1f476e]/95 px-2 py-1 sm:px-3 sm:py-2 rounded-md sm:rounded-lg shadow-xl text-white pointer-events-auto transition-all cursor-pointer select-none active:scale-95"
+            className={`w-[82px] sm:w-[94px] bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-1.5 rounded-md sm:rounded-lg shadow-md text-white pointer-events-auto transition-all cursor-pointer select-none active:scale-95 flex flex-col items-center gap-0.5 ${
+              hideGaragePill ? 'hidden lg:flex' : 'flex'
+            }`}
             title={t('sim_garages_tooltip', 'Detached Laned Garages: Real-time off-street vehicle parking across all 12 properties (Click to toggle garage roof indicators)')}
             aria-label={t('sim_garages_aria', 'Rear Garages Status: {count} of 12 occupied. Click to toggle garage badges.').replace('{count}', String(occupiedGaragesCount))}
           >
-            <span className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-[#10B981] animate-pulse shrink-0" />
-            <div className="flex flex-col min-w-0">
-              <div className="flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-black tracking-wide whitespace-nowrap">
-                <span>🏠 <span className="hidden xs:inline">{t('sim_rear_garages_label', 'REAR GARAGES')}</span></span>
-                <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1 sm:px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-bold">
-                  {occupiedGaragesCount}/12
-                </span>
-                <span className="bg-[#FBBF24] text-[#78350F] border border-[#D97706]/60 px-1 sm:px-1.5 py-0.2 rounded text-[9px] sm:text-[10px] font-bold hidden sm:inline">
-                  {12 - occupiedGaragesCount} {t('sim_vacant_label', 'Vacant')}
-                </span>
-              </div>
+            <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200">
+              <span className="truncate">{t('sim_garage_use_label', 'Garage Use')}</span>
+              <span className="text-[8px] sm:text-[9px] text-[#34D399] font-bold">
+                {Math.round((occupiedGaragesCount / 12) * 100)}%
+              </span>
+            </div>
+            <div className="flex items-center justify-between w-full text-[8px] sm:text-[9px] font-semibold text-gray-200 mt-0.5">
+              <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1 py-0.2 rounded text-[8.5px] sm:text-[9.5px] font-bold leading-none">
+                {occupiedGaragesCount}/12
+              </span>
+              <span className="text-gray-300 font-semibold leading-none truncate">
+                {12 - occupiedGaragesCount} {t('sim_vacant_label', 'Vacant')}
+              </span>
             </div>
           </div>
+        </div>
+
+        {/* Zoom Controls (Bottom Left) */}
+        <div className="absolute bottom-2 left-2 sm:bottom-3 sm:left-3 z-10 flex flex-col gap-0.5 sm:gap-1 bg-black/65 backdrop-blur-md p-0.5 sm:p-1 rounded-lg border border-white/15 transition-transform">
+          <button 
+            type="button"
+            onClick={() => setZoomScale(s => Math.min(4, s + 0.25))}
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-lg sm:text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
+            title={t('sim_zoom_in', 'Zoom In')}
+            aria-label={t('sim_zoom_in', 'Zoom In')}
+          >
+            +
+          </button>
+          <button 
+            type="button"
+            onClick={() => setZoomScale(isExpanded ? 1.75 : 1.33)}
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-xs sm:text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
+            title={t('sim_zoom_reset', 'Reset Camera View (Default {scale}x)').replace('{scale}', isExpanded ? '1.75' : '1.33')}
+            aria-label={t('sim_zoom_reset', 'Reset Camera View (Default {scale}x)').replace('{scale}', isExpanded ? '1.75' : '1.33')}
+          >
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+          <button 
+            type="button"
+            onClick={() => setZoomScale(s => Math.max(0.5, s - 0.25))}
+            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-lg sm:text-xl cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
+            title={t('sim_zoom_out', 'Zoom Out')}
+            aria-label={t('sim_zoom_out', 'Zoom Out')}
+          >
+            -
+          </button>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { SurveyStage } from './components/SurveyStage';
 import { ResultsView } from './components/ResultsView';
 import { ManualSlidersDrawer } from './components/ManualSlidersDrawer';
 import { MagnifiedGaugeDrawer } from './components/MagnifiedGaugeDrawer';
+import { RotateDeviceNotice } from './components/RotateDeviceNotice';
 
 // Temporary tool for the City communications team to review and edit copy directly
 import { GoogleSheetSyncModal } from './components/GoogleSheetSyncModal';
@@ -31,15 +32,18 @@ import {
   ChevronDown,
   ChevronUp,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ExternalLink
 } from 'lucide-react';
+import { getDirectGoogleSheetWebUrl, isEditableGoogleSheetUrl } from './utils/textSync';
 import { feedback, triggerFeedback } from './utils/feedback';
 import { ambientAudio } from './utils/ambientAudio';
 
 export default function App() {
   // # BEGIN TEMPORARY SHEETS SYNC
-  const { t, isCustomActive, itemCount } = useAppText();
+  const { t, isCustomActive, itemCount, sheetUrl } = useAppText();
   const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
+  const [syncModalTab, setSyncModalTab] = useState<'inventory' | 'url'>('inventory');
   // # END TEMPORARY SHEETS SYNC
 
   const [showManualSliders, setShowManualSliders] = useState<boolean>(false);
@@ -154,26 +158,7 @@ export default function App() {
   );
   const [soundEnabled, setSoundEnabled] = useState<boolean>(feedback.isSoundEnabled());
   const [hasManuallyChangedFont, setHasManuallyChangedFont] = useState(false);
-  const [fontSizePt, setFontSizePt] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const isTabletPortrait = window.matchMedia('(min-width: 768px) and (max-width: 1023px) and (orientation: portrait)').matches;
-      return isTabletPortrait ? 14 : 12;
-    }
-    return 12;
-  }); // Default text size is 12 points, or 14 points on vertical tablets
-
-  // Automatically adjust font size when viewing on a tablet held upright
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mediaQuery = window.matchMedia('(min-width: 768px) and (max-width: 1023px) and (orientation: portrait)');
-    const handler = (e: MediaQueryListEvent) => {
-      if (!hasManuallyChangedFont) {
-        setFontSizePt(e.matches ? 14 : 12);
-      }
-    };
-    mediaQuery.addEventListener('change', handler);
-    return () => mediaQuery.removeEventListener('change', handler);
-  }, [hasManuallyChangedFont]);
+  const [fontSizePt, setFontSizePt] = useState<number>(12); // Normal text size is 12 points
 
   // Apply the chosen font size across the whole webpage
   useEffect(() => {
@@ -230,6 +215,11 @@ export default function App() {
 
   // Update the simulation when the user chooses a different street type or neighbourhood
   const handleLayoutChange = useCallback((layout: StreetLayoutTypology, neighbourhoodName?: string, postalCode?: string) => {
+    setSelectedAnswers((prev) => ({
+      ...prev,
+      q0_layout: layout,
+      ...(prev.q0 ? {} : { q0: layout })
+    }));
     setManualOverride((prev) => ({
       ...(prev || {}),
       streetLayout: layout,
@@ -295,8 +285,9 @@ export default function App() {
 
       // Make sure the user entered a valid postal code or selected an answer before moving on
       if (currentQuestion.type === 'text' || currentQuestion.id === 'q0' || currentQuestion.id === 'q9') {
+        const hasLayoutChoice = !!(selectedAnswers['q0_layout'] || selectedAnswers['q9_layout']);
         const valResult = validatePostalCode(answer || '');
-        if (!valResult.isValid) {
+        if (!valResult.isValid && !hasLayoutChoice) {
           setValidationErrorMsg(valResult.message || 'Please enter your postal code or select your neighbourhood.');
           setShowValidationError(true);
           return;
@@ -343,6 +334,17 @@ export default function App() {
     setManualOverride((prev) => ({ ...(prev || {}), ...updated }));
   }, []);
 
+  const isDirectEditable = useMemo(() => isEditableGoogleSheetUrl(sheetUrl), [sheetUrl]);
+
+  const handleOpenGoogleSheet = () => {
+    if (isDirectEditable) {
+      window.open(getDirectGoogleSheetWebUrl(sheetUrl), '_blank', 'noopener,noreferrer');
+    } else {
+      setSyncModalTab('url');
+      setIsSyncModalOpen(true);
+    }
+  };
+
   return (
     <div className="flex flex-col h-[100dvh] max-h-[100dvh] w-screen bg-[#f4f6f8] text-gray-800 overflow-hidden font-sans">
       {/* Top Header Navigation Bar */}
@@ -364,33 +366,64 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {/* Communications Team: Text Inventory & Google Sheets Sync */}
-          <button
-            type="button"
-            onClick={() => setIsSyncModalOpen(true)}
-            title={
-              isCustomActive
-                ? `App Text Sync Active (${itemCount} items) - Click to browse inventory or update copy`
-                : 'App Text Inventory & Google Sheet Sync (Communications Tool)'
-            }
-            aria-label="App text inventory and copy sync tool"
-            className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg transition-all min-h-[38px] sm:min-h-[44px] cursor-pointer border ${
-              isCustomActive
-                ? 'bg-emerald-700 hover:bg-emerald-600 text-white border-emerald-400 shadow-sm'
-                : 'bg-white/10 hover:bg-white/20 text-[#FFC72C] border-white/20'
-            }`}
-          >
-            <FileSpreadsheet className="w-4 h-4 text-[#FFC72C]" />
-            <span className="font-bold flex items-center gap-1">
-              <span className="hidden sm:inline">App Text</span>
-              <span>Inventory</span>
-              {isCustomActive && (
-                <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-emerald-400 text-emerald-950 font-black">
-                  {itemCount}
-                </span>
-              )}
-            </span>
-          </button>
+          {/* Communications Team: Text Inventory & Direct Google Sheet Link */}
+          <div className="flex items-center rounded-lg border border-white/20 bg-white/10 overflow-hidden shadow-xs">
+            <button
+              type="button"
+              onClick={() => {
+                setSyncModalTab('inventory');
+                setIsSyncModalOpen(true);
+              }}
+              title={
+                isCustomActive
+                  ? `App Text Sync Active (${itemCount} items) - Click to browse inventory or update copy`
+                  : 'App Text Inventory & Google Sheet Sync (Communications Tool)'
+              }
+              aria-label="App text inventory and copy sync tool"
+              className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 transition-all min-h-[38px] sm:min-h-[44px] cursor-pointer ${
+                isCustomActive
+                  ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
+                  : 'hover:bg-white/20 text-[#FFC72C]'
+              }`}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-[#FFC72C]" />
+              <span className="font-bold flex items-center gap-1">
+                <span className="hidden sm:inline">App Text</span>
+                <span>Inventory</span>
+                {isCustomActive && (
+                  <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-emerald-400 text-emerald-950 font-black">
+                    {itemCount}
+                  </span>
+                )}
+              </span>
+            </button>
+            {isDirectEditable ? (
+              <a
+                href={getDirectGoogleSheetWebUrl(sheetUrl)}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Open live editable Google Sheet directly in new tab to edit app copy"
+                aria-label="Open live editable Google Sheet directly in new tab"
+                className="px-2 sm:px-2.5 py-1.5 text-white hover:bg-white/20 transition-all border-l border-white/20 flex items-center gap-1 text-[0.6875rem] sm:text-xs font-bold min-h-[38px] sm:min-h-[44px]"
+              >
+                <span className="hidden xs:inline">Google</span>
+                <span>Sheet</span>
+                <ExternalLink className="w-3.5 h-3.5 text-[#FFC72C]" />
+              </a>
+            ) : (
+              <button
+                type="button"
+                onClick={handleOpenGoogleSheet}
+                title="Connect your team's live Google Sheet to edit copy"
+                aria-label="Connect live Google Sheet"
+                className="px-2 sm:px-2.5 py-1.5 text-white hover:bg-white/20 transition-all border-l border-white/20 flex items-center gap-1 text-[0.6875rem] sm:text-xs font-bold min-h-[38px] sm:min-h-[44px] cursor-pointer"
+              >
+                <span className="hidden xs:inline">Google</span>
+                <span>Sheet</span>
+                <ExternalLink className="w-3.5 h-3.5 text-[#FFC72C]" />
+              </button>
+            )}
+          </div>
 
           <div className="hidden md:flex items-center bg-[#003566] rounded-md border border-[#002244] overflow-hidden flex-shrink-0">
             <button
@@ -507,6 +540,7 @@ export default function App() {
           totalDwellings={simulationMetrics.totalDwellings}
           onOpenManualSliders={() => {
             setShowMagnifiedGauge(false);
+            setIsSimExpanded(false);
             setShowManualSliders(true);
           }}
         />
@@ -515,46 +549,23 @@ export default function App() {
         <section
           id="simulation-section"
           onClick={() => {
-            if (!isSimExpanded && !isCompleted) {
+            if (!isSimExpanded && !isCompleted && !showManualSliders) {
               setIsSimExpanded(true);
             }
           }}
-          className={`relative bg-[#193A5A] flex-shrink-0 shadow-inner overflow-hidden border-[#004B8D] border-b-2 lg:border-b-0 lg:border-r-2 transition-all duration-300 ease-in-out cursor-pointer ${
+          className={`relative bg-[#193A5A] flex-shrink-0 shadow-inner overflow-hidden border-[#004B8D] border-b-2 lg:border-b-0 lg:border-r-2 transition-all duration-300 ease-in-out ${
+            showManualSliders ? '' : 'cursor-pointer'
+          } ${
             isCompleted
               ? "hidden lg:block"
-              : isSimExpanded
+              : isSimExpanded && !showManualSliders
               ? "w-full h-[67vh] max-h-none sm:h-[67vh] sm:max-h-none md:h-[67vh] md:max-h-none lg:w-[65%] xl:w-[65%]"
+              : showManualSliders
+              ? "w-full h-[18vh] min-h-[105px] max-h-[135px] sm:h-[22vh] sm:max-h-[170px] md:h-[26vh] md:max-h-[220px] lg:w-[48%] xl:w-[50%] 2xl:w-[52%]"
               : "w-full h-[22vh] min-h-[120px] max-h-[170px] sm:h-[30vh] sm:max-h-[240px] md:h-[38vh] md:max-h-[360px] lg:w-[48%] xl:w-[50%] 2xl:w-[52%]"
           } lg:h-full lg:max-h-none [@media(orientation:landscape)_and_(max-height:540px)]:h-full [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 [@media(orientation:landscape)_and_(max-height:540px)]:border-b-0 [@media(orientation:landscape)_and_(max-height:540px)]:border-r-2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
           aria-label={t('header_sim_view_aria', 'Neighborhood Parking Simulation View')}
         >
-          {/* Mobile indicator for expand/restore */}
-          {!isCompleted && (
-            <div className="absolute bottom-1.5 left-2 z-20 pointer-events-auto lg:hidden">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsSimExpanded((prev) => !prev);
-                }}
-                className="bg-[#002B49]/90 hover:bg-[#002B49] text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20 shadow-md flex items-center gap-1 cursor-pointer transition-all active:scale-95"
-                title={isSimExpanded ? t('sim_restore_title', 'Restore question view') : t('sim_expand_title', 'Expand simulation (slides question to lower 33%)')}
-              >
-                {isSimExpanded ? (
-                  <>
-                    <ChevronDown className="w-3 h-3 text-[#FFC72C]" />
-                    <span>{t('sim_restore_label', 'Restore Questions')}</span>
-                  </>
-                ) : (
-                  <>
-                    <ChevronUp className="w-3 h-3 text-[#FFC72C]" />
-                    <span>{t('sim_expand_label', 'Tap to Expand View')}</span>
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-
           {isSimplifiedMode ? (
             <SimplifiedStreetSummary
               config={simConfig}
@@ -571,7 +582,10 @@ export default function App() {
               policyNote={policyNote}
               onSwitchToSimulation={() => handleToggleSimplifiedMode(false)}
               onOpenMagnifiedGauge={() => setShowMagnifiedGauge(true)}
-              onOpenManualSliders={() => setShowManualSliders(true)}
+              onOpenManualSliders={() => {
+                setIsSimExpanded(false);
+                setShowManualSliders(true);
+              }}
               onCurbsideDemandChange={(newDemand) => {
                 setManualOverride((prev) => ({
                   ...prev,
@@ -588,7 +602,15 @@ export default function App() {
               policyNote={policyNote}
               isCompleted={isCompleted}
               showControls={showManualSliders}
-              onToggleControls={() => setShowManualSliders((prev) => !prev)}
+              onToggleControls={() => {
+                setShowManualSliders((prev) => {
+                  const next = !prev;
+                  if (next) {
+                    setIsSimExpanded(false);
+                  }
+                  return next;
+                });
+              }}
               onToggleMagnifiedGauge={() => setShowMagnifiedGauge((prev) => !prev)}
               onToggleSimplifiedMode={() => handleToggleSimplifiedMode(true)}
               curbsideDemandCount={simulationMetrics.curbsideDemandCount}
@@ -596,6 +618,8 @@ export default function App() {
               curbsidePct={simulationMetrics.curbsidePct}
               circlingCarCount={simulationMetrics.circlingCarCount}
               occupiedGaragesCount={simulationMetrics.occupiedGaragesCount}
+              hideGaragePill={!isSimExpanded || showManualSliders}
+              isExpanded={isSimExpanded}
               onSimulationMetricsChange={() => {}}
             />
           )}
@@ -605,43 +629,66 @@ export default function App() {
         <section
           id="survey-section"
           onClick={() => {
-            if (isSimExpanded) {
+            if (isSimExpanded && !showManualSliders) {
               setIsSimExpanded(false);
             }
           }}
           onFocusCapture={() => {
-            if (isSimExpanded) {
+            if (isSimExpanded && !showManualSliders) {
               setIsSimExpanded(false);
             }
           }}
           className={`relative w-full flex flex-col overflow-hidden min-h-0 bg-[#ffffff] lg:h-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full transition-all duration-300 ease-in-out ${
             isCompleted
               ? "w-full lg:w-[52%] xl:w-[50%] 2xl:w-[48%]"
-              : isSimExpanded
+              : isSimExpanded && !showManualSliders
               ? "h-[33vh] min-h-[33vh] max-h-[33vh] flex-none overflow-hidden lg:h-full lg:max-h-none lg:w-[35%] xl:w-[35%]"
               : "flex-1 lg:w-[52%] xl:w-[50%] 2xl:w-[48%]"
           } [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
           aria-label={t('header_survey_aria', 'Parking Policy Persona Survey')}
         >
-          {/* Restore banner when question container is slid down to lower 33% */}
-          {isSimExpanded && !isCompleted && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsSimExpanded(false);
-              }}
-              className="w-full py-1.5 px-3 bg-blue-50 hover:bg-blue-100 text-[#004B8D] text-xs font-black flex items-center justify-between border-b-2 border-[#004B8D]/30 shrink-0 cursor-pointer shadow-xs transition-colors z-20 animate-in fade-in"
-              title={t('survey_restore_title', 'Click to restore full Question view')}
+          {/* Middle bar: Larger Centre Button to Toggle between "Tap to Expand View" and "Tap to Restore View" */}
+          {!isCompleted && !showManualSliders && (
+            <div
+              className={`w-full py-2 px-3 flex items-center justify-center border-b shrink-0 z-20 transition-all ${
+                isSimExpanded
+                  ? 'bg-amber-50/90 border-amber-300 shadow-xs'
+                  : 'bg-slate-100/95 border-slate-300 lg:hidden shadow-2xs'
+              }`}
             >
-              <div className="flex items-center gap-1.5 truncate">
-                <ChevronUp className="w-4 h-4 text-[#004B8D] shrink-0" />
-                <span className="truncate">{t('survey_restore_banner', 'Question container in lower 33% • Tap to restore')}</span>
-              </div>
-              <span className="bg-[#004B8D] text-white px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
-                {t('survey_restore_btn', 'Restore Full View ▴')}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsSimExpanded((prev) => !prev);
+                }}
+                className="w-full max-w-sm sm:max-w-md py-2.5 px-6 rounded-full bg-[#004B8D] hover:bg-[#00386a] active:bg-[#002244] text-white text-xs sm:text-sm font-black shadow-md hover:shadow-lg flex items-center justify-center gap-2.5 cursor-pointer transition-all active:scale-[0.98] border-2 border-white/80 ring-2 ring-[#004B8D]/20 min-h-[42px] sm:min-h-[46px]"
+                title={
+                  isSimExpanded
+                    ? t('sim_restore_view_title', 'Tap to restore question view')
+                    : t('sim_expand_view_title', 'Tap to expand view')
+                }
+                aria-label={
+                  isSimExpanded
+                    ? t('sim_restore_view_label', 'Tap to Restore View')
+                    : t('sim_expand_view_label', 'Tap to Expand View')
+                }
+              >
+                {isSimExpanded ? (
+                  <>
+                    <ChevronDown className="w-4 h-4 text-[#FFC72C] shrink-0" />
+                    <span className="tracking-wide">{t('sim_restore_view_label', 'Tap to Restore View')}</span>
+                    <ChevronDown className="w-4 h-4 text-[#FFC72C] shrink-0" />
+                  </>
+                ) : (
+                  <>
+                    <ChevronUp className="w-4 h-4 text-[#FFC72C] shrink-0" />
+                    <span className="tracking-wide">{t('sim_expand_view_label', 'Tap to Expand View')}</span>
+                    <ChevronUp className="w-4 h-4 text-[#FFC72C] shrink-0" />
+                  </>
+                )}
+              </button>
+            </div>
           )}
 
           {/* Manual Sliders Overlay: positioned over the question container, blurring question content underneath while the neighborhood canvas remains crisp and unblurred */}
@@ -780,6 +827,7 @@ export default function App() {
       <GoogleSheetSyncModal
         isOpen={isSyncModalOpen}
         onClose={() => setIsSyncModalOpen(false)}
+        initialTab={syncModalTab}
       />
       {/* # END TEMPORARY SHEETS SYNC */}
 
@@ -790,6 +838,9 @@ export default function App() {
         isSimplifiedMode={isSimplifiedMode}
         onToggleSimplifiedMode={handleToggleSimplifiedMode}
       />
+
+      {/* Mobile Horizontal Screen Orientation Advisory */}
+      <RotateDeviceNotice />
     </div>
   );
 }

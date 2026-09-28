@@ -225,25 +225,8 @@ export const SimplifiedStreetSummary: React.FC<SimplifiedStreetSummaryProps> = (
           </p>
         </div>
 
-        {/* ROW E: Number of Vehicles Circling for Parking */}
-        <div className={`flex items-center gap-2 p-1.5 sm:p-2 rounded-lg border text-xs font-bold transition-all ${
-          circlingCarCount > 0 
-            ? 'bg-amber-500/20 border-amber-500/50 text-amber-200' 
-            : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-200'
-        }`}>
-          <div className={`w-2 h-2 rounded-full shrink-0 ${circlingCarCount > 0 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
-          <span className="text-xs sm:text-sm">
-            {circlingCarCount > 0 
-              ? `🚗 ${circlingCarCount} ${circlingCarCount === 1 ? t('static_circling_single', 'vehicle') : t('static_circling_plural', 'vehicles')} ${t('static_circling_active', 'circling looking for parking')}` 
-              : `🚗 ${t('static_circling_none', '0 vehicles circling (street traffic flowing freely)')}`}
-          </span>
-        </div>
-      </div>
-
-      {/* 3. Expandable Accordion Tabs for Secondary Containers */}
-      <div className="flex flex-col gap-1.5 sm:gap-2 pt-0.5 sm:pt-1 shrink-0">
-        {/* Accordion Item 1: Private & Off Street Parking */}
-        <div className="border border-white/15 rounded-lg overflow-hidden bg-[#162e47]">
+        {/* ROW D: Private & Off-Street Parking (moved inside Balanced Availability container just below summary) */}
+        <div className="border border-white/15 rounded-lg overflow-hidden bg-black/25">
           <button
             type="button"
             onClick={() => toggleAccordion('offstreet')}
@@ -287,6 +270,24 @@ export const SimplifiedStreetSummary: React.FC<SimplifiedStreetSummaryProps> = (
             </div>
           )}
         </div>
+
+        {/* ROW E: Number of Vehicles Circling for Parking */}
+        <div className={`flex items-center gap-2 p-1.5 sm:p-2 rounded-lg border text-xs font-bold transition-all ${
+          circlingCarCount > 0 
+            ? 'bg-amber-500/20 border-amber-500/50 text-amber-200' 
+            : 'bg-emerald-500/15 border-emerald-500/40 text-emerald-200'
+        }`}>
+          <div className={`w-2 h-2 rounded-full shrink-0 ${circlingCarCount > 0 ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+          <span className="text-xs sm:text-sm">
+            {circlingCarCount > 0 
+              ? `🚗 ${circlingCarCount} ${circlingCarCount === 1 ? t('static_circling_single', 'vehicle') : t('static_circling_plural', 'vehicles')} ${t('static_circling_active', 'circling looking for parking')}` 
+              : `🚗 ${t('static_circling_none', '0 vehicles circling (street traffic flowing freely)')}`}
+          </span>
+        </div>
+      </div>
+
+      {/* 3. Action Buttons */}
+      <div className="flex flex-col gap-1.5 sm:gap-2 pt-0.5 sm:pt-1 shrink-0">
 
         {/* Direct Button: Customize Street Assumptions in Live Simulation */}
         <button
