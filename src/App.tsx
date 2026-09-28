@@ -21,6 +21,7 @@ import {
 } from './data/surveyData';
 import { SimulationConfig, StreetLayoutTypology } from './types';
 import { getStreetLayoutInfo, detectLayoutAndNeighbourhood } from './data/edmontonNeighbourhoods';
+import { OutcomeTooltipPill } from './components/OutcomeTooltipPill';
 import {
   Compass,
   RotateCcw,
@@ -557,7 +558,7 @@ export default function App() {
             showManualSliders ? '' : 'cursor-pointer'
           } ${
             isCompleted
-              ? "hidden lg:block"
+              ? "hidden lg:block lg:w-1/2"
               : isSimExpanded && !showManualSliders
               ? "w-full h-[67vh] max-h-none sm:h-[67vh] sm:max-h-none md:h-[67vh] md:max-h-none lg:w-[65%] xl:w-[65%]"
               : showManualSliders
@@ -640,7 +641,7 @@ export default function App() {
           }}
           className={`relative w-full flex flex-col overflow-hidden min-h-0 bg-[#ffffff] lg:h-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full transition-all duration-300 ease-in-out ${
             isCompleted
-              ? "w-full lg:w-[52%] xl:w-[50%] 2xl:w-[48%]"
+              ? "w-full lg:w-1/2"
               : isSimExpanded && !showManualSliders
               ? "h-[33vh] min-h-[33vh] max-h-[33vh] flex-none overflow-hidden lg:h-full lg:max-h-none lg:w-[35%] xl:w-[35%]"
               : "flex-1 lg:w-[52%] xl:w-[50%] 2xl:w-[48%]"
@@ -746,26 +747,94 @@ export default function App() {
 
                   {/* Summary & View Toggle Pills */}
                   <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 pt-0.5 text-[9.5pt] sm:text-[10pt] font-bold">
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-800">
-                      📍 {simConfig.neighbourhoodName || 'Edmonton'}
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-[#004B8D]">
-                      🏡 {getStreetLayoutInfo(simConfig.streetLayout).shortTitle} ({simulationMetrics.curbsideStallsCapacity} stalls)
-                    </span>
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border ${
-                      simulationMetrics.curbsidePct >= 100
-                        ? 'bg-amber-50 border-amber-300 text-amber-900'
-                        : 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                    }`}>
-                      🚗 {simulationMetrics.curbsideDemandCount} Demand • {simulationMetrics.curbsidePct}% Occupancy
-                    </span>
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border ${
-                      simulationMetrics.circlingCarCount > 0
-                        ? 'bg-amber-50 border-amber-300 text-amber-900'
-                        : 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                    }`}>
-                      🚦 {simulationMetrics.circlingCarCount > 0 ? `${simulationMetrics.circlingCarCount} Circling` : 'Smooth Flow'}
-                    </span>
+                    <OutcomeTooltipPill
+                      icon="📍"
+                      label={simConfig.neighbourhoodName || 'Edmonton'}
+                      badgeClass="bg-gray-100 border-gray-200 text-gray-800 hover:bg-gray-200/70"
+                      tooltipTitle="Neighbourhood Typology"
+                      tooltipDesc="The Edmonton neighbourhood housing profile and density setting modeled in this simulation."
+                      statusBadge="Edmonton"
+                    />
+
+                    <OutcomeTooltipPill
+                      icon="🏡"
+                      label={`${getStreetLayoutInfo(simConfig.streetLayout).shortTitle} (${simulationMetrics.curbsideStallsCapacity} stalls)`}
+                      badgeClass="bg-blue-50 border-blue-200 text-[#004B8D] hover:bg-blue-100/70"
+                      tooltipTitle="Curbside Stalls Capacity"
+                      tooltipDesc={`The total number of legal on-street parking spaces (${simulationMetrics.curbsideStallsCapacity} stalls) physically available along both sides of this street block.`}
+                      statusBadge={`${simulationMetrics.curbsideStallsCapacity} Stalls`}
+                      statusColor="bg-[#004B8D] text-white"
+                    />
+
+                    <OutcomeTooltipPill
+                      icon="🚗"
+                      label={`${simulationMetrics.curbsideDemandCount} Demand`}
+                      badgeClass={
+                        simulationMetrics.curbsideDemandCount > simulationMetrics.curbsideStallsCapacity
+                          ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100/70'
+                          : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100/70'
+                      }
+                      tooltipTitle="Curbside Parking Demand"
+                      tooltipDesc="The total number of vehicles needing on-street parking right now, including resident cars without private driveway space, visitors, trades, and delivery services."
+                      statusBadge={`${simulationMetrics.curbsideDemandCount} Vehicles`}
+                      statusColor={
+                        simulationMetrics.curbsideDemandCount > simulationMetrics.curbsideStallsCapacity
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-emerald-600 text-white'
+                      }
+                    />
+
+                    <OutcomeTooltipPill
+                      icon="📊"
+                      label={`${simulationMetrics.curbsidePct}% Occupancy`}
+                      badgeClass={
+                        simulationMetrics.curbsidePct >= 100
+                          ? 'bg-red-50 border-red-300 text-red-900 hover:bg-red-100/70'
+                          : simulationMetrics.curbsidePct >= 85
+                          ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100/70'
+                          : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100/70'
+                      }
+                      tooltipTitle="Curbside Occupancy"
+                      tooltipDesc={
+                        simulationMetrics.curbsidePct >= 100
+                          ? `${simulationMetrics.curbsidePct}% of legal stalls are full. Demand exceeds physical capacity, causing drivers to circle or park elsewhere.`
+                          : simulationMetrics.curbsidePct >= 85
+                          ? `${simulationMetrics.curbsidePct}% of stalls are full. This reaches the ideal 85% planning standard, maximizing curb utility while preserving 1 to 2 open spots per block.`
+                          : `${simulationMetrics.curbsidePct}% of stalls are full. On-street parking is readily available with open spaces always in sight.`
+                      }
+                      statusBadge={
+                        simulationMetrics.curbsidePct >= 100
+                          ? 'Over Capacity'
+                          : simulationMetrics.curbsidePct >= 85
+                          ? 'Target (85%)'
+                          : 'Ample Space'
+                      }
+                      statusColor={
+                        simulationMetrics.curbsidePct >= 100
+                          ? 'bg-red-600 text-white'
+                          : simulationMetrics.curbsidePct >= 85
+                          ? 'bg-amber-600 text-white'
+                          : 'bg-emerald-600 text-white'
+                      }
+                    />
+
+                    <OutcomeTooltipPill
+                      icon="🚦"
+                      label={simulationMetrics.circlingCarCount > 0 ? `${simulationMetrics.circlingCarCount} Circling` : 'Smooth Flow'}
+                      badgeClass={
+                        simulationMetrics.circlingCarCount > 0
+                          ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100/70'
+                          : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100/70'
+                      }
+                      tooltipTitle="Traffic Flow & Search Delay"
+                      tooltipDesc={
+                        simulationMetrics.circlingCarCount > 0
+                          ? `${simulationMetrics.circlingCarCount} vehicle(s) are circling the block unable to find an open curb spot, generating neighbourhood traffic and emissions.`
+                          : "Zero vehicles are circling. Drivers find spots quickly upon arrival, keeping neighbourhood streets quiet and safe."
+                      }
+                      statusBadge={simulationMetrics.circlingCarCount > 0 ? `${simulationMetrics.circlingCarCount} Searching` : 'Optimal Flow'}
+                      statusColor={simulationMetrics.circlingCarCount > 0 ? 'bg-amber-600 text-white' : 'bg-emerald-600 text-white'}
+                    />
                     <button
                       type="button"
                       onClick={() => setIsSimExpanded((prev) => !prev)}
