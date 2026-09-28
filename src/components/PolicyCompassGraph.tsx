@@ -16,26 +16,25 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
   className = ''
 }) => {
   const { t } = useAppText();
-  // Normalize X and Y to percentage for compass marker
-  // totalX: negative = Taxpayer (Left), positive = User-Fee (Right)
-  // totalY in survey scoring: negative = Regulated/Restrictive (Top / Q1 & Q2), positive = Open Access/Free (Bottom / Q3 & Q4)
+  // Convert the user's score to a percentage position on the compass grid
+  // Horizontal (X axis): Left side represents Taxpayer-funded, Right side represents User-paid
+  // Vertical (Y axis): Top half represents Regulated parking, Bottom half represents Open access
   const clampedX = Math.max(-18, Math.min(18, totalX));
   const clampedY = Math.max(-18, Math.min(18, totalY));
   
   const rawLeftPct = 6 + ((clampedX + 18) / 36) * 88;
-  // Invert Y so that negative totalY (Regulated) maps to upper half (bottom% > 50) and positive totalY (Open Access) maps to lower half (bottom% < 50)
   const rawBottomPct = 6 + ((18 - clampedY) / 36) * 88;
 
-  // Strict quadrant alignment so the yellow target indicator always visibly matches and lands in persona.quadrant
+  // Make sure the target marker stays cleanly inside the correct visual quadrant
   let markerLeftPct = rawLeftPct;
   let markerBottomPct = rawBottomPct;
 
   if (persona.quadrant === 'Q1') {
-    // Quadrant 1: Top-Right (Regulated & User-Fee)
+    // Quadrant 1: Top-Right (Regulated & User-Paid)
     markerLeftPct = Math.max(53, Math.min(94, rawLeftPct));
     markerBottomPct = Math.max(53, Math.min(94, rawBottomPct));
   } else if (persona.quadrant === 'Q2') {
-    // Quadrant 2: Top-Left (Protective/Regulated & Taxpayer)
+    // Quadrant 2: Top-Left (Regulated & Taxpayer-Funded)
     markerLeftPct = Math.max(6, Math.min(47, rawLeftPct));
     markerBottomPct = Math.max(53, Math.min(94, rawBottomPct));
   } else if (persona.quadrant === 'Q3') {

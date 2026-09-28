@@ -99,9 +99,10 @@ export const SimplifiedStreetSummary: React.FC<SimplifiedStreetSummaryProps> = (
   const status = getStatusIndicator();
   const StatusIcon = status.icon;
 
-  // Off-street calculations
-  const occupiedGarages = Math.min(12, Math.max(0, Math.round(activeHouseholdCars * 0.5)));
-  const vacantGarages = Math.max(0, 12 - occupiedGarages);
+  // Calculate private garage parking based on total homes in the neighbourhood
+  const maxGarages = totalDwellings || 12;
+  const occupiedGarages = Math.min(maxGarages, Math.max(0, Math.round(activeHouseholdCars * 0.75)));
+  const vacantGarages = Math.max(0, maxGarages - occupiedGarages);
 
   return (
     <div className="w-full h-full bg-[#112438] text-white flex flex-col justify-start p-2.5 sm:p-4 overflow-y-auto overscroll-contain select-none gap-2 sm:gap-2.5">
@@ -253,7 +254,7 @@ export const SimplifiedStreetSummary: React.FC<SimplifiedStreetSummaryProps> = (
               <Home className="w-4 h-4 text-[#FFC72C] shrink-0" />
               <span className="truncate">{t('static_acc_offstreet_title', 'Private & Off-Street Parking')}</span>
               <span className="text-[10px] bg-white/10 px-1.5 py-0.5 rounded text-gray-300 font-mono shrink-0">
-                {occupiedGarages}/12 {t('static_acc_offstreet_garages_full', 'Garages Full')}
+                {occupiedGarages}/{maxGarages} {t('static_acc_offstreet_garages_full', 'Garages Full')}
               </span>
             </div>
             {openAccordion === 'offstreet' ? (

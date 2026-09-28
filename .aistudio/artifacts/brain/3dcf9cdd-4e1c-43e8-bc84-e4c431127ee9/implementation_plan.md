@@ -1,85 +1,224 @@
-# Implementation Plan: Civic Onboarding & Educational Street Model Mode
+# Deployment Guide: How to Deploy Curbside Compass to Google Cloud Run with Cloud SQL
 
-## 1. Executive Summary & User Alignment
-
-This plan addresses public participant hesitation and skepticism toward gamified simulations in municipal policy feedback. By providing a structured, respectful introduction, the app bridges the gap between traditional civic consultation surveys and modern interactive digital twins.
-
-Based on consultation responses, this feature introduces:
-1. **Interactive 3-Step Civic Welcome Walkthrough**: A clear, friendly onboarding modal that introduces the tool as an **"Educational Interactive Neighbourhood Street Model"**, clarifying that it is a civic planning educational tool designed to test real-world Edmonton street scenarios rather than a video game.
-2. **Simplified / Static Mode Toggle**: A dedicated switch enabling participants to collapse or pause the live animated canvas into a clean, low-motion diagrammatic overview with high-legibility meters and parking demand statistics.
-3. **Transparent Civic Framing**: Updated contextual banners and tooltips that explain how each survey policy choice directly translates to street capacity, curbside availability, and neighbourhood access.
-4. **First-Visit Persistence & On-Demand Replay**: The welcome walkthrough opens automatically for first-time visitors (persisted via `localStorage`), and remains easily accessible via a persistent "How This Works" / "About Street Model" button in the top navigation bar.
+Welcome! This guide explains how to take your **Curbside Compass** web application and put it on the internet using **Google Cloud Run** and a **Cloud SQL (PostgreSQL)** database, completely automated with a **GitHub Actions** robot helper.
 
 ---
 
-## 2. Visual Architecture & Design Guidelines
+## 🌟 The Big Picture: How Everything Works (Like You're 12!)
 
-### Design Tokens & Layout Philosophy
-- **Domain Aesthetic**: Municipal Institutional & Educational Simulation (City of Edmonton brand standards: Deep Navy `#004B8D`, Sky Accent `#0081BC`, Heritage Gold `#FFC72C`, Neutral Warm Slate `#F8FAFC`).
-- **Zero-Pill Discipline**: Metadata, badges, and progress indicators avoid floating colorful pill capsules; they use clean structural typography, solid dividers, and WCAG AA compliant text containers.
-- **Motion & Accessibility**:
-  - Modal respects `prefers-reduced-motion`.
-  - Accessible focus management with keyboard trapping (`Tab`, `Escape` to close, `Enter` to advance).
-  - Clear touch targets ($\ge 44\text{px}$) with visible high-contrast focus rings.
+Imagine you built an awesome LEGO castle in your bedroom, and now you want millions of people in Edmonton to play with it without coming into your bedroom:
 
----
-
-## 3. Feature Specifications
-
-### A. 3-Step Civic Welcome Walkthrough Modal (`CivicOnboardingModal.tsx`)
-- **Step 1: Welcome & Purpose ("Why a Neighbourhood Model?")**
-  - Explains the purpose of Curbside Compass: to help Edmontonians explore how parking policies, residential infill, and curb rules balance parking access, transit, and street safety.
-  - Reassures participants: No prior technical or gaming experience needed. The model updates automatically as questions are answered.
-- **Step 2: How the Street Model Works ("Connecting Policies to Real Streets")**
-  - Visual breakdown showing:
-    - 🏠 **Houses & Driveways**: Residential homes with laneway rear garages and private parking.
-    - 🚗 **Curbside Stalls**: On-street public spaces shared by residents, guests, and delivery vans.
-    - 📊 **Curbside Gauge**: A real-time meter indicating when street parking is plentiful, balanced, or constrained.
-- **Step 3: Choose Your Experience ("Animated vs. Simplified View")**
-  - Gives the participant the choice to proceed with:
-    - **Live Street Simulation (Default)**: Full isometric animation with moving vehicles, cyclists, and transit.
-    - **Simplified Street Summary (Accessible)**: Static visual snapshot with reduced motion, high-contrast gauges, and direct policy metric summaries.
-  - Clear confirmation button: **"Start Consultation"**.
-
-### B. Simplified / Static Mode Integration
-- Integrated in the top header and within the simulation HUD controls.
-- When enabled:
-  - Pauses canvas vehicle rendering animations or renders a clean static overhead diagram snapshot.
-  - Highlights essential numerical figures: Curbside Occupancy %, Total Parked Vehicles, Rear Garage Usage, and Circling Demand.
-  - Reduces CPU/GPU overhead for older mobile devices and eliminates motion sickness or sensory overload for sensitive users.
-
-### C. Persistent "How This Works" Navigation Trigger
-- Placed in the top right header beside language and audio controls.
-- Allows any user to re-open the walkthrough at any point during their survey session.
+1. **Your Web App (The LEGO Castle)**:
+   The React and Tailwind code you've built. It runs inside a browser so people can answer questions and see the 3D neighbourhood simulation.
+2. **Docker & Nginx (The Magical Lunchbox)**:
+   A **Docker Container** is like a sealed lunchbox. Inside this lunchbox, you put your pre-baked website and a tiny, lightning-fast web server called **Nginx**. Because everything is inside the lunchbox, it works identically on your laptop, on a friend's Mac, or inside Google's giant data centers.
+3. **Google Cloud Run (The Chef Who Only Cooks When Ordered)**:
+   Normally, running a website meant leaving a computer plugged into the wall 24 hours a day, burning electricity and money. **Cloud Run** is serverless: when a citizen visits your link, Google wakes up a container in 1 second, serves the webpage, and if nobody visits at 3 AM, it goes to sleep and costs **$0.00**.
+4. **Cloud SQL PostgreSQL (The Steel Filing Cabinet)**:
+   When people finish the survey, where do their answers go? If the server restarts, memory disappears. A **PostgreSQL Database** is like a fireproof, lock-and-key digital filing cabinet where survey votes, feedback, and neighbourhood choices are saved safely forever.
+5. **GitHub Actions (The Friendly Robot Helper)**:
+   Instead of you typing long commands on your computer every time you fix a spelling mistake or tweak a slider, you push code to GitHub. A robot helper automatically wakes up, builds the container, tests it, and delivers it to Google Cloud Run.
 
 ---
 
-## 4. Technical & Component Architecture
+## 🗺️ Architecture Overview
 
-1. **`src/components/CivicOnboardingModal.tsx`**:
-   - Manages step state (`currentStep`: 1, 2, 3), step indicators, and accessibility controls.
-   - Saves `curbside_compass_onboarding_completed` in `localStorage`.
-2. **`src/components/SimplifiedStreetSummary.tsx`**:
-   - Rendered as an alternative view inside the `simulation-section` when `isSimplifiedMode` is toggled.
-   - Presents a clean, structured infographic card breakdown of parking metrics without continuous requestAnimationFrame canvas cycles.
-3. **`src/App.tsx`**:
-   - Houses `showOnboarding` and `isSimplifiedMode` state.
-   - Header action button (`HelpCircle` / "How This Works") to trigger onboarding modal.
-   - Conditional rendering between `NeighborhoodSimulation` and `SimplifiedStreetSummary` or passing `isSimplifiedMode` prop to pause internal physics.
+```
+                      ┌───────────────────────────────────────────────┐
+                      │              Citizen in Edmonton              │
+                      │         (iPhone / Android / Laptop)           │
+                      └───────────────────────┬───────────────────────┘
+                                              │ HTTPS (Port 443)
+                                              ▼
+┌─────────────────────────────────────────────────────────────────────────────────────┐
+│ Google Cloud Project (e.g., edmonton-curbside-compass)                              │
+│                                                                                     │
+│  ┌──────────────────────────────────────────────────────────────────────────────┐  │
+│  │ Google Cloud Run Service (Serverless Container)                              │  │
+│  │                                                                              │  │
+│  │   ┌──────────────────────────────────────────────────────────────────────┐   │  │
+│  │   │ Nginx Web Server (Port 8080)                                         │   │  │
+│  │   │  ├── Serves compiled Vite HTML/JS/CSS assets                         │   │  │
+│  │   │  └── Proxy /api/* requests to backend or Cloud Run sidecar           │   │  │
+│  │   └──────────────────────────────────┬───────────────────────────────────┘   │  │
+│  └──────────────────────────────────────┼───────────────────────────────────────┘  │
+│                                         │ Cloud SQL Auth Proxy / Unix Socket        │
+│                                         ▼                                           │
+│  ┌──────────────────────────────────────────────────────────────────────────────┐  │
+│  │ Cloud SQL Instance (PostgreSQL 16)                                           │  │
+│  │  └── Database: curbside_compass_db                                           │  │
+│  │       ├── table: survey_responses                                            │  │
+│  │       └── table: anonymous_postal_stats                                      │  │
+│  └──────────────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## 5. Verification & Acceptance Criteria
+## 📋 Step-by-Step Implementation Roadmap
 
-1. **First-Time Visitor Flow**:
-   - Opening the application without existing local storage triggers the 3-Step Welcome Walkthrough.
-   - Stepping through Step 1 $\to$ Step 2 $\to$ Step 3 behaves smoothly with forward/backward navigation and keyboard support.
-2. **View Preference Selection**:
-   - Selecting "Simplified View" switches the street display to the calm static summary.
-   - Selecting "Live Simulation" continues normal isometric rendering.
-3. **Modal Dismissal & Re-launch**:
-   - Completing the modal saves preference; subsequent page refreshes do not disrupt the user.
-   - Clicking "How This Works" in the header immediately re-opens the walkthrough without resetting active survey progress.
-4. **Accessibility & Responsive Checks**:
-   - Verified on mobile viewport (360px–420px) and desktop (1440px).
-   - All interactive controls have $\ge 44\text{px}$ touch targets, visible focus outlines, and full screen reader labels.
+### Step 1: Prepare Google Cloud (Your Cloud Kingdom)
+
+1. **Sign in to Google Cloud Console**:
+   - Go to [console.cloud.google.com](https://console.cloud.google.com/).
+   - Click the project dropdown at the top and click **New Project**. Name it `curbside-compass-prod`.
+2. **Enable Google Cloud APIs**:
+   Open Cloud Shell (the `>_` icon at top right) and run:
+   ```bash
+   gcloud services enable \
+     run.googleapis.com \
+     sqladmin.googleapis.com \
+     artifactregistry.googleapis.com \
+     cloudbuild.googleapis.com \
+     secretmanager.googleapis.com
+   ```
+3. **Create an Artifact Registry (Container Warehouse)**:
+   This is where your Docker lunchboxes are stored:
+   ```bash
+   gcloud artifacts repositories create curbside-repo \
+     --repository-format=docker \
+     --location=northamerica-northeast1 \
+     --description="Docker repository for Curbside Compass"
+   ```
+
+---
+
+### Step 2: Create Your Cloud SQL Database (The Steel Filing Cabinet)
+
+1. **Create the Cloud SQL PostgreSQL Instance**:
+   Run this in Cloud Shell (choose `northamerica-northeast1` for Montreal or `us-central1` for low latency):
+   ```bash
+   gcloud sql instances create curbside-db-instance \
+     --database-version=POSTGRES_16 \
+     --tier=db-f1-micro \
+     --region=northamerica-northeast1 \
+     --root-password="ChooseAStrongPassword123!"
+   ```
+   *(Note: `db-f1-micro` is very inexpensive, costing ~$7–$10/month, and can scale up whenever high public traffic arrives).*
+
+2. **Create the Database and Application User**:
+   ```bash
+   # Create the application database
+   gcloud sql databases create curbside_db --instance=curbside-db-instance
+
+   # Create a secure user for your app
+   gcloud sql users create curbside_app_user \
+     --instance=curbside-db-instance \
+     --password="SuperSecureAppPassword456!"
+   ```
+
+3. **Database Schema (What the Filing Cabinet Holds)**:
+   Create the initial table to store user responses safely:
+   ```sql
+   CREATE TABLE survey_submissions (
+       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+       created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+       postal_code_prefix VARCHAR(3),
+       neighbourhood VARCHAR(100),
+       street_layout VARCHAR(50),
+       answers JSONB NOT NULL,
+       persona_title VARCHAR(100),
+       policy_x_score NUMERIC(5,2),
+       policy_y_score NUMERIC(5,2)
+   );
+   ```
+
+---
+
+### Step 3: Configure the Web App Container for Cloud Run
+
+Google Cloud Run expects your container to listen on the port given by the `$PORT` environment variable (which is `8080` by default).
+
+1. **Update `nginx.conf`**:
+   Adjust Nginx to listen on port `8080` (Cloud Run's default) and handle Cloud Run health checks.
+2. **Update `Dockerfile`**:
+   Ensure multi-stage caching: Node 20 builds the Vite bundles, and lightweight Nginx Alpine serves the static assets.
+
+---
+
+### Step 4: Automate Deployments with GitHub Actions (The Robot)
+
+Every time you commit to `main`, GitHub Actions will:
+1. Check out your code.
+2. Build the Docker container.
+3. Push it to Google Artifact Registry.
+4. Deploy it directly to Cloud Run without downtime!
+
+Create `.github/workflows/deploy.yml`:
+```yaml
+name: Deploy to Google Cloud Run
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  PROJECT_ID: curbside-compass-prod
+  REGION: northamerica-northeast1
+  SERVICE_NAME: curbside-compass
+  REPOSITORY: curbside-repo
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - name: Build and Push Docker Container
+        run: |
+          IMAGE_TAG="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+          docker build -t $IMAGE_TAG .
+          docker push $IMAGE_TAG
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.IMAGE_TAG }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory 512Mi \
+            --cpu 1 \
+            --min-instances 0 \
+            --max-instances 10
+```
+
+---
+
+### Step 5: Connecting the Database with Cloud Run
+
+Because your app is an interactive client-side React app with simulation math running in the browser:
+- For storing survey submissions, we attach a lightweight Node/Express API endpoint or Cloud Function proxy that receives the anonymous survey payload.
+- In Cloud Run, you enable the **Cloud SQL connection**:
+  ```bash
+  gcloud run services update curbside-compass \
+    --region=northamerica-northeast1 \
+    --add-cloudsql-instances=curbside-compass-prod:northamerica-northeast1:curbside-db-instance
+  ```
+- This creates an encrypted internal Unix socket (`/cloudsql/...`), so your database is never exposed directly to the public internet!
+
+---
+
+## 🎯 Verification & Launch Checklist
+
+- [ ] `nginx.conf` listens on port `8080` for Cloud Run.
+- [ ] Dockerfile compiles cleanly with `npm run build` and tests locally.
+- [ ] Google Cloud Project created with Cloud Run, Cloud SQL, and Artifact Registry enabled.
+- [ ] Cloud SQL PostgreSQL instance running with `survey_submissions` table.
+- [ ] GitHub repository secrets populated with `GCP_SA_KEY`.
+- [ ] GitHub Actions workflow triggers and deploys green.
+- [ ] Live URL loaded over HTTPS with zero console errors.

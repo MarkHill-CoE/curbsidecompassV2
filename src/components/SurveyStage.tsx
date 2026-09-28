@@ -9,9 +9,6 @@ import {
   Search,
   Check,
   Sparkles,
-  Building,
-  Home,
-  Car,
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -19,7 +16,6 @@ import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
 import { QuestionTradeoffOutcome } from '../data/surveyData';
 import {
-  STREET_LAYOUTS,
   getStreetLayoutInfo,
   getTypologyFromPostalCode,
   detectLayoutAndNeighbourhood,
@@ -69,22 +65,15 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
   const currentAnswer = selectedAnswers[currentQuestion.id];
   const isTextQuestion = currentQuestion.type === 'text' || currentQuestion.options.length === 0;
 
-  // Dynamic grid configuration based on option count
-  // Mobile vertical: 1 column
-  // Mobile horizontal (landscape max-height 540px): 2 or 3 columns (so everything fits above fold)
-  // Tablet vertical (md): 2 or 3 columns
-  // Desktop & Tablet horizontal (lg/xl): 2 or 3 columns
+  // Lay out answer choices in responsive columns so cards fit comfortably without excessive scrolling
   const optionCount = currentQuestion.options.length;
   let gridClasses = 'grid grid-cols-1 gap-1.5 sm:gap-2 md:gap-2.5 w-full';
-  if (optionCount === 2) {
-    gridClasses =
-      'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-2 gap-1.5 sm:gap-2 md:gap-2.5 w-full';
-  } else if (optionCount === 4) {
-    gridClasses =
-      'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-2 gap-1.5 sm:gap-2 md:gap-2.5 w-full';
-  } else if (optionCount === 3) {
+  if (optionCount === 3) {
     gridClasses =
       'grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-3 gap-1.5 sm:gap-2 md:gap-2.5 w-full';
+  } else if (optionCount === 2 || optionCount === 4) {
+    gridClasses =
+      'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-2 gap-1.5 sm:gap-2 md:gap-2.5 w-full';
   }
 
   const [q0SubScreen, setQ0SubScreen] = useState<0 | 1>(0);
@@ -97,12 +86,17 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
   });
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Reset to screen 0 if advancing past question 0
+  // Reset to screen 0 when advancing questions
   useEffect(() => {
     if (currentStep > 0) {
       setQ0SubScreen(0);
     }
   }, [currentStep]);
+
+  const selectedOption = useMemo(() => {
+    if (!currentQuestion?.options || !currentAnswer) return null;
+    return currentQuestion.options.find((opt) => opt.id === currentAnswer) || null;
+  }, [currentQuestion, currentAnswer]);
 
   const filteredNeighbourhoods = useMemo(() => {
     return searchNeighbourhoods(neighbourhoodQuery, 8);
@@ -266,27 +260,27 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             transition={{ duration: 0.18 }}
             className="flex flex-col w-full"
           >
-            <h3 className="text-sm sm:text-base md:text-lg font-bold text-[#002B49] mb-1 sm:mb-2 [@media(orientation:landscape)_and_(max-height:540px)]:text-xs [@media(orientation:landscape)_and_(max-height:540px)]:mb-0.5 leading-snug tracking-tight">
+            <h3 className="text-[14pt] sm:text-[16pt] md:text-[18pt] font-bold text-[#193A5A] mb-2 sm:mb-2.5 leading-snug tracking-tight">
               {currentQuestion.id === 'q0'
                 ? q0SubScreen === 0
-                  ? t('q0_title_step1', 'Find your Edmonton street layout')
-                  : t('q0_title_step2', 'Confirm your street layout')
-                : currentQuestion.text}
+                  ? t('q0_title_step1', 'Where do you live in Edmonton?')
+                  : t('q0_title_step2', 'Confirm your street style')
+                : t(`q${currentQuestion.number}_question`, currentQuestion.text)}
             </h3>
 
             {isTextQuestion ? (
               q0SubScreen === 0 ? (
                 /* Screen 0A: Location / Postal Code / Neighbourhood Input (Optimized to fit 100% above the fold) */
-                <div className="w-full flex flex-col gap-1.5 pt-0.5">
-                  <p className="text-xs text-gray-600 leading-tight">
+                <div className="w-full flex flex-col gap-2 pt-0.5">
+                  <label htmlFor="location-smart-input" className="block text-[14pt] sm:text-[15pt] font-bold text-[#193A5A] leading-snug">
                     {t('q0_helper_short', 'Search your neighbourhood or enter a postal code to match your street:')}
-                  </p>
+                  </label>
 
-                  {/* Single Smart Unified Search Input */}
+                  {/* Single Smart Unified Search Input with explicit 48px touch target */}
                   <div className="relative flex flex-col gap-1 w-full">
                     <div className="relative">
-                      <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                        <Search className="w-4 h-4 text-[#004B8D]" />
+                      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                        <Search className="w-5 h-5 text-[#004B8D]" />
                       </div>
                       <input
                         type="text"
@@ -304,7 +298,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                             setQ0SubScreen(1);
                           }
                         }}
-                        className="w-full pl-9 pr-8 py-1.5 sm:py-2 bg-white border border-gray-300 rounded-lg text-xs sm:text-sm font-semibold text-[#004B8D] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20 transition-all shadow-2xs"
+                        className="w-full pl-11 pr-10 py-2.5 sm:py-3 bg-white border-2 border-gray-300 rounded-lg text-[14pt] sm:text-[15pt] font-semibold text-[#004B8D] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20 transition-all min-h-[48px] shadow-2xs"
                         aria-label={t('survey_location_input_aria', 'Edmonton postal code or neighbourhood')}
                       />
                       {(postalInput || neighbourhoodQuery) && currentAnswer !== 'OPT_OUT' && (
@@ -315,10 +309,10 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                             setNeighbourhoodQuery('');
                             onSelectOption(currentQuestion.id, '');
                           }}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1.5 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
                           aria-label={t('survey_clear_location_aria', 'Clear location search')}
                         >
-                          <X className="w-3.5 h-3.5" />
+                          <X className="w-4 h-4" />
                         </button>
                       )}
                     </div>
@@ -482,7 +476,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                             <div className="flex items-center gap-1.5 min-w-0">
                               <span className="text-lg leading-none shrink-0" role="img" aria-label={layout.title}>{layout.icon}</span>
                               <div className="min-w-0">
-                                <h4 className="font-bold text-xs sm:text-sm text-gray-900 leading-tight truncate">
+                                <h4 className="font-bold text-xs sm:text-sm text-black leading-tight truncate">
                                   {layout.title}
                                 </h4>
                                 <span className="text-[10px] text-gray-500 font-semibold block leading-tight truncate">
@@ -547,36 +541,33 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       type="button"
                       role="radio"
                       aria-checked={isSelected}
+                      aria-describedby={(currentAnswer && tradeoffOutcome?.hasAnswer) ? 'tradeoff-education-card' : undefined}
                       tabIndex={isSelected || (!currentAnswer && option === currentQuestion.options[0]) ? 0 : -1}
                       onClick={() => {
                         triggerFeedback('choice');
                         onSelectOption(currentQuestion.id, option.id);
                       }}
-                      className={`w-full text-left p-2 sm:p-2.5 md:p-3 rounded-lg border-2 transition-all flex items-start gap-2 sm:gap-2.5 cursor-pointer relative min-h-[44px] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] focus-visible:ring-offset-2 ${
+                      className={`w-full text-left p-3.5 sm:p-4 rounded-xl border-2 transition-all flex items-start gap-3 sm:gap-3.5 cursor-pointer relative min-h-[52px] sm:min-h-[56px] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] focus-visible:ring-offset-2 ${
                         isSelected
-                          ? 'border-[#004B8D] bg-[#004B8D]/6 shadow-2xs ring-1 ring-[#004B8D]'
+                          ? 'border-[#004B8D] bg-[#004B8D]/8 shadow-xs ring-1 ring-[#004B8D]'
                           : 'border-gray-200 bg-white hover:border-[#004B8D]/40 hover:bg-gray-50/80'
                       }`}
                     >
-                      <div className="pt-0.5 flex-shrink-0">
+                      <div className="pt-1 flex-shrink-0">
                         <div
-                          className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 flex items-center justify-center transition-all ${
+                          className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                             isSelected
                               ? 'border-[#004B8D] bg-[#004B8D]'
                               : 'border-gray-400 bg-white'
                           }`}
                         >
-                          {isSelected && <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-white" />}
+                          {isSelected && <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-white" />}
                         </div>
                       </div>
 
                       <div className="flex flex-col flex-grow min-w-0">
-                        <span
-                          className={`text-[13px] sm:text-sm md:text-base font-semibold leading-snug tracking-tight ${
-                            isSelected ? 'text-[#004B8D]' : 'text-gray-800'
-                          }`}
-                        >
-                          {option.label}
+                        <span className="text-[14pt] sm:text-[15pt] font-semibold leading-snug tracking-tight text-black">
+                          {t(`q${currentQuestion.number}_option_${option.id.slice(-1)}`, option.label)}
                         </span>
                       </div>
                     </button>
@@ -585,18 +576,42 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
               </div>
             )}
 
-            {/* Answer Choice Street Impact Callout (Only shown when answered, never an empty placeholder box) */}
-            {!isTextQuestion && currentQuestion.id !== 'q0' && tradeoffOutcome?.hasAnswer && (
-              <div className="mt-1.5 sm:mt-2 bg-[#004B8D]/8 border border-[#0081BC]/30 rounded-lg p-2 text-xs sm:text-[13px] shadow-2xs transition-all animate-in fade-in duration-150">
-                <div className="flex items-start gap-1.5 leading-snug text-gray-800">
-                  <span className="font-bold text-[#004B8D] shrink-0">{t('survey_street_impact_label', 'Street Impact:')}</span>
-                  <div className="font-medium text-gray-800">
-                    {tradeoffOutcome.curbsideImpactSummary && (
-                      <span className="font-bold text-[#005087] mr-1.5">
-                        {tradeoffOutcome.curbsideImpactSummary}.
-                      </span>
-                    )}
-                    <span>{tradeoffOutcome.tradeoffRationale}</span>
+            {/* The Real-World Trade-Off For Your Choice (displayed below question answers once an answer is selected) */}
+            {!isTextQuestion && currentQuestion.id !== 'q0' && (currentAnswer || tradeoffOutcome?.hasAnswer) && (
+              <div
+                id="tradeoff-education-card"
+                role="region"
+                aria-live="polite"
+                className="mt-2.5 bg-white border-2 border-[#004B8D]/30 rounded-xl p-2.5 sm:p-3 shadow-xs transition-all animate-in fade-in slide-in-from-bottom-2 duration-200"
+              >
+                <div className="flex items-center gap-1.5 mb-1.5 pb-1 border-b border-gray-100">
+                  <span className="text-[10pt] font-extrabold uppercase tracking-wider text-[#004B8D] flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#FFC72C] fill-[#FFC72C]" />
+                    {t('tradeoff_card_header', 'The Real-World Trade-Off For Your Choice')}
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  {/* The Gain / Benefit Pill */}
+                  <div className="flex items-start gap-2 bg-emerald-50 border border-emerald-300 rounded-lg px-2.5 py-1.5 text-emerald-950 shadow-2xs">
+                    <span className="self-start shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider bg-emerald-700 text-white shadow-2xs mt-0.5">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                      {t('tradeoff_gain_pill', 'The Gain')}
+                    </span>
+                    <p className="text-[11.5pt] sm:text-[12pt] font-normal leading-snug text-emerald-950">
+                      {tradeoffOutcome?.benefitText || tradeoffOutcome?.curbsideImpactSummary}
+                    </p>
+                  </div>
+
+                  {/* The Trade-off / Cost Pill */}
+                  <div className="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg px-2.5 py-1.5 text-amber-950 shadow-2xs">
+                    <span className="self-start shrink-0 inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider bg-amber-700 text-white shadow-2xs mt-0.5">
+                      <span className="text-[10px] leading-none">⚡</span>
+                      {t('tradeoff_cost_pill', 'The Cost')}
+                    </span>
+                    <p className="text-[11.5pt] sm:text-[12pt] font-normal leading-snug text-amber-950">
+                      {tradeoffOutcome?.costText || tradeoffOutcome?.tradeoffRationale}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -605,8 +620,13 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
         </AnimatePresence>
       </div>
 
-      {/* Navigation Buttons & Validation Alert (always pinned at bottom) */}
-      <div className="mt-auto pt-1.5 sm:pt-2 border-t border-gray-200 flex flex-col gap-1.5 flex-shrink-0">
+      {/* Navigation Buttons & Validation Alert (always pinned at bottom of question container) */}
+      <div
+        id="survey-navigation-container"
+        role="navigation"
+        aria-label="Question Navigation"
+        className="sticky bottom-0 z-30 bg-white mt-auto pt-1.5 sm:pt-2 pb-1 sm:pb-1.5 border-t border-gray-200 flex flex-col gap-1.5 flex-shrink-0 shadow-[0_-2px_6px_rgba(0,0,0,0.03)]"
+      >
         {showValidationError && (
           <div 
             role="alert" 
@@ -619,6 +639,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
         )}
 
         <div className="flex items-center justify-between gap-2 sm:gap-3">
+          {/* Go Back button */}
           {currentQuestion.id === 'q0' ? (
             q0SubScreen === 1 ? (
               <button
@@ -628,22 +649,34 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                   triggerFeedback('button');
                   setQ0SubScreen(0);
                 }}
-                className="px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm flex items-center gap-1.5 border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 transition-all min-h-[44px] cursor-pointer shadow-2xs active:scale-95"
+                className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 border-2 border-gray-300 bg-white text-gray-800 hover:bg-gray-100 transition-all min-h-[44px] sm:min-h-[48px] min-w-[48px] cursor-pointer shadow-2xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
               >
                 <ChevronLeft className="w-4 h-4" />
-                {t('nav_btn_back_to_location', 'Back')}
+                <span>{t('nav_btn_go_back', 'Go Back')}</span>
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => {
-                  triggerFeedback('button');
-                  onNavigate(1);
-                }}
-                className="text-xs font-semibold text-gray-500 hover:text-[#004B8D] px-2 py-2 min-h-[44px] flex items-center cursor-pointer"
-              >
-                {t('skip_to_q1_link', 'Skip Location')}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  id="survey-prev-btn"
+                  disabled={true}
+                  aria-disabled="true"
+                  className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 border-2 border-gray-200 bg-gray-50 text-gray-400 opacity-40 cursor-not-allowed min-h-[44px] sm:min-h-[48px] min-w-[48px]"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  <span>{t('nav_btn_go_back', 'Go Back')}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    triggerFeedback('button');
+                    onNavigate(1);
+                  }}
+                  className="text-xs font-semibold text-gray-500 hover:text-[#004B8D] px-2 py-1.5 min-h-[44px] flex items-center cursor-pointer underline underline-offset-2"
+                >
+                  {t('skip_to_q1_link', 'Skip Location')}
+                </button>
+              </div>
             )
           ) : (
             <button
@@ -656,66 +689,68 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                   onNavigate(-1);
                 }
               }}
-              className={`px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-lg font-semibold text-xs sm:text-sm flex items-center gap-1.5 border transition-all min-h-[44px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
+              className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 border-2 transition-all min-h-[44px] sm:min-h-[48px] min-w-[48px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
                 currentStep === 0
                   ? 'opacity-40 cursor-not-allowed border-gray-200 text-gray-400'
-                  : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100 cursor-pointer shadow-2xs'
+                  : 'border-gray-300 bg-white text-gray-800 hover:bg-gray-100 cursor-pointer shadow-2xs'
               }`}
             >
               <ChevronLeft className="w-4 h-4" />
-              {t('nav_btn_previous', 'Back')}
+              <span>{t('nav_btn_go_back', 'Go Back')}</span>
             </button>
           )}
 
+          {/* Next button */}
           {currentQuestion.id === 'q0' ? (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                id="survey-next-btn"
-                onClick={() => {
-                  triggerFeedback('button');
-                  if (q0SubScreen === 0) {
-                    setQ0SubScreen(1);
-                  } else {
-                    onNavigate(1);
-                  }
-                }}
-                className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#004B8D]"
-              >
-                {q0SubScreen === 0 ? (
-                  <>
-                    {t('nav_btn_confirm_layout', 'Next: Street Layout')}
-                    <ChevronRight className="w-4 h-4" />
-                  </>
-                ) : (
-                  <>
-                    {t('nav_btn_proceed_q1', 'Start Survey')}
-                    <ChevronRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
+            <button
+              type="button"
+              id="survey-next-btn"
+              onClick={() => {
+                triggerFeedback('button');
+                if (q0SubScreen === 0) {
+                  setQ0SubScreen(1);
+                } else {
+                  onNavigate(1);
+                }
+              }}
+              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-1.5 shadow-xs transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] min-w-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
+            >
+              <span>{t('nav_btn_next', 'Next')}</span>
+              <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+            </button>
+          ) : isLastQuestion ? (
+            <button
+              type="button"
+              id="survey-next-btn"
+              onClick={() => {
+                if (!currentAnswer) {
+                  onNavigate(1); // Trigger validation error
+                  return;
+                }
+                triggerFeedback('submit');
+                onNavigate(1);
+              }}
+              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-2 shadow-xs transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] min-w-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
+            >
+              <CheckCircle2 className="w-4 h-4 text-[#FFC72C] stroke-[2.5]" />
+              <span>{t('nav_btn_calc_persona', 'See Results')}</span>
+            </button>
           ) : (
             <button
               type="button"
               id="survey-next-btn"
               onClick={() => {
-                triggerFeedback(isLastQuestion ? 'submit' : 'button');
+                if (!currentAnswer) {
+                  onNavigate(1); // Trigger validation error
+                  return;
+                }
+                triggerFeedback('button');
                 onNavigate(1);
               }}
-              className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-lg font-bold text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#004B8D]"
+              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-2 shadow-xs transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] min-w-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
             >
-              {isLastQuestion ? (
-                <>
-                  <CheckCircle2 className="w-4 h-4 text-[#FFC72C]" />
-                  {t('nav_btn_calc_persona', 'See Results')}
-                </>
-              ) : (
-                <>
-                  {t('nav_btn_next', 'Next Question')}
-                  <ChevronRight className="w-4 h-4" />
-                </>
-              )}
+              <span>{t('nav_btn_next', 'Next')}</span>
+              <ChevronRight className="w-4 h-4 stroke-[2.5]" />
             </button>
           )}
         </div>

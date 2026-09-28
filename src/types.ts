@@ -36,6 +36,7 @@ export interface SimulationConfig {
   streetLayout?: StreetLayoutTypology;
   neighbourhoodName?: string;
   postalCode?: string;
+  curbsideDemandOverride?: number;
 }
 
 export interface PersonaResult {

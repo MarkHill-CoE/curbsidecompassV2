@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { SimulationConfig, StreetLayoutTypology } from '../types';
 import { getStreetLayoutInfo } from '../data/edmontonNeighbourhoods';
-import { Volume2, VolumeX, Sliders, RefreshCw, AlertTriangle, ShieldCheck, RotateCcw, CheckCircle, Home, ZapOff } from 'lucide-react';
+import { Volume2, VolumeX, Sliders, RefreshCw, RotateCcw, ZapOff } from 'lucide-react';
 import { feedback, triggerFeedback } from '../utils/feedback';
 import { ambientAudio } from '../utils/ambientAudio';
 import { useAppText } from '../context/TextContentContext';
@@ -102,7 +102,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
   }, [onToggleControls]);
   const [curbsideDemandCount, setCurbsideDemandCount] = useState<number>(() => propCurbsideDemandCount ?? 10);
   const [curbsideStallsCapacity, setCurbsideStallsCapacity] = useState<number>(() => propCurbsideStallsCapacity ?? BASE_LEGAL_CURBSIDE_STALLS);
-  const [curbsidePct, setCurbsidePct] = useState<number>(() => propCurbsidePct ?? 62);
+  const [curbsidePct, setCurbsidePct] = useState<number>(() => propCurbsidePct ?? 60);
   const [circlingCarCount, setCirclingCarCount] = useState<number>(() => propCirclingCarCount ?? 0);
   const [isPoliceTrafficActive, setIsPoliceTrafficActive] = useState<boolean>(false);
   const [laneStuckSeconds, setLaneStuckSeconds] = useState<number>(0);
@@ -4548,7 +4548,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     };
   }, [playHonk, playCriticalAlarm]);
 
-  const totalDwellings = TOTAL_MIDCENTURY_HOMES;
+  const totalDwellings = config.splitInfillLots !== undefined ? 10 + config.splitInfillLots : TOTAL_MIDCENTURY_HOMES;
   const totalLegalCurbsideStalls = TOTAL_LEGAL_CURBSIDE_STALLS;
 
   const activeHouseholdCars = Math.round(config.householdCarsPerHome * totalDwellings);

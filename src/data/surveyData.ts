@@ -3,7 +3,7 @@ import { getTypologyFromPostalCode, getStreetLayoutInfo } from './edmontonNeighb
 
 export const INITIAL_SIM_CONFIG: SimulationConfig = {
   householdCarsPerHome: 2.0,
-  visitorPassesPerHome: 0.3714, // Calibrated to 60% initial curbside occupancy (6.6 cars demand / 11 legal curbside stalls)
+  visitorPassesPerHome: 0.3333, // Calibrated to 60% default starting curbside occupancy across all neighbourhood typologies
   drivewayCapacity: 2,
   splitInfillLots: 2,
   deliveriesPerHomePerWeek: 1.0,
@@ -19,23 +19,23 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     number: 0,
     category: 'location',
     type: 'text',
-    text: 'Share your Edmonton postal code or neighbourhood first to explore your street layout.',
+    text: 'Where do you live in Edmonton?',
     placeholder: 'e.g. T5J 2R7 or Strathcona',
-    helperText: 'Enter your Edmonton postal code or select your neighbourhood to match your local street layout type and predetermine the live simulation.',
+    helperText: 'Type your neighbourhood or postal code so we can show your street style.',
     options: []
   },
   {
     id: 'q1',
     number: 1,
     category: 'residential',
-    text: 'Who should pay for residential parking programs?',
+    text: 'Who should pay the cost to run street parking in neighbourhoods?',
     options: [
       {
         id: 'q1_a',
-        label: 'Residents with vehicles in residential parking program areas pay permit fees that cover all program costs.',
+        label: 'Drivers who park on the street should pay permit fees to cover the costs.',
         x: 4,
         y: 0,
-        hint: 'Residents with vehicles in the program area pay permit fees, which fully cover program costs and reduce street parking by encouraging off-street driveway parking.',
+        hint: 'Drivers who park on the street pay permit fees. This covers program costs and encourages people with driveways to park off the street.',
         simEffects: {
           drivewayCapacity: 2,
           householdCarsPerHome: 2.0 // total 12 cars, 12 fit in driveway, 0 on street
@@ -43,10 +43,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q1_b',
-        label: 'Tax-payers cover program costs through property tax revenues.',
+        label: 'All city taxpayers should pay for street parking through property taxes.',
         x: -4,
         y: 0,
-        hint: 'Since no fee is charged, more vehicles park on the street.',
+        hint: 'Because street parking is free, more vehicles park on the street.',
         simEffects: {
           drivewayCapacity: 1, // only 6 fit in driveway
           householdCarsPerHome: 2.6 // total ~16 cars. 6 in driveway, 10 on street.
@@ -58,14 +58,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q2',
     number: 2,
     category: 'visitors',
-    text: 'Should your neighbourhood limit the number of on-street parking permits residents can hold?',
+    text: 'Should the City put a limit on how many street parking permits each home can get?',
     options: [
       {
         id: 'q2_a',
-        label: 'Yes.',
+        label: 'Yes, set a limit so street spots stay open for neighbours.',
         x: 0,
         y: -3,
-        hint: 'Limiting on-street parking permits reduces the number of vehicles parked on the street and encourages off-street or driveway parking.',
+        hint: 'Limiting permits lowers the number of cars parked on the street and encourages using driveways or garages.',
         simEffects: {
           drivewayCapacity: 2,
           householdCarsPerHome: 1.8
@@ -73,10 +73,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q2_b',
-        label: 'No.',
+        label: 'No, let homes get as many permits as they need.',
         x: 0,
         y: 3,
-        hint: 'Since no fee is charged, more vehicles park on the street.',
+        hint: 'Without permit limits, homes with several cars park them all on the street.',
         simEffects: {
           drivewayCapacity: 1,
           householdCarsPerHome: 2.5
@@ -88,14 +88,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q3',
     number: 3,
     category: 'commercial',
-    text: 'What restrictions should be placed on commercial and trade vehicles in residential areas?',
+    text: 'How should work vans and delivery trucks park on your street?',
     options: [
       {
         id: 'q3_a',
-        label: 'Specialized paid permits are required to access work/loading zones.',
+        label: 'Require work vehicles to buy special permits to park on the street.',
         x: 2,
         y: -2,
-        hint: 'Since a fee is charged, fewer vehicles park on the street and more park in driveways.',
+        hint: 'Requiring permits and loading zones keeps delivery trucks moving and stops them from blocking traffic.',
         simEffects: {
           deliveriesPerHomePerWeek: 2,
           enforcementLevel: 'strict'
@@ -103,10 +103,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q3_b',
-        label: 'No restrictions - commercial and trade vehicles have access and do not require paid permits.',
+        label: 'Let work vehicles and delivery vans park for free without special permits.',
         x: -2,
         y: 2,
-        hint: 'Since parking is on a first-come, first-served basis, available spots fill up quickly and remaining vehicles park on the street.',
+        hint: 'Free parking means work trucks take street spots all day and can block narrow streets.',
         simEffects: {
           deliveriesPerHomePerWeek: 4,
           enforcementLevel: 'lenient'
@@ -118,14 +118,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q4',
     number: 4,
     category: 'visitors',
-    text: 'How would you manage visitor parking in your neighbourhood?',
+    text: 'How should guest and visitor parking work on your street?',
     options: [
       {
         id: 'q4_a',
-        label: 'Visitors digitally register their vehicles, with enforcement conducted regularly.',
+        label: 'Guests must register online or use a pass so parking stays under control.',
         x: 3,
         y: -3,
-        hint: 'Visitor registration and regular enforcement keep curb demand predictable.',
+        hint: 'Visitor passes and check-ins keep parking spots open for actual guests.',
         simEffects: {
           visitorPassesPerHome: 0.8,
           enforcementLevel: 'strict'
@@ -133,10 +133,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q4_b',
-        label: 'Visitor parking is on a first-come, first-served basis.',
+        label: 'Free parking for all guests on a first-come, first-served basis.',
         x: -3,
         y: 3,
-        hint: 'Since no permit or registration is required, visitor vehicles park freely on the street.',
+        hint: 'Without registration or passes, spots fill up quickly and commuters can park for days.',
         simEffects: {
           visitorPassesPerHome: 2.2,
           enforcementLevel: 'lenient'
@@ -148,14 +148,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q5',
     number: 5,
     category: 'finance',
-    text: 'Who should pay for residential parking enforcement?',
+    text: 'Who should pay for parking officers and parking tickets?',
     options: [
       {
         id: 'q5_a',
-        label: 'Residents and visitors — through permit fees, guest pass sales and violation fines.',
+        label: 'Drivers who park and get tickets should cover costs through fees and fines.',
         x: 4,
         y: 0,
-        hint: 'Since user fees and violation fines cover enforcement, curb turnover is prioritized.',
+        hint: 'User fees and tickets pay for patrols, keeping streets clear and moving.',
         simEffects: {
           curbsideFeeModel: 'permit',
           householdCarsPerHome: 1.8,
@@ -164,10 +164,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q5_b',
-        label: 'Edmontonians — through property taxes.',
+        label: 'All city taxpayers should pay for enforcement through property taxes.',
         x: -4,
         y: 0,
-        hint: 'Since enforcement is funded by general city taxes, curb usage is open to all residents.',
+        hint: 'Because taxes pay for officers, enforcement is relaxed and cars can sit parked for days.',
         simEffects: {
           curbsideFeeModel: 'free',
           householdCarsPerHome: 2.8,
@@ -180,14 +180,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q6',
     number: 6,
     category: 'enforcement',
-    text: 'How would you manage parking near major traffic generators, like educational institutions and hospitals?',
+    text: 'How should parking work near busy places like hospitals, colleges, or LRT stations?',
     options: [
       {
         id: 'q6_a',
-        label: 'Paid parking with time limits and frequent enforcement.',
+        label: 'Charge for parking with time limits so spots turn over often.',
         x: 3,
         y: -3,
-        hint: 'Since a fee is charged, fewer vehicles park on the street and more park in driveways.',
+        hint: 'Paid parking and time limits stop outside commuters from taking neighbourhood spots.',
         simEffects: {
           enforcementLevel: 'strict',
           cruisingTrafficLevel: 'low',
@@ -196,10 +196,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q6_b',
-        label: 'Maintain free, unenforced parking for visitors.',
+        label: 'Keep street parking free and open for everyone who visits.',
         x: -3,
         y: 3,
-        hint: 'Since no fee is charged, more vehicles park on the street.',
+        hint: 'Free parking means hospital and university commuters fill neighbourhood streets all day.',
         simEffects: {
           enforcementLevel: 'lenient',
           cruisingTrafficLevel: 'high',
@@ -212,14 +212,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q7',
     number: 7,
     category: 'residential',
-    text: 'How would you manage accessible parking zones during events?',
+    text: 'How should accessible disability parking spots be protected during busy events?',
     options: [
       {
         id: 'q7_a',
-        label: 'Conduct strict eligibility and digital pass checks, plus regular enforcement.',
+        label: 'Check disability permits strictly so spots stay open for people who need them.',
         x: 2,
         y: -2,
-        hint: 'Since no fee is charged, more vehicles park on the street.',
+        hint: 'Strict checks make sure people with disabilities, seniors, and caregivers always have a spot.',
         simEffects: {
           enforcementLevel: 'strict',
           householdCarsPerHome: 2.0
@@ -227,10 +227,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q7_b',
-        label: 'No active enforcement, relying on public courtesy to obey zone signage.',
+        label: 'Rely on drivers\' courtesy to leave marked accessible spots open.',
         x: -2,
         y: 2,
-        hint: 'Since no fee is charged, more vehicles park on the street.',
+        hint: 'Without active checks, drivers without permits take accessible spots during events.',
         simEffects: {
           enforcementLevel: 'lenient',
           householdCarsPerHome: 2.5
@@ -242,14 +242,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q8',
     number: 8,
     category: 'residential',
-    text: 'How should parking rules respond to the individual needs of each neighbourhood?',
+    text: 'How should the City set street parking rules across Edmonton?',
     options: [
       {
         id: 'q8_a',
-        label: 'Apply proactive, city-wide standardized rules across all mature and developing neighbourhoods.',
+        label: 'Use the same clear, standard parking rules across all Edmonton neighbourhoods.',
         x: 0,
         y: -4,
-        hint: 'City-wide standards ensure consistent parking management across all Edmonton communities.',
+        hint: 'Consistent city-wide parking rules stop cars from dodging rules onto the next block.',
         simEffects: {
           drivewayCapacity: 2,
           householdCarsPerHome: 2.0
@@ -257,10 +257,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q8_b',
-        label: 'Allow neighbourhoods to opt into local solutions on a block-by-block basis.',
+        label: 'Let each neighbourhood vote and pick its own parking rules block by block.',
         x: 0,
         y: 4,
-        hint: 'Neighbourhood-by-neighbourhood opt-in provides local flexibility with fewer blanket rules.',
+        hint: 'Neighbourhoods get flexibility, but cars may spill over onto nearby unregulated streets.',
         simEffects: {
           drivewayCapacity: 1,
           householdCarsPerHome: 2.8
@@ -285,13 +285,16 @@ export interface ComputedSimulationMetrics {
 
 export function calculateSimulationMetricsFromAnswers(
   answers: Record<string, string>,
-  layoutOverride?: StreetLayoutTypology
+  manualOverridesOrLayout?: StreetLayoutTypology | Partial<SimulationConfig>
 ): ComputedSimulationMetrics {
-  const totalDwellings = 12;
+  const overrides: Partial<SimulationConfig> =
+    typeof manualOverridesOrLayout === 'string'
+      ? { streetLayout: manualOverridesOrLayout }
+      : (manualOverridesOrLayout || {});
 
   // Determine active street layout typology (predetermined by q0 or fallback q9)
   const activeLayout: StreetLayoutTypology =
-    layoutOverride ||
+    overrides.streetLayout ||
     (answers['q0_layout'] as StreetLayoutTypology) ||
     (answers['q9_layout'] as StreetLayoutTypology) ||
     (answers['q0'] ? getTypologyFromPostalCode(answers['q0']) : (answers['q9'] ? getTypologyFromPostalCode(answers['q9']) : 'mature_laned'));
@@ -299,123 +302,177 @@ export function calculateSimulationMetricsFromAnswers(
   const layoutInfo = getStreetLayoutInfo(activeLayout);
   const curbsideStallsCapacity = layoutInfo.curbsideCapacity;
 
-  // Baseline calibration tuned to ~60-62% occupancy for each street layout:
-  // - Mature Laned / Infill: 10 cars out of 16 legal stalls (62.5%)
-  // - Suburban Front Driveway: 6.2 cars out of 10 legal stalls (62%)
-  // - Contemporary Townhomes: 7.5 cars out of 12 legal stalls (62.5%)
-  let curbsideDemand = activeLayout === 'suburban_front_driveway'
-    ? 6.2
-    : activeLayout === 'contemporary_townhomes'
-    ? 7.5
-    : 10.0;
+  // Dwellings (Home Density):
+  // splitInfillLots range 2 to 12 in slider (min 2 = 12 dwellings, max 12 = 22 dwellings)
+  const splitLots = overrides.splitInfillLots ?? (activeLayout === 'infill_skinny' ? 6 : 2);
+  const totalDwellings = 10 + splitLots;
 
-  let occupiedGarages = activeLayout === 'suburban_front_driveway' ? 12 : 10;
-  let deliveriesPerWeek = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
-  let visitorDemand = 4;
-  let householdCars = 24;
-  let drivewayCap = activeLayout === 'suburban_front_driveway' ? 2 : 2;
+  // Household Cars:
+  // Baseline cars per home (~2.0, modified by q2 unlimited permits)
+  let baseCarsPerHome = 2.0;
+  if (answers['q2'] === 'q2_b') baseCarsPerHome += 0.33;
+  if (answers['q2'] === 'q2_a') baseCarsPerHome -= 0.17;
+
+  const householdCarsPerHome = overrides.householdCarsPerHome !== undefined
+    ? overrides.householdCarsPerHome
+    : baseCarsPerHome;
+
+  const householdCars = Math.round(householdCarsPerHome * totalDwellings);
+
+  // Private Off-Street Parking (Driveway / Garage Capacity):
+  const baseDrivewayCap = activeLayout === 'suburban_front_driveway' ? 2 : (activeLayout === 'contemporary_townhomes' ? 1 : 2);
+  const drivewayCap = overrides.drivewayCapacity !== undefined
+    ? overrides.drivewayCapacity
+    : baseDrivewayCap;
+
+  // Private off-street capacity (garages / private driveways)
+  // When drivewayCap is 0: 0 off-street parking -> all cars park on the curb!
+  // When drivewayCap > 0: garages absorb up to ~85% of their capacity
+  const totalOffStreetStalls = drivewayCap * totalDwellings;
+  const occupiedGarages = drivewayCap === 0
+    ? 0
+    : Math.min(householdCars, Math.round(totalOffStreetStalls * 0.85));
+
+  // Overflow household vehicles parked along the curb
+  const residentCurbOverflow = Math.max(0, householdCars - occupiedGarages);
+  // Plus baseline daytime active convenience/errand curb parking
+  const residentCurbConvenience = drivewayCap === 0 ? 0 : Math.min(Math.round(householdCars * 0.08), Math.round(curbsideStallsCapacity * 0.25));
+  const residentCurbsideDemand = residentCurbOverflow + residentCurbConvenience;
+
+  // Visitor passes and visitor cars:
+  const baseVisitorPasses = answers['q4'] === 'q4_b' ? (8 / 12) : (answers['q4'] === 'q4_a' ? (3 / 12) : (4 / 12));
+  const visitorPassesPerHome = overrides.visitorPassesPerHome !== undefined
+    ? overrides.visitorPassesPerHome
+    : baseVisitorPasses;
+
+  const visitorDemand = Math.round(visitorPassesPerHome * totalDwellings);
+  // Visitors park on the street
+  const visitorCurbsideDemand = visitorDemand;
+
+  // Deliveries:
+  let baseDeliveriesPerWeek = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
+  if (answers['q3'] === 'q3_b') baseDeliveriesPerWeek += 1.5;
+  if (answers['q3'] === 'q3_a') baseDeliveriesPerWeek = 1.0;
+
+  const deliveriesPerWeek = overrides.deliveriesPerHomePerWeek !== undefined
+    ? overrides.deliveriesPerHomePerWeek
+    : baseDeliveriesPerWeek;
+
+  const totalWeeklyDeliveries = Math.round(deliveriesPerWeek * totalDwellings);
+  // Delivery vans active curb turnover impact
+  const deliveryCurbsideDemand = totalWeeklyDeliveries / 16;
+
+  // Policy shifts from survey answers (Q1 to Q8)
+  let policyDemandShift = 0;
   let feeModel: 'free' | 'permit' = 'free';
   let enforcement: 'strict' | 'standard' | 'lenient' = 'standard';
   let cruisingLevel: 'low' | 'moderate' | 'high' = 'moderate';
 
   // Q1: Who should pay for residential parking programs?
   if (answers['q1'] === 'q1_a') {
-    // Permit fees paid by vehicle owners: incentivizes off-street garage use
-    curbsideDemand -= 1.5;
-    occupiedGarages = Math.min(12, occupiedGarages + 1);
+    policyDemandShift -= 1.5;
     feeModel = 'permit';
   } else if (answers['q1'] === 'q1_b') {
-    // Taxpayer funded: free on-street storage encourages parking on curb
-    curbsideDemand += 1.5;
-    occupiedGarages = Math.max(8, occupiedGarages - 1);
+    policyDemandShift += 1.5;
     feeModel = 'free';
   }
 
   // Q2: Limit on-street permits per household?
   if (answers['q2'] === 'q2_a') {
-    // Limit permits: forces extra household vehicles off the street
-    curbsideDemand -= 2.0;
-    occupiedGarages = Math.min(12, occupiedGarages + 1);
+    policyDemandShift -= 1.5;
   } else if (answers['q2'] === 'q2_b') {
-    // Unlimited permits: multi-car homes park multiple cars along the curb
-    curbsideDemand += 2.0;
-    householdCars += 4;
+    policyDemandShift += 1.5;
   }
 
   // Q3: Restrictions on commercial & trade vehicles?
   if (answers['q3'] === 'q3_a') {
-    // Paid permits/loading zones: trades park off-street or in designated loading zones
-    curbsideDemand -= 1.5;
-    deliveriesPerWeek = 1.0;
+    policyDemandShift -= 1.0;
   } else if (answers['q3'] === 'q3_b') {
-    // No restrictions: trades, contractors, and delivery vans take up curb stalls
-    curbsideDemand += 2.0;
-    deliveriesPerWeek = 3.5;
+    policyDemandShift += 1.5;
   }
 
   // Q4: Visitor parking management?
   if (answers['q4'] === 'q4_a') {
-    // Digital registration & enforcement: visitor parking stays controlled
-    curbsideDemand -= 1.5;
-    visitorDemand = 3;
+    policyDemandShift -= 1.0;
     enforcement = 'strict';
   } else if (answers['q4'] === 'q4_b') {
-    // First-come, first-served free: unmanaged visitor parking floods the street
-    curbsideDemand += 2.5;
-    visitorDemand = 8;
+    policyDemandShift += 1.5;
     enforcement = 'lenient';
   }
 
   // Q5: Who pays for enforcement?
   if (answers['q5'] === 'q5_a') {
-    // User fees & violation fines: active patrols, high turnover, overstays penalized
-    curbsideDemand -= 1.5;
+    policyDemandShift -= 1.5;
     enforcement = 'strict';
   } else if (answers['q5'] === 'q5_b') {
-    // Property taxes: infrequent complaint-based enforcement, cars linger on curb
-    curbsideDemand += 2.0;
+    policyDemandShift += 2.0;
     enforcement = 'lenient';
   }
 
   // Q6: Near major traffic generators (hospitals/universities)?
   if (answers['q6'] === 'q6_a') {
-    // Paid parking & time limits: commuter overflow prevented
-    curbsideDemand -= 2.5;
+    policyDemandShift -= 2.0;
     cruisingLevel = 'low';
   } else if (answers['q6'] === 'q6_b') {
-    // Free & unenforced: hospital/university commuters flood neighbourhood street
-    curbsideDemand += 3.5;
+    policyDemandShift += 3.0;
     cruisingLevel = 'high';
   }
 
   // Q7: Accessible parking zones during events?
   if (answers['q7'] === 'q7_a') {
-    // Strict eligibility checks & enforcement: stalls protected, orderly parking
-    curbsideDemand -= 1.0;
+    policyDemandShift -= 1.0;
   } else if (answers['q7'] === 'q7_b') {
-    // No enforcement: event-goers encroach on stalls and driveways
-    curbsideDemand += 1.5;
+    policyDemandShift += 1.5;
   }
 
   // Q8: City-wide standardized rules vs block-by-block opt-in?
   if (answers['q8'] === 'q8_a') {
-    // Standardized rules: city-wide consistency prevents spillover from adjacent streets
-    curbsideDemand -= 1.0;
+    policyDemandShift -= 1.0;
   } else if (answers['q8'] === 'q8_b') {
-    // Block-by-block opt-in: spillover from regulated blocks onto this block
-    curbsideDemand += 2.0;
+    policyDemandShift += 2.0;
   }
 
-  // Clamp demand between 1 and max capacity + 10
-  const roundedDemand = Math.max(1, Math.min(26, Math.round(curbsideDemand)));
-  const curbsidePct = Math.round((roundedDemand / curbsideStallsCapacity) * 100);
+  // Baseline calibration: The default parking occupancy to start is strictly 60% regardless of neighbourhood type
+  const baselineCurbsideDemand = curbsideStallsCapacity * 0.60;
+
+  // Compute the baseline unadjusted demand for this typology at its default parameters
+  const defaultSplit = activeLayout === 'infill_skinny' ? 6 : 2;
+  const defaultDwellings = 10 + defaultSplit;
+  const defaultCarsPerHome = 2.0;
+  const defaultDrivewayCap = activeLayout === 'suburban_front_driveway' ? 2 : (activeLayout === 'contemporary_townhomes' ? 1 : 2);
+  const defaultTotalOffStreet = defaultDrivewayCap * defaultDwellings;
+  const defaultHouseholdCars = Math.round(defaultCarsPerHome * defaultDwellings);
+  const defaultOccupiedGarages = Math.min(defaultHouseholdCars, Math.round(defaultTotalOffStreet * 0.85));
+  const defaultResidentOverflow = Math.max(0, defaultHouseholdCars - defaultOccupiedGarages);
+  const defaultConvenience = Math.min(Math.round(defaultHouseholdCars * 0.08), Math.round(curbsideStallsCapacity * 0.25));
+  const defaultResidentDemand = defaultResidentOverflow + defaultConvenience;
+  const defaultVisitorDemand = Math.round((4 / 12) * defaultDwellings);
+  const defaultDeliveries = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
+  const defaultDeliveryDemand = Math.round(defaultDeliveries * defaultDwellings) / 16;
+  const defaultRawDemand = defaultResidentDemand + defaultVisitorDemand + defaultDeliveryDemand;
+
+  // Net shift resulting from manual slider adjustments away from the default baseline
+  const currentRawDemand = residentCurbsideDemand + visitorCurbsideDemand + deliveryCurbsideDemand;
+  const sliderDemandDelta = currentRawDemand - defaultRawDemand;
+
+  // Total curbside demand: starts at exactly 60% baseline capacity, shifting with policy and slider choices
+  const totalCalculatedDemand = overrides.curbsideDemandOverride !== undefined
+    ? overrides.curbsideDemandOverride
+    : (baselineCurbsideDemand + sliderDemandDelta + policyDemandShift);
+
+  // Clamp demand between 0 and realistic upper bound
+  const roundedDemand = Math.max(0, Math.min(36, Math.round(totalCalculatedDemand)));
+  // Calculate percentage: exactly 60% at start, scaling smoothly with demand shifts
+  const curbsidePct = Math.max(0, Math.round((totalCalculatedDemand / curbsideStallsCapacity) * 100));
 
   // Circling vehicles: when demand approaches or exceeds capacity
   let circlingCarCount = 0;
   if (roundedDemand >= curbsideStallsCapacity + 4) {
     circlingCarCount = 5;
-  } else if (roundedDemand >= curbsideStallsCapacity + 1) {
+  } else if (roundedDemand >= curbsideStallsCapacity + 2) {
     circlingCarCount = 4;
+  } else if (roundedDemand >= curbsideStallsCapacity + 1) {
+    circlingCarCount = 3;
   } else if (roundedDemand >= curbsideStallsCapacity) {
     circlingCarCount = 2;
   } else if (roundedDemand >= Math.round(curbsideStallsCapacity * 0.85)) {
@@ -423,24 +480,24 @@ export function calculateSimulationMetricsFromAnswers(
   }
 
   const simConfig: SimulationConfig = {
-    householdCarsPerHome: householdCars / totalDwellings,
-    visitorPassesPerHome: visitorDemand / totalDwellings,
+    householdCarsPerHome,
+    visitorPassesPerHome,
     drivewayCapacity: drivewayCap,
-    splitInfillLots: 2,
+    splitInfillLots: splitLots,
     deliveriesPerHomePerWeek: deliveriesPerWeek,
-    enforcementLevel: enforcement,
-    cruisingTrafficLevel: cruisingLevel,
-    curbsideFeeModel: feeModel,
+    enforcementLevel: overrides.enforcementLevel || enforcement,
+    cruisingTrafficLevel: overrides.cruisingTrafficLevel || cruisingLevel,
+    curbsideFeeModel: overrides.curbsideFeeModel || feeModel,
     streetLayout: activeLayout,
-    neighbourhoodName: answers['q0_neighbourhood'] || answers['q9_neighbourhood'] || undefined,
-    postalCode: answers['q0'] || answers['q9'] || undefined
+    neighbourhoodName: overrides.neighbourhoodName || answers['q0_neighbourhood'] || answers['q9_neighbourhood'] || undefined,
+    postalCode: overrides.postalCode || answers['q0'] || answers['q9'] || undefined
   };
 
   return {
     activeHouseholdCars: householdCars,
     activeVisitorCars: visitorDemand,
     totalDwellings,
-    totalWeeklyDeliveries: Math.round(deliveriesPerWeek * totalDwellings),
+    totalWeeklyDeliveries,
     circlingCarCount,
     curbsideDemandCount: roundedDemand,
     curbsideStallsCapacity,
@@ -459,6 +516,8 @@ export interface QuestionTradeoffOutcome {
   deltaStallsValue?: number;
   tradeoffRationale: string;
   curbsideImpactSummary: string;
+  benefitText?: string;
+  costText?: string;
 }
 
 export function getQuestionTradeoffImpact(
@@ -472,7 +531,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: 'Curbside Parking Policy',
       hasAnswer: false,
       tradeoffRationale: 'Answer survey questions to see the live calculated impact on curbside parking stalls.',
-      curbsideImpactSummary: 'Curbside parking demand updates in real-time.'
+      curbsideImpactSummary: 'Curbside parking demand updates in real-time.',
+      benefitText: 'Select an option to explore the community benefit.',
+      costText: 'Every choice involves a real-world community trade-off.'
     };
   }
 
@@ -489,7 +550,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-1.5 stalls (-10%)',
         deltaStallsValue: -1.5,
         tradeoffRationale: 'User permit fees encourage vehicle owners to use private detached garages instead of the street.',
-        curbsideImpactSummary: 'Frees up shared curbside stalls for visitors and delivery couriers.'
+        curbsideImpactSummary: 'Frees up shared curbside stalls for visitors and delivery couriers.',
+        benefitText: 'Frees up curb spaces for guests, family visitors, and delivery couriers. Non-drivers do not pay for parking.',
+        costText: 'Drivers who park on the street must pay monthly or yearly permit fees.'
       };
     }
     if (selectedAnswerId === 'q1_b') {
@@ -501,7 +564,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '+1.5 stalls (+10%)',
         deltaStallsValue: +1.5,
         tradeoffRationale: 'Free on-street storage encourages residents to leave extra vehicles parked curbside.',
-        curbsideImpactSummary: 'Higher curbside occupancy and less room for short-term visitors.'
+        curbsideImpactSummary: 'Higher curbside occupancy and less room for short-term visitors.',
+        benefitText: 'Zero permit fees and no out-of-pocket costs for residents parking on the street.',
+        costText: 'All city taxpayers cover the bill, even if they do not own a car. Streets stay more crowded.'
       };
     }
     return {
@@ -509,7 +574,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: question.text,
       hasAnswer: false,
       tradeoffRationale: 'Choose between vehicle owner permit fees or general taxpayer funding.',
-      curbsideImpactSummary: 'Calculates the trade-off between private garage use and street crowding.'
+      curbsideImpactSummary: 'Calculates the trade-off between private garage use and street crowding.',
+      benefitText: 'Learn who pays and who benefits from street parking rules.',
+      costText: 'Select an answer to see the community trade-off.'
     };
   }
 
@@ -523,7 +590,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-2.0 stalls (-13%)',
         deltaStallsValue: -2.0,
         tradeoffRationale: 'Capping permits per home prevents multi-car homes from occupying multiple curb spaces.',
-        curbsideImpactSummary: 'Leaves guaranteed open space for all households along the block.'
+        curbsideImpactSummary: 'Leaves guaranteed open space for all households along the block.',
+        benefitText: 'Guarantees open space so every home on the block has a fair chance to park.',
+        costText: 'Homes with multiple drivers cannot park all their cars on the street.'
       };
     }
     if (selectedAnswerId === 'q2_b') {
@@ -535,7 +604,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: +2.0,
         tradeoffRationale: 'Unlimited permits allow multi-car homes to store multiple cars on the street.',
-        curbsideImpactSummary: 'Increased curbside competition and reduced stall turnover.'
+        curbsideImpactSummary: 'Increased curbside competition and reduced stall turnover.',
+        benefitText: 'Multi-driver households can register and park all their vehicles on the street.',
+        costText: 'Street spaces fill up quickly, leaving fewer spots for neighbours and guests.'
       };
     }
     return {
@@ -543,7 +614,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: question.text,
       hasAnswer: false,
       tradeoffRationale: 'Decide whether to cap on-street permits per household.',
-      curbsideImpactSummary: 'Affects how many vehicles each home can park along the curb.'
+      curbsideImpactSummary: 'Affects how many vehicles each home can park along the curb.',
+      benefitText: 'Balances street space among all neighbours.',
+      costText: 'Select an answer to see the community trade-off.'
     };
   }
 
@@ -557,7 +630,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-1.5 stalls (-10%)',
         deltaStallsValue: -1.5,
         tradeoffRationale: 'Specialized work and loading zones keep couriers and contractors from double-parking in the lane.',
-        curbsideImpactSummary: 'Ensures delivery turnover while keeping street traffic moving smoothly.'
+        curbsideImpactSummary: 'Ensures delivery turnover while keeping street traffic moving smoothly.',
+        benefitText: 'Keeps traffic lanes moving and guarantees safe, quick drop-off zones for delivery drivers.',
+        costText: 'Contractors and delivery companies must pay permit fees or face short time limits.'
       };
     }
     if (selectedAnswerId === 'q3_b') {
@@ -569,7 +644,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: +2.0,
         tradeoffRationale: 'Contractors and delivery vans occupy curbside stalls for extended hours.',
-        curbsideImpactSummary: 'Reduces available parking for residents and visiting guests.'
+        curbsideImpactSummary: 'Reduces available parking for residents and visiting guests.',
+        benefitText: 'Free and convenient parking for home renovations, tradespeople, and couriers.',
+        costText: 'Large commercial trucks can block narrow residential roads and take resident stalls all day.'
       };
     }
     return {
@@ -577,7 +654,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: question.text,
       hasAnswer: false,
       tradeoffRationale: 'Choose rules for trade contractors and delivery vans.',
-      curbsideImpactSummary: 'Balances commercial delivery needs with resident parking.'
+      curbsideImpactSummary: 'Balances commercial delivery needs with resident parking.',
+      benefitText: 'Explore how delivery vans and work trucks share the road.',
+      costText: 'Select an answer to see the community trade-off.'
     };
   }
 
@@ -591,7 +670,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-1.5 stalls (-10%)',
         deltaStallsValue: -1.5,
         tradeoffRationale: 'Digital registration prevents non-resident commuters from parking for days at a time.',
-        curbsideImpactSummary: 'Maintains predictable, open visitor parking stalls.'
+        curbsideImpactSummary: 'Maintains predictable, open visitor parking stalls.',
+        benefitText: 'Keeps spots open for genuine visiting family and friends; stops commuters from hogging street stalls.',
+        costText: 'Visitors or hosts must take time to register online or display a visitor pass.'
       };
     }
     if (selectedAnswerId === 'q4_b') {
@@ -603,7 +684,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '+2.5 stalls (+16%)',
         deltaStallsValue: +2.5,
         tradeoffRationale: 'Unmonitored visitor parking fills stalls quickly without time turnover.',
-        curbsideImpactSummary: 'High curb pressure during peak evenings and weekends.'
+        curbsideImpactSummary: 'High curb pressure during peak evenings and weekends.',
+        benefitText: 'Zero registration, no apps, and no visitor pass paperwork needed for guests.',
+        costText: 'Street spaces fill up quickly, and guests often have to circle looking for open parking.'
       };
     }
     return {
@@ -611,7 +694,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: question.text,
       hasAnswer: false,
       tradeoffRationale: 'Choose how visitor parking should be managed.',
-      curbsideImpactSummary: 'Balances guest convenience with commuter parking overflow.'
+      curbsideImpactSummary: 'Balances guest convenience with commuter parking overflow.',
+      benefitText: 'Decide how easy or strict visiting should be on your block.',
+      costText: 'Select an answer to see the community trade-off.'
     };
   }
 
@@ -625,7 +710,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-1.5 stalls (-10%)',
         deltaStallsValue: -1.5,
         tradeoffRationale: 'Active patrols funded by violators deter long-term overstays and boost turnover.',
-        curbsideImpactSummary: 'Prevents abandoned or stored cars from hogging curbside stalls.'
+        curbsideImpactSummary: 'Prevents abandoned or stored cars from hogging curbside stalls.',
+        benefitText: 'Only people who park or break parking rules pay for enforcement; general city taxes stay low.',
+        costText: 'Strict patrols and higher ticket fines for residents who overstay or forget permits.'
       };
     }
     if (selectedAnswerId === 'q5_b') {
@@ -637,7 +724,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: +2.0,
         tradeoffRationale: 'Tax-funded enforcement is infrequent and complaint-driven.',
-        curbsideImpactSummary: 'Cars linger parked along the curb for multiple days without turnover.'
+        curbsideImpactSummary: 'Cars linger parked along the curb for multiple days without turnover.',
+        benefitText: 'Fewer parking tickets issued; relaxed enforcement across neighbourhood streets.',
+        costText: 'All city taxpayers pay for enforcement officers. Abandoned or stored cars linger on the curb.'
       };
     }
     return {
@@ -645,7 +734,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: question.text,
       hasAnswer: false,
       tradeoffRationale: 'Decide whether parking violators or all property taxpayers fund enforcement.',
-      curbsideImpactSummary: 'Determines how frequently street stalls are patrolled.'
+      curbsideImpactSummary: 'Determines how frequently street stalls are patrolled.',
+      benefitText: 'Understand who funds city parking officers.',
+      costText: 'Select an answer to see the community trade-off.'
     };
   }
 
@@ -659,7 +750,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-2.5 stalls (-16%)',
         deltaStallsValue: -2.5,
         tradeoffRationale: 'Time limits stop hospital and university commuters from taking residential spots.',
-        curbsideImpactSummary: 'Keeps traffic flowing and eliminates circling commuter vehicles.'
+        curbsideImpactSummary: 'Keeps traffic flowing and eliminates circling commuter vehicles.',
+        benefitText: 'Stops commuter overflow and keeps residential streets quiet and open for locals.',
+        costText: 'Hospital visitors, patients, and students must pay to park on nearby residential streets.'
       };
     }
     if (selectedAnswerId === 'q6_b') {
@@ -671,7 +764,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '+3.5 stalls (+22%)',
         deltaStallsValue: +3.5,
         tradeoffRationale: 'Commuters flood residential streets seeking free parking rather than paid lots.',
-        curbsideImpactSummary: 'Severe congestion with 4 to 5 vehicles circling looking for spots.'
+        curbsideImpactSummary: 'Severe congestion with 4 to 5 vehicles circling looking for spots.',
+        benefitText: 'Free parking for patients, hospital visitors, and university students.',
+        costText: 'Residential streets stay jammed from morning to night with loud circling cars and exhaust.'
       };
     }
     return {
@@ -679,7 +774,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: question.text,
       hasAnswer: false,
       tradeoffRationale: 'Decide how to protect residential streets near major traffic hubs.',
-      curbsideImpactSummary: 'Controls commuter spillover and circling traffic.'
+      curbsideImpactSummary: 'Controls commuter spillover and circling traffic.',
+      benefitText: 'See how hospital and university traffic impacts nearby homes.',
+      costText: 'Select an answer to see the community trade-off.'
     };
   }
 
@@ -693,7 +790,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-1.0 stall (-6%)',
         deltaStallsValue: -1.0,
         tradeoffRationale: 'Accessible curb stalls remain protected for residents and guests with mobility permits.',
-        curbsideImpactSummary: 'Ensures equitable access and maintains driveway sightlines.'
+        curbsideImpactSummary: 'Ensures equitable access and maintains driveway sightlines.',
+        benefitText: 'Guarantees that people with disabilities always have safe, open parking near homes and event venues.',
+        costText: 'Drivers must display valid government disability placards or receive heavy fines.'
       };
     }
     if (selectedAnswerId === 'q7_b') {
@@ -705,7 +804,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '+1.5 stalls (+10%)',
         deltaStallsValue: +1.5,
         tradeoffRationale: 'Event attendees encroach on accessible stalls and block driveway sightlines.',
-        curbsideImpactSummary: 'Restricts mobility access and increases safety hazards.'
+        curbsideImpactSummary: 'Restricts mobility access and increases safety hazards.',
+        benefitText: 'Less aggressive ticketing and fewer officers on patrol during major community events.',
+        costText: 'Accessible spots are taken by non-disabled eventgoers, forcing disabled residents to park blocks away.'
       };
     }
     return {
@@ -713,7 +814,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: question.text,
       hasAnswer: false,
       tradeoffRationale: 'Choose enforcement policy for accessible curbside stalls during events.',
-      curbsideImpactSummary: 'Protects mobility zones during peak neighbourhood events.'
+      curbsideImpactSummary: 'Protects mobility zones during peak neighbourhood events.',
+      benefitText: 'Protect accessible parking for people with mobility needs.',
+      costText: 'Select an answer to see the community trade-off.'
     };
   }
 
@@ -727,7 +830,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-1.0 stall (-6%)',
         deltaStallsValue: -1.0,
         tradeoffRationale: 'Consistent city-wide parking rules prevent drivers from dodging restrictions onto adjacent blocks.',
-        curbsideImpactSummary: 'Prevents parking spillover onto unregulated neighbouring streets.'
+        curbsideImpactSummary: 'Prevents parking spillover onto unregulated neighbouring streets.',
+        benefitText: 'Clear, consistent rules across Edmonton prevent parking problems from spilling onto the next street.',
+        costText: 'Neighbourhoods have less freedom to create unique local rules.'
       };
     }
     if (selectedAnswerId === 'q8_b') {
@@ -739,7 +844,9 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: +2.0,
         tradeoffRationale: 'Unregulated blocks absorb overflow from nearby restricted blocks.',
-        curbsideImpactSummary: 'Increases parking spillover pressure on unregulated blocks.'
+        curbsideImpactSummary: 'Increases parking spillover pressure on unregulated blocks.',
+        benefitText: 'Each neighbourhood or block can customize rules to fit their specific street needs.',
+        costText: 'Unregulated blocks get crowded with cars dodging restrictions from nearby streets.'
       };
     }
     return {
@@ -747,7 +854,9 @@ export function getQuestionTradeoffImpact(
       questionTitle: question.text,
       hasAnswer: false,
       tradeoffRationale: 'Choose between city-wide standardized rules and block-by-block opt-in.',
-      curbsideImpactSummary: 'Determines whether parking restrictions push cars to neighbouring streets.'
+      curbsideImpactSummary: 'Determines whether parking restrictions push cars to neighbouring streets.',
+      benefitText: 'Compare city-wide consistency with local block choice.',
+      costText: 'Select an answer to see the community trade-off.'
     };
   }
 

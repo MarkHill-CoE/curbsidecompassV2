@@ -16,7 +16,6 @@ interface ManualSlidersDrawerProps {
   totalWeeklyDeliveries: number;
   circlingCarCount: number;
   onOpenGauge?: () => void;
-  onReshuffle?: () => void;
 }
 
 export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
@@ -158,6 +157,34 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           />
         </div>
 
+        {/* Private Off-Street Parking (Driveway / Rear Garage Capacity) */}
+        <div className="flex flex-col gap-0.5 bg-black/25 p-2 rounded-lg border border-white/10">
+          <div className="flex justify-between">
+            <span className="text-gray-200 font-bold flex items-center gap-1.5">
+              <span>🏠</span>
+              <span>{t('sim_private_parking_label', 'Private Off-Street Stalls (Driveway / Garage)')}</span>
+            </span>
+            <span className="font-bold text-emerald-400">
+              {config.drivewayCapacity ?? 2} {t('sim_stalls_per_home', 'stalls/home')}
+            </span>
+          </div>
+          <input
+            type="range"
+            aria-label={t('drawer_sliders_driveway_aria', 'Private off-street parking stalls per home')}
+            min="0"
+            max="3"
+            step="1"
+            value={config.drivewayCapacity ?? 2}
+            onChange={(e) =>
+              onConfigChange?.({ drivewayCapacity: parseInt(e.target.value, 10) })
+            }
+            className="accent-emerald-400 cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
+          />
+          <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
+            {t('sim_private_parking_explainer', 'Household cars park in private garages/driveways first; overflow vehicles park on the curbside.')}
+          </p>
+        </div>
+
         {/* Visitor parking passes */}
         <div className="flex flex-col gap-0.5">
           <div className="flex justify-between">
@@ -200,6 +227,9 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
             }
             className="accent-[#009A44] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
           />
+          <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
+            {t('drawer_density_explainer', 'Subdivided lots and skinny duplexes increase residents, vehicles, and visitor parking demand.')}
+          </p>
         </div>
 
         {/* Deliveries Per Home */}

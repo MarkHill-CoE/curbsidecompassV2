@@ -157,8 +157,9 @@
   "nav_btn_back_to_location": "Back",
   "nav_btn_calc_persona": "Calculate Final Persona",
   "nav_btn_confirm_layout": "Next: Street Layout",
+  "nav_btn_go_back": "Go Back",
   "nav_btn_next": "Next",
-  "nav_btn_previous": "Previous",
+  "nav_btn_previous": "Go Back",
   "nav_btn_proceed_q1": "Start Survey",
   "persona_balanced_resident_desc": "You like a fair balance of parking rules. You slightly prefer that everyone shares the costs through taxes, instead of just drivers.",
   "persona_balanced_resident_edmonton_fit": "Aligns with flexible neighbourhood parking.",
@@ -482,6 +483,9 @@
   "static_tradeoff_prefix": "Trade-off: ",
   "static_tradeoff_title": "Answer Choice Impact & Trade-Off",
   "static_tradeoff_unanswered_prompt": "Select an option on Question 1 to calculate its live impact on curbside stalls and street trade-offs.",
+  "tradeoff_card_header": "The Real-World Trade-Off For Your Choice",
+  "tradeoff_cost_pill": "The Cost",
+  "tradeoff_gain_pill": "The Gain",
   "survey_back_button": "← Back",
   "survey_change_layout_btn": "Change ▾",
   "survey_clear_location_aria": "Clear location search",
@@ -557,8 +561,9 @@
   "thankyou_preview_general_text": "Where do you stand on Edmonton's neighbourhood parking and curbside policies? Have your say and try the Curbside Compass public engagement tool:",
   "thankyou_share_mode_label": "Choose What to Share",
   "thankyou_status": "Feedback Completed",
-  "watch_btn_back": "Back",
+  "watch_btn_back": "Go Back",
   "watch_btn_results": "See Final Results",
-  "watch_desc": "Based on your policy choices, the neighborhood parking demand has been set. Observe the simulation to see if your policies lead to harmony or chaos!",
-  "watch_title": "Watch the Street!"
+  "watch_btn_view_persona": "View Your Curbside Persona",
+  "watch_desc": "Based on your policy choices, neighbourhood parking demand and curbside regulations have been applied. Observe the live street simulation or stalls overview above, then proceed to view your curbside persona.",
+  "watch_title": "Your Neighbourhood Parking Program Outcome"
 }

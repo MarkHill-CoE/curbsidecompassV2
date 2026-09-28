@@ -7,24 +7,32 @@ import { ResultsView } from './components/ResultsView';
 import { ManualSlidersDrawer } from './components/ManualSlidersDrawer';
 import { MagnifiedGaugeDrawer } from './components/MagnifiedGaugeDrawer';
 
-// # BEGIN TEMPORARY SHEETS SYNC
-// The following component and context hook provide live spreadsheet synchronization
-// during City stakeholder review. They are isolated here for removal before production.
+// Temporary tool for the City communications team to review and edit copy directly
 import { GoogleSheetSyncModal } from './components/GoogleSheetSyncModal';
 import { useAppText } from './context/TextContentContext';
-// # END TEMPORARY SHEETS SYNC
 
 import {
   SURVEY_QUESTIONS,
-  INITIAL_SIM_CONFIG,
   calculatePersona,
   validatePostalCode,
   calculateSimulationMetricsFromAnswers,
   getQuestionTradeoffImpact
 } from './data/surveyData';
 import { SimulationConfig, StreetLayoutTypology } from './types';
-import { getStreetLayoutInfo, getTypologyFromPostalCode, detectLayoutAndNeighbourhood } from './data/edmontonNeighbourhoods';
-import { Compass, RotateCcw, FileSpreadsheet, CheckCircle, HelpCircle, ZapOff, Eye, Sparkles } from 'lucide-react';
+import { getStreetLayoutInfo, detectLayoutAndNeighbourhood } from './data/edmontonNeighbourhoods';
+import {
+  Compass,
+  RotateCcw,
+  FileSpreadsheet,
+  HelpCircle,
+  ZapOff,
+  Eye,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 import { feedback, triggerFeedback } from './utils/feedback';
 import { ambientAudio } from './utils/ambientAudio';
 
@@ -50,6 +58,7 @@ export default function App() {
       return false;
     }
   });
+  const [isSimExpanded, setIsSimExpanded] = useState<boolean>(false);
 
   const handleToggleSimplifiedMode = useCallback((simplified?: boolean) => {
     setIsSimplifiedMode((prev) => {
@@ -80,17 +89,17 @@ export default function App() {
     }
   });
 
-  // Support optional manual overrides if user adjusts manual sliders or selects layout
+  // Store temporary overrides if the user adjusts manual sliders or selects a street layout
   const [manualOverride, setManualOverride] = useState<Partial<SimulationConfig> | null>(null);
 
-  // Calculate live policy metrics dynamically as questions are answered
+  // Calculate neighbourhood parking metrics live as answers are given or sliders move
   const computedMetrics = useMemo(() => {
-    return calculateSimulationMetricsFromAnswers(selectedAnswers, manualOverride?.streetLayout);
-  }, [selectedAnswers, manualOverride?.streetLayout]);
+    return calculateSimulationMetricsFromAnswers(selectedAnswers, manualOverride || undefined);
+  }, [selectedAnswers, manualOverride]);
 
   const simConfig = useMemo(() => {
-    return manualOverride ? { ...computedMetrics.simConfig, ...manualOverride } : computedMetrics.simConfig;
-  }, [computedMetrics.simConfig, manualOverride]);
+    return computedMetrics.simConfig;
+  }, [computedMetrics.simConfig]);
 
   const simulationMetrics = useMemo(() => ({
     activeHouseholdCars: computedMetrics.activeHouseholdCars,
@@ -121,7 +130,7 @@ export default function App() {
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
   const [validationErrorMsg, setValidationErrorMsg] = useState<string | null>(null);
 
-  // Batched & protected localStorage persistence to prevent I/O blocking and quota errors
+  // Automatically save the user's progress to the browser's local storage
   useEffect(() => {
     try {
       localStorage.setItem('curbsideCompass_step', currentStep.toString());
@@ -129,10 +138,16 @@ export default function App() {
       localStorage.setItem('curbsideCompass_simConfig', JSON.stringify(simConfig));
       localStorage.setItem('curbsideCompass_completed', isCompleted.toString());
     } catch (err) {
-      // Graceful fallback if storage is disabled or quota exceeded
-      console.warn('[Storage] Local storage persistence warning:', err);
+      console.warn('Could not save progress to browser storage:', err);
     }
   }, [currentStep, selectedAnswers, simConfig, isCompleted]);
+
+  // Expand the street simulation view when the user finishes all questions
+  useEffect(() => {
+    if (currentStep >= SURVEY_QUESTIONS.length && !isCompleted) {
+      setIsSimExpanded(true);
+    }
+  }, [currentStep, isCompleted]);
 
   const [policyNote, setPolicyNote] = useState<string>(
     '1950s–1960s Mid-Century Laned Bungalow Street active (12 bungalows, gravel rear alley with detached garages, zero front curb cuts, continuous curbside parking).'
@@ -145,8 +160,9 @@ export default function App() {
       return isTabletPortrait ? 14 : 12;
     }
     return 12;
-  }); // Default 12pt, or 14pt on tablet portrait
+  }); // Default text size is 12 points, or 14 points on vertical tablets
 
+  // Automatically adjust font size when viewing on a tablet held upright
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const mediaQuery = window.matchMedia('(min-width: 768px) and (max-width: 1023px) and (orientation: portrait)');
@@ -159,16 +175,17 @@ export default function App() {
     return () => mediaQuery.removeEventListener('change', handler);
   }, [hasManuallyChangedFont]);
 
+  // Apply the chosen font size across the whole webpage
   useEffect(() => {
-    // 1pt = 96/72 pixels
+    // Convert typographic points to screen pixels (1pt = 96/72 pixels)
     document.documentElement.style.fontSize = `${fontSizePt * (96 / 72)}px`;
   }, [fontSizePt]);
 
+  // Connect user feedback audio and background sound effects
   useEffect(() => {
-    // Sync state with feedback and ambient audio manager
     const unsubscribeFeedback = feedback.subscribe((enabled) => setSoundEnabled(enabled));
     
-    // Kick off ambient audio on mount if sound is enabled
+    // Start ambient background sounds if sound is turned on and survey is active
     if (feedback.isSoundEnabled() && !isCompleted) {
       ambientAudio.play();
     }
@@ -178,6 +195,7 @@ export default function App() {
     };
   }, []);
 
+  // Pause ambient audio when the user finishes the survey, or resume if unmuted
   useEffect(() => {
     if (isCompleted) {
       ambientAudio.pause();
@@ -186,7 +204,7 @@ export default function App() {
     }
   }, [isCompleted, soundEnabled]);
 
-  // Calculate cumulative X and Y scores
+  // Add up the user's score along the Fiscal axis (X) and Regulatory axis (Y)
   const { totalX, totalY } = useMemo(() => {
     let x = 0;
     let y = 0;
@@ -205,12 +223,12 @@ export default function App() {
     return { totalX: x, totalY: y };
   }, [selectedAnswers]);
 
-  // Derived current persona
+  // Determine which curbside persona best matches the user's answers
   const currentPersona = useMemo(() => {
     return calculatePersona(totalX, totalY);
   }, [totalX, totalY]);
 
-  // Handle street layout change
+  // Update the simulation when the user chooses a different street type or neighbourhood
   const handleLayoutChange = useCallback((layout: StreetLayoutTypology, neighbourhoodName?: string, postalCode?: string) => {
     setManualOverride((prev) => ({
       ...(prev || {}),
@@ -222,13 +240,14 @@ export default function App() {
     setPolicyNote(`Matched to ${layoutInfo.title} (${layoutInfo.shortTitle}) with ${layoutInfo.curbsideCapacity} legal curbside stalls.`);
   }, []);
 
-  // Handle option selection
+  // Handle when a user clicks on an answer option
   const handleSelectOption = useCallback((questionId: string, optionId: string) => {
     setShowValidationError(false);
     setValidationErrorMsg(null);
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: optionId }));
 
     const question = SURVEY_QUESTIONS.find((q) => q.id === questionId);
+    // If this is the location or postal code question, find the matching neighbourhood type
     if (question?.type === 'text' || questionId === 'q0' || questionId === 'q9') {
       const trimmed = optionId.trim();
       if (trimmed && trimmed !== 'OPT_OUT') {
@@ -252,14 +271,14 @@ export default function App() {
 
     const option = question?.options.find((opt) => opt.id === optionId);
     if (option) {
-      // Clear non-layout manual overrides so user's explicit policy answer directly drives the simulation
+      // Clear manual slider adjustments so the user's policy choice directly sets the simulation
       setManualOverride((prev) => {
         if (!prev) return null;
         const { streetLayout, neighbourhoodName, postalCode } = prev;
         return (streetLayout || neighbourhoodName || postalCode) ? { streetLayout, neighbourhoodName, postalCode } : null;
       });
 
-      // Generate conversational policy feedback
+      // Show a helpful explanation of what this choice does
       if (option.hint) {
         setPolicyNote(option.hint);
       } else {
@@ -268,12 +287,13 @@ export default function App() {
     }
   }, []);
 
-  // Step Navigation
+  // Move forward to the next question or backward to the previous question
   const handleNavigate = useCallback((direction: number) => {
     if (direction === 1) {
       const currentQuestion = SURVEY_QUESTIONS[currentStep];
       const answer = selectedAnswers[currentQuestion.id];
 
+      // Make sure the user entered a valid postal code or selected an answer before moving on
       if (currentQuestion.type === 'text' || currentQuestion.id === 'q0' || currentQuestion.id === 'q9') {
         const valResult = validatePostalCode(answer || '');
         if (!valResult.isValid) {
@@ -304,13 +324,14 @@ export default function App() {
     }
   }, [currentStep, selectedAnswers]);
 
-  // Reset / Retake
+  // Reset the survey back to the start and restore initial settings
   const handleRetake = useCallback(() => {
     triggerFeedback('button');
     setSelectedAnswers({});
     setManualOverride(null);
     setCurrentStep(0);
     setIsCompleted(false);
+    setIsSimExpanded(false);
     setShowValidationError(false);
     setValidationErrorMsg(null);
     setShowManualSliders(false);
@@ -490,16 +511,50 @@ export default function App() {
           }}
         />
 
-        {/* Simulation Section: Calibrated mobile vertical height (32vh, max 260px) ensuring survey section remains 100% above the fold */}
+        {/* Simulation Section: Calibrated vertical mobile-first height with interactive tap-to-expand */}
         <section
           id="simulation-section"
-          className={`relative bg-[#193A5A] flex-shrink-0 shadow-inner overflow-hidden border-[#004B8D] border-b-2 lg:border-b-0 lg:border-r-2 ${
+          onClick={() => {
+            if (!isSimExpanded && !isCompleted) {
+              setIsSimExpanded(true);
+            }
+          }}
+          className={`relative bg-[#193A5A] flex-shrink-0 shadow-inner overflow-hidden border-[#004B8D] border-b-2 lg:border-b-0 lg:border-r-2 transition-all duration-300 ease-in-out cursor-pointer ${
             isCompleted
               ? "hidden lg:block"
-              : "w-full h-[32vh] min-h-[175px] max-h-[260px] sm:h-[36vh] sm:max-h-[320px] md:h-[40vh] md:max-h-[400px]"
-          } lg:h-full lg:max-h-none lg:w-[48%] xl:w-[50%] 2xl:w-[52%] [@media(orientation:landscape)_and_(max-height:540px)]:h-full [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 [@media(orientation:landscape)_and_(max-height:540px)]:border-b-0 [@media(orientation:landscape)_and_(max-height:540px)]:border-r-2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
+              : isSimExpanded
+              ? "w-full h-[67vh] max-h-none sm:h-[67vh] sm:max-h-none md:h-[67vh] md:max-h-none lg:w-[65%] xl:w-[65%]"
+              : "w-full h-[25vh] min-h-[140px] max-h-[195px] sm:h-[32vh] sm:max-h-[260px] md:h-[38vh] md:max-h-[360px] lg:w-[48%] xl:w-[50%] 2xl:w-[52%]"
+          } lg:h-full lg:max-h-none [@media(orientation:landscape)_and_(max-height:540px)]:h-full [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 [@media(orientation:landscape)_and_(max-height:540px)]:border-b-0 [@media(orientation:landscape)_and_(max-height:540px)]:border-r-2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
           aria-label={t('header_sim_view_aria', 'Neighborhood Parking Simulation View')}
         >
+          {/* Mobile indicator for expand/restore */}
+          {!isCompleted && (
+            <div className="absolute bottom-1.5 left-2 z-20 pointer-events-auto lg:hidden">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsSimExpanded((prev) => !prev);
+                }}
+                className="bg-[#002B49]/90 hover:bg-[#002B49] text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/20 shadow-md flex items-center gap-1 cursor-pointer transition-all active:scale-95"
+                title={isSimExpanded ? t('sim_restore_title', 'Restore question view') : t('sim_expand_title', 'Expand simulation (slides question to lower 33%)')}
+              >
+                {isSimExpanded ? (
+                  <>
+                    <ChevronDown className="w-3 h-3 text-[#FFC72C]" />
+                    <span>{t('sim_restore_label', 'Restore Questions')}</span>
+                  </>
+                ) : (
+                  <>
+                    <ChevronUp className="w-3 h-3 text-[#FFC72C]" />
+                    <span>{t('sim_expand_label', 'Tap to Expand View')}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
           {isSimplifiedMode ? (
             <SimplifiedStreetSummary
               config={simConfig}
@@ -520,7 +575,7 @@ export default function App() {
               onCurbsideDemandChange={(newDemand) => {
                 setManualOverride((prev) => ({
                   ...prev,
-                  householdCarsPerHome: Math.max(1, (newDemand + 10) / 12)
+                  curbsideDemandOverride: newDemand
                 }));
               }}
               onReshuffle={simulationMetrics.onReshuffle}
@@ -546,12 +601,49 @@ export default function App() {
           )}
         </section>
 
-        {/* Interactive Survey or Results View */}
+        {/* Interactive Survey or Results View: slides down to lower 33% when simulation is expanded, restored when clicked */}
         <section
           id="survey-section"
-          className={`relative w-full flex-1 flex flex-col justify-between overflow-hidden min-h-0 bg-[#ffffff] lg:h-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full ${isCompleted ? "w-full lg:w-[52%] xl:w-[50%] 2xl:w-[48%]" : "lg:w-[52%] xl:w-[50%] 2xl:w-[48%] [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2"} ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
+          onClick={() => {
+            if (isSimExpanded) {
+              setIsSimExpanded(false);
+            }
+          }}
+          onFocusCapture={() => {
+            if (isSimExpanded) {
+              setIsSimExpanded(false);
+            }
+          }}
+          className={`relative w-full flex flex-col justify-between overflow-hidden min-h-0 bg-[#ffffff] lg:h-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full transition-all duration-300 ease-in-out ${
+            isCompleted
+              ? "w-full lg:w-[52%] xl:w-[50%] 2xl:w-[48%]"
+              : isSimExpanded
+              ? "h-[33vh] min-h-[33vh] max-h-[33vh] flex-none overflow-hidden lg:h-full lg:max-h-none lg:w-[35%] xl:w-[35%]"
+              : "flex-1 lg:w-[52%] xl:w-[50%] 2xl:w-[48%]"
+          } [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
           aria-label={t('header_survey_aria', 'Parking Policy Persona Survey')}
         >
+          {/* Restore banner when question container is slid down to lower 33% */}
+          {isSimExpanded && !isCompleted && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsSimExpanded(false);
+              }}
+              className="w-full py-1.5 px-3 bg-blue-50 hover:bg-blue-100 text-[#004B8D] text-xs font-black flex items-center justify-between border-b-2 border-[#004B8D]/30 shrink-0 cursor-pointer shadow-xs transition-colors z-20 animate-in fade-in"
+              title={t('survey_restore_title', 'Click to restore full Question view')}
+            >
+              <div className="flex items-center gap-1.5 truncate">
+                <ChevronUp className="w-4 h-4 text-[#004B8D] shrink-0" />
+                <span className="truncate">{t('survey_restore_banner', 'Question container in lower 33% • Tap to restore')}</span>
+              </div>
+              <span className="bg-[#004B8D] text-white px-2 py-0.5 rounded text-[10px] font-bold shrink-0">
+                {t('survey_restore_btn', 'Restore Full View ▴')}
+              </span>
+            </button>
+          )}
+
           {/* Manual Sliders Overlay: positioned over the question container, blurring question content underneath while the neighborhood canvas remains crisp and unblurred */}
           <ManualSlidersDrawer
             showControls={showManualSliders}
@@ -588,22 +680,85 @@ export default function App() {
                 onLayoutChange={handleLayoutChange}
               />
             ) : (
-              <div className="relative flex flex-col items-center justify-center h-full p-8 text-center space-y-6 animate-in fade-in zoom-in duration-500 overflow-hidden">
-                 <h2 className="text-2xl sm:text-3xl font-black text-[#004B8D]">
-                   {t('watch_title', 'Watch the Street!')}
-                 </h2>
-                 <p className="text-gray-600 max-w-md text-sm sm:text-base">
-                   {t('watch_desc', 'Based on your policy choices, the neighborhood parking demand has been set. Observe the simulation to see the impact of your policy choices on neighborhood parking and traffic flow!')}
-                 </p>
-                 <div className="flex gap-4 pt-4">
-                   <button onClick={() => setCurrentStep(prev => prev - 1)} className="px-5 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-lg shadow-sm hover:bg-gray-200 transition-all border border-gray-300 cursor-pointer">
-                     {t('watch_btn_back', 'Back')}
-                   </button>
-                   <button onClick={() => setIsCompleted(true)} className="px-6 py-2.5 bg-[#004B8D] text-white font-bold rounded-lg shadow-md hover:bg-[#003566] transition-all flex items-center gap-2 cursor-pointer">
-                     {t('watch_btn_results', 'See Final Results')}
-                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-                   </button>
-                 </div>
+              <div 
+                id="outcome-screen-container"
+                role="region"
+                aria-label={t('watch_title', 'Your Neighbourhood Parking Program Outcome')}
+                className="relative flex flex-col justify-between h-full p-2 sm:p-3 text-center animate-in fade-in duration-300 overflow-y-auto"
+              >
+                {/* Header & Status Card */}
+                <div className="flex flex-col items-center justify-center gap-1 sm:gap-1.5 my-auto max-w-xl mx-auto w-full">
+                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#004B8D] text-[9pt] sm:text-[9.5pt] font-black uppercase tracking-wider shadow-2xs">
+                    <Sparkles className="w-3.5 h-3.5 text-[#FFC72C] fill-[#FFC72C]" />
+                    <span>{t('outcome_badge', 'All 8 Policy Steps Completed')}</span>
+                  </div>
+
+                  <h2 className="text-[13pt] sm:text-[16pt] md:text-[18pt] font-black text-[#002B49] tracking-tight leading-tight">
+                    {t('watch_title', 'Your Neighbourhood Parking Program Outcome')}
+                  </h2>
+
+                  {/* Summary & View Toggle Pills */}
+                  <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 pt-0.5 text-[9.5pt] sm:text-[10pt] font-bold">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-gray-100 border border-gray-200 text-gray-800">
+                      📍 {simConfig.neighbourhoodName || 'Edmonton'}
+                    </span>
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-[#004B8D]">
+                      🏡 {getStreetLayoutInfo(simConfig.streetLayout).shortTitle} ({simulationMetrics.curbsideStallsCapacity} stalls)
+                    </span>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border ${
+                      simulationMetrics.curbsidePct >= 100
+                        ? 'bg-amber-50 border-amber-300 text-amber-900'
+                        : 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                    }`}>
+                      🚗 {simulationMetrics.curbsideDemandCount} Demand • {simulationMetrics.curbsidePct}% Occupancy
+                    </span>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border ${
+                      simulationMetrics.circlingCarCount > 0
+                        ? 'bg-amber-50 border-amber-300 text-amber-900'
+                        : 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                    }`}>
+                      🚦 {simulationMetrics.circlingCarCount > 0 ? `${simulationMetrics.circlingCarCount} Circling` : 'Smooth Flow'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setIsSimExpanded((prev) => !prev)}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-[#004B8D] hover:bg-blue-100 cursor-pointer transition-colors shadow-2xs font-bold"
+                      title={isSimExpanded ? "Minimize simulation view" : "Expand simulation view"}
+                    >
+                      {isSimExpanded ? <ChevronDown className="w-3.5 h-3.5 text-[#FFC72C]" /> : <ChevronUp className="w-3.5 h-3.5 text-[#004B8D]" />}
+                      <span>{isSimExpanded ? 'Expanded View (Active)' : 'Expand Street View'}</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Bottom Action Buttons: Go Back & View Your Curbside Persona */}
+                <div className="sticky bottom-0 z-20 bg-white pt-2 pb-1 border-t border-gray-200 flex items-center justify-between gap-3 w-full max-w-xl mx-auto shrink-0 shadow-[0_-2px_6px_rgba(0,0,0,0.03)]">
+                  <button
+                    type="button"
+                    id="outcome-back-btn"
+                    onClick={() => {
+                      triggerFeedback('button');
+                      setCurrentStep(prev => Math.max(0, prev - 1));
+                    }}
+                    className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 border-2 border-gray-300 bg-white text-gray-800 hover:bg-gray-100 transition-all min-h-[44px] sm:min-h-[48px] cursor-pointer shadow-2xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                    <span>{t('watch_btn_back', 'Go Back')}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    id="outcome-view-persona-btn"
+                    onClick={() => {
+                      triggerFeedback('submit');
+                      setIsCompleted(true);
+                    }}
+                    className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-2 shadow-md transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
+                  >
+                    <span>{t('watch_btn_view_persona', 'View Your Curbside Persona')}</span>
+                    <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+                  </button>
+                </div>
               </div>
             )
           ) : (
