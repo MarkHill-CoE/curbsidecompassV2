@@ -32,7 +32,7 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 # Expose HTTP port
-EXPOSE 80
+EXPOSE 8080
 
 # Health check to ensure nginx is serving requests
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
