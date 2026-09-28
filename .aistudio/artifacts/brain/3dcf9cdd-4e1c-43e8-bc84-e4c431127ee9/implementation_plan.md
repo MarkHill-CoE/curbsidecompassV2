@@ -1,29 +1,34 @@
-# Implementation Plan: Fix Mobile Vertical Next Button Visibility on Question 0 [COMPLETED]
+# Implementation Plan: Update Google Cloud Run (GCP) Deployment
 
-## Problem Analysis
-When accessing Curbside Compass on mobile portrait (vertical) devices on Question 0 (both Screen 0A Location Search and Screen 0B Street Style Selection):
-1. **Flexbox Overflow Clipping**: In `App.tsx`, the survey section container and its child wrapper contained `overflow-hidden` without a fully constrained `min-h-0` flex chain down to `SurveyStage`. Because flex items default to `min-height: auto`, when Question 0's content height exceeded the available vertical viewport, `SurveyStage` expanded beyond the container, pushing the bottom navigation container (`#survey-navigation-container` containing the 'Next' button) off the bottom of the screen where it was clipped by `overflow-hidden`.
-2. **Missing Navigation Padding & Safe Area Inset**: `#survey-navigation-container` in `SurveyStage.tsx` lacked bottom safe-area insets (`env(safe-area-inset-bottom)`), causing buttons to sit under mobile browser home indicators and URL bars.
-3. **Question 0 Vertical Footprint**: Question 0 headings and search input consumed excessive vertical space on small mobile viewports.
+## Context & Objective
+You recently updated `nginx.conf` and `Dockerfile` to listen on port **8080** (the standard default ingress port for Google Cloud Run). To successfully publish your updated application to Google Cloud Platform (GCP), we need to synchronize the container health checks with port 8080 and provide the exact `gcloud` deployment commands.
 
 ---
 
-## Applied Changes
+## Proposed Changes
 
-### 1. `src/App.tsx` [DONE]
-- Updated mobile portrait height allocation for `#simulation-section` to `h-[22vh] min-h-[120px] max-h-[170px]` to free up vital vertical space for Question 0 and the navigation controls on compact mobile screens.
-- Removed conflicting `justify-between` and added `w-full h-full flex-1 flex flex-col min-h-0 overflow-hidden` to `#survey-section` and its child wrapper, ensuring child components conform to the viewport bounds without clipping.
+### 1. Fix Health Checks for Port 8080
+- **`Dockerfile`**:
+  - Update `HEALTHCHECK` command from `http://localhost/healthz` to `http://localhost:8080/healthz` so container health monitors pass on GCP.
+- **`docker-compose.yml`**:
+  - Update host port binding to `"3000:8080"` and health check probe to `http://localhost:8080/healthz` for local Docker parity.
 
-### 2. `src/components/SurveyStage.tsx` [DONE]
-- **Flex Child Constraints**: Updated root container to `w-full max-w-4xl mx-auto h-full max-h-full flex flex-col min-h-0 px-2.5 sm:px-3.5 md:px-4 pt-2 sm:pt-3 pb-0 overflow-hidden` so that `survey-content-scroll` correctly receives vertical overflow and enables smooth internal scrolling.
-- **Navigation Container Padding**: Updated `#survey-navigation-container` to include mobile safe area bottom padding (`pb-[max(0.75rem,env(safe-area-inset-bottom))]`) so that the 'Go Back' and 'Next' buttons are always elevated above physical device gesture bars and browser toolbars.
-- **Question 0 Mobile Layout Tuning**:
-  - Refined Screen 0A typography: heading size to `text-[13pt] sm:text-[16pt]` and helper label to `text-xs sm:text-sm font-semibold text-[#193A5A]/90` with compact `min-h-[44px]` search input.
-  - Question 0 content fits comfortably above the fold or scrolls smoothly inside the scrollable content container while the 'Next' button remains securely pinned and accessible.
+### 2. Add Quick Deployment Script & GCP Guide
+- Create a script `scripts/deploy-cloud-run.sh` with parameter prompts (or default project/region) that runs:
+  ```bash
+  gcloud run deploy curbside-compass \
+    --source . \
+    --region northamerica-northeast1 \
+    --port 8080 \
+    --allow-unauthenticated
+  ```
+- Document the two deployment paths:
+  1. **Direct Source Deploy** (simplest: Cloud Build packages and deploys in one step).
+  2. **Container Image Deploy** via Google Artifact Registry (standard CI/CD pipeline).
 
 ---
 
-## Verification Results
-- **Automated Build**: `compile_applet` passed with zero errors.
-- **Linter Check**: `lint_applet` passed with zero errors.
-- **Responsiveness**: Verified flex constraints, touch targets, and mobile viewport compatibility.
+## Verification Plan
+1. **Configuration Verification**: Run `compile_applet` and `lint_applet` to ensure codebase integrity.
+2. **Local Container Test**: Verify `Dockerfile` healthcheck and configuration syntax.
+3. **Deployment Readiness**: Ensure execution permissions and commands are validated for standard GCP project structures.

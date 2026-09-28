@@ -344,7 +344,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-[#f4f6f8] text-gray-800 overflow-hidden font-sans">
+    <div className="flex flex-col h-[100dvh] max-h-[100dvh] w-screen bg-[#f4f6f8] text-gray-800 overflow-hidden font-sans">
       {/* Top Header Navigation Bar */}
       <header className="h-10 sm:h-11 [@media(orientation:landscape)_and_(max-height:540px)]:h-9 bg-[#004B8D] text-white flex items-center justify-between px-2 sm:px-4 z-30 shadow-xs flex-shrink-0 border-b border-[#003566]">
         <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
@@ -493,7 +493,7 @@ export default function App() {
       </header>
 
       {/* Primary Split Viewport: Stacked on mobile portrait, side-by-side on desktop, tablet horizontal, and mobile landscape */}
-      <main className="relative flex flex-col lg:flex-row [@media(orientation:landscape)_and_(max-height:540px)]:flex-row flex-grow h-[calc(100dvh-40px)] sm:h-[calc(100dvh-44px)] [@media(orientation:landscape)_and_(max-height:540px)]:h-[calc(100dvh-36px)] overflow-hidden">
+      <main className="relative flex flex-col lg:flex-row [@media(orientation:landscape)_and_(max-height:540px)]:flex-row flex-1 min-h-0 w-full overflow-hidden">
         {/* Magnified Parking Gauge Overlay */}
         <MagnifiedGaugeDrawer
           isOpen={showMagnifiedGauge}

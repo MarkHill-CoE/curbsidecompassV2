@@ -625,7 +625,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
         id="survey-navigation-container"
         role="navigation"
         aria-label="Question Navigation"
-        className="sticky bottom-0 z-30 bg-white pt-2 sm:pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-0.5 sm:px-1 border-t border-gray-200 flex flex-col gap-1.5 flex-shrink-0 shadow-[0_-3px_10px_rgba(0,0,0,0.04)]"
+        className="sticky bottom-0 z-30 bg-white pt-2 sm:pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-3 sm:px-4 md:px-6 border-t border-gray-200 flex flex-col gap-1.5 flex-shrink-0 shadow-[0_-3px_10px_rgba(0,0,0,0.04)]"
       >
         {showValidationError && (
           <div 
