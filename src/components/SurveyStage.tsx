@@ -203,7 +203,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto h-full flex flex-col justify-between p-2.5 sm:p-3.5 md:p-4 [@media(orientation:landscape)_and_(max-height:540px)]:p-1.5 overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto h-full max-h-full flex flex-col min-h-0 px-2.5 sm:px-3.5 md:px-4 pt-2 sm:pt-3 pb-0 [@media(orientation:landscape)_and_(max-height:540px)]:p-1.5 overflow-hidden">
       {/* Progress & Category Header */}
       <div className="flex flex-col gap-1 flex-shrink-0 mb-1 sm:mb-1.5">
         <div className="flex items-center justify-between text-xs sm:text-sm font-semibold text-gray-500">
@@ -250,7 +250,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       </div>
 
       {/* Animated Question Card with adaptive layout & momentum scroll */}
-      <div className="relative flex-grow flex flex-col justify-start min-h-0 overflow-y-auto overscroll-contain pt-0.5 pb-1 sm:pt-1 sm:pb-2 pr-0.5">
+      <div className="relative flex-1 flex flex-col justify-start min-h-0 overflow-y-auto overscroll-contain pt-0.5 pb-2.5 sm:pt-1 sm:pb-3 pr-0.5">
         <AnimatePresence mode="wait">
           <motion.div
             key={`${currentQuestion.id}_${q0SubScreen}`}
@@ -260,7 +260,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             transition={{ duration: 0.18 }}
             className="flex flex-col w-full"
           >
-            <h3 className="text-[14pt] sm:text-[16pt] md:text-[18pt] font-bold text-[#193A5A] mb-2 sm:mb-2.5 leading-snug tracking-tight">
+            <h3 className="text-[13pt] sm:text-[16pt] md:text-[18pt] font-bold text-[#193A5A] mb-1.5 sm:mb-2 leading-snug tracking-tight">
               {currentQuestion.id === 'q0'
                 ? q0SubScreen === 0
                   ? t('q0_title_step1', 'Where do you live in Edmonton?')
@@ -271,8 +271,8 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             {isTextQuestion ? (
               q0SubScreen === 0 ? (
                 /* Screen 0A: Location / Postal Code / Neighbourhood Input (Optimized to fit 100% above the fold) */
-                <div className="w-full flex flex-col gap-2 pt-0.5">
-                  <label htmlFor="location-smart-input" className="block text-[14pt] sm:text-[15pt] font-bold text-[#193A5A] leading-snug">
+                <div className="w-full flex flex-col gap-1.5 pt-0.5">
+                  <label htmlFor="location-smart-input" className="block text-xs sm:text-sm font-semibold text-[#193A5A] leading-snug">
                     {t('q0_helper_short', 'Search your neighbourhood or enter a postal code to match your street:')}
                   </label>
 
@@ -298,7 +298,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                             setQ0SubScreen(1);
                           }
                         }}
-                        className="w-full pl-11 pr-10 py-2.5 sm:py-3 bg-white border-2 border-gray-300 rounded-lg text-[14pt] sm:text-[15pt] font-semibold text-[#004B8D] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20 transition-all min-h-[48px] shadow-2xs"
+                        className="w-full pl-10 pr-9 py-2 sm:py-2.5 bg-white border-2 border-gray-300 rounded-lg text-sm sm:text-base font-semibold text-[#004B8D] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20 transition-all min-h-[44px] shadow-2xs"
                         aria-label={t('survey_location_input_aria', 'Edmonton postal code or neighbourhood')}
                       />
                       {(postalInput || neighbourhoodQuery) && currentAnswer !== 'OPT_OUT' && (
@@ -625,7 +625,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
         id="survey-navigation-container"
         role="navigation"
         aria-label="Question Navigation"
-        className="sticky bottom-0 z-30 bg-white mt-auto pt-1.5 sm:pt-2 pb-1 sm:pb-1.5 border-t border-gray-200 flex flex-col gap-1.5 flex-shrink-0 shadow-[0_-2px_6px_rgba(0,0,0,0.03)]"
+        className="sticky bottom-0 z-30 bg-white pt-2 sm:pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-0.5 sm:px-1 border-t border-gray-200 flex flex-col gap-1.5 flex-shrink-0 shadow-[0_-3px_10px_rgba(0,0,0,0.04)]"
       >
         {showValidationError && (
           <div 

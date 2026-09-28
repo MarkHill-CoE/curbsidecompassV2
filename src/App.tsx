@@ -524,7 +524,7 @@ export default function App() {
               ? "hidden lg:block"
               : isSimExpanded
               ? "w-full h-[67vh] max-h-none sm:h-[67vh] sm:max-h-none md:h-[67vh] md:max-h-none lg:w-[65%] xl:w-[65%]"
-              : "w-full h-[25vh] min-h-[140px] max-h-[195px] sm:h-[32vh] sm:max-h-[260px] md:h-[38vh] md:max-h-[360px] lg:w-[48%] xl:w-[50%] 2xl:w-[52%]"
+              : "w-full h-[22vh] min-h-[120px] max-h-[170px] sm:h-[30vh] sm:max-h-[240px] md:h-[38vh] md:max-h-[360px] lg:w-[48%] xl:w-[50%] 2xl:w-[52%]"
           } lg:h-full lg:max-h-none [@media(orientation:landscape)_and_(max-height:540px)]:h-full [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 [@media(orientation:landscape)_and_(max-height:540px)]:border-b-0 [@media(orientation:landscape)_and_(max-height:540px)]:border-r-2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
           aria-label={t('header_sim_view_aria', 'Neighborhood Parking Simulation View')}
         >
@@ -614,7 +614,7 @@ export default function App() {
               setIsSimExpanded(false);
             }
           }}
-          className={`relative w-full flex flex-col justify-between overflow-hidden min-h-0 bg-[#ffffff] lg:h-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full transition-all duration-300 ease-in-out ${
+          className={`relative w-full flex flex-col overflow-hidden min-h-0 bg-[#ffffff] lg:h-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full transition-all duration-300 ease-in-out ${
             isCompleted
               ? "w-full lg:w-[52%] xl:w-[50%] 2xl:w-[48%]"
               : isSimExpanded
@@ -660,7 +660,7 @@ export default function App() {
               setShowMagnifiedGauge(true);
             }}
           />
-          <div className={`w-full flex-1 flex flex-col justify-between min-h-0 transition-all duration-200 ${showManualSliders || showMagnifiedGauge ? 'blur-sm select-none pointer-events-none' : ''}`}>
+          <div className={`w-full h-full flex-1 flex flex-col min-h-0 overflow-hidden transition-all duration-200 ${showManualSliders || showMagnifiedGauge ? 'blur-sm select-none pointer-events-none' : ''}`}>
           {!isCompleted ? (
             currentStep < SURVEY_QUESTIONS.length ? (
               <SurveyStage
