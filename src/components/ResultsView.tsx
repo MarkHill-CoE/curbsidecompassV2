@@ -74,6 +74,9 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
       <ThankYouView
         persona={persona}
         config={config}
+        answers={answers}
+        totalX={totalX}
+        totalY={totalY}
         onViewResults={() => setSubmitted(false)}
         onRetake={onRetake}
       />
@@ -84,10 +87,22 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
   if (step === 1) {
     const handleShare = async () => {
       triggerFeedback('button');
+      const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://curbside-compass.edmonton.ca';
+      const imageUrl = `${shareUrl}/CurbsideCompass_Social_Media_IMG.jpg`;
+      const priorities = (persona.keyPriorities || []).map(p => `• ${p}`).join('\n');
+      const fullText = [
+        `I took Edmonton's Curbside Compass public engagement tool and got "${persona.title}"!`,
+        config.neighbourhoodName ? `📍 Neighbourhood: ${config.neighbourhoodName}` : '',
+        priorities ? `\nKey Priorities:\n${priorities}` : '',
+        `\n🖼️ Screen Image: ${imageUrl}`,
+        `🔗 Find your persona and have your say: ${shareUrl}`,
+        `\n#YEGcurbside #Edmonton #YEGtraffic #CurbsideCompass`
+      ].filter(Boolean).join('\n');
+
       const shareData = {
         title: 'Curbside Compass',
-        text: `I got the ${persona.title} persona! Help shape Edmonton's parking future.`,
-        url: window.location.href,
+        text: fullText,
+        url: shareUrl,
       };
       
       if (navigator.share) {
@@ -99,7 +114,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
       } else {
         try {
           if (navigator.clipboard) {
-            await navigator.clipboard.writeText(shareData.url);
+            await navigator.clipboard.writeText(fullText);
           }
           setCopied(true);
           setTimeout(() => setCopied(false), 2500);

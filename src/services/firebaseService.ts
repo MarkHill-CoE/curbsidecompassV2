@@ -6,7 +6,7 @@ import {
   getDocs,
   writeBatch
 } from 'firebase/firestore';
-import { getDb, ensureAnonymousAuth } from '../lib/firebase';
+import { getDb, getFirebaseAuth, ensureAnonymousAuth } from '../lib/firebase';
 import { PersonaResult, SimulationConfig } from '../types';
 import { sanitizeOpenTextInput } from '../utils/securitySanitizer';
 import {
@@ -15,6 +15,54 @@ import {
   PostalScrubAuditReport,
   RecordWithPostalCode
 } from '../utils/postalPrivacyScrubber';
+
+export enum OperationType {
+  CREATE = 'create',
+  UPDATE = 'update',
+  DELETE = 'delete',
+  LIST = 'list',
+  GET = 'get',
+  WRITE = 'write',
+}
+
+export interface FirestoreErrorInfo {
+  error: string;
+  operationType: OperationType;
+  path: string | null;
+  authInfo: {
+    userId?: string | null;
+    email?: string | null;
+    emailVerified?: boolean | null;
+    isAnonymous?: boolean | null;
+    tenantId?: string | null;
+    providerInfo?: {
+      providerId?: string | null;
+      email?: string | null;
+    }[];
+  };
+}
+
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null): FirestoreErrorInfo {
+  const auth = getFirebaseAuth();
+  const errInfo: FirestoreErrorInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth?.currentUser?.uid ?? null,
+      email: auth?.currentUser?.email ?? null,
+      emailVerified: auth?.currentUser?.emailVerified ?? null,
+      isAnonymous: auth?.currentUser?.isAnonymous ?? null,
+      tenantId: auth?.currentUser?.tenantId ?? null,
+      providerInfo: auth?.currentUser?.providerData?.map(provider => ({
+        providerId: provider.providerId,
+        email: provider.email,
+      })) || []
+    },
+    operationType,
+    path
+  };
+  console.warn(`[Firestore Error: ${operationType} on ${path}]`, JSON.stringify(errInfo));
+  return errInfo;
+}
 
 export interface SurveySubmissionData {
   personaId: string;
@@ -72,6 +120,7 @@ export async function saveSurveyResponse(data: {
   rating?: number | null;
   feedback?: string;
 }): Promise<{ success: boolean; id?: string; error?: string }> {
+  const sessionId = getSessionId();
   try {
     const db = getDb();
     if (!db) {
@@ -113,7 +162,6 @@ export async function saveSurveyResponse(data: {
 
     // Try ensuring anonymous auth if permitted
     const authUid = await ensureAnonymousAuth();
-    const sessionId = getSessionId();
 
     const submissionDoc: SurveySubmissionData = {
       personaId: String(data.persona.id || '').slice(0, 50),
@@ -143,9 +191,8 @@ export async function saveSurveyResponse(data: {
 
     return { success: true, id: sessionId };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.warn('[Firebase] Failed to persist survey response:', msg);
-    return { success: false, error: msg };
+    const errInfo = handleFirestoreError(err, OperationType.WRITE, `survey_responses/${sessionId}`);
+    return { success: false, error: errInfo.error };
   }
 }
 
@@ -230,8 +277,7 @@ export async function scrubFirestoreLowVolumePostalCodes(threshold = 20): Promis
 
     return { success: true, auditReport };
   } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    console.error('[Firebase] Error executing postal code k-anonymity scrub:', msg);
-    return { success: false, error: msg };
+    const errInfo = handleFirestoreError(err, OperationType.WRITE, 'survey_responses');
+    return { success: false, error: errInfo.error };
   }
 }

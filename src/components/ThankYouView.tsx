@@ -13,47 +13,171 @@ import {
   ExternalLink,
   User,
   Users,
-  Download
+  Download,
+  Image as ImageIcon
 } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
 
-const curbsideSocialImg = '/Curbside_Compass_fb.png';
+const curbsideSocialImg = '/CurbsideCompass_Social_Media_IMG.jpg';
 
 interface ThankYouViewProps {
   persona: PersonaResult;
   config: SimulationConfig;
+  answers?: Record<string, string>;
+  totalX?: number;
+  totalY?: number;
   onViewResults: () => void;
   onRetake?: () => void;
+}
+
+function formatUserSelections(answers: Record<string, string> = {}, config: SimulationConfig): string[] {
+  const selections: string[] = [];
+
+  if (config.neighbourhoodName) {
+    selections.push(`Neighbourhood: ${config.neighbourhoodName}`);
+  }
+
+  // Q1: Program Funding
+  if (answers['q1'] === 'q1_a') {
+    selections.push('Funding: User-pay permits & fees cover program costs');
+  } else if (answers['q1'] === 'q1_b') {
+    selections.push('Funding: General property taxes (free street parking for all)');
+  } else if (config.curbsideFeeModel) {
+    selections.push(`Funding: ${config.curbsideFeeModel === 'free' ? 'Free on-street parking' : 'User-pay permits & fees'}`);
+  }
+
+  // Q2: Permit Limits
+  if (answers['q2'] === 'q2_a') {
+    selections.push('Permit Limits: Cap permits at 2 per home in high-demand zones');
+  } else if (answers['q2'] === 'q2_b') {
+    selections.push('Permit Limits: Unlimited permits per household');
+  }
+
+  // Q3: Visitor & Trade Access
+  if (answers['q3'] === 'q3_a') {
+    selections.push('Visitor Access: Equal opportunity for visitors & trades to park');
+  } else if (answers['q3'] === 'q3_b') {
+    selections.push('Visitor Access: Prioritize street parking for residents');
+  }
+
+  // Q4: Hospital & Event Venue Traffic
+  if (answers['q4'] === 'q4_a') {
+    selections.push('Venue/Hospital Parking: Allow nearby street parking for visitors');
+  } else if (answers['q4'] === 'q4_b') {
+    selections.push('Venue/Hospital Parking: Protect local residential parking');
+  }
+
+  // Q5: Walking Distance
+  if (answers['q5'] === 'q5_a') {
+    selections.push('Walking Distance: Expect parking spaces on the immediate block');
+  } else if (answers['q5'] === 'q5_b') {
+    selections.push('Walking Distance: Accept parking in wider neighbourhood');
+  }
+
+  // Q6: Private Parking Equity
+  if (answers['q6'] === 'q6_a') {
+    selections.push('Parking Equity: Priority permits for homes without private parking');
+  } else if (answers['q6'] === 'q6_b') {
+    selections.push('Parking Equity: Equal eligibility regardless of private driveway/garage');
+  }
+
+  if (config.enforcementLevel && selections.length < 3) {
+    selections.push(`Enforcement: ${config.enforcementLevel.charAt(0).toUpperCase() + config.enforcementLevel.slice(1)}`);
+  }
+
+  return selections;
 }
 
 const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
   persona,
   config,
+  answers = {},
   onViewResults,
   onRetake
 }) => {
   const { t } = useAppText();
   const [shareMode, setShareMode] = useState<'with_persona' | 'general'>('with_persona');
   const [copied, setCopied] = useState<boolean>(false);
+  const [imageCopied, setImageCopied] = useState<boolean>(false);
   const [platformNotice, setPlatformNotice] = useState<string | null>(null);
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.href : 'https://curbside-compass.edmonton.ca';
+  const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://curbside-compass.edmonton.ca';
+  const imageUrl = typeof window !== 'undefined' ? `${window.location.origin}${curbsideSocialImg}` : `https://curbside-compass.edmonton.ca${curbsideSocialImg}`;
 
-  const shareText = shareMode === 'with_persona'
-    ? `I took Edmonton's Curbside Compass public engagement tool and got "${persona.title}"!\n\nMy Curbside Preferences:\n• Fee Model: ${config.curbsideFeeModel.charAt(0).toUpperCase() + config.curbsideFeeModel.slice(1)}\n• Enforcement: ${config.enforcementLevel}\n\nWhere do you stand on neighbourhood parking? Find your persona:`
-    : `Where do you stand on Edmonton's neighbourhood parking and curbside policies? Have your say and try the Curbside Compass public engagement tool:`;
+  const userSelections = formatUserSelections(answers, config);
+  const priorities = (persona.keyPriorities || []).map(p => `• ${p}`);
 
-  const shareTextWithUrl = `${shareText} ${shareUrl}`;
+  const shareTextWithPersona = [
+    `I completed the City of Edmonton's Curbside Compass public consultation!`,
+    ``,
+    `🎯 My Policy Profile: "${persona.title}"`,
+    config.neighbourhoodName ? `📍 Typology: ${config.neighbourhoodName}` : null,
+    ``,
+    `My Curbside Selections:`,
+    ...userSelections.map(s => `• ${s}`),
+    ``,
+    priorities.length > 0 ? `Key Priorities:\n${priorities.join('\n')}\n` : null,
+    `🖼️ Screen Image from Street Model: ${imageUrl}`,
+    `🔗 Have your say and explore Edmonton's curbside policy model: ${shareUrl}`,
+    ``,
+    `#YEGcurbside #Edmonton #YEGtraffic #CurbsideCompass`
+  ].filter(line => line !== null).join('\n');
+
+  const shareTextGeneral = [
+    `Where do you stand on Edmonton's neighbourhood parking and curbside policies? Have your say and explore the interactive street model:`,
+    ``,
+    `🖼️ Screen Image from Street Model: ${imageUrl}`,
+    `🔗 Have your say on Edmonton's neighbourhood parking policies: ${shareUrl}`,
+    ``,
+    `#YEGcurbside #Edmonton #YEGtraffic #CurbsideCompass`
+  ].join('\n');
+
+  const fullShareText = shareMode === 'with_persona' ? shareTextWithPersona : shareTextGeneral;
 
   const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}&hashtags=YEGcurbside,Edmonton,YEGtraffic`;
+  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}&url=${encodeURIComponent(shareUrl)}&hashtags=YEGcurbside,Edmonton,YEGtraffic`;
   const instagramUrl = 'https://www.instagram.com/';
 
   const handleCopyLink = async () => {
+    triggerFeedback('button');
     try {
       if (navigator.clipboard) {
-        await navigator.clipboard.writeText(shareTextWithUrl);
+        // Attempt rich HTML + plain text copy for destinations that support embedded image pastes
+        if (typeof ClipboardItem !== 'undefined') {
+          try {
+            const htmlFormatted = `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #1e293b;">
+                <p><strong>I completed the City of Edmonton's Curbside Compass public consultation!</strong></p>
+                <p style="font-size: 16px; color: #004B8D;"><strong>🎯 My Policy Profile: ${persona.title}</strong></p>
+                ${config.neighbourhoodName ? `<p>📍 <em>Neighbourhood: ${config.neighbourhoodName}</em></p>` : ''}
+                <p><strong>My Curbside Selections:</strong><br/>
+                ${userSelections.map(s => `• ${s}`).join('<br/>')}
+                </p>
+                ${priorities.length > 0 ? `<p><strong>Key Priorities:</strong><br/>${priorities.join('<br/>')}</p>` : ''}
+                <p><img src="${imageUrl}" alt="Curbside Compass Screen Image" style="max-width: 100%; width: 560px; height: auto; border-radius: 8px; border: 1px solid #cbd5e1; display: block; margin: 12px 0;" /></p>
+                <p>🔗 <a href="${shareUrl}" style="color: #0081BC; font-weight: bold;">Have your say and explore Edmonton's curbside policy model: ${shareUrl}</a></p>
+                <p style="color: #64748b; font-size: 12px;">#YEGcurbside #Edmonton #YEGtraffic #CurbsideCompass</p>
+              </div>
+            `.trim();
+
+            const textBlob = new Blob([fullShareText], { type: 'text/plain' });
+            const htmlBlob = new Blob([htmlFormatted], { type: 'text/html' });
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'text/plain': textBlob,
+                'text/html': htmlBlob,
+              })
+            ]);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 3000);
+            return;
+          } catch {
+            // Fallback to writeText below
+          }
+        }
+
+        await navigator.clipboard.writeText(fullShareText);
         setCopied(true);
         setTimeout(() => setCopied(false), 3000);
       }
@@ -63,10 +187,29 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
     }
   };
 
+  const handleCopyImage = async () => {
+    triggerFeedback('button');
+    try {
+      const res = await fetch(curbsideSocialImg);
+      const blob = await res.blob();
+      if (typeof ClipboardItem !== 'undefined') {
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            [blob.type]: blob
+          })
+        ]);
+        setImageCopied(true);
+        setTimeout(() => setImageCopied(false), 3000);
+      }
+    } catch (err) {
+      console.warn('Could not copy image directly to clipboard:', err);
+    }
+  };
+
   const handlePlatformClick = async (platform: string) => {
     try {
       if (navigator.clipboard) {
-        await navigator.clipboard.writeText(shareTextWithUrl);
+        await navigator.clipboard.writeText(fullShareText);
       }
     } catch {
       // ignore
@@ -88,7 +231,6 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
               {t('share_feedback_completed', 'Feedback Completed')}
             </span>
           </div>
-          
         </div>
 
         {onRetake && (
@@ -149,7 +291,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <User className={`w-3.5 h-3.5 ${shareMode === 'with_persona' ? 'text-[#004B8D]' : 'text-gray-500'}`} />
                   <span className="text-[0.6875rem] font-bold">
-                    {t('share_opt_persona', 'Include My Persona')}
+                    {t('share_opt_persona', 'Include My Persona & Selections')}
                   </span>
                 </div>
                 <div className="text-[0.59375rem] text-gray-600 leading-tight line-clamp-1">
@@ -183,55 +325,91 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
               </button>
             </div>
 
-            {/* Social Post Preview Card with Image */}
+            {/* Social Post Preview Card with Image and Selections */}
             <div className="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-2xs">
-              <div className="p-2 border-b border-gray-100 flex items-start gap-2.5">
-                {/* Thumbnail of Curbside Compass Image */}
-                <div className="relative flex-shrink-0 w-20 sm:w-24 h-20 sm:h-24 rounded-md overflow-hidden bg-slate-100 border border-gray-200 shadow-2xs group">
+              <div className="p-2.5 border-b border-gray-100 flex flex-col sm:flex-row items-start gap-2.5">
+                {/* Thumbnail of Curbside Compass Image with Quick Actions */}
+                <div className="relative flex-shrink-0 w-full sm:w-28 h-28 rounded-md overflow-hidden bg-slate-100 border border-gray-200 shadow-2xs group">
                   <img
                     src={curbsideSocialImg}
                     alt="Curbside Compass Social Share Card"
                     referrerPolicy="no-referrer"
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
                     <a
                       href={curbsideSocialImg}
-                      download="Curbside_Compass_fb.png"
+                      download="CurbsideCompass_Social_Media_IMG.jpg"
                       onClick={() => triggerFeedback('button')}
-                      className="p-1 bg-white/90 rounded text-gray-800 text-[0.5625rem] font-bold flex items-center gap-0.5 no-underline active:scale-95"
-                      title={t('share_download_img_title', 'Download image')}
+                      className="p-1.5 bg-white/95 hover:bg-white rounded text-gray-800 text-[0.625rem] font-bold flex items-center gap-1 no-underline active:scale-95 shadow-xs"
+                      title={t('share_download_img_title', 'Download image file')}
                     >
-                      <Download className="w-2.5 h-2.5" />
+                      <Download className="w-3 h-3 text-[#004B8D]" />
+                      <span>Download</span>
                     </a>
                   </div>
                 </div>
 
-                {/* Post Text & Meta */}
-                <div className="flex-1 min-w-0 flex flex-col justify-between h-20 sm:h-24 py-0.5">
+                {/* Post Text & User Selections Meta */}
+                <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5 w-full">
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1">
                       <span className="text-[0.59375rem] font-bold text-[#004B8D] uppercase tracking-wide">
                         {t('share_preview_label', 'Social Post Preview')}
                       </span>
-                      <a
-                        href={curbsideSocialImg}
-                        download="Curbside_Compass_fb.png"
-                        onClick={() => triggerFeedback('button')}
-                        className="text-[0.5625rem] text-gray-500 hover:text-[#004B8D] flex items-center gap-1 font-semibold active:scale-95"
-                        title={t('share_download_attach_title', 'Download image to save or attach')}
-                      >
-                        <Download className="w-2.5 h-2.5" />
-                        <span>{t('share_save_image_btn', 'Save image')}</span>
-                      </a>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCopyImage}
+                          className="text-[0.5625rem] text-[#004B8D] hover:underline flex items-center gap-0.5 font-bold cursor-pointer"
+                          title="Copy screen image directly to clipboard"
+                        >
+                          <ImageIcon className="w-2.5 h-2.5" />
+                          <span>{imageCopied ? 'Image Copied!' : 'Copy Image'}</span>
+                        </button>
+                        <a
+                          href={curbsideSocialImg}
+                          download="CurbsideCompass_Social_Media_IMG.jpg"
+                          onClick={() => triggerFeedback('button')}
+                          className="text-[0.5625rem] text-gray-600 hover:text-[#004B8D] flex items-center gap-0.5 font-semibold active:scale-95"
+                          title={t('share_download_attach_title', 'Download image to save or attach')}
+                        >
+                          <Download className="w-2.5 h-2.5" />
+                          <span>{t('share_save_image_btn', 'Save Image')}</span>
+                        </a>
+                      </div>
                     </div>
-                    <p className="text-[0.625rem] sm:text-[0.65625rem] text-gray-700 leading-snug line-clamp-3 italic">
-                      "{shareText}"
-                    </p>
+
+                    {shareMode === 'with_persona' ? (
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-gray-900 leading-snug">
+                          🎯 {persona.title}
+                        </p>
+                        <div className="bg-slate-50 rounded p-1.5 border border-slate-100 space-y-0.5 max-h-24 overflow-y-auto">
+                          <span className="text-[0.5625rem] font-bold text-gray-500 uppercase block">User Selections:</span>
+                          {userSelections.slice(0, 4).map((sel, idx) => (
+                            <p key={idx} className="text-[0.59375rem] text-gray-700 leading-tight">
+                              • {sel}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-[0.625rem] sm:text-[0.65625rem] text-gray-700 leading-snug italic">
+                        "{shareTextGeneral}"
+                      </p>
+                    )}
                   </div>
 
-                  <div className="text-[0.5625rem] text-[#0081BC] font-medium truncate">
-                    🔗 {shareUrl}
+                  <div className="pt-1.5 flex flex-col gap-0.5 text-[0.5625rem]">
+                    <div className="text-[#0081BC] font-medium truncate flex items-center gap-1">
+                      <span>🔗 Weblink:</span>
+                      <span className="underline">{shareUrl}</span>
+                    </div>
+                    <div className="text-gray-500 truncate flex items-center gap-1">
+                      <span>🖼️ Image file:</span>
+                      <span className="font-mono">{curbsideSocialImg}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -266,15 +444,15 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                 triggerFeedback('button');
                 handlePlatformClick('X');
               }}
-              id="share-x-button"
-              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-black hover:bg-neutral-800 text-white text-xs font-bold shadow-xs transition-transform active:scale-95 cursor-pointer no-underline min-h-[44px] min-w-[44px]"
-              title={t('share_on_x', 'Share on X')}
+              id="share-twitter-button"
+              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-black hover:bg-gray-800 text-white text-xs font-bold shadow-xs transition-transform active:scale-95 cursor-pointer no-underline min-h-[44px] min-w-[44px]"
+              title={t('share_on_twitter', 'Post on X')}
             >
               <Twitter className="w-4 h-4 fill-current" />
-              <span>{t('share_x', 'X (Twitter)')}</span>
+              <span>{t('share_twitter', 'Post on X')}</span>
             </a>
 
-            {/* Instagram */}
+            {/* Instagram / Direct Paste */}
             <a
               href={instagramUrl}
               target="_blank"
@@ -284,7 +462,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                 handlePlatformClick('Instagram');
               }}
               id="share-instagram-button"
-              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#FCB045] hover:opacity-95 text-white text-xs font-bold shadow-xs transition-transform active:scale-95 cursor-pointer no-underline min-h-[44px] min-w-[44px]"
+              className="flex items-center justify-center gap-1.5 py-2 px-2.5 rounded-xl bg-gradient-to-r from-[#833AB4] via-[#FD1D1D] to-[#F77737] hover:opacity-90 text-white text-xs font-bold shadow-xs transition-transform active:scale-95 cursor-pointer no-underline min-h-[44px] min-w-[44px]"
               title={t('share_on_instagram', 'Share on Instagram')}
             >
               <Instagram className="w-4 h-4" />
@@ -292,9 +470,9 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
             </a>
           </div>
 
-          {/* Platform Toast Notice */}
+          {/* Platform Click Helper / Auto-Copy Notification */}
           {platformNotice && (
-            <div className={`mb-2 p-2 border rounded-lg text-xs leading-snug flex items-start gap-2 ${
+            <div className={`mb-2 p-2 sm:p-2.5 rounded-xl text-xs flex items-start gap-2 border transition-all animate-in fade-in duration-200 ${
               platformNotice === 'Instagram' ? 'bg-purple-50 border-purple-200 text-purple-900' :
               platformNotice === 'Facebook' ? 'bg-blue-50 border-blue-200 text-blue-900' :
               'bg-gray-50 border-gray-200 text-gray-900'
@@ -306,7 +484,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
               }`} />
               <span>
                 <strong>{t('share_caption_copied_title', 'Share caption copied!')}</strong>{' '}
-                {t('share_opening_platform', 'Opening {platform} so you can paste your post.').replace('{platform}', platformNotice)}
+                {t('share_opening_platform', 'Opening {platform} so you can paste your post with your selections, link, and image.').replace('{platform}', platformNotice)}
               </span>
             </div>
           )}
@@ -323,17 +501,17 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
               className={`w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer active:scale-95 min-h-[44px] ${
                 copied
                   ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-white border border-gray-300 text-gray-800 hover:bg-gray-50 shadow-xs'
+                  : 'bg-white border-2 border-[#004B8D] text-[#004B8D] hover:bg-blue-50 shadow-xs'
               }`}
             >
               {copied ? (
                 <>
                   <Check className="w-4 h-4 text-white" />
-                  <span>{t('share_copied_btn', 'Copied to Clipboard!')}</span>
+                  <span>{t('share_copied_btn', 'Copied Post, Link & Image to Clipboard!')}</span>
                 </>
               ) : (
                 <>
-                  <Copy className="w-4 h-4 text-gray-600" />
+                  <Copy className="w-4 h-4 text-[#004B8D]" />
                   <span>{t('share_copy_btn', 'Copy Full Post Text to Clipboard')}</span>
                 </>
               )}
@@ -341,7 +519,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
             <p className="text-center text-xs text-gray-500 mt-1.5 whitespace-pre-line">
               {t(
                 'share_copy_helper_text',
-                'Copies your Curbside Compass result\nand the survey link to paste and share anywhere'
+                'Copies your full post with your policy selections, the survey link, and street model image ready to paste anywhere.'
               )}
             </p>
           </div>
@@ -369,10 +547,10 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
               triggerFeedback('button');
               onRetake();
             }}
-            className="text-xs sm:text-sm font-bold text-gray-600 hover:text-gray-900 flex items-center gap-1.5 py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer active:scale-95 min-h-[44px] min-w-[44px]"
+            className="text-xs sm:text-sm font-bold text-gray-600 hover:text-gray-900 flex items-center gap-1.5 py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer active:scale-95 min-h-[44px]"
           >
-            <span>{t('share_retake_btn', 'Retake Assessment')}</span>
-            <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
+            <RotateCcw className="w-4 h-4" />
+            <span>{t('results_retake_btn', 'Retake Survey')}</span>
           </button>
         )}
       </div>

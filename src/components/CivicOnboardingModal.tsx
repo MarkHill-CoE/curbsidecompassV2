@@ -31,7 +31,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
 }) => {
   const { t } = useAppText();
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const totalSteps = 3;
+  const totalSteps = 4;
   const modalRef = useRef<HTMLDivElement>(null);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -143,38 +143,42 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
 
         {/* Step Progress Tracker: Clear & 16px font */}
         <div className="bg-gray-100 px-3 sm:px-5 py-1.5 sm:py-2 border-b border-gray-300 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {[1, 2, 3].map((step) => (
-              <button
-                key={step}
-                type="button"
-                onClick={() => {
-                  triggerFeedback('button');
-                  setCurrentStep(step);
-                }}
-                className={`flex items-center justify-center text-base font-black px-3 sm:px-4 py-1 rounded-lg transition-all cursor-pointer min-h-[38px] ${
-                  currentStep === step
-                    ? 'bg-[#004B8D] text-white shadow-xs scale-105'
-                    : currentStep > step
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-                aria-label={`Go to step ${step}`}
-              >
-                <span>{t('intro_step_label', 'Step')} {step}</span>
-                {currentStep > step && <CheckCircle2 className="w-4 h-4 text-emerald-600 inline ml-1" />}
-              </button>
-            ))}
+          <div className="flex items-center gap-1 sm:gap-2">
+            {[1, 2, 3, 4].map((step) => {
+              const label = step === 1 ? t('intro_step_1_label', 'Introduction') : `${t('intro_step_label', 'Step')} ${step - 1}`;
+              const aria = step === 1 ? t('intro_step_1_aria', 'Go to Introduction') : `Go to Step ${step - 1}`;
+              return (
+                <button
+                  key={step}
+                  type="button"
+                  onClick={() => {
+                    triggerFeedback('button');
+                    setCurrentStep(step);
+                  }}
+                  className={`flex items-center justify-center text-xs sm:text-sm md:text-base font-black px-2.5 sm:px-3.5 py-1 rounded-lg transition-all cursor-pointer min-h-[38px] ${
+                    currentStep === step
+                      ? 'bg-[#004B8D] text-white shadow-xs scale-105'
+                      : currentStep > step
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  }`}
+                  aria-label={aria}
+                >
+                  <span>{label}</span>
+                  {currentStep > step && <CheckCircle2 className="w-4 h-4 text-emerald-600 inline ml-1" />}
+                </button>
+              );
+            })}
           </div>
 
-          <span className="text-base font-bold text-gray-700 hidden md:inline">
+          <span className="text-sm sm:text-base font-bold text-gray-700 hidden md:inline">
             {t('intro_screen_counter_label', 'Screen')} {currentStep} {t('intro_screen_counter_of', 'of')} {totalSteps}
           </span>
         </div>
 
         {/* Body Content Area: Sized strictly above the fold with NO vertical scrolling */}
         <div className="p-3 sm:p-5 [@media(orientation:landscape)_and_(max-height:500px)]:p-2 flex-1 flex flex-col justify-center text-gray-900 overflow-y-auto">
-          {/* SCREEN 1: Welcome & Civic Purpose */}
+          {/* SCREEN 1: Welcome & Civic Purpose (Introduction) */}
           {currentStep === 1 && (
             <div className="space-y-2.5 sm:space-y-3.5 animate-in fade-in duration-150">
               <div className="border-l-4 border-[#004B8D] pl-3">
@@ -202,8 +206,54 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             </div>
           )}
 
-          {/* SCREEN 2: See What Happens Live & Choose Your View (Consolidated) */}
+          {/* SCREEN 2: Step 1 - Street Types & Parking Combinations */}
           {currentStep === 2 && (
+            <div className="space-y-2.5 sm:space-y-3.5 animate-in fade-in duration-150">
+              <div className="border-l-4 border-[#004B8D] pl-3">
+                <h3 className="text-lg sm:text-xl md:text-2xl font-black text-[#004B8D] leading-tight">
+                  {t('intro_s2_title', 'Select the type of street you would like to explore.')}
+                </h3>
+                <p className="text-sm sm:text-base md:text-lg text-gray-700 font-bold mt-1">
+                  {t('intro_s2_subtitle', 'Each street has a different combination of:')}
+                </p>
+              </div>
+
+              <div className="space-y-2.5 sm:space-y-3">
+                {/* Private Parking */}
+                <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-3 sm:p-4 flex items-start gap-3 shadow-2xs">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#004B8D] text-white flex items-center justify-center shrink-0 mt-0.5">
+                    <Home className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base sm:text-lg font-black text-[#004B8D]">
+                      {t('intro_s2_private_title', 'Private Parking')}
+                    </h4>
+                    <p className="text-sm sm:text-base text-gray-900 leading-snug mt-0.5">
+                      {t('intro_s2_private_desc', 'Some homes have parking in a garage, driveway or parking lot. Others have limited or no private parking.')}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Street Parking */}
+                <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-3 sm:p-4 flex items-start gap-3 shadow-2xs">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-[#D97706] text-white flex items-center justify-center shrink-0 mt-0.5">
+                    <Car className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-base sm:text-lg font-black text-amber-900">
+                      {t('intro_s2_street_title', 'Street Parking')}
+                    </h4>
+                    <p className="text-sm sm:text-base text-gray-900 leading-snug mt-0.5">
+                      {t('intro_s2_street_desc', 'Residents, visitors and service providers share the available street parking.')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SCREEN 3: Step 2 - See What Happens Live & Choose Your View */}
+          {currentStep === 3 && (
             <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-150">
               <div>
                 <h3 className="text-xl sm:text-2xl font-black text-[#004B8D] leading-tight">
@@ -293,8 +343,8 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             </div>
           )}
 
-          {/* SCREEN 3: Ready to Start */}
-          {currentStep === 3 && (
+          {/* SCREEN 4: Step 3 - Ready to Start */}
+          {currentStep === 4 && (
             <div className="space-y-2.5 sm:space-y-3.5 animate-in fade-in duration-150">
               <div className="border-l-4 border-[#059669] pl-3">
                 <h3 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">

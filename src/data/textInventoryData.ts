@@ -802,32 +802,46 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "guidance": "Onboarding walkthrough card, title, bullet, or button"
   },
   {
-    "key": "intro_s2_garages_desc",
-    "category": "Civic Onboarding",
-    "container": "3-Step Walkthrough Modal",
-    "defaultText": "Homes have private garages in the back lane.",
-    "guidance": "Onboarding walkthrough card, title, bullet, or button"
-  },
-  {
-    "key": "intro_s2_garages_title",
-    "category": "Civic Onboarding",
-    "container": "3-Step Walkthrough Modal",
-    "defaultText": "1. Back Garages:",
-    "guidance": "Onboarding walkthrough card, title, bullet, or button"
-  },
-  {
-    "key": "intro_s2_takeaway",
-    "category": "Civic Onboarding",
-    "container": "3-Step Walkthrough Modal",
-    "defaultText": "When curb spots fill up, drivers have to circle the block looking for parking.",
-    "guidance": "Onboarding walkthrough card, title, bullet, or button"
-  },
-  {
     "key": "intro_s2_title",
     "category": "Civic Onboarding",
-    "container": "3-Step Walkthrough Modal",
-    "defaultText": "How Our Streets Work",
-    "guidance": "Onboarding walkthrough card, title, bullet, or button"
+    "container": "4-Step Walkthrough Modal",
+    "defaultText": "Select the type of street you would like to explore.",
+    "guidance": "Step 1 modal card heading"
+  },
+  {
+    "key": "intro_s2_subtitle",
+    "category": "Civic Onboarding",
+    "container": "4-Step Walkthrough Modal",
+    "defaultText": "Each street has a different combination of:",
+    "guidance": "Step 1 modal card subheading"
+  },
+  {
+    "key": "intro_s2_private_title",
+    "category": "Civic Onboarding",
+    "container": "4-Step Walkthrough Modal",
+    "defaultText": "Private Parking",
+    "guidance": "Step 1 private parking card title"
+  },
+  {
+    "key": "intro_s2_private_desc",
+    "category": "Civic Onboarding",
+    "container": "4-Step Walkthrough Modal",
+    "defaultText": "Some homes have parking in a garage, driveway or parking lot. Others have limited or no private parking.",
+    "guidance": "Step 1 private parking description"
+  },
+  {
+    "key": "intro_s2_street_title",
+    "category": "Civic Onboarding",
+    "container": "4-Step Walkthrough Modal",
+    "defaultText": "Street Parking",
+    "guidance": "Step 1 street parking card title"
+  },
+  {
+    "key": "intro_s2_street_desc",
+    "category": "Civic Onboarding",
+    "container": "4-Step Walkthrough Modal",
+    "defaultText": "Residents, visitors and service providers share the available street parking.",
+    "guidance": "Step 1 street parking description"
   },
   {
     "key": "intro_s3_body1",

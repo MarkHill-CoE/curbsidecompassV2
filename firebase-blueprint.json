@@ -34,7 +34,7 @@
           "description": "Final parking simulation configuration resulting from choices"
         },
         "rating": {
-          "type": ["number", "null"],
+          "type": "number",
           "description": "User 1-5 rating of Edmonton parking program trade-off outcomes"
         },
         "feedback": {
@@ -45,8 +45,24 @@
           "type": "string",
           "description": "Edmonton postal code FSA or entered code for spatial analysis"
         },
+        "fsa": {
+          "type": "string",
+          "description": "Forward Sortation Area (first 3 characters) of postal code"
+        },
+        "isPostalScrubbed": {
+          "type": "boolean",
+          "description": "Whether postal code was scrubbed for k-anonymity privacy protection"
+        },
+        "scrubReason": {
+          "type": "string",
+          "description": "Audit reason for postal code suppression or scrubbing"
+        },
+        "userAgent": {
+          "type": "string",
+          "description": "Client user agent metadata"
+        },
         "authUid": {
-          "type": ["string", "null"],
+          "type": "string",
           "description": "Anonymous user UID if authenticated"
         },
         "timestamp": {
@@ -65,7 +81,7 @@
   },
   "firestore": {
     "/survey_responses/{responseId}": {
-      "entity": "SurveyResponse",
+      "schema": "SurveyResponse",
       "description": "Individual survey and feedback submissions"
     }
   }
