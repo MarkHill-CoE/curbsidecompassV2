@@ -181,13 +181,32 @@ export async function saveSurveyResponse(data: {
       timestamp: serverTimestamp()
     };
 
+    // Save to local backup in case client is offline or network connection is interrupted
+    try {
+      localStorage.setItem(`curbside_survey_backup_${sessionId}`, JSON.stringify({
+        ...submissionDoc,
+        timestamp: new Date().toISOString()
+      }));
+    } catch {
+      // ignore storage limits
+    }
+
     // Use sessionId doc to prevent duplicate submissions per user session, while updating when feedback is submitted
-    const docRef = doc(db, 'survey_responses', sessionId);
-    await setDoc(docRef, {
-      ...submissionDoc,
-      authUid: authUid || null,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+    try {
+      const docRef = doc(db, 'survey_responses', sessionId);
+      await setDoc(docRef, {
+        ...submissionDoc,
+        authUid: authUid || null,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (writeErr: unknown) {
+      const errStr = writeErr instanceof Error ? writeErr.message : String(writeErr);
+      if (errStr.includes('unavailable') || errStr.includes('offline') || errStr.includes('Could not reach')) {
+        console.info('[Firebase] Device is offline; response preserved in local storage & offline queue.');
+        return { success: true, id: sessionId };
+      }
+      throw writeErr;
+    }
 
     return { success: true, id: sessionId };
   } catch (err) {

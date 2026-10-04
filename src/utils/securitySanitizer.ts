@@ -100,19 +100,28 @@ export function sanitizeOpenTextInput(input: unknown, maxLength = 500, autoRedac
   sanitized = sanitized.replace(CONTROL_CHARS_REGEX, '');
   sanitized = sanitized.replace(BIDI_OVERRIDE_REGEX, '');
 
-  // 2. Strip dangerous HTML script and execution tags
-  sanitized = sanitized.replace(/<\s*(?:script|iframe|object|embed|style|meta|link)[^>]*>.*?<\s*\/\s*(?:script|iframe|object|embed|style|meta|link)\s*>/gis, '');
-  sanitized = sanitized.replace(/<\s*(?:script|iframe|object|embed|style|meta|link)[^>]*\/?>/gis, '');
+  // 2. Strip pseudo-protocols and inline scripting schemes (javascript:, vbscript:, data:text/html)
+  sanitized = sanitized.replace(/(?:javascript|vbscript|data\s*:\s*text\/html)\s*:/gis, '');
 
-  // 3. Optional FOIP redaction
+  // 3. Strip dangerous HTML execution tags (<script>, <iframe>, <object>, <embed>, <svg>, <math>, etc.)
+  sanitized = sanitized.replace(/<\s*(?:script|iframe|object|embed|style|meta|link|svg|math|applet)[^>]*>.*?<\s*\/\s*(?:script|iframe|object|embed|style|meta|link|svg|math|applet)\s*>/gis, '');
+  sanitized = sanitized.replace(/<\s*(?:script|iframe|object|embed|style|meta|link|svg|math|applet)[^>]*\/?>/gis, '');
+
+  // 4. Strip inline event handlers (e.g., onload=, onerror=, onclick=)
+  sanitized = sanitized.replace(/\bon\w+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gis, '');
+
+  // 5. Neutralize angle brackets to prevent any HTML injection
+  sanitized = sanitized.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+  // 6. Optional FOIP redaction
   if (autoRedactPII) {
     sanitized = redactPII(sanitized);
   }
 
-  // 4. Trim whitespace and enforce length bound
+  // 7. Trim whitespace and enforce length bound
   sanitized = sanitized.trim().slice(0, maxLength);
 
-  // 5. Neutralize spreadsheet formula injection (CWE-1236)
+  // 8. Neutralize spreadsheet formula injection (CWE-1236)
   // If the string begins with =, +, -, @, or tab/return, prepend an apostrophe (')
   // so Excel, Google Sheets, or CSV parsers treat it strictly as plaintext rather than an executable formula.
   if (FORMULA_PREFIX_REGEX.test(sanitized)) {

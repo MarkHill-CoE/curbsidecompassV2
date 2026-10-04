@@ -81,7 +81,18 @@ export default function App() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>(() => {
     try {
       const saved = safeStorage.getItem('curbsideCompass_answers');
-      return saved ? JSON.parse(saved) : {};
+      if (!saved) return {};
+      const parsed = JSON.parse(saved);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        const safeAnswers: Record<string, string> = {};
+        for (const [k, v] of Object.entries(parsed)) {
+          if (k !== '__proto__' && k !== 'constructor' && k !== 'prototype' && typeof v === 'string') {
+            safeAnswers[k] = v;
+          }
+        }
+        return safeAnswers;
+      }
+      return {};
     } catch {
       return {};
     }

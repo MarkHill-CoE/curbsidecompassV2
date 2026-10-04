@@ -124,9 +124,33 @@ function sheetProxyPlugin(): Plugin {
   };
 }
 
+function securityHeadersPlugin(): Plugin {
+  return {
+    name: 'security-headers-plugin',
+    configureServer(server) {
+      server.middlewares.use((_req, res, next) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+        next();
+      });
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use((_req, res, next) => {
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        res.setHeader('X-XSS-Protection', '1; mode=block');
+        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+        next();
+      });
+    }
+  };
+}
+
 export default defineConfig(() => {
   return {
-    plugins: [react(), tailwindcss(), sheetProxyPlugin()],
+    plugins: [react(), tailwindcss(), securityHeadersPlugin(), sheetProxyPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),

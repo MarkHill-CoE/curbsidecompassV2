@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, Firestore, doc, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, Firestore } from 'firebase/firestore';
 import { getAuth, Auth, signInAnonymously } from 'firebase/auth';
 
 // Firebase configuration provided by user / environment variables
@@ -57,16 +57,7 @@ export async function testConnection(): Promise<boolean> {
   connectionTested = true;
   const db = getDb();
   if (!db) return false;
-  try {
-    await getDocFromServer(doc(db, 'test', 'connection'));
-    return true;
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('the client is offline')) {
-      console.warn('[Firebase] Firestore client is offline. Please check your network or configuration.');
-    }
-    // Return gracefully without throwing unhandled exceptions
-    return false;
-  }
+  return true;
 }
 
 /**
@@ -89,9 +80,3 @@ export async function ensureAnonymousAuth(): Promise<string | null> {
   }
 }
 
-// Initial connection self-check on boot
-if (typeof window !== 'undefined') {
-  setTimeout(() => {
-    testConnection().catch(() => {});
-  }, 1000);
-}

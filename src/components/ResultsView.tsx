@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PersonaResult, SimulationConfig } from '../types';
-import { Award, MapPin, Target, CheckCircle, ChevronRight, Compass, Share2, AlertTriangle, Printer, RotateCcw } from 'lucide-react';
+import { Award, MapPin, Target, CheckCircle, ChevronRight, Compass, Share2, AlertTriangle, Printer, RotateCcw, Check } from 'lucide-react';
 import { ThankYouView } from './ThankYouView';
 import { PolicyCompassGraph } from './PolicyCompassGraph';
 import { triggerFeedback } from '../utils/feedback';
@@ -27,6 +27,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
 }) => {
   const { t } = useAppText();
   const [rating, setRating] = useState<number | null>(null);
+  const [ratingError, setRatingError] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<string>('');
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
@@ -47,6 +48,16 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
   }, [persona, totalX, totalY, answers, config]);
 
   const handleSubmitFeedback = async () => {
+    if (rating === null) {
+      setRatingError(true);
+      triggerFeedback('button');
+      const el = document.getElementById('feedback-rating-group');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+    setRatingError(false);
     triggerFeedback('submit');
     setIsSaving(true);
     try {
@@ -282,10 +293,27 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
 
       {/* Feedback Section */}
       <div className="bg-white border border-gray-200 rounded-xl p-2.5 sm:p-3 shadow-xs flex-shrink-0">
-        <div className="bg-[#193A5A]/5 border border-[#004B8D]/20 rounded-lg p-2.5 sm:p-3 flex flex-col">
-          <label className="block text-[11pt] font-bold text-[#004B8D] mb-2 leading-snug">
-            {t('results_feedback_prompt', 'Do you feel this represents your view on neighbourhood parking?')}
-          </label>
+        <div 
+          id="feedback-rating-group"
+          className={`rounded-lg p-2.5 sm:p-3 flex flex-col transition-all duration-200 border-2 ${
+            ratingError && rating === null
+              ? 'bg-red-50/70 border-red-500 ring-2 ring-red-200'
+              : 'bg-[#193A5A]/5 border-[#004B8D]/20'
+          }`}
+        >
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <label className="block text-[11pt] font-bold text-[#004B8D] leading-snug">
+              {t('results_feedback_prompt', 'Do you feel this represents your view on neighbourhood parking?')}
+              <span className="text-red-600 ml-1.5 text-xs font-black inline-flex items-center" title="Required to finish">
+                * (Required)
+              </span>
+            </label>
+            {rating !== null && (
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1 flex-shrink-0">
+                <Check className="w-3 h-3" /> {t('results_answered_badge', 'Answered')}
+              </span>
+            )}
+          </div>
           
           <div className="flex items-center justify-between gap-1 sm:gap-2 mb-1.5">
             {[1, 2, 3, 4, 5].map((val) => {
@@ -297,10 +325,13 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
                   onClick={() => {
                     triggerFeedback('choice');
                     setRating(val);
+                    if (ratingError) setRatingError(false);
                   }}
                   className={`flex-1 min-h-[44px] min-w-[40px] py-1.5 rounded-xl text-[11pt] font-bold transition-all cursor-pointer border-2 flex items-center justify-center active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
                     isSelected
                       ? 'bg-[#004B8D] text-white border-[#004B8D] shadow-xs ring-1 ring-[#004B8D]'
+                      : ratingError && rating === null
+                      ? 'bg-white text-gray-800 hover:bg-red-50 border-red-400'
                       : 'bg-white text-gray-800 hover:bg-blue-50 hover:border-blue-300 border-gray-300'
                   }`}
                   title={`Rating: ${val}`}
@@ -315,10 +346,17 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
             <span>{t('results_scale_1', '1 - Strongly Disagree')}</span>
             <span>{t('results_scale_5', '5 - Strongly Agree')}</span>
           </div>
+
+          {ratingError && rating === null && (
+            <div className="mb-2 p-2 bg-red-100/90 border border-red-300 rounded-lg text-xs font-bold text-red-800 flex items-center gap-1.5 animate-fadeIn">
+              <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <span>Please select a rating (1 to 5) above to indicate your view. This question is required.</span>
+            </div>
+          )}
           
-          <div className="flex items-center justify-between text-xs mb-1">
+          <div className="flex items-center justify-between text-xs mb-1 pt-1 border-t border-gray-200/60">
             <label htmlFor="why-feedback" className="font-bold text-gray-800 text-[11pt]">
-              {t('results_why_label', 'Why or why not? (Optional)')}
+              {t('results_why_label', 'Why or why not?')} <span className="text-gray-500 font-normal text-xs">(Optional)</span>
             </label>
             <span className={`text-[10pt] sm:text-xs font-semibold ${500 - feedback.length < 50 ? 'text-amber-700 font-bold' : 'text-gray-500'}`}>
               {500 - feedback.length} left
@@ -334,7 +372,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
             }}
             maxLength={500}
             rows={2}
-            placeholder={t('results_why_placeholder', 'Share your thoughts with City of Edmonton planners...')}
+            placeholder={t('results_why_placeholder', 'Share your thoughts with City of Edmonton planners (optional)...')}
             className={`w-full text-[11pt] text-gray-800 p-2.5 border rounded-lg focus:outline-none focus:ring-2 resize-none bg-white leading-normal placeholder:text-gray-400 min-h-[52px] ${
               detectPII(feedback).hasPII 
                 ? 'border-amber-400 focus:ring-amber-500 focus:border-amber-500' 

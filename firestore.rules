@@ -12,17 +12,25 @@ service cloud.firestore {
     }
 
     function isValidSurveyResponse(data) {
-      return data.personaId is string
-        && data.personaId.size() <= 50
-        && data.personaTitle is string
-        && data.personaTitle.size() <= 100
-        && data.quadrant in ['Q1', 'Q2', 'Q3', 'Q4']
-        && (data.totalX is number && data.totalX >= -50 && data.totalX <= 50)
-        && (data.totalY is number && data.totalY >= -50 && data.totalY <= 50)
-        && (data.feedback == null || (data.feedback is string && data.feedback.size() <= 600))
-        && (data.rating == null || ((data.rating is int || data.rating is number) && data.rating >= 1 && data.rating <= 5))
-        && (data.postalCode == null || (data.postalCode is string && data.postalCode.size() <= 20))
-        && (data.fsa == null || (data.fsa is string && data.fsa.size() <= 10));
+      return data.keys().hasOnly([
+        'personaId', 'personaTitle', 'quadrant', 'totalX', 'totalY',
+        'answers', 'simConfig', 'rating', 'feedback', 'postalCode',
+        'fsa', 'isPostalScrubbed', 'scrubReason', 'userAgent',
+        'timestamp', 'authUid', 'updatedAt'
+      ])
+      && data.personaId is string
+      && data.personaId.size() <= 50
+      && data.personaTitle is string
+      && data.personaTitle.size() <= 100
+      && data.quadrant in ['Q1', 'Q2', 'Q3', 'Q4']
+      && (data.totalX is number && data.totalX >= -50 && data.totalX <= 50)
+      && (data.totalY is number && data.totalY >= -50 && data.totalY <= 50)
+      && (data.answers is map && data.answers.size() <= 40)
+      && (data.simConfig is map)
+      && (data.feedback == null || (data.feedback is string && data.feedback.size() <= 600))
+      && (data.rating == null || ((data.rating is int || data.rating is number) && data.rating >= 1 && data.rating <= 5))
+      && (data.postalCode == null || (data.postalCode is string && data.postalCode.size() <= 20))
+      && (data.fsa == null || (data.fsa is string && data.fsa.size() <= 10));
     }
 
     // Curbside Compass public survey responses

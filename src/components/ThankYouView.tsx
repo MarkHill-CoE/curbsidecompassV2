@@ -14,12 +14,11 @@ import {
   User,
   Users,
   Download,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Upload
 } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
-
-const curbsideSocialImg = '/CurbsideCompass_Social_Media_IMG.jpg';
 
 interface ThankYouViewProps {
   persona: PersonaResult;
@@ -102,14 +101,47 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
   const [imageCopied, setImageCopied] = useState<boolean>(false);
   const [platformNotice, setPlatformNotice] = useState<string | null>(null);
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://curbside-compass.edmonton.ca';
-  const imageUrl = typeof window !== 'undefined' ? `${window.location.origin}${curbsideSocialImg}` : `https://curbside-compass.edmonton.ca${curbsideSocialImg}`;
+  const [customImage, setCustomImage] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('curbside_user_social_img');
+    } catch {
+      return null;
+    }
+  });
+
+  const curbsideSocialImg = customImage || '/CurbsideCompass_Social_Media_IMG.jpg';
+
+  const handleCustomImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => {
+        const dataUrl = loadEvent.target?.result as string;
+        if (dataUrl) {
+          setCustomImage(dataUrl);
+          try {
+            localStorage.setItem('curbside_user_social_img', dataUrl);
+          } catch {
+            // Storage quota fallback
+          }
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const defaultAppUrl = 'https://ais-dev-j7ghsp42y77c6djfbgfkd5-460515158127.us-east1.run.app';
+  const shareUrl = typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null' 
+    ? window.location.origin 
+    : defaultAppUrl;
+  const imageUrl = customImage ? shareUrl : (typeof window !== 'undefined' ? `${window.location.origin}${curbsideSocialImg}` : `${defaultAppUrl}${curbsideSocialImg}`);
 
   const userSelections = formatUserSelections(answers, config);
   const priorities = (persona.keyPriorities || []).map(p => `• ${p}`);
 
   const shareTextWithPersona = [
-    `I completed the City of Edmonton's Curbside Compass public consultation!`,
+    `Help Shape Edmonton's Neighborhood Streets`,
+    `How should local parking and curbside spaces be balanced? Explore the City's Cubside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.`,
     ``,
     `🎯 My Policy Profile: "${persona.title}"`,
     config.neighbourhoodName ? `📍 Typology: ${config.neighbourhoodName}` : null,
@@ -118,25 +150,22 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
     ...userSelections.map(s => `• ${s}`),
     ``,
     priorities.length > 0 ? `Key Priorities:\n${priorities.join('\n')}\n` : null,
-    `🖼️ Screen Image from Street Model: ${imageUrl}`,
-    `🔗 Have your say and explore Edmonton's curbside policy model: ${shareUrl}`,
+    `Explore Curbside Compass Today : ${shareUrl}`,
     ``,
-    `#YEGcurbside #Edmonton #YEGtraffic #CurbsideCompass`
+    `#YEG #YEGtraffic #CurbsideCompass`
   ].filter(line => line !== null).join('\n');
 
   const shareTextGeneral = [
-    `Where do you stand on Edmonton's neighbourhood parking and curbside policies? Have your say and explore the interactive street model:`,
-    ``,
-    `🖼️ Screen Image from Street Model: ${imageUrl}`,
-    `🔗 Have your say on Edmonton's neighbourhood parking policies: ${shareUrl}`,
-    ``,
-    `#YEGcurbside #Edmonton #YEGtraffic #CurbsideCompass`
+    `Help Shape Edmonton's Neighborhood Streets`,
+    `How should local parking and curbside spaces be balanced? Explore the City's Cubside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.`,
+    `Explore Curbside Compass Today : ${shareUrl}`,
+    `#YEG #YEGtraffic #CurbsideCompass`
   ].join('\n');
 
   const fullShareText = shareMode === 'with_persona' ? shareTextWithPersona : shareTextGeneral;
 
   const facebookShareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
-  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}&url=${encodeURIComponent(shareUrl)}&hashtags=YEGcurbside,Edmonton,YEGtraffic`;
+  const twitterShareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(fullShareText)}`;
   const instagramUrl = 'https://www.instagram.com/';
 
   const handleCopyLink = async () => {
@@ -146,18 +175,27 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
         // Attempt rich HTML + plain text copy for destinations that support embedded image pastes
         if (typeof ClipboardItem !== 'undefined') {
           try {
-            const htmlFormatted = `
+            const htmlFormatted = shareMode === 'with_persona' ? `
               <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #1e293b;">
-                <p><strong>I completed the City of Edmonton's Curbside Compass public consultation!</strong></p>
-                <p style="font-size: 16px; color: #004B8D;"><strong>🎯 My Policy Profile: ${persona.title}</strong></p>
+                <p style="font-size: 16px; font-weight: bold; color: #004B8D;">Help Shape Edmonton's Neighborhood Streets</p>
+                <p>How should local parking and curbside spaces be balanced? Explore the City's Cubside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.</p>
+                <p style="font-size: 15px; color: #004B8D;"><strong>🎯 My Policy Profile: ${persona.title}</strong></p>
                 ${config.neighbourhoodName ? `<p>📍 <em>Neighbourhood: ${config.neighbourhoodName}</em></p>` : ''}
                 <p><strong>My Curbside Selections:</strong><br/>
                 ${userSelections.map(s => `• ${s}`).join('<br/>')}
                 </p>
                 ${priorities.length > 0 ? `<p><strong>Key Priorities:</strong><br/>${priorities.join('<br/>')}</p>` : ''}
                 <p><img src="${imageUrl}" alt="Curbside Compass Screen Image" style="max-width: 100%; width: 560px; height: auto; border-radius: 8px; border: 1px solid #cbd5e1; display: block; margin: 12px 0;" /></p>
-                <p>🔗 <a href="${shareUrl}" style="color: #0081BC; font-weight: bold;">Have your say and explore Edmonton's curbside policy model: ${shareUrl}</a></p>
-                <p style="color: #64748b; font-size: 12px;">#YEGcurbside #Edmonton #YEGtraffic #CurbsideCompass</p>
+                <p><strong>Explore Curbside Compass Today :</strong> <a href="${shareUrl}" style="color: #0081BC; font-weight: bold;">${shareUrl}</a></p>
+                <p style="color: #64748b; font-size: 12px;">#YEG #YEGtraffic #CurbsideCompass</p>
+              </div>
+            `.trim() : `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #1e293b;">
+                <p style="font-size: 16px; font-weight: bold; color: #004B8D;">Help Shape Edmonton's Neighborhood Streets</p>
+                <p>How should local parking and curbside spaces be balanced? Explore the City's Cubside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.</p>
+                <p><img src="${imageUrl}" alt="Curbside Compass Screen Image" style="max-width: 100%; width: 560px; height: auto; border-radius: 8px; border: 1px solid #cbd5e1; display: block; margin: 12px 0;" /></p>
+                <p><strong>Explore Curbside Compass Today :</strong> <a href="${shareUrl}" style="color: #0081BC; font-weight: bold;">${shareUrl}</a></p>
+                <p style="color: #64748b; font-size: 12px;">#YEG #YEGtraffic #CurbsideCompass</p>
               </div>
             `.trim();
 
@@ -358,6 +396,36 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                         {t('share_preview_label', 'Social Post Preview')}
                       </span>
                       <div className="flex items-center gap-2">
+                        <label
+                          className="text-[0.5625rem] text-[#004B8D] hover:underline flex items-center gap-0.5 font-bold cursor-pointer"
+                          title="Upload or select your exact CurbsideCompass_Social_Media_IMG.jpg file from device"
+                        >
+                          <Upload className="w-2.5 h-2.5" />
+                          <span>{customImage ? 'Uploaded' : 'Upload File'}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={handleCustomImageUpload}
+                          />
+                        </label>
+                        {customImage && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomImage(null);
+                              try {
+                                localStorage.removeItem('curbside_user_social_img');
+                              } catch {
+                                // ignore
+                              }
+                            }}
+                            className="text-[0.5625rem] text-gray-500 hover:text-red-600 underline cursor-pointer"
+                            title="Reset to default image"
+                          >
+                            Reset
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={handleCopyImage}
@@ -395,9 +463,11 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <p className="text-[0.625rem] sm:text-[0.65625rem] text-gray-700 leading-snug italic">
-                        "{shareTextGeneral}"
-                      </p>
+                      <div className="bg-slate-50 rounded p-2 border border-slate-100 max-h-36 overflow-y-auto">
+                        <p className="text-[0.625rem] sm:text-[0.6875rem] text-gray-800 leading-relaxed whitespace-pre-line font-medium">
+                          {shareTextGeneral}
+                        </p>
+                      </div>
                     )}
                   </div>
 
