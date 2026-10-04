@@ -483,7 +483,7 @@
   "static_tradeoff_prefix": "Trade-off: ",
   "static_tradeoff_title": "Answer Choice Impact & Trade-Off",
   "static_tradeoff_unanswered_prompt": "Select an option on Question 1 to calculate its live impact on curbside stalls and street trade-offs.",
-  "tradeoff_card_header": "The Real-World Trade-Off For Your Choice",
+  "tradeoff_card_header": "FOR YOUR CHOICE",
   "tradeoff_cost_pill": "The Cost",
   "tradeoff_gain_pill": "The Gain",
   "survey_back_button": "← Back",

@@ -1,4 +1,4 @@
-// Comprehensive inventory of all 562 text elements in Curbside Compass
+// Comprehensive inventory of all text elements in Curbside Compass
 // Generated automatically for communications and content editing teams.
 
 export interface TextInventoryItem {
@@ -1810,503 +1810,6 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "guidance": "City policy persona profile details"
   },
   {
-    "key": "q0_helper_short",
-    "category": "Location / Postal Code",
-    "container": "Input Helper Prompt",
-    "defaultText": "Search your neighbourhood or enter a postal code to match your street:",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q0_placeholder",
-    "category": "Location / Postal Code",
-    "container": "Input Box Placeholder",
-    "defaultText": "Postal code (e.g. T5J 2R7) or neighbourhood...",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q0_step1_progress_title",
-    "category": "Location / Postal Code",
-    "container": "Progress Step Header",
-    "defaultText": "Step 1 of 2: Find Street",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q0_step2_progress_title",
-    "category": "Location / Postal Code",
-    "container": "Progress Step Header",
-    "defaultText": "Step 2 of 2: Confirm Layout",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q0_title_step1",
-    "category": "Location / Postal Code",
-    "container": "Question Card",
-    "defaultText": "Find your Edmonton street layout",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q0_title_step2",
-    "category": "Location / Postal Code",
-    "container": "Question Card",
-    "defaultText": "Confirm your street layout",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q1_category",
-    "category": "Question 1 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Residential Policy",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q1_hint_a",
-    "category": "Question 1 of 9",
-    "container": "Simulation Hint A",
-    "defaultText": "Residents with vehicles in the program area pay permit fees, which fully cover program costs and reduce street parking by encouraging off-street driveway parking.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q1_hint_b",
-    "category": "Question 1 of 9",
-    "container": "Simulation Hint B",
-    "defaultText": "Since no fee is charged, more vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q1_option_a",
-    "category": "Question 1 of 9",
-    "container": "Option A Choice",
-    "defaultText": "Residents with vehicles in residential parking program areas pay permit fees that cover all program costs.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q1_option_b",
-    "category": "Question 1 of 9",
-    "container": "Option B Choice",
-    "defaultText": "Tax-payers cover program costs through property tax revenues.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q1_progress_title",
-    "category": "Question 1 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 1 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q1_question",
-    "category": "Question 1 of 9",
-    "container": "Question Card",
-    "defaultText": "Who should pay for residential parking programs?",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q2_category",
-    "category": "Question 2 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Visitors Policy",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q2_hint_a",
-    "category": "Question 2 of 9",
-    "container": "Simulation Hint A",
-    "defaultText": "Limiting on-street parking permits reduces the number of vehicles parked on the street and encourages off-street or driveway parking.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q2_hint_b",
-    "category": "Question 2 of 9",
-    "container": "Simulation Hint B",
-    "defaultText": "Since no fee is charged, more vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q2_option_a",
-    "category": "Question 2 of 9",
-    "container": "Option A Choice",
-    "defaultText": "Yes.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q2_option_b",
-    "category": "Question 2 of 9",
-    "container": "Option B Choice",
-    "defaultText": "No.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q2_progress_title",
-    "category": "Question 2 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 2 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q2_question",
-    "category": "Question 2 of 9",
-    "container": "Question Card",
-    "defaultText": "Should your neighbourhood limit the number of on-street parking permits residents can hold?",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q3_category",
-    "category": "Question 3 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Commercial Policy",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q3_hint_a",
-    "category": "Question 3 of 9",
-    "container": "Simulation Hint A",
-    "defaultText": "Since a fee is charged, fewer vehicles park on the street and more park in driveways.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q3_hint_b",
-    "category": "Question 3 of 9",
-    "container": "Simulation Hint B",
-    "defaultText": "Since parking is on a first-come, first-served basis, available spots fill up quickly and remaining vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q3_option_a",
-    "category": "Question 3 of 9",
-    "container": "Option A Choice",
-    "defaultText": "Specialized paid permits are required to access work/loading zones.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q3_option_b",
-    "category": "Question 3 of 9",
-    "container": "Option B Choice",
-    "defaultText": "No restrictions - commercial and trade vehicles have access and do not require paid permits.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q3_progress_title",
-    "category": "Question 3 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 3 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q3_question",
-    "category": "Question 3 of 9",
-    "container": "Question Card",
-    "defaultText": "What restrictions should be placed on commercial and trade vehicles in residential areas?",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q4_category",
-    "category": "Question 4 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Visitors Policy",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q4_hint_a",
-    "category": "Question 4 of 9",
-    "container": "Simulation Hint A",
-    "defaultText": "Since no fee is charged, more vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q4_hint_b",
-    "category": "Question 4 of 9",
-    "container": "Simulation Hint B",
-    "defaultText": "Since no fee is charged, more vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q4_option_a",
-    "category": "Question 4 of 9",
-    "container": "Option A Choice",
-    "defaultText": "Visitors digitally register their vehicles, with enforcement conducted regularly.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q4_option_b",
-    "category": "Question 4 of 9",
-    "container": "Option B Choice",
-    "defaultText": "Visitor parking is on a first-come, first-served basis.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q4_progress_title",
-    "category": "Question 4 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 4 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q4_question",
-    "category": "Question 4 of 9",
-    "container": "Question Card",
-    "defaultText": "How would you manage visitor parking in your neighbourhood?",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q5_category",
-    "category": "Question 5 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Finance Policy",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q5_hint_a",
-    "category": "Question 5 of 9",
-    "container": "Simulation Hint A",
-    "defaultText": "Since a fee is charged, fewer vehicles park on the street and more park in driveways.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q5_hint_b",
-    "category": "Question 5 of 9",
-    "container": "Simulation Hint B",
-    "defaultText": "Since no fee is charged, more vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q5_option_a",
-    "category": "Question 5 of 9",
-    "container": "Option A Choice",
-    "defaultText": "Residents and visitors — through permit fees, guest pass sales and violation fines.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q5_option_b",
-    "category": "Question 5 of 9",
-    "container": "Option B Choice",
-    "defaultText": "Edmontonians — through property taxes.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q5_progress_title",
-    "category": "Question 5 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 5 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q5_question",
-    "category": "Question 5 of 9",
-    "container": "Question Card",
-    "defaultText": "Who should pay for residential parking enforcement?",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q6_category",
-    "category": "Question 6 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Enforcement Policy",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q6_hint_a",
-    "category": "Question 6 of 9",
-    "container": "Simulation Hint A",
-    "defaultText": "Since a fee is charged, fewer vehicles park on the street and more park in driveways.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q6_hint_b",
-    "category": "Question 6 of 9",
-    "container": "Simulation Hint B",
-    "defaultText": "Since no fee is charged, more vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q6_option_a",
-    "category": "Question 6 of 9",
-    "container": "Option A Choice",
-    "defaultText": "Paid parking with time limits and frequent enforcement.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q6_option_b",
-    "category": "Question 6 of 9",
-    "container": "Option B Choice",
-    "defaultText": "Maintain free, unenforced parking for visitors.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q6_progress_title",
-    "category": "Question 6 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 6 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q6_question",
-    "category": "Question 6 of 9",
-    "container": "Question Card",
-    "defaultText": "How would you manage parking near major traffic generators, like educational institutions and hospitals?",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q7_category",
-    "category": "Question 7 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Residential Policy",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q7_hint_a",
-    "category": "Question 7 of 9",
-    "container": "Simulation Hint A",
-    "defaultText": "Since no fee is charged, more vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q7_hint_b",
-    "category": "Question 7 of 9",
-    "container": "Simulation Hint B",
-    "defaultText": "Since no fee is charged, more vehicles park on the street.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q7_option_a",
-    "category": "Question 7 of 9",
-    "container": "Option A Choice",
-    "defaultText": "Conduct strict eligibility and digital pass checks, plus regular enforcement.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q7_option_b",
-    "category": "Question 7 of 9",
-    "container": "Option B Choice",
-    "defaultText": "No active enforcement, relying on public courtesy to obey zone signage.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q7_progress_title",
-    "category": "Question 7 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 7 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q7_question",
-    "category": "Question 7 of 9",
-    "container": "Question Card",
-    "defaultText": "How would you manage accessible parking zones during events?",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q8_category",
-    "category": "Question 8 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Residential Policy",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q8_hint_a",
-    "category": "Question 8 of 9",
-    "container": "Simulation Hint A",
-    "defaultText": "Since a fee is charged, fewer vehicles park on the street and more park in driveways.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q8_hint_b",
-    "category": "Question 8 of 9",
-    "container": "Simulation Hint B",
-    "defaultText": "Without a fee, more vehicles park on the street. If a fee is charged, fewer vehicles park on the street and more residents park in their driveways.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q8_option_a",
-    "category": "Question 8 of 9",
-    "container": "Option A Choice",
-    "defaultText": "Allow neighbourhoods to opt into fee-based parking solutions.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q8_option_b",
-    "category": "Question 8 of 9",
-    "container": "Option B Choice",
-    "defaultText": "Apply one city-wide set of rules.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q8_progress_title",
-    "category": "Question 8 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 8 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q8_question",
-    "category": "Question 8 of 9",
-    "container": "Question Card",
-    "defaultText": "How should parking rules respond to the individual needs of each neighbourhood?",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_category",
-    "category": "Question 9 of 9",
-    "container": "Policy Category Badge",
-    "defaultText": "Neighbourhood Location",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_error_alphanumeric",
-    "category": "Question 9 of 9",
-    "container": "Question Card",
-    "defaultText": "Postal code must contain only letters and numbers.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_error_length",
-    "category": "Question 9 of 9",
-    "container": "Question Card",
-    "defaultText": "Postal code must be 6 or 7 alphanumeric characters (currently [N]).",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_error_required",
-    "category": "Question 9 of 9",
-    "container": "Question Card",
-    "defaultText": "Please enter your full postal code to continue.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_helper_text",
-    "category": "Question 9 of 9",
-    "container": "Input Helper Prompt",
-    "defaultText": "Please enter a 6 or 7 character alphanumeric postal code (e.g., T5J 2R7 or T5J2R7).",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_input_placeholder",
-    "category": "Question 9 of 9",
-    "container": "Input Box Placeholder",
-    "defaultText": "e.g. T5J 2R7",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_opt_out_label",
-    "category": "Question 9 of 9",
-    "container": "Question Card",
-    "defaultText": "I prefer not to provide my postal code",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_progress_title",
-    "category": "Question 9 of 9",
-    "container": "Progress Step Header",
-    "defaultText": "QUESTION 9 OF 9",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
-    "key": "q9_question",
-    "category": "Question 9 of 9",
-    "container": "Question Card",
-    "defaultText": "Please enter your full postal code.",
-    "guidance": "Survey policy tradeoff content"
-  },
-  {
     "key": "results_alignment_title",
     "category": "Results & Sharing",
     "container": "Results Summary View",
@@ -3943,5 +3446,502 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "container": "Live Interactive Street Model",
     "defaultText": "Watch the Street!",
     "guidance": "Curbside animation, parking lane, or traffic notice"
+  },
+  {
+    "key": "q0_step1_progress_title",
+    "category": "Location / Postal Code",
+    "container": "Progress Step Header",
+    "defaultText": "Step 1 of 2: Find Street",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q0_step2_progress_title",
+    "category": "Location / Postal Code",
+    "container": "Progress Step Header",
+    "defaultText": "Step 2 of 2: Confirm Layout",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q0_title_step1",
+    "category": "Location / Postal Code",
+    "container": "Question Card",
+    "defaultText": "Find your Edmonton street layout",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q0_title_step2",
+    "category": "Location / Postal Code",
+    "container": "Question Card",
+    "defaultText": "Confirm your street layout",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q0_helper_short",
+    "category": "Location / Postal Code",
+    "container": "Input Helper Prompt",
+    "defaultText": "Search your neighbourhood or enter a postal code to match your street:",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q0_placeholder",
+    "category": "Location / Postal Code",
+    "container": "Input Box Placeholder",
+    "defaultText": "Postal code (e.g. T5J 2R7) or neighbourhood...",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q1_progress_title",
+    "category": "Question 1 of 6",
+    "container": "Progress Step Header",
+    "defaultText": "Question 1 of 6",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q1_category",
+    "category": "Question 1 of 6",
+    "container": "Policy Category Badge",
+    "defaultText": "Residential Parking Permit Program Funding",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q1_question",
+    "category": "Question 1 of 6",
+    "container": "Question Card",
+    "defaultText": "Residential parking programs cost money to operate. Who should pay for them?",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q1_option_a",
+    "category": "Question 1 of 6",
+    "container": "Option A Choice",
+    "defaultText": "People who use parking through pay-per-use fees and parking permits.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q1_option_b",
+    "category": "Question 1 of 6",
+    "container": "Option B Choice",
+    "defaultText": "All residents through property taxes",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q1_hint_a",
+    "category": "Question 1 of 6",
+    "container": "Simulation Hint A",
+    "defaultText": "Drivers who park on the street pay permit fees. This covers program costs and encourages people with driveways to park off the street.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q1_hint_b",
+    "category": "Question 1 of 6",
+    "container": "Simulation Hint B",
+    "defaultText": "Because street parking is free, more vehicles park on the street.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q2_progress_title",
+    "category": "Question 2 of 6",
+    "container": "Progress Step Header",
+    "defaultText": "Question 2 of 6",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q2_category",
+    "category": "Question 2 of 6",
+    "container": "Policy Category Badge",
+    "defaultText": "Residential Parking Permit Limit",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q2_question",
+    "category": "Question 2 of 6",
+    "container": "Question Card",
+    "defaultText": "In neighbourhoods where street parking is in high demand, should there be a limit on parking permits per household?",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q2_option_a",
+    "category": "Question 2 of 6",
+    "container": "Option A Choice",
+    "defaultText": "Yes",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q2_option_b",
+    "category": "Question 2 of 6",
+    "container": "Option B Choice",
+    "defaultText": "No",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q2_hint_a",
+    "category": "Question 2 of 6",
+    "container": "Simulation Hint A",
+    "defaultText": "Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q2_hint_b",
+    "category": "Question 2 of 6",
+    "container": "Simulation Hint B",
+    "defaultText": "Homes can get permits for 3 or more vehicles, so more cars end up parked along the curb.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q3_progress_title",
+    "category": "Question 3 of 6",
+    "container": "Progress Step Header",
+    "defaultText": "Question 3 of 6",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q3_category",
+    "category": "Question 3 of 6",
+    "container": "Policy Category Badge",
+    "defaultText": "Visitor Access",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q3_question",
+    "category": "Question 3 of 6",
+    "container": "Question Card",
+    "defaultText": "When street parking is in high demand, should visitors and service providers (e.g., cleaners and contractors) have the same opportunity as residents to park on the block they are visiting?",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q3_option_a",
+    "category": "Question 3 of 6",
+    "container": "Option A Choice",
+    "defaultText": "Yes",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q3_option_b",
+    "category": "Question 3 of 6",
+    "container": "Option B Choice",
+    "defaultText": "No",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q3_hint_a",
+    "category": "Question 3 of 6",
+    "container": "Simulation Hint A",
+    "defaultText": "Allows visitors, family, and service providers equal access to park near the home they are visiting.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q3_hint_b",
+    "category": "Question 3 of 6",
+    "container": "Simulation Hint B",
+    "defaultText": "Prioritizes street parking for residents, reducing competition from visitor and service vehicles.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q4_progress_title",
+    "category": "Question 4 of 6",
+    "container": "Progress Step Header",
+    "defaultText": "Question 4 of 6",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q4_category",
+    "category": "Question 4 of 6",
+    "container": "Policy Category Badge",
+    "defaultText": "Parking Proximity to Destination",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q4_question",
+    "category": "Question 4 of 6",
+    "container": "Question Card",
+    "defaultText": "When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking (within a few blocks)?",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q4_option_a",
+    "category": "Question 4 of 6",
+    "container": "Option A Choice",
+    "defaultText": "Yes",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q4_option_b",
+    "category": "Question 4 of 6",
+    "container": "Option B Choice",
+    "defaultText": "No",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q4_hint_a",
+    "category": "Question 4 of 6",
+    "container": "Simulation Hint A",
+    "defaultText": "Expands parking choices on nearby residential streets for patients, students, and event attendees.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q4_hint_b",
+    "category": "Question 4 of 6",
+    "container": "Simulation Hint B",
+    "defaultText": "Protects nearby residential street parking for residents and guests near major destinations.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q5_progress_title",
+    "category": "Question 5 of 6",
+    "container": "Progress Step Header",
+    "defaultText": "Question 5 of 6",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q5_category",
+    "category": "Question 5 of 6",
+    "container": "Policy Category Badge",
+    "defaultText": "Parking Proximity to Home",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q5_question",
+    "category": "Question 5 of 6",
+    "container": "Question Card",
+    "defaultText": "When parking on the street near your home, what would you consider reasonably close?",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q5_option_a",
+    "category": "Question 5 of 6",
+    "container": "Option A Choice",
+    "defaultText": "On my Block",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q5_option_b",
+    "category": "Question 5 of 6",
+    "container": "Option B Choice",
+    "defaultText": "More possible spaces fall within the distance you consider acceptable.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q5_hint_a",
+    "category": "Question 5 of 6",
+    "container": "Simulation Hint A",
+    "defaultText": "Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q5_hint_b",
+    "category": "Question 5 of 6",
+    "container": "Simulation Hint B",
+    "defaultText": "Increases available parking options by extending acceptable parking distance into the wider neighbourhood.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q6_progress_title",
+    "category": "Question 6 of 6",
+    "container": "Progress Step Header",
+    "defaultText": "Question 6 of 6",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q6_category",
+    "category": "Question 6 of 6",
+    "container": "Policy Category Badge",
+    "defaultText": "Residential Parking Permit Eligibility",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q6_question",
+    "category": "Question 6 of 6",
+    "container": "Question Card",
+    "defaultText": "Should access to private parking affect who can get a permit? Consider all households, including those in houses, townhomes and apartments. Private parking means a driveway, garage or other off-street parking space.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q6_option_a",
+    "category": "Question 6 of 6",
+    "container": "Option A Choice",
+    "defaultText": "Yes households with no private parking should get priority for permits",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q6_option_b",
+    "category": "Question 6 of 6",
+    "container": "Option B Choice",
+    "defaultText": "No, households should have the same eligibility, whether or not they have private parking.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q6_hint_a",
+    "category": "Question 6 of 6",
+    "container": "Simulation Hint A",
+    "defaultText": "Prioritizes street parking permits for households with fewer off-street parking alternatives.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q6_hint_b",
+    "category": "Question 6 of 6",
+    "container": "Simulation Hint B",
+    "defaultText": "Ensures equal permit eligibility for all households regardless of their private parking arrangements.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q7_progress_title",
+    "category": "Question 7 of 9",
+    "container": "Progress Step Header",
+    "defaultText": "QUESTION 7 OF 9",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q7_category",
+    "category": "Question 7 of 9",
+    "container": "Policy Category Badge",
+    "defaultText": "Residential Policy",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q7_question",
+    "category": "Question 7 of 9",
+    "container": "Question Card",
+    "defaultText": "How would you manage accessible parking zones during events?",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q7_option_a",
+    "category": "Question 7 of 9",
+    "container": "Option A Choice",
+    "defaultText": "Conduct strict eligibility and digital pass checks, plus regular enforcement.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q7_option_b",
+    "category": "Question 7 of 9",
+    "container": "Option B Choice",
+    "defaultText": "No active enforcement, relying on public courtesy to obey zone signage.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q7_hint_a",
+    "category": "Question 7 of 9",
+    "container": "Simulation Hint A",
+    "defaultText": "Since no fee is charged, more vehicles park on the street.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q7_hint_b",
+    "category": "Question 7 of 9",
+    "container": "Simulation Hint B",
+    "defaultText": "Since no fee is charged, more vehicles park on the street.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q8_progress_title",
+    "category": "Question 8 of 9",
+    "container": "Progress Step Header",
+    "defaultText": "QUESTION 8 OF 9",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q8_category",
+    "category": "Question 8 of 9",
+    "container": "Policy Category Badge",
+    "defaultText": "Residential Policy",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q8_question",
+    "category": "Question 8 of 9",
+    "container": "Question Card",
+    "defaultText": "How should parking rules respond to the individual needs of each neighbourhood?",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q8_option_a",
+    "category": "Question 8 of 9",
+    "container": "Option A Choice",
+    "defaultText": "Allow neighbourhoods to opt into fee-based parking solutions.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q8_option_b",
+    "category": "Question 8 of 9",
+    "container": "Option B Choice",
+    "defaultText": "Apply one city-wide set of rules.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q8_hint_a",
+    "category": "Question 8 of 9",
+    "container": "Simulation Hint A",
+    "defaultText": "Since a fee is charged, fewer vehicles park on the street and more park in driveways.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q8_hint_b",
+    "category": "Question 8 of 9",
+    "container": "Simulation Hint B",
+    "defaultText": "Without a fee, more vehicles park on the street. If a fee is charged, fewer vehicles park on the street and more residents park in their driveways.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_progress_title",
+    "category": "Question 9 of 9",
+    "container": "Progress Step Header",
+    "defaultText": "QUESTION 9 OF 9",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_category",
+    "category": "Question 9 of 9",
+    "container": "Policy Category Badge",
+    "defaultText": "Neighbourhood Location",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_error_alphanumeric",
+    "category": "Question 9 of 9",
+    "container": "Question Card",
+    "defaultText": "Postal code must contain only letters and numbers.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_error_length",
+    "category": "Question 9 of 9",
+    "container": "Question Card",
+    "defaultText": "Postal code must be 6 or 7 alphanumeric characters (currently [N]).",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_error_required",
+    "category": "Question 9 of 9",
+    "container": "Question Card",
+    "defaultText": "Please enter your full postal code to continue.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_opt_out_label",
+    "category": "Question 9 of 9",
+    "container": "Question Card",
+    "defaultText": "I prefer not to provide my postal code",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_question",
+    "category": "Question 9 of 9",
+    "container": "Question Card",
+    "defaultText": "Please enter your full postal code.",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_helper_text",
+    "category": "Question 9 of 9",
+    "container": "Input Helper Prompt",
+    "defaultText": "Please enter a 6 or 7 character alphanumeric postal code (e.g., T5J 2R7 or T5J2R7).",
+    "guidance": "Survey policy tradeoff content"
+  },
+  {
+    "key": "q9_input_placeholder",
+    "category": "Question 9 of 9",
+    "container": "Input Box Placeholder",
+    "defaultText": "e.g. T5J 2R7",
+    "guidance": "Survey policy tradeoff content"
   }
 ];

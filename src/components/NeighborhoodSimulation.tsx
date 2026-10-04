@@ -769,17 +769,19 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     const bgGroundCanvas = document.createElement('canvas');
     bgGroundCanvas.width = canvas.width;
     bgGroundCanvas.height = canvas.height;
-    const bgGroundCtx = bgGroundCanvas.getContext('2d')!;
+    const bgGroundCtx = bgGroundCanvas.getContext('2d');
 
     const bgHousesCanvas = document.createElement('canvas');
     bgHousesCanvas.width = canvas.width;
     bgHousesCanvas.height = canvas.height;
-    const bgHousesCtx = bgHousesCanvas.getContext('2d')!;
+    const bgHousesCtx = bgHousesCanvas.getContext('2d');
 
     const bgTreesCanvas = document.createElement('canvas');
     bgTreesCanvas.width = canvas.width;
     bgTreesCanvas.height = canvas.height;
-    const bgTreesCtx = bgTreesCanvas.getContext('2d')!;
+    const bgTreesCtx = bgTreesCanvas.getContext('2d');
+
+    if (!bgGroundCtx || !bgHousesCtx || !bgTreesCtx) return;
 
     function renderGroundBackground() {
       bgGroundCtx.clearRect(0, 0, bgGroundCanvas.width, bgGroundCanvas.height);

@@ -185,6 +185,81 @@ export function extractTextMapFromRows(rows: string[][]): Record<string, string>
   const map: Record<string, string> = {};
   if (!rows || rows.length === 0) return map;
 
+  // 0. Detect Multi-Column Question Table Schema (e.g. curbside_compass_all_questions_text.csv)
+  // Headers: Question_Number, Category, Question_Text, Option_Letter, Option_Label, Option_Hint, Gains_Benefits, Pains_Costs
+  for (let r = 0; r < Math.min(rows.length, 5); r++) {
+    const row = rows[r];
+    let qNumIdx = -1;
+    let optLetterIdx = -1;
+    let qTextIdx = -1;
+    let optLabelIdx = -1;
+    let optHintIdx = -1;
+    let categoryIdx = -1;
+    let gainsIdx = -1;
+    let painsIdx = -1;
+    let impactIdx = -1;
+    let rationaleIdx = -1;
+
+    for (let c = 0; c < row.length; c++) {
+      const h = normalizeHeader(row[c]);
+      if (h === 'questionnumber' || h === 'qnumber' || h === 'questionid' || h === 'qid' || h === 'q') qNumIdx = c;
+      else if (h === 'optionletter' || h === 'option' || h === 'choice' || h === 'optionid' || h === 'letter') optLetterIdx = c;
+      else if (h === 'questiontext' || h === 'question' || h === 'prompt') qTextIdx = c;
+      else if (h === 'optionlabel' || h === 'label' || h === 'optiontext' || h === 'choicetext') optLabelIdx = c;
+      else if (h === 'optionhint' || h === 'hint' || h === 'subtext') optHintIdx = c;
+      else if (h === 'category' || h === 'theme' || h === 'topic') categoryIdx = c;
+      else if (h === 'gainsbenefits' || h === 'gains' || h === 'benefits' || h === 'gain') gainsIdx = c;
+      else if (h === 'painscosts' || h === 'pains' || h === 'costs' || h === 'pain') painsIdx = c;
+      else if (h === 'curbsidestallimpact' || h === 'stallimpact' || h === 'impact') impactIdx = c;
+      else if (h === 'policyrationale' || h === 'rationale' || h === 'policynote') rationaleIdx = c;
+    }
+
+    if (qNumIdx !== -1 && (optLetterIdx !== -1 || qTextIdx !== -1 || optLabelIdx !== -1)) {
+      for (let dr = r + 1; dr < rows.length; dr++) {
+        const dRow = rows[dr];
+        const rawQNum = (dRow[qNumIdx] || '').trim();
+        if (!rawQNum) continue;
+        const match = rawQNum.match(/q?(\d+)/i);
+        if (!match) continue;
+        const qNum = match[1];
+        const optLetter = optLetterIdx !== -1 ? (dRow[optLetterIdx] || '').trim().toLowerCase() : '';
+
+        if (qTextIdx !== -1 && dRow[qTextIdx]?.trim()) {
+          if (!map[`q${qNum}_question`]) {
+            map[`q${qNum}_question`] = dRow[qTextIdx].trim();
+          }
+        }
+        if (categoryIdx !== -1 && dRow[categoryIdx]?.trim()) {
+          if (!map[`q${qNum}_category`]) {
+            map[`q${qNum}_category`] = dRow[categoryIdx].trim();
+          }
+        }
+        if (optLetter && optLabelIdx !== -1 && dRow[optLabelIdx]?.trim()) {
+          map[`q${qNum}_option_${optLetter}`] = dRow[optLabelIdx].trim();
+        }
+        if (optLetter && optHintIdx !== -1 && dRow[optHintIdx]?.trim()) {
+          map[`q${qNum}_hint_${optLetter}`] = dRow[optHintIdx].trim();
+        }
+        if (optLetter && gainsIdx !== -1 && dRow[gainsIdx]?.trim()) {
+          map[`q${qNum}_gain_${optLetter}`] = dRow[gainsIdx].trim();
+        }
+        if (optLetter && painsIdx !== -1 && dRow[painsIdx]?.trim()) {
+          map[`q${qNum}_cost_${optLetter}`] = dRow[painsIdx].trim();
+        }
+        if (optLetter && impactIdx !== -1 && dRow[impactIdx]?.trim()) {
+          map[`q${qNum}_impact_${optLetter}`] = dRow[impactIdx].trim();
+        }
+        if (rationaleIdx !== -1 && dRow[rationaleIdx]?.trim()) {
+          map[`q${qNum}_rationale_${optLetter || 'a'}`] = dRow[rationaleIdx].trim();
+        }
+      }
+
+      if (Object.keys(map).length > 0) {
+        return map;
+      }
+    }
+  }
+
   let headerRowIndex = -1;
   let keyColIndex = -1;
   let revisedTextColIndex = -1;

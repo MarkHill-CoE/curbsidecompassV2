@@ -325,6 +325,8 @@ export const TextContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     const result = syncFromCsvText(csvContent);
     if (result.success) {
+      applyTextsToData(result.texts);
+      saveCachedTexts(result.texts);
       setTexts(result.texts);
       setItemCount(result.itemCount);
       setSyncStatus('synced');

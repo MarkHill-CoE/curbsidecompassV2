@@ -19,11 +19,11 @@ import {
   getStreetLayoutInfo,
   getTypologyFromPostalCode,
   detectLayoutAndNeighbourhood,
-  POPULAR_EDMONTON_NEIGHBOURHOODS,
   searchNeighbourhoods,
   findNeighbourhood,
   EdmontonNeighbourhood
 } from '../data/edmontonNeighbourhoods';
+import { resolveLocationOrPredictiveAddress } from '../data/edmontonPostalData';
 
 interface SurveyStageProps {
   questions: SurveyQuestion[];
@@ -101,6 +101,12 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
   const filteredNeighbourhoods = useMemo(() => {
     return searchNeighbourhoods(neighbourhoodQuery, 8);
   }, [neighbourhoodQuery]);
+
+  const detectedLocation = useMemo(() => {
+    const input = postalInput || neighbourhoodQuery;
+    if (!input || input === 'OPT_OUT') return null;
+    return resolveLocationOrPredictiveAddress(input);
+  }, [postalInput, neighbourhoodQuery]);
 
   const layoutOptions: Array<{
     id: StreetLayoutTypology;
@@ -212,19 +218,15 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
           <span className="flex items-center gap-1.5 truncate">
             <span className="font-bold text-[#004B8D]">
               {currentQuestion.id === 'q0' || currentQuestion.category === 'location'
-                ? q0SubScreen === 0
-                  ? t('q0_step1_progress_title', 'Step 1 of 2: Find Street')
-                  : t('q0_step2_progress_title', 'Step 2 of 2: Confirm Layout')
-                : t(`q${currentQuestion.number}_progress_title`, `Question ${currentQuestion.number} of 8`)}
+                ? t('q0_step1_progress_title', 'Find Your Neighbourhood')
+                : t(`q${currentQuestion.number}_progress_title`, `Question ${currentQuestion.number} of ${questions.length - 1}`)}
             </span>
             <span className="text-gray-300">·</span>
             <span className="text-gray-500 font-medium truncate">
               {t(
                 `q${currentQuestion.number}_category`,
                 currentQuestion.category === 'location'
-                  ? q0SubScreen === 0
-                    ? 'Location'
-                    : 'Street Style'
+                  ? 'Location'
                   : currentQuestion.category === 'demographics'
                   ? 'Demographics'
                   : `${currentQuestion.category} Policy`
@@ -232,7 +234,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             </span>
           </span>
           <span className="text-[11px] text-gray-400 font-mono hidden xs:inline">
-            {currentQuestion.id === 'q0' ? (q0SubScreen === 0 ? 'Step 1/2' : 'Step 2/2') : `${Math.round(((currentQuestion.number) / 8) * 100)}%`}
+            {currentQuestion.id === 'q0' ? (q0SubScreen === 0 ? 'Step 1/2' : 'Step 2/2') : `${Math.round(((currentQuestion.number) / Math.max(1, questions.length - 1)) * 100)}%`}
           </span>
         </div>
 
@@ -297,7 +299,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                           if (e.key === 'Enter') {
                             e.preventDefault();
                             triggerFeedback('button');
-                            setQ0SubScreen(1);
+                            onNavigate(1);
                           }
                         }}
                         className="w-full pl-10 pr-9 py-2 sm:py-2.5 bg-white border-2 border-gray-300 rounded-lg text-sm sm:text-base font-semibold text-[#004B8D] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20 transition-all min-h-[44px] shadow-2xs"
@@ -319,9 +321,9 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       )}
                     </div>
 
-                    {/* Autocomplete Dropdown */}
+                    {/* Autocomplete Dropdown with first 3 characters of postal code (FSA) */}
                     {showDropdown && filteredNeighbourhoods.length > 0 && currentAnswer !== 'OPT_OUT' && (
-                      <div className="absolute top-[38px] left-0 right-0 z-30 bg-white border border-[#004B8D]/40 rounded-lg shadow-xl overflow-hidden max-h-40 overflow-y-auto">
+                      <div className="absolute top-[44px] left-0 right-0 z-30 bg-white border border-[#004B8D]/40 rounded-lg shadow-xl overflow-hidden max-h-40 overflow-y-auto">
                         {filteredNeighbourhoods.map((n) => (
                           <button
                             key={n.name}
@@ -330,81 +332,41 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                             className="w-full text-left px-3 py-1.5 hover:bg-[#004B8D]/10 flex items-center justify-between text-xs border-b border-gray-100 last:border-b-0 cursor-pointer"
                           >
                             <span className="font-bold text-gray-800">{n.name}</span>
-                            <span className="text-[10px] text-[#004B8D] font-semibold bg-[#004B8D]/10 px-1.5 py-0.5 rounded">
-                              {getStreetLayoutInfo(n.typology).shortTitle}
-                            </span>
+                            {n.postalFSA?.[0] && (
+                              <span className="text-[10px] text-[#004B8D] font-bold bg-[#004B8D]/10 px-1.5 py-0.5 rounded">
+                                {n.postalFSA[0]}
+                              </span>
+                            )}
                           </button>
                         ))}
                       </div>
                     )}
                   </div>
 
-                  {/* Popular Community Quick Chips */}
-                  {currentAnswer !== 'OPT_OUT' && (
-                    <div className="flex flex-wrap items-center gap-1">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mr-0.5">{t('survey_quick_match', 'Quick Match:')}</span>
-                      {POPULAR_EDMONTON_NEIGHBOURHOODS.slice(0, 4).map((popName) => {
-                        const isSelected = neighbourhoodQuery.toLowerCase() === popName.toLowerCase();
-                        return (
-                          <button
-                            key={popName}
-                            type="button"
-                            onClick={() => {
-                              const n = findNeighbourhood(popName);
-                              if (n) handleSelectNeighbourhood(n);
-                            }}
-                            className={`text-[11px] px-2 py-0.5 rounded-md border transition-all cursor-pointer font-medium ${
-                              isSelected
-                                ? 'bg-[#004B8D] text-white border-[#004B8D] font-bold shadow-2xs'
-                                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200'
-                            }`}
-                          >
-                            {popName}
-                          </button>
-                        );
-                      })}
+                  {/* Identified Neighbourhood & Postal Code feedback */}
+                  {detectedLocation && currentAnswer !== 'OPT_OUT' && (
+                    <div className="flex items-center justify-between p-2 rounded-lg bg-[#004B8D]/5 border border-[#004B8D]/20 text-xs shadow-2xs">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <MapPin className="w-3.5 h-3.5 text-[#004B8D] shrink-0" />
+                        <span className="font-bold text-[#004B8D] truncate">
+                          {detectedLocation.neighbourhood}
+                        </span>
+                        <span className="text-[10px] font-semibold text-[#004B8D] bg-[#004B8D]/10 px-1.5 py-0.5 rounded shrink-0">
+                          Postal Code: {detectedLocation.postalFSA}
+                        </span>
+                        {detectedLocation.ward && (
+                          <span className="text-[10px] text-gray-500 truncate hidden xs:inline">
+                            • Ward {detectedLocation.ward}
+                          </span>
+                        )}
+                      </div>
+                      {detectedLocation.matchedBy === 'predictive_spelling' && (
+                        <span className="text-[10px] text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded font-medium shrink-0">
+                          Auto-corrected
+                        </span>
+                      )}
                     </div>
                   )}
-
-                  {/* Compact Live Matched Street Layout Callout */}
-                  {(() => {
-                    const activeLayout = getStreetLayoutInfo(currentStreetLayout);
-                    const matchedName = neighbourhoodQuery || currentNeighbourhoodName;
-                    return (
-                      <div className="flex items-center justify-between p-2 rounded-lg border border-[#004B8D]/25 bg-[#004B8D]/5 text-xs shadow-2xs">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xl leading-none shrink-0" role="img" aria-label={activeLayout.title}>
-                            {activeLayout.icon}
-                          </span>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="font-bold text-[#004B8D] text-xs">
-                                {activeLayout.title}
-                              </span>
-                              {matchedName && currentAnswer !== 'OPT_OUT' && (
-                                <span className="text-[10px] font-semibold text-gray-600 truncate">
-                                  • {matchedName}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[10px] text-gray-500 block truncate">
-                              {t('survey_on_street_stalls', '{count} on-street stalls').replace('{count}', String(activeLayout.curbsideCapacity))} · {activeLayout.drivewayType}
-                            </span>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            triggerFeedback('button');
-                            setQ0SubScreen(1);
-                          }}
-                          className="text-[11px] font-bold text-[#004B8D] hover:underline shrink-0 px-1 py-0.5 cursor-pointer ml-1"
-                        >
-                          {t('survey_change_layout_btn', 'Change ▾')}
-                        </button>
-                      </div>
-                    );
-                  })()}
 
                   {/* Opt-Out Option & Privacy */}
                   <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">
@@ -435,6 +397,14 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       {t('survey_postal_codes_anonymized', 'Postal codes anonymized')}
                     </span>
                   </div>
+
+                  {/* City of Edmonton Statutory Collection Notice in 10pt font */}
+                  <p className="text-[10pt] leading-normal text-gray-600 border-t border-gray-200/80 pt-2 mt-1 select-text">
+                    {t(
+                      'privacy_popa_statutory_notice',
+                      'Personal information is collected for the purpose of Residential Parking Public Engagement and will be used for analysis and insights. Collection is authorized under section 4(c) of the Protection of Privacy Act (POPA) and is managed and protected in accordance with the Act. The City intends to input the information into an automated system to generate content or make decisions, recommendations or predictions in accordance with the City of Edmonton Generative AI Standard. For questions about the collection, please contact [title], [business telephone number] and [email address].'
+                    )}
+                  </p>
                 </div>
               ) : (
                 /* Screen 0B: Choose / Confirm 1 of 4 Edmonton Street Layouts */
@@ -604,7 +574,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
               </div>
             )}
 
-            {/* The Real-World Trade-Off For Your Choice (displayed below question answers once an answer is selected) */}
+            {/* FOR YOUR CHOICE (displayed below question answers once an answer is selected) */}
             {!isTextQuestion && currentQuestion.id !== 'q0' && (currentAnswer || tradeoffOutcome?.hasAnswer) && (
               <div
                 id="tradeoff-education-card"
@@ -615,7 +585,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                 <div className="flex items-center gap-1 mb-1 pb-0.5 border-b border-gray-100">
                   <Sparkles className="w-3 h-3 text-[#FFC72C] fill-[#FFC72C] shrink-0" />
                   <span className="text-[9pt] sm:text-[9.5pt] font-extrabold uppercase tracking-wider text-[#004B8D] leading-none">
-                    {t('tradeoff_card_header', 'The Real-World Trade-Off For Your Choice')}
+                    {t('tradeoff_card_header', 'FOR YOUR CHOICE')}
                   </span>
                 </div>
 
@@ -743,11 +713,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
               id="survey-next-btn"
               onClick={() => {
                 triggerFeedback('button');
-                if (q0SubScreen === 0) {
-                  setQ0SubScreen(1);
-                } else {
-                  onNavigate(1);
-                }
+                onNavigate(1);
               }}
               className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-1.5 shadow-xs transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] min-w-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
             >

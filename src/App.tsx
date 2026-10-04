@@ -6,7 +6,8 @@ import { SurveyStage } from './components/SurveyStage';
 import { ResultsView } from './components/ResultsView';
 import { ManualSlidersDrawer } from './components/ManualSlidersDrawer';
 import { MagnifiedGaugeDrawer } from './components/MagnifiedGaugeDrawer';
-import { RotateDeviceNotice } from './components/RotateDeviceNotice';
+import { DeviceBrowserCheck } from './components/DeviceBrowserCheck';
+import { safeStorage, checkBrowserCompatibility } from './utils/browserCheck';
 
 // Temporary tool for the City communications team to review and edit copy directly
 import { GoogleSheetSyncModal } from './components/GoogleSheetSyncModal';
@@ -21,7 +22,6 @@ import {
 } from './data/surveyData';
 import { SimulationConfig, StreetLayoutTypology } from './types';
 import { getStreetLayoutInfo, detectLayoutAndNeighbourhood } from './data/edmontonNeighbourhoods';
-import { OutcomeTooltipPill } from './components/OutcomeTooltipPill';
 import {
   Compass,
   RotateCcw,
@@ -34,7 +34,8 @@ import {
   ChevronUp,
   ChevronLeft,
   ChevronRight,
-  ExternalLink
+  ExternalLink,
+  Download
 } from 'lucide-react';
 import { getDirectGoogleSheetWebUrl, isEditableGoogleSheetUrl } from './utils/textSync';
 import { feedback, triggerFeedback } from './utils/feedback';
@@ -44,50 +45,42 @@ export default function App() {
   // # BEGIN TEMPORARY SHEETS SYNC
   const { t, isCustomActive, itemCount, sheetUrl } = useAppText();
   const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
-  const [syncModalTab, setSyncModalTab] = useState<'inventory' | 'url'>('inventory');
+  const [syncModalTab, setSyncModalTab] = useState<'csv' | 'inventory' | 'url'>('inventory');
   // # END TEMPORARY SHEETS SYNC
 
   const [showManualSliders, setShowManualSliders] = useState<boolean>(false);
   const [showMagnifiedGauge, setShowMagnifiedGauge] = useState<boolean>(false);
+  const [isDeviceCheckBlocking, setIsDeviceCheckBlocking] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const compat = checkBrowserCompatibility();
+    return compat.isMobileLandscape;
+  });
   const [showOnboarding, setShowOnboarding] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('curbside_compass_onboarding_completed') !== 'true';
-    } catch {
-      return false;
-    }
+    return safeStorage.getItem('curbside_compass_onboarding_completed') !== 'true';
   });
   const [isSimplifiedMode, setIsSimplifiedMode] = useState<boolean>(() => {
-    try {
-      return localStorage.getItem('curbside_compass_simplified_mode') === 'true';
-    } catch {
-      return false;
-    }
+    if (typeof window === 'undefined') return false;
+    const compat = checkBrowserCompatibility();
+    if (!compat.hasCanvas) return true;
+    return safeStorage.getItem('curbside_compass_simplified_mode') === 'true';
   });
   const [isSimExpanded, setIsSimExpanded] = useState<boolean>(false);
 
   const handleToggleSimplifiedMode = useCallback((simplified?: boolean) => {
     setIsSimplifiedMode((prev) => {
       const nextVal = simplified !== undefined ? simplified : !prev;
-      try {
-        localStorage.setItem('curbside_compass_simplified_mode', String(nextVal));
-      } catch {
-        // ignore
-      }
+      safeStorage.setItem('curbside_compass_simplified_mode', String(nextVal));
       return nextVal;
     });
   }, []);
   const [currentStep, setCurrentStep] = useState<number>(() => {
-    try {
-      const saved = localStorage.getItem('curbsideCompass_step');
-      return saved ? parseInt(saved, 10) : 0;
-    } catch {
-      return 0;
-    }
+    const saved = safeStorage.getItem('curbsideCompass_step');
+    return saved ? parseInt(saved, 10) : 0;
   });
 
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>(() => {
     try {
-      const saved = localStorage.getItem('curbsideCompass_answers');
+      const saved = safeStorage.getItem('curbsideCompass_answers');
       return saved ? JSON.parse(saved) : {};
     } catch {
       return {};
@@ -124,27 +117,19 @@ export default function App() {
   }, [currentStep, selectedAnswers]);
 
   const [isCompleted, setIsCompleted] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('curbsideCompass_completed');
-      return saved === 'true';
-    } catch {
-      return false;
-    }
+    const saved = safeStorage.getItem('curbsideCompass_completed');
+    return saved === 'true';
   });
 
   const [showValidationError, setShowValidationError] = useState<boolean>(false);
   const [validationErrorMsg, setValidationErrorMsg] = useState<string | null>(null);
 
-  // Automatically save the user's progress to the browser's local storage
+  // Automatically save the user's progress to safe storage
   useEffect(() => {
-    try {
-      localStorage.setItem('curbsideCompass_step', currentStep.toString());
-      localStorage.setItem('curbsideCompass_answers', JSON.stringify(selectedAnswers));
-      localStorage.setItem('curbsideCompass_simConfig', JSON.stringify(simConfig));
-      localStorage.setItem('curbsideCompass_completed', isCompleted.toString());
-    } catch (err) {
-      console.warn('Could not save progress to browser storage:', err);
-    }
+    safeStorage.setItem('curbsideCompass_step', currentStep.toString());
+    safeStorage.setItem('curbsideCompass_answers', JSON.stringify(selectedAnswers));
+    safeStorage.setItem('curbsideCompass_simConfig', JSON.stringify(simConfig));
+    safeStorage.setItem('curbsideCompass_completed', isCompleted.toString());
   }, [currentStep, selectedAnswers, simConfig, isCompleted]);
 
   // Expand the street simulation view when the user finishes all questions
@@ -302,7 +287,7 @@ export default function App() {
       setShowValidationError(false);
       setValidationErrorMsg(null);
 
-      if (currentStep >= SURVEY_QUESTIONS.length) {
+      if (currentStep >= SURVEY_QUESTIONS.length - 1) {
         setIsCompleted(true);
       } else {
         setCurrentStep((prev) => prev + 1);
@@ -346,6 +331,16 @@ export default function App() {
     }
   };
 
+  // Device & Browser Guard: Validates mobile orientation and browser compatibility before displaying start screen
+  if (isDeviceCheckBlocking) {
+    return (
+      <DeviceBrowserCheck
+        onBlockStateChange={setIsDeviceCheckBlocking}
+        onAutoSwitchSimplifiedMode={() => handleToggleSimplifiedMode(true)}
+      />
+    );
+  }
+
   return (
     <div className="flex flex-col h-[100dvh] max-h-[100dvh] w-screen bg-[#f4f6f8] text-gray-800 overflow-hidden font-sans">
       {/* Top Header Navigation Bar */}
@@ -367,7 +362,7 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {/* Communications Team: Text Inventory & Direct Google Sheet Link */}
+          {/* Communications Team: Live Content & Copy Sync (Browse & Search Copy) */}
           <div className="flex items-center rounded-lg border border-white/20 bg-white/10 overflow-hidden shadow-xs">
             <button
               type="button"
@@ -375,12 +370,8 @@ export default function App() {
                 setSyncModalTab('inventory');
                 setIsSyncModalOpen(true);
               }}
-              title={
-                isCustomActive
-                  ? `App Text Sync Active (${itemCount} items) - Click to browse inventory or update copy`
-                  : 'App Text Inventory & Google Sheet Sync (Communications Tool)'
-              }
-              aria-label="App text inventory and copy sync tool"
+              title="Live Content & Copy Sync: Browse, search, and edit copy across the application"
+              aria-label="Browse & Search Copy"
               className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 transition-all min-h-[38px] sm:min-h-[44px] cursor-pointer ${
                 isCustomActive
                   ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
@@ -389,14 +380,26 @@ export default function App() {
             >
               <FileSpreadsheet className="w-4 h-4 text-[#FFC72C]" />
               <span className="font-bold flex items-center gap-1">
-                <span className="hidden sm:inline">App Text</span>
-                <span>Inventory</span>
+                <span>Browse &amp; Search Copy</span>
                 {isCustomActive && (
                   <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-emerald-400 text-emerald-950 font-black">
                     {itemCount}
                   </span>
                 )}
               </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSyncModalTab('csv');
+                setIsSyncModalOpen(true);
+              }}
+              title="Download questions as CSV, revise in Excel/Sheets, or upload updated questions"
+              aria-label="Download and upload questions CSV"
+              className="px-2 sm:px-2.5 py-1.5 text-white hover:bg-white/20 transition-all border-l border-white/20 flex items-center gap-1 text-[0.6875rem] sm:text-xs font-bold min-h-[38px] sm:min-h-[44px] cursor-pointer"
+            >
+              <span>CSV</span>
+              <Download className="w-3.5 h-3.5 text-[#FFC72C]" />
             </button>
             {isDirectEditable ? (
               <a
@@ -710,173 +713,22 @@ export default function App() {
           />
           <div className={`w-full h-full flex-1 flex flex-col min-h-0 overflow-hidden transition-all duration-200 ${showManualSliders || showMagnifiedGauge ? 'blur-sm select-none pointer-events-none' : ''}`}>
           {!isCompleted ? (
-            currentStep < SURVEY_QUESTIONS.length ? (
-              <SurveyStage
-                questions={SURVEY_QUESTIONS}
-                currentStep={currentStep}
-                selectedAnswers={selectedAnswers}
-                onSelectOption={handleSelectOption}
-                onNavigate={handleNavigate}
-                showValidationError={showValidationError}
-                validationErrorMsg={validationErrorMsg}
-                totalX={totalX}
-                totalY={totalY}
-                tradeoffOutcome={currentTradeoffOutcome}
-                policyNote={policyNote}
-                currentStreetLayout={simConfig.streetLayout || 'mature_laned'}
-                currentNeighbourhoodName={simConfig.neighbourhoodName}
-                onLayoutChange={handleLayoutChange}
-              />
-            ) : (
-              <div 
-                id="outcome-screen-container"
-                role="region"
-                aria-label={t('watch_title', 'Your Neighbourhood Parking Program Outcome')}
-                className="relative flex flex-col justify-between h-full p-2 sm:p-3 text-center animate-in fade-in duration-300 overflow-y-auto"
-              >
-                {/* Header & Status Card */}
-                <div className="flex flex-col items-center justify-center gap-1 sm:gap-1.5 my-auto max-w-xl mx-auto w-full">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#004B8D] text-[9pt] sm:text-[9.5pt] font-black uppercase tracking-wider shadow-2xs">
-                    <Sparkles className="w-3.5 h-3.5 text-[#FFC72C] fill-[#FFC72C]" />
-                    <span>{t('outcome_badge', 'All 8 Policy Steps Completed')}</span>
-                  </div>
-
-                  <h2 className="text-[13pt] sm:text-[16pt] md:text-[18pt] font-black text-[#002B49] tracking-tight leading-tight">
-                    {t('watch_title', 'Your Neighbourhood Parking Program Outcome')}
-                  </h2>
-
-                  {/* Summary & View Toggle Pills */}
-                  <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 pt-0.5 text-[9.5pt] sm:text-[10pt] font-bold">
-                    <OutcomeTooltipPill
-                      icon="📍"
-                      label={simConfig.neighbourhoodName || 'Edmonton'}
-                      badgeClass="bg-gray-100 border-gray-200 text-gray-800 hover:bg-gray-200/70"
-                      tooltipTitle="Neighbourhood Typology"
-                      tooltipDesc="The Edmonton neighbourhood housing profile and density setting modeled in this simulation."
-                      statusBadge="Edmonton"
-                    />
-
-                    <OutcomeTooltipPill
-                      icon="🏡"
-                      label={`${getStreetLayoutInfo(simConfig.streetLayout).shortTitle} (${simulationMetrics.curbsideStallsCapacity} stalls)`}
-                      badgeClass="bg-blue-50 border-blue-200 text-[#004B8D] hover:bg-blue-100/70"
-                      tooltipTitle="Curbside Stalls Capacity"
-                      tooltipDesc={`The total number of legal on-street parking spaces (${simulationMetrics.curbsideStallsCapacity} stalls) physically available along both sides of this street block.`}
-                      statusBadge={`${simulationMetrics.curbsideStallsCapacity} Stalls`}
-                      statusColor="bg-[#004B8D] text-white"
-                    />
-
-                    <OutcomeTooltipPill
-                      icon="🚗"
-                      label={`${simulationMetrics.curbsideDemandCount} Demand`}
-                      badgeClass={
-                        simulationMetrics.curbsideDemandCount > simulationMetrics.curbsideStallsCapacity
-                          ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100/70'
-                          : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100/70'
-                      }
-                      tooltipTitle="Curbside Parking Demand"
-                      tooltipDesc="The total number of vehicles needing on-street parking right now, including resident cars without private driveway space, visitors, trades, and delivery services."
-                      statusBadge={`${simulationMetrics.curbsideDemandCount} Vehicles`}
-                      statusColor={
-                        simulationMetrics.curbsideDemandCount > simulationMetrics.curbsideStallsCapacity
-                          ? 'bg-amber-600 text-white'
-                          : 'bg-emerald-600 text-white'
-                      }
-                    />
-
-                    <OutcomeTooltipPill
-                      icon="📊"
-                      label={`${simulationMetrics.curbsidePct}% Occupancy`}
-                      badgeClass={
-                        simulationMetrics.curbsidePct >= 100
-                          ? 'bg-red-50 border-red-300 text-red-900 hover:bg-red-100/70'
-                          : simulationMetrics.curbsidePct >= 85
-                          ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100/70'
-                          : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100/70'
-                      }
-                      tooltipTitle="Curbside Occupancy"
-                      tooltipDesc={
-                        simulationMetrics.curbsidePct >= 100
-                          ? `${simulationMetrics.curbsidePct}% of legal stalls are full. Demand exceeds physical capacity, causing drivers to circle or park elsewhere.`
-                          : simulationMetrics.curbsidePct >= 85
-                          ? `${simulationMetrics.curbsidePct}% of stalls are full. This reaches the ideal 85% planning standard, maximizing curb utility while preserving 1 to 2 open spots per block.`
-                          : `${simulationMetrics.curbsidePct}% of stalls are full. On-street parking is readily available with open spaces always in sight.`
-                      }
-                      statusBadge={
-                        simulationMetrics.curbsidePct >= 100
-                          ? 'Over Capacity'
-                          : simulationMetrics.curbsidePct >= 85
-                          ? 'Target (85%)'
-                          : 'Ample Space'
-                      }
-                      statusColor={
-                        simulationMetrics.curbsidePct >= 100
-                          ? 'bg-red-600 text-white'
-                          : simulationMetrics.curbsidePct >= 85
-                          ? 'bg-amber-600 text-white'
-                          : 'bg-emerald-600 text-white'
-                      }
-                    />
-
-                    <OutcomeTooltipPill
-                      icon="🚦"
-                      label={simulationMetrics.circlingCarCount > 0 ? `${simulationMetrics.circlingCarCount} Circling` : 'Smooth Flow'}
-                      badgeClass={
-                        simulationMetrics.circlingCarCount > 0
-                          ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100/70'
-                          : 'bg-emerald-50 border-emerald-300 text-emerald-900 hover:bg-emerald-100/70'
-                      }
-                      tooltipTitle="Traffic Flow & Search Delay"
-                      tooltipDesc={
-                        simulationMetrics.circlingCarCount > 0
-                          ? `${simulationMetrics.circlingCarCount} vehicle(s) are circling the block unable to find an open curb spot, generating neighbourhood traffic and emissions.`
-                          : "Zero vehicles are circling. Drivers find spots quickly upon arrival, keeping neighbourhood streets quiet and safe."
-                      }
-                      statusBadge={simulationMetrics.circlingCarCount > 0 ? `${simulationMetrics.circlingCarCount} Searching` : 'Optimal Flow'}
-                      statusColor={simulationMetrics.circlingCarCount > 0 ? 'bg-amber-600 text-white' : 'bg-emerald-600 text-white'}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setIsSimExpanded((prev) => !prev)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-[#004B8D] hover:bg-blue-100 cursor-pointer transition-colors shadow-2xs font-bold"
-                      title={isSimExpanded ? "Minimize simulation view" : "Expand simulation view"}
-                    >
-                      {isSimExpanded ? <ChevronDown className="w-3.5 h-3.5 text-[#FFC72C]" /> : <ChevronUp className="w-3.5 h-3.5 text-[#004B8D]" />}
-                      <span>{isSimExpanded ? 'Expanded View (Active)' : 'Expand Street View'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Bottom Action Buttons: Go Back & View Your Curbside Persona */}
-                <div className="sticky bottom-0 z-20 bg-white pt-2 pb-1 border-t border-gray-200 flex items-center justify-between gap-3 w-full max-w-xl mx-auto shrink-0 shadow-[0_-2px_6px_rgba(0,0,0,0.03)]">
-                  <button
-                    type="button"
-                    id="outcome-back-btn"
-                    onClick={() => {
-                      triggerFeedback('button');
-                      setCurrentStep(prev => Math.max(0, prev - 1));
-                    }}
-                    className="px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 border-2 border-gray-300 bg-white text-gray-800 hover:bg-gray-100 transition-all min-h-[44px] sm:min-h-[48px] cursor-pointer shadow-2xs active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span>{t('watch_btn_back', 'Go Back')}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    id="outcome-view-persona-btn"
-                    onClick={() => {
-                      triggerFeedback('submit');
-                      setIsCompleted(true);
-                    }}
-                    className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-2 shadow-md transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
-                  >
-                    <span>{t('watch_btn_view_persona', 'View Your Curbside Persona')}</span>
-                    <ChevronRight className="w-4 h-4 stroke-[2.5]" />
-                  </button>
-                </div>
-              </div>
-            )
+            <SurveyStage
+              questions={SURVEY_QUESTIONS}
+              currentStep={currentStep}
+              selectedAnswers={selectedAnswers}
+              onSelectOption={handleSelectOption}
+              onNavigate={handleNavigate}
+              showValidationError={showValidationError}
+              validationErrorMsg={validationErrorMsg}
+              totalX={totalX}
+              totalY={totalY}
+              tradeoffOutcome={currentTradeoffOutcome}
+              policyNote={policyNote}
+              currentStreetLayout={simConfig.streetLayout || 'mature_laned'}
+              currentNeighbourhoodName={simConfig.neighbourhoodName}
+              onLayoutChange={handleLayoutChange}
+            />
           ) : (
             <ResultsView
               persona={currentPersona}
@@ -900,16 +752,19 @@ export default function App() {
       />
       {/* # END TEMPORARY SHEETS SYNC */}
 
-      {/* 3-Step Civic Onboarding Walkthrough Modal */}
+      {/* 3-Step Civic Onboarding Walkthrough Modal - only displayed when device check is not blocking */}
       <CivicOnboardingModal
-        isOpen={showOnboarding}
+        isOpen={showOnboarding && !isDeviceCheckBlocking}
         onClose={() => setShowOnboarding(false)}
         isSimplifiedMode={isSimplifiedMode}
         onToggleSimplifiedMode={handleToggleSimplifiedMode}
       />
 
-      {/* Mobile Horizontal Screen Orientation Advisory */}
-      <RotateDeviceNotice />
+      {/* Device & Browser Verification Guard (Validates orientation, canvas, and storage before displaying start screen) */}
+      <DeviceBrowserCheck
+        onBlockStateChange={setIsDeviceCheckBlocking}
+        onAutoSwitchSimplifiedMode={() => handleToggleSimplifiedMode(true)}
+      />
     </div>
   );
 }

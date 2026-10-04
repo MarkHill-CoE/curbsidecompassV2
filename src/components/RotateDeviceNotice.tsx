@@ -47,7 +47,7 @@ export const RotateDeviceNotice: React.FC<RotateDeviceNoticeProps> = ({ onDismis
       aria-modal="true"
       aria-labelledby="rotate-notice-title"
       aria-describedby="rotate-notice-desc"
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#002B49]/98 text-white p-4 sm:p-6 backdrop-blur-md select-none animate-in fade-in duration-200"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#002B49]/98 text-white p-4 sm:p-6 backdrop-blur-md select-none animate-in fade-in duration-200"
     >
       <div className="max-w-md w-full flex flex-col items-center text-center">
         {/* Safe Mobility Logo */}

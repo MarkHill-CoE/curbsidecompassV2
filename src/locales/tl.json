@@ -563,5 +563,9 @@
   "watch_title": "Panoorin ang Kalsada!",
   "rotate_screen_title": "Pakiikot sa Patayo (Portrait)",
   "rotate_screen_desc": "Ang Curbside Compass ay dinisenyo para sa patayong portrait view sa mobile upang maranasan ang live simulation ng komunidad at masagot ang mga tanong nang malinaw.",
-  "rotate_screen_continue_anyway": "Magpatuloy sa pahalang na view pa rin"
+  "rotate_screen_continue_anyway": "Magpatuloy sa pahalang na view pa rin",
+  "compat_canvas_switched_title": "Naka-activate ang Accessible Mode",
+  "compat_canvas_switched_desc": "Hindi sinusuportahan ng iyong browser ang 2.5D graphics. Awtomatikong pinagana ang Accessible Street Summary.",
+  "compat_storage_private_title": "Aktibo ang Pribadong Sesyon",
+  "compat_storage_private_desc": "Naka-disable ang storage ng browser. Mananatili ang iyong mga sagot sa sesyong ito lamang."
 }

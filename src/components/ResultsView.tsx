@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PersonaResult, SimulationConfig } from '../types';
-import { Award, MapPin, Target, CheckCircle, ChevronRight, Compass, Share2, AlertTriangle, Printer } from 'lucide-react';
+import { Award, MapPin, Target, CheckCircle, ChevronRight, Compass, Share2, AlertTriangle, Printer, RotateCcw } from 'lucide-react';
 import { ThankYouView } from './ThankYouView';
 import { PolicyCompassGraph } from './PolicyCompassGraph';
 import { triggerFeedback } from '../utils/feedback';
@@ -177,7 +177,18 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
         </div>
 
         {/* Next Button Footer - Accessible 48px min touch target */}
-        <div className="mt-2 flex justify-end flex-shrink-0">
+        <div className="mt-2 flex items-center justify-between flex-shrink-0">
+          {onRetake ? (
+            <button
+              type="button"
+              onClick={onRetake}
+              className="px-4 py-2.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[48px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
+              title={t('results_retake_title', 'Retake survey and adjust your answers')}
+            >
+              <RotateCcw className="w-4 h-4 text-gray-500" />
+              <span>{t('results_retake_btn', 'Retake Survey')}</span>
+            </button>
+          ) : <div />}
           <button
             onClick={() => setStep(2)}
             className="flex items-center justify-center gap-2 px-6 py-3 bg-[#004B8D] text-white rounded-xl font-bold shadow hover:bg-[#003866] transition-colors active:scale-95 text-sm sm:text-base min-h-[48px] min-w-[48px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#004B8D]"

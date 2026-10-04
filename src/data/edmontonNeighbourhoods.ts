@@ -302,16 +302,21 @@ export const POPULAR_EDMONTON_NEIGHBOURHOODS = [
   'Chappelle Gardens'
 ];
 
+import { 
+  ALL_EDMONTON_NEIGHBOURHOODS, 
+  resolveLocationOrPredictiveAddress, 
+  EDMONTON_FSA_DATA 
+} from './edmontonPostalData';
+
 /**
  * Determines most likely Street Layout Typology from an Edmonton Postal Code or Neighbourhood Name
  */
 export function getTypologyFromPostalCode(postalCodeOrName: string): StreetLayoutTypology {
   if (!postalCodeOrName || postalCodeOrName === 'OPT_OUT') return 'mature_laned';
   
-  // First, check if input directly matches an Edmonton neighbourhood name
-  const directNeighbourhood = findNeighbourhood(postalCodeOrName);
-  if (directNeighbourhood) {
-    return directNeighbourhood.typology;
+  const predictive = resolveLocationOrPredictiveAddress(postalCodeOrName);
+  if (predictive) {
+    return predictive.typology;
   }
 
   const clean = postalCodeOrName.trim().toUpperCase().replace(/[\s-]/g, '');
@@ -326,16 +331,16 @@ export function getTypologyFromPostalCode(postalCodeOrName: string): StreetLayou
 
   // Broad Edmonton FSA heuristics
   if (['T5J', 'T5K', 'T5H', 'T6G', 'T5L'].includes(fsa)) {
-    return 'infill_skinny'; // Downtown, Oliver, Garneau, Central
+    return 'infill_skinny';
   }
   if (['T5N', 'T5W', 'T6C', 'T6E', 'T6A'].includes(fsa)) {
-    return 'mature_laned'; // Westmount, Glenora, Strathcona, Highlands
+    return 'mature_laned';
   }
   if (['T6W', 'T6X', 'T5G', 'T5E', 'T6T'].includes(fsa)) {
-    return 'contemporary_townhomes'; // Windermere, Blatchford, Griesbach, Chappelle
+    return 'contemporary_townhomes';
   }
   if (['T5T', 'T6K', 'T6L', 'T6R', 'T5X', 'T5Z', 'T5Y', 'T6J', 'T5V'].includes(fsa)) {
-    return 'suburban_front_driveway'; // Callingwood, Mill Woods, Riverbend, Castledowns
+    return 'suburban_front_driveway';
   }
 
   return 'mature_laned';
@@ -353,7 +358,7 @@ export function detectLayoutAndNeighbourhood(input: string): {
     return { typology: 'mature_laned', neighbourhood: null, detectedBy: 'default' };
   }
 
-  // 0. Direct typology match (e.g. user selected suburban_front_driveway, contemporary_townhomes, etc.)
+  // 0. Direct typology match
   if (input in STREET_LAYOUTS) {
     return {
       typology: input as StreetLayoutTypology,
@@ -362,7 +367,24 @@ export function detectLayoutAndNeighbourhood(input: string): {
     };
   }
 
-  // 1. Direct neighbourhood match
+  // 1. Predictive postal code and address matching
+  const predictive = resolveLocationOrPredictiveAddress(input);
+  if (predictive) {
+    const existing = EDMONTON_NEIGHBOURHOODS.find(n => n.name.toLowerCase() === predictive.neighbourhood.toLowerCase());
+    const matched: EdmontonNeighbourhood = existing || {
+      name: predictive.neighbourhood,
+      typology: predictive.typology,
+      sector: 'Central',
+      postalFSA: [predictive.postalFSA]
+    };
+    return {
+      typology: predictive.typology,
+      neighbourhood: matched,
+      detectedBy: predictive.matchedBy === 'exact_code' || predictive.matchedBy === 'fsa' ? 'postal_fsa' : 'neighbourhood'
+    };
+  }
+
+  // 2. Direct neighbourhood match fallback
   const matchedNeighbourhood = findNeighbourhood(input);
   if (matchedNeighbourhood) {
     return {
@@ -372,25 +394,23 @@ export function detectLayoutAndNeighbourhood(input: string): {
     };
   }
 
-  // 2. Postal code FSA match
+  // 3. Fallback FSA heuristic
   const clean = input.trim().toUpperCase().replace(/[\s-]/g, '');
   if (clean.length >= 3) {
     const fsa = clean.slice(0, 3);
-    const neighbourhoodByFsa = EDMONTON_NEIGHBOURHOODS.find(n => n.postalFSA?.includes(fsa));
-    if (neighbourhoodByFsa) {
+    const fsaData = EDMONTON_FSA_DATA[fsa];
+    if (fsaData) {
       return {
-        typology: neighbourhoodByFsa.typology,
-        neighbourhood: neighbourhoodByFsa,
+        typology: fsaData.typology,
+        neighbourhood: {
+          name: fsaData.neighbourhoods[0] || fsaData.name,
+          typology: fsaData.typology,
+          sector: 'Central',
+          postalFSA: [fsa]
+        },
         detectedBy: 'postal_fsa'
       };
     }
-
-    const typologyFromFsa = getTypologyFromPostalCode(clean);
-    return {
-      typology: typologyFromFsa,
-      neighbourhood: null,
-      detectedBy: 'postal_heuristic'
-    };
   }
 
   return { typology: 'mature_laned', neighbourhood: null, detectedBy: 'default' };
@@ -402,22 +422,74 @@ export function detectLayoutAndNeighbourhood(input: string): {
 export function findNeighbourhood(nameOrQuery: string): EdmontonNeighbourhood | null {
   if (!nameOrQuery || !nameOrQuery.trim()) return null;
   const q = nameOrQuery.toLowerCase().trim();
-  return (
-    EDMONTON_NEIGHBOURHOODS.find(n => n.name.toLowerCase() === q) ||
-    EDMONTON_NEIGHBOURHOODS.find(n => n.name.toLowerCase().includes(q)) ||
-    null
+
+  // Search existing database
+  const direct = EDMONTON_NEIGHBOURHOODS.find(n => n.name.toLowerCase() === q);
+  if (direct) return direct;
+
+  const partial = EDMONTON_NEIGHBOURHOODS.find(n => n.name.toLowerCase().includes(q));
+  if (partial) return partial;
+
+  // Search extended directory
+  const extended = ALL_EDMONTON_NEIGHBOURHOODS.find(n => 
+    n.name.toLowerCase() === q || 
+    n.aliases.some(a => a.toLowerCase() === q) ||
+    n.name.toLowerCase().includes(q)
   );
+  if (extended) {
+    return {
+      name: extended.name,
+      typology: extended.typology,
+      sector: 'Central',
+      postalFSA: [extended.fsa]
+    };
+  }
+
+  return null;
 }
 
 /**
- * Searches neighbourhoods for autocomplete
+ * Searches neighbourhoods for autocomplete with predictive aliases
  */
 export function searchNeighbourhoods(query: string, limit = 8): EdmontonNeighbourhood[] {
   if (!query || !query.trim()) return EDMONTON_NEIGHBOURHOODS.slice(0, limit);
   const q = query.toLowerCase().trim();
-  return EDMONTON_NEIGHBOURHOODS.filter(n =>
-    n.name.toLowerCase().includes(q) ||
-    n.sector.toLowerCase().includes(q) ||
-    n.postalFSA?.some(f => f.toLowerCase().includes(q))
-  ).slice(0, limit);
+  
+  const results: EdmontonNeighbourhood[] = [];
+  const addedNames = new Set<string>();
+
+  // 1. Matches in primary list
+  for (const n of EDMONTON_NEIGHBOURHOODS) {
+    if (
+      n.name.toLowerCase().includes(q) ||
+      n.sector.toLowerCase().includes(q) ||
+      n.postalFSA?.some(f => f.toLowerCase().includes(q))
+    ) {
+      results.push(n);
+      addedNames.add(n.name.toLowerCase());
+      if (results.length >= limit) return results;
+    }
+  }
+
+  // 2. Matches in extended list
+  for (const ext of ALL_EDMONTON_NEIGHBOURHOODS) {
+    if (!addedNames.has(ext.name.toLowerCase())) {
+      if (
+        ext.name.toLowerCase().includes(q) ||
+        ext.fsa.toLowerCase().includes(q) ||
+        ext.aliases.some(a => a.toLowerCase().includes(q))
+      ) {
+        results.push({
+          name: ext.name,
+          typology: ext.typology,
+          sector: 'Central',
+          postalFSA: [ext.fsa]
+        });
+        addedNames.add(ext.name.toLowerCase());
+        if (results.length >= limit) return results;
+      }
+    }
+  }
+
+  return results.slice(0, limit);
 }

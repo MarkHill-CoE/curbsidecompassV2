@@ -31,7 +31,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
 }) => {
   const { t } = useAppText();
   const [currentStep, setCurrentStep] = useState<number>(1);
-  const totalSteps = 5;
+  const totalSteps = 3;
   const modalRef = useRef<HTMLDivElement>(null);
   const nextButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -144,7 +144,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
         {/* Step Progress Tracker: Clear & 16px font */}
         <div className="bg-gray-100 px-3 sm:px-5 py-1.5 sm:py-2 border-b border-gray-300 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-1.5 sm:gap-2">
-            {[1, 2, 3, 4, 5].map((step) => (
+            {[1, 2, 3].map((step) => (
               <button
                 key={step}
                 type="button"
@@ -152,7 +152,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                   triggerFeedback('button');
                   setCurrentStep(step);
                 }}
-                className={`flex items-center justify-center text-base font-black px-2.5 sm:px-3 py-1 rounded-lg transition-all cursor-pointer min-h-[38px] ${
+                className={`flex items-center justify-center text-base font-black px-3 sm:px-4 py-1 rounded-lg transition-all cursor-pointer min-h-[38px] ${
                   currentStep === step
                     ? 'bg-[#004B8D] text-white shadow-xs scale-105'
                     : currentStep > step
@@ -202,76 +202,20 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             </div>
           )}
 
-          {/* SCREEN 2: How Street Parking Works */}
+          {/* SCREEN 2: See What Happens Live & Choose Your View (Consolidated) */}
           {currentStep === 2 && (
-            <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-150">
-              <h3 className="text-xl sm:text-2xl font-black text-[#004B8D] leading-tight">
-                {t('intro_s2_title', 'How Our Streets Work')}
-              </h3>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl border-2 border-gray-200">
-                  <div className="w-9 h-9 rounded-lg bg-[#193A5A] text-[#FFC72C] flex items-center justify-center shrink-0">
-                    <Home className="w-5 h-5" />
-                  </div>
-                  <div className="text-base text-gray-900">
-                    <strong className="block font-bold">{t('intro_s2_garages_title', '1. Back Garages:')}</strong>
-                    <span>{t('intro_s2_garages_desc', 'Homes have private garages in the back lane.')}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl border-2 border-gray-200">
-                  <div className="w-9 h-9 rounded-lg bg-[#0081BC] text-white flex items-center justify-center shrink-0">
-                    <Car className="w-5 h-5" />
-                  </div>
-                  <div className="text-base text-gray-900">
-                    <strong className="block font-bold">{t('intro_s2_curb_title', '2. Curb Spots:')}</strong>
-                    <span>{t('intro_s2_curb_desc', 'Residents, visitors, and delivery vans share street spots.')}</span>
-                  </div>
-                </div>
-              </div>
-
-              <p className="text-base text-gray-700 font-bold leading-snug">
-                {t('intro_s2_takeaway', 'When curb spots fill up, drivers have to circle the block looking for parking.')}
-              </p>
-            </div>
-          )}
-
-          {/* SCREEN 3: See What Happens Live */}
-          {currentStep === 3 && (
-            <div className="space-y-2.5 sm:space-y-3.5 animate-in fade-in duration-150">
-              <h3 className="text-xl sm:text-2xl font-black text-[#004B8D] leading-tight">
-                {t('intro_s3_title', 'See What Happens Live')}
-              </h3>
-
-              <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-3 sm:p-4 space-y-2">
-                <p className="text-base sm:text-lg text-gray-900 leading-snug">
-                  {t('intro_s3_body1', 'Every time you answer a question, the street picture updates right away.')}
-                </p>
-                <p className="text-base sm:text-lg text-gray-900 leading-snug font-bold">
-                  {t('intro_s3_body2', 'You can see if parking spots open up, or if cars start circling.')}
-                </p>
-              </div>
-
-              <p className="text-base sm:text-lg text-gray-700 font-semibold leading-snug">
-                {t('intro_s3_summary', 'This helps you see how each parking rule affects your neighbourhood street.')}
-              </p>
-            </div>
-          )}
-
-          {/* SCREEN 4: Choose Your View */}
-          {currentStep === 4 && (
             <div className="space-y-2 sm:space-y-3 animate-in fade-in duration-150">
               <div>
                 <h3 className="text-xl sm:text-2xl font-black text-[#004B8D] leading-tight">
-                  {t('intro_s4_title', 'Choose Your Street Picture')}
+                  {t('intro_s3_title', 'See What Happens Live')}
                 </h3>
-                <p className="text-base text-gray-700 font-semibold">
-                  {t('intro_s4_subtitle', 'Pick the view you like best:')}
+                <p className="text-base text-gray-700 font-semibold mt-0.5">
+                  {t('intro_s3_body1', 'Every time you answer a question, the street picture updates right away.')}
                 </p>
               </div>
 
-              <div className="space-y-2">
+              {/* View Selection Options */}
+              <div className="space-y-2 pt-1">
                 {/* Moving Simulation */}
                 <button
                   type="button"
@@ -349,8 +293,8 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             </div>
           )}
 
-          {/* SCREEN 5: Ready to Start */}
-          {currentStep === 5 && (
+          {/* SCREEN 3: Ready to Start */}
+          {currentStep === 3 && (
             <div className="space-y-2.5 sm:space-y-3.5 animate-in fade-in duration-150">
               <div className="border-l-4 border-[#059669] pl-3">
                 <h3 className="text-xl sm:text-2xl font-black text-gray-900 leading-tight">

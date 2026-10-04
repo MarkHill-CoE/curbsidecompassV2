@@ -28,28 +28,28 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q1',
     number: 1,
     category: 'residential',
-    text: 'Who should pay the cost to run street parking in neighbourhoods?',
+    text: 'Residential parking programs cost money to operate. Who should pay for them?',
     options: [
       {
         id: 'q1_a',
-        label: 'Drivers who park on the street should pay permit fees to cover the costs.',
+        label: 'People who use parking through pay-per-use fees and parking permits.',
         x: 4,
         y: 0,
         hint: 'Drivers who park on the street pay permit fees. This covers program costs and encourages people with driveways to park off the street.',
         simEffects: {
           drivewayCapacity: 2,
-          householdCarsPerHome: 2.0 // total 12 cars, 12 fit in driveway, 0 on street
+          householdCarsPerHome: 1.8
         }
       },
       {
         id: 'q1_b',
-        label: 'All city taxpayers should pay for street parking through property taxes.',
+        label: 'All residents through property taxes',
         x: -4,
         y: 0,
         hint: 'Because street parking is free, more vehicles park on the street.',
         simEffects: {
-          drivewayCapacity: 1, // only 6 fit in driveway
-          householdCarsPerHome: 2.6 // total ~16 cars. 6 in driveway, 10 on street.
+          drivewayCapacity: 1,
+          householdCarsPerHome: 2.6
         }
       }
     ]
@@ -58,14 +58,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q2',
     number: 2,
     category: 'visitors',
-    text: 'Should the City put a limit on how many street parking permits each home can get?',
+    text: 'In neighbourhoods where street parking is in high demand, should there be a limit on parking permits per household?',
     options: [
       {
         id: 'q2_a',
-        label: 'Yes, set a limit so street spots stay open for neighbours.',
+        label: 'Yes',
         x: 0,
         y: -3,
-        hint: 'Limiting permits lowers the number of cars parked on the street and encourages using driveways or garages.',
+        hint: 'Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.',
         simEffects: {
           drivewayCapacity: 2,
           householdCarsPerHome: 1.8
@@ -73,10 +73,10 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q2_b',
-        label: 'No, let homes get as many permits as they need.',
+        label: 'No',
         x: 0,
         y: 3,
-        hint: 'Without permit limits, homes with several cars park them all on the street.',
+        hint: 'Homes can get permits for 3 or more vehicles, so more cars end up parked along the curb.',
         simEffects: {
           drivewayCapacity: 1,
           householdCarsPerHome: 2.5
@@ -87,29 +87,29 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q3',
     number: 3,
-    category: 'commercial',
-    text: 'How should work vans and delivery trucks park on your street?',
+    category: 'visitors',
+    text: 'When street parking is in high demand, should visitors and service providers (e.g., cleaners and contractors) have the same opportunity as residents to park on the block they are visiting?',
     options: [
       {
         id: 'q3_a',
-        label: 'Require work vehicles to buy special permits to park on the street.',
-        x: 2,
-        y: -2,
-        hint: 'Requiring permits and loading zones keeps delivery trucks moving and stops them from blocking traffic.',
+        label: 'Yes',
+        x: 0,
+        y: 2,
+        hint: 'Allows visitors, family, and service providers equal access to park near the home they are visiting.',
         simEffects: {
-          deliveriesPerHomePerWeek: 2,
-          enforcementLevel: 'strict'
+          visitorPassesPerHome: 1.2,
+          enforcementLevel: 'standard'
         }
       },
       {
         id: 'q3_b',
-        label: 'Let work vehicles and delivery vans park for free without special permits.',
-        x: -2,
-        y: 2,
-        hint: 'Free parking means work trucks take street spots all day and can block narrow streets.',
+        label: 'No',
+        x: 0,
+        y: -2,
+        hint: 'Prioritizes street parking for residents, reducing competition from visitor and service vehicles.',
         simEffects: {
-          deliveriesPerHomePerWeek: 4,
-          enforcementLevel: 'lenient'
+          visitorPassesPerHome: 0.3,
+          enforcementLevel: 'strict'
         }
       }
     ]
@@ -117,29 +117,29 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q4',
     number: 4,
-    category: 'visitors',
-    text: 'How should guest and visitor parking work on your street?',
+    category: 'enforcement',
+    text: 'When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking (within a few blocks)?',
     options: [
       {
         id: 'q4_a',
-        label: 'Guests must register online or use a pass so parking stays under control.',
-        x: 3,
-        y: -3,
-        hint: 'Visitor passes and check-ins keep parking spots open for actual guests.',
+        label: 'Yes',
+        x: 0,
+        y: 3,
+        hint: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
         simEffects: {
-          visitorPassesPerHome: 0.8,
-          enforcementLevel: 'strict'
+          cruisingTrafficLevel: 'high',
+          enforcementLevel: 'lenient'
         }
       },
       {
         id: 'q4_b',
-        label: 'Free parking for all guests on a first-come, first-served basis.',
-        x: -3,
-        y: 3,
-        hint: 'Without registration or passes, spots fill up quickly and commuters can park for days.',
+        label: 'No',
+        x: 0,
+        y: -3,
+        hint: 'Protects nearby residential street parking for residents and guests near major destinations.',
         simEffects: {
-          visitorPassesPerHome: 2.2,
-          enforcementLevel: 'lenient'
+          cruisingTrafficLevel: 'low',
+          enforcementLevel: 'strict'
         }
       }
     ]
@@ -147,31 +147,29 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q5',
     number: 5,
-    category: 'finance',
-    text: 'Who should pay for parking officers and parking tickets?',
+    category: 'residential',
+    text: 'When parking on the street near your home, what would you consider reasonably close?',
     options: [
       {
         id: 'q5_a',
-        label: 'Drivers who park and get tickets should cover costs through fees and fines.',
-        x: 4,
-        y: 0,
-        hint: 'User fees and tickets pay for patrols, keeping streets clear and moving.',
+        label: 'On my Block',
+        x: 0,
+        y: -2,
+        hint: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
         simEffects: {
-          curbsideFeeModel: 'permit',
-          householdCarsPerHome: 1.8,
-          drivewayCapacity: 2
+          drivewayCapacity: 2,
+          householdCarsPerHome: 1.8
         }
       },
       {
         id: 'q5_b',
-        label: 'All city taxpayers should pay for enforcement through property taxes.',
-        x: -4,
-        y: 0,
-        hint: 'Because taxes pay for officers, enforcement is relaxed and cars can sit parked for days.',
+        label: 'More possible spaces fall within the distance you consider acceptable.',
+        x: 0,
+        y: 2,
+        hint: 'Increases available parking options by extending acceptable parking distance into the wider neighbourhood.',
         simEffects: {
-          curbsideFeeModel: 'free',
-          householdCarsPerHome: 2.8,
-          drivewayCapacity: 1
+          drivewayCapacity: 1,
+          householdCarsPerHome: 2.2
         }
       }
     ]
@@ -179,91 +177,29 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q6',
     number: 6,
-    category: 'enforcement',
-    text: 'How should parking work near busy places like hospitals, colleges, or LRT stations?',
+    category: 'residential',
+    text: 'Should access to private parking affect who can get a permit? Consider all households, including those in houses, townhomes and apartments. Private parking means a driveway, garage or other off-street parking space.',
     options: [
       {
         id: 'q6_a',
-        label: 'Charge for parking with time limits so spots turn over often.',
-        x: 3,
+        label: 'Yes households with no private parking should get priority for permits',
+        x: 2,
         y: -3,
-        hint: 'Paid parking and time limits stop outside commuters from taking neighbourhood spots.',
+        hint: 'Prioritizes street parking permits for households with fewer off-street parking alternatives.',
         simEffects: {
-          enforcementLevel: 'strict',
-          cruisingTrafficLevel: 'low',
-          visitorPassesPerHome: 0.2
+          drivewayCapacity: 2,
+          enforcementLevel: 'strict'
         }
       },
       {
         id: 'q6_b',
-        label: 'Keep street parking free and open for everyone who visits.',
-        x: -3,
-        y: 3,
-        hint: 'Free parking means hospital and university commuters fill neighbourhood streets all day.',
-        simEffects: {
-          enforcementLevel: 'lenient',
-          cruisingTrafficLevel: 'high',
-          visitorPassesPerHome: 1.2
-        }
-      }
-    ]
-  },
-  {
-    id: 'q7',
-    number: 7,
-    category: 'residential',
-    text: 'How should accessible disability parking spots be protected during busy events?',
-    options: [
-      {
-        id: 'q7_a',
-        label: 'Check disability permits strictly so spots stay open for people who need them.',
-        x: 2,
-        y: -2,
-        hint: 'Strict checks make sure people with disabilities, seniors, and caregivers always have a spot.',
-        simEffects: {
-          enforcementLevel: 'strict',
-          householdCarsPerHome: 2.0
-        }
-      },
-      {
-        id: 'q7_b',
-        label: 'Rely on drivers\' courtesy to leave marked accessible spots open.',
+        label: 'No, households should have the same eligibility, whether or not they have private parking.',
         x: -2,
-        y: 2,
-        hint: 'Without active checks, drivers without permits take accessible spots during events.',
-        simEffects: {
-          enforcementLevel: 'lenient',
-          householdCarsPerHome: 2.5
-        }
-      }
-    ]
-  },
-  {
-    id: 'q8',
-    number: 8,
-    category: 'residential',
-    text: 'How should the City set street parking rules across Edmonton?',
-    options: [
-      {
-        id: 'q8_a',
-        label: 'Use the same clear, standard parking rules across all Edmonton neighbourhoods.',
-        x: 0,
-        y: -4,
-        hint: 'Consistent city-wide parking rules stop cars from dodging rules onto the next block.',
-        simEffects: {
-          drivewayCapacity: 2,
-          householdCarsPerHome: 2.0
-        }
-      },
-      {
-        id: 'q8_b',
-        label: 'Let each neighbourhood vote and pick its own parking rules block by block.',
-        x: 0,
-        y: 4,
-        hint: 'Neighbourhoods get flexibility, but cars may spill over onto nearby unregulated streets.',
+        y: 3,
+        hint: 'Ensures equal permit eligibility for all households regardless of their private parking arrangements.',
         simEffects: {
           drivewayCapacity: 1,
-          householdCarsPerHome: 2.8
+          enforcementLevel: 'standard'
         }
       }
     ]
@@ -362,13 +298,13 @@ export function calculateSimulationMetricsFromAnswers(
   // Delivery vans active curb turnover impact
   const deliveryCurbsideDemand = totalWeeklyDeliveries / 16;
 
-  // Policy shifts from survey answers (Q1 to Q8)
+  // Policy shifts from survey answers (Q1 to Q6)
   let policyDemandShift = 0;
   let feeModel: 'free' | 'permit' = 'free';
   let enforcement: 'strict' | 'standard' | 'lenient' = 'standard';
   let cruisingLevel: 'low' | 'moderate' | 'high' = 'moderate';
 
-  // Q1: Who should pay for residential parking programs?
+  // Q1: Residential Parking Permit Program Funding
   if (answers['q1'] === 'q1_a') {
     policyDemandShift -= 1.5;
     feeModel = 'permit';
@@ -377,59 +313,44 @@ export function calculateSimulationMetricsFromAnswers(
     feeModel = 'free';
   }
 
-  // Q2: Limit on-street permits per household?
+  // Q2: Residential Parking Permit Limit
   if (answers['q2'] === 'q2_a') {
-    policyDemandShift -= 1.5;
+    policyDemandShift -= 2.0;
   } else if (answers['q2'] === 'q2_b') {
-    policyDemandShift += 1.5;
+    policyDemandShift += 2.0;
   }
 
-  // Q3: Restrictions on commercial & trade vehicles?
+  // Q3: Visitor Access
   if (answers['q3'] === 'q3_a') {
-    policyDemandShift -= 1.0;
+    policyDemandShift -= 2.0;
+    enforcement = 'standard';
   } else if (answers['q3'] === 'q3_b') {
-    policyDemandShift += 1.5;
+    policyDemandShift += 2.0;
   }
 
-  // Q4: Visitor parking management?
+  // Q4: Parking Proximity to Destination
   if (answers['q4'] === 'q4_a') {
-    policyDemandShift -= 1.0;
-    enforcement = 'strict';
+    policyDemandShift -= 2.5;
+    cruisingLevel = 'high';
   } else if (answers['q4'] === 'q4_b') {
-    policyDemandShift += 1.5;
-    enforcement = 'lenient';
+    policyDemandShift += 2.5;
+    cruisingLevel = 'low';
   }
 
-  // Q5: Who pays for enforcement?
+  // Q5: Parking Proximity to Home
   if (answers['q5'] === 'q5_a') {
-    policyDemandShift -= 1.5;
-    enforcement = 'strict';
+    policyDemandShift -= 2.0;
   } else if (answers['q5'] === 'q5_b') {
     policyDemandShift += 2.0;
-    enforcement = 'lenient';
   }
 
-  // Q6: Near major traffic generators (hospitals/universities)?
+  // Q6: Residential Parking Permit Eligibility
   if (answers['q6'] === 'q6_a') {
-    policyDemandShift -= 2.0;
-    cruisingLevel = 'low';
+    policyDemandShift -= 3.5;
+    enforcement = 'strict';
   } else if (answers['q6'] === 'q6_b') {
-    policyDemandShift += 3.0;
-    cruisingLevel = 'high';
-  }
-
-  // Q7: Accessible parking zones during events?
-  if (answers['q7'] === 'q7_a') {
-    policyDemandShift -= 1.0;
-  } else if (answers['q7'] === 'q7_b') {
-    policyDemandShift += 1.5;
-  }
-
-  // Q8: City-wide standardized rules vs block-by-block opt-in?
-  if (answers['q8'] === 'q8_a') {
-    policyDemandShift -= 1.0;
-  } else if (answers['q8'] === 'q8_b') {
-    policyDemandShift += 2.0;
+    policyDemandShift += 3.5;
+    enforcement = 'lenient';
   }
 
   // Baseline calibration: The default parking occupancy to start is strictly 60% regardless of neighbourhood type
@@ -546,13 +467,13 @@ export function getQuestionTradeoffImpact(
         questionNumber: 1,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Permit fees by vehicle owners',
+        selectedOptionLabel: selectedOption?.label || 'People who use parking through pay-per-use fees and parking permits.',
         deltaStallsText: '-1.5 stalls (-10%)',
         deltaStallsValue: -1.5,
-        tradeoffRationale: 'User permit fees encourage vehicle owners to use private detached garages instead of the street.',
+        tradeoffRationale: 'Ensures program operating costs are paid directly by users rather than through property taxes',
         curbsideImpactSummary: 'Frees up shared curbside stalls for visitors and delivery couriers.',
-        benefitText: 'Frees up curb spaces for guests, family visitors, and delivery couriers. Non-drivers do not pay for parking.',
-        costText: 'Drivers who park on the street must pay monthly or yearly permit fees.'
+        benefitText: 'Costs are covered by people using the program, rather than through property taxes.',
+        costText: 'Fees add to users’ parking costs, including for people with no private parking.'
       };
     }
     if (selectedAnswerId === 'q1_b') {
@@ -560,21 +481,21 @@ export function getQuestionTradeoffImpact(
         questionNumber: 1,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Taxpayer funded',
+        selectedOptionLabel: selectedOption?.label || 'All residents through property taxes',
         deltaStallsText: '+1.5 stalls (+10%)',
         deltaStallsValue: +1.5,
-        tradeoffRationale: 'Free on-street storage encourages residents to leave extra vehicles parked curbside.',
+        tradeoffRationale: 'Reduces direct costs to users by funding the program through property taxes instead of separate fees',
         curbsideImpactSummary: 'Higher curbside occupancy and less room for short-term visitors.',
-        benefitText: 'Zero permit fees and no out-of-pocket costs for residents parking on the street.',
-        costText: 'All city taxpayers cover the bill, even if they do not own a car. Streets stay more crowded.'
+        benefitText: 'People can use the program without paying separate parking fees, reducing the direct cost of access.',
+        costText: 'Program costs are shared through property taxes, including by people who do not use the parking.'
       };
     }
     return {
       questionNumber: 1,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Choose between vehicle owner permit fees or general taxpayer funding.',
-      curbsideImpactSummary: 'Calculates the trade-off between private garage use and street crowding.',
+      tradeoffRationale: 'Decide whether users pay permit fees or costs are shared through property taxes.',
+      curbsideImpactSummary: 'Determines whether curbside parking is user-funded or tax-supported.',
       benefitText: 'Learn who pays and who benefits from street parking rules.',
       costText: 'Select an answer to see the community trade-off.'
     };
@@ -586,13 +507,13 @@ export function getQuestionTradeoffImpact(
         questionNumber: 2,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Limit permits per household',
+        selectedOptionLabel: selectedOption?.label || 'Yes',
         deltaStallsText: '-2.0 stalls (-13%)',
         deltaStallsValue: -2.0,
-        tradeoffRationale: 'Capping permits per home prevents multi-car homes from occupying multiple curb spaces.',
+        tradeoffRationale: 'Reduces competition for street parking to improve availability for other residents and visitors',
         curbsideImpactSummary: 'Leaves guaranteed open space for all households along the block.',
-        benefitText: 'Guarantees open space so every home on the block has a fair chance to park.',
-        costText: 'Homes with multiple drivers cannot park all their cars on the street.'
+        benefitText: 'Limiting permits can reduce competition for street parking, improving availability for other residents and visitors',
+        costText: 'Households with more vehicles than permits would need other parking arrangements, which may be difficult if they have limited or no private parking'
       };
     }
     if (selectedAnswerId === 'q2_b') {
@@ -600,20 +521,20 @@ export function getQuestionTradeoffImpact(
         questionNumber: 2,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'No permit limits',
+        selectedOptionLabel: selectedOption?.label || 'No',
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: +2.0,
-        tradeoffRationale: 'Unlimited permits allow multi-car homes to store multiple cars on the street.',
+        tradeoffRationale: 'Accommodates households with multiple drivers by allowing permits for all eligible vehicles',
         curbsideImpactSummary: 'Increased curbside competition and reduced stall turnover.',
-        benefitText: 'Multi-driver households can register and park all their vehicles on the street.',
-        costText: 'Street spaces fill up quickly, leaving fewer spots for neighbours and guests.'
+        benefitText: 'Households can obtain permits for all eligible vehicles, accommodating households with multiple drivers.',
+        costText: 'More vehicles may compete for the same spaces, making parking near home harder to find.'
       };
     }
     return {
       questionNumber: 2,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Decide whether to cap on-street permits per household.',
+      tradeoffRationale: 'Decide whether to cap on-street permits per household in high-demand areas.',
       curbsideImpactSummary: 'Affects how many vehicles each home can park along the curb.',
       benefitText: 'Balances street space among all neighbours.',
       costText: 'Select an answer to see the community trade-off.'
@@ -626,13 +547,13 @@ export function getQuestionTradeoffImpact(
         questionNumber: 3,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Paid commercial permits & zones',
-        deltaStallsText: '-1.5 stalls (-10%)',
-        deltaStallsValue: -1.5,
-        tradeoffRationale: 'Specialized work and loading zones keep couriers and contractors from double-parking in the lane.',
-        curbsideImpactSummary: 'Ensures delivery turnover while keeping street traffic moving smoothly.',
-        benefitText: 'Keeps traffic lanes moving and guarantees safe, quick drop-off zones for delivery drivers.',
-        costText: 'Contractors and delivery companies must pay permit fees or face short time limits.'
+        selectedOptionLabel: selectedOption?.label || 'Yes',
+        deltaStallsText: '-2.0 stalls (-13%)',
+        deltaStallsValue: -2.0,
+        tradeoffRationale: 'Allows family, friends, and service providers to park conveniently close to the homes they visit',
+        curbsideImpactSummary: 'Family, friends, and service providers share available street spaces.',
+        benefitText: 'Family, friends and people providing services can use available spaces close to the home they’re visiting.',
+        costText: 'Residents face more competition for those spaces and may need to park farther from home.'
       };
     }
     if (selectedAnswerId === 'q3_b') {
@@ -640,22 +561,22 @@ export function getQuestionTradeoffImpact(
         questionNumber: 3,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'No commercial restrictions',
+        selectedOptionLabel: selectedOption?.label || 'No',
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: +2.0,
-        tradeoffRationale: 'Contractors and delivery vans occupy curbside stalls for extended hours.',
-        curbsideImpactSummary: 'Reduces available parking for residents and visiting guests.',
-        benefitText: 'Free and convenient parking for home renovations, tradespeople, and couriers.',
-        costText: 'Large commercial trucks can block narrow residential roads and take resident stalls all day.'
+        tradeoffRationale: 'Prioritizes residents for nearby spaces by reducing competition from visitor vehicles',
+        curbsideImpactSummary: 'Street parking prioritized for local residents.',
+        benefitText: 'Residents have priority for nearby spaces, reducing competition from visitor vehicles.',
+        costText: 'Visitors and service providers may need to park farther away, making visits less convenient.'
       };
     }
     return {
       questionNumber: 3,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Choose rules for trade contractors and delivery vans.',
-      curbsideImpactSummary: 'Balances commercial delivery needs with resident parking.',
-      benefitText: 'Explore how delivery vans and work trucks share the road.',
+      tradeoffRationale: 'Decide whether visitors and service providers have equal access to park on the block.',
+      curbsideImpactSummary: 'Balances visitor and service access with resident curb priority.',
+      benefitText: 'Explore how guest and contractor parking affects neighbourhood availability.',
       costText: 'Select an answer to see the community trade-off.'
     };
   }
@@ -666,13 +587,13 @@ export function getQuestionTradeoffImpact(
         questionNumber: 4,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Digital visitor registration',
-        deltaStallsText: '-1.5 stalls (-10%)',
-        deltaStallsValue: -1.5,
-        tradeoffRationale: 'Digital registration prevents non-resident commuters from parking for days at a time.',
-        curbsideImpactSummary: 'Maintains predictable, open visitor parking stalls.',
-        benefitText: 'Keeps spots open for genuine visiting family and friends; stops commuters from hogging street stalls.',
-        costText: 'Visitors or hosts must take time to register online or display a visitor pass.'
+        selectedOptionLabel: selectedOption?.label || 'Yes',
+        deltaStallsText: '-2.5 stalls (-16%)',
+        deltaStallsValue: -2.5,
+        tradeoffRationale: 'Expands parking options for patients, students, visitors, and event attendees near major destinations',
+        curbsideImpactSummary: 'Expands parking access across nearby residential blocks.',
+        benefitText: 'Patients, visitors, students and event attendees have more parking options within a few blocks of their destination.',
+        costText: 'Residents and their guests may face more competition for spaces and need to park farther away.'
       };
     }
     if (selectedAnswerId === 'q4_b') {
@@ -680,22 +601,22 @@ export function getQuestionTradeoffImpact(
         questionNumber: 4,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'First-come, first-served',
+        selectedOptionLabel: selectedOption?.label || 'No',
         deltaStallsText: '+2.5 stalls (+16%)',
         deltaStallsValue: +2.5,
-        tradeoffRationale: 'Unmonitored visitor parking fills stalls quickly without time turnover.',
-        curbsideImpactSummary: 'High curb pressure during peak evenings and weekends.',
-        benefitText: 'Zero registration, no apps, and no visitor pass paperwork needed for guests.',
-        costText: 'Street spaces fill up quickly, and guests often have to circle looking for open parking.'
+        tradeoffRationale: 'Protects residential street parking from institutional and event venue visitor spillover',
+        curbsideImpactSummary: 'Limits commuter and venue parking spillover into residential streets.',
+        benefitText: 'Residents and their guests face less competition for nearby spaces from people visiting these destinations.',
+        costText: 'People visiting nearby destinations have fewer street parking options and may need to park farther away, or use other parking facilities'
       };
     }
     return {
       questionNumber: 4,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Choose how visitor parking should be managed.',
-      curbsideImpactSummary: 'Balances guest convenience with commuter parking overflow.',
-      benefitText: 'Decide how easy or strict visiting should be on your block.',
+      tradeoffRationale: 'Decide whether visitors to hospitals, colleges, and event venues can park on residential streets.',
+      curbsideImpactSummary: 'Controls destination visitor spillover onto nearby neighbourhood streets.',
+      benefitText: 'See how hospital and event traffic impacts nearby homes.',
       costText: 'Select an answer to see the community trade-off.'
     };
   }
@@ -706,13 +627,13 @@ export function getQuestionTradeoffImpact(
         questionNumber: 5,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'User fees & violation fines',
-        deltaStallsText: '-1.5 stalls (-10%)',
-        deltaStallsValue: -1.5,
-        tradeoffRationale: 'Active patrols funded by violators deter long-term overstays and boost turnover.',
-        curbsideImpactSummary: 'Prevents abandoned or stored cars from hogging curbside stalls.',
-        benefitText: 'Only people who park or break parking rules pay for enforcement; general city taxes stay low.',
-        costText: 'Strict patrols and higher ticket fines for residents who overstay or forget permits.'
+        selectedOptionLabel: selectedOption?.label || 'On my Block',
+        deltaStallsText: '-2.0 stalls (-13%)',
+        deltaStallsValue: -2.0,
+        tradeoffRationale: 'Limits acceptable parking distance to the immediate block to keep vehicles close to home',
+        curbsideImpactSummary: 'Focuses parking expectations on the immediate front block.',
+        benefitText: 'A short distance between your vehicle and home',
+        costText: 'Fewer spaces meet your preferences and your block may be full even when parking is available nearby.'
       };
     }
     if (selectedAnswerId === 'q5_b') {
@@ -720,22 +641,22 @@ export function getQuestionTradeoffImpact(
         questionNumber: 5,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Property taxes',
+        selectedOptionLabel: selectedOption?.label || 'More possible spaces fall within the distance you consider acceptable.',
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: +2.0,
-        tradeoffRationale: 'Tax-funded enforcement is infrequent and complaint-driven.',
-        curbsideImpactSummary: 'Cars linger parked along the curb for multiple days without turnover.',
-        benefitText: 'Fewer parking tickets issued; relaxed enforcement across neighbourhood streets.',
-        costText: 'All city taxpayers pay for enforcement officers. Abandoned or stored cars linger on the curb.'
+        tradeoffRationale: 'Expands acceptable parking distance to the wider neighbourhood to increase available parking options',
+        curbsideImpactSummary: 'Distributes parking across a wider multi-block radius.',
+        benefitText: 'More possible spaces fall within the distance you consider acceptable.',
+        costText: 'You may have a longer walk between your vehicle and home.'
       };
     }
     return {
       questionNumber: 5,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Decide whether parking violators or all property taxpayers fund enforcement.',
-      curbsideImpactSummary: 'Determines how frequently street stalls are patrolled.',
-      benefitText: 'Understand who funds city parking officers.',
+      tradeoffRationale: 'Define what walking distance is considered reasonably close when parking near home.',
+      curbsideImpactSummary: 'Balances immediate front-block convenience with overall neighbourhood parking flexibility.',
+      benefitText: 'Explore walking distance expectations for residential parking.',
       costText: 'Select an answer to see the community trade-off.'
     };
   }
@@ -746,13 +667,13 @@ export function getQuestionTradeoffImpact(
         questionNumber: 6,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Paid parking & time limits',
-        deltaStallsText: '-2.5 stalls (-16%)',
-        deltaStallsValue: -2.5,
-        tradeoffRationale: 'Time limits stop hospital and university commuters from taking residential spots.',
-        curbsideImpactSummary: 'Keeps traffic flowing and eliminates circling commuter vehicles.',
-        benefitText: 'Stops commuter overflow and keeps residential streets quiet and open for locals.',
-        costText: 'Hospital visitors, patients, and students must pay to park on nearby residential streets.'
+        selectedOptionLabel: selectedOption?.label || 'Yes households with no private parking should get priority for permits',
+        deltaStallsText: '-3.5 stalls (-22%)',
+        deltaStallsValue: -3.5,
+        tradeoffRationale: 'Prioritizes street parking permits for households with no private off-street parking options',
+        curbsideImpactSummary: 'Encourages private garage and driveway use while reserving curb spots for households without off-street stalls.',
+        benefitText: 'Prioritizes households with fewer alternatives to street parking, regardless of housing type.',
+        costText: 'Households with private parking may have less access to permits, even when the parking does not meet all their needs.'
       };
     }
     if (selectedAnswerId === 'q6_b') {
@@ -760,102 +681,22 @@ export function getQuestionTradeoffImpact(
         questionNumber: 6,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Free & unenforced',
+        selectedOptionLabel: selectedOption?.label || 'No, households should have the same eligibility, whether or not they have private parking.',
         deltaStallsText: '+3.5 stalls (+22%)',
         deltaStallsValue: +3.5,
-        tradeoffRationale: 'Commuters flood residential streets seeking free parking rather than paid lots.',
-        curbsideImpactSummary: 'Severe congestion with 4 to 5 vehicles circling looking for spots.',
-        benefitText: 'Free parking for patients, hospital visitors, and university students.',
-        costText: 'Residential streets stay jammed from morning to night with loud circling cars and exhaust.'
+        tradeoffRationale: 'Ensures equal permit eligibility for all households regardless of private parking availability',
+        curbsideImpactSummary: 'Permits distributed equally without checking private driveway or garage capacity.',
+        benefitText: 'Households have the same opportunity to obtain permits, regardless of their private parking arrangements',
+        costText: 'Households without private parking receive no additional priority and may face more competition for limited permits'
       };
     }
     return {
       questionNumber: 6,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Decide how to protect residential streets near major traffic hubs.',
-      curbsideImpactSummary: 'Controls commuter spillover and circling traffic.',
-      benefitText: 'See how hospital and university traffic impacts nearby homes.',
-      costText: 'Select an answer to see the community trade-off.'
-    };
-  }
-
-  if (question.id === 'q7') {
-    if (selectedAnswerId === 'q7_a') {
-      return {
-        questionNumber: 7,
-        questionTitle: question.text,
-        hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Strict eligibility & enforcement',
-        deltaStallsText: '-1.0 stall (-6%)',
-        deltaStallsValue: -1.0,
-        tradeoffRationale: 'Accessible curb stalls remain protected for residents and guests with mobility permits.',
-        curbsideImpactSummary: 'Ensures equitable access and maintains driveway sightlines.',
-        benefitText: 'Guarantees that people with disabilities always have safe, open parking near homes and event venues.',
-        costText: 'Drivers must display valid government disability placards or receive heavy fines.'
-      };
-    }
-    if (selectedAnswerId === 'q7_b') {
-      return {
-        questionNumber: 7,
-        questionTitle: question.text,
-        hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'No event enforcement',
-        deltaStallsText: '+1.5 stalls (+10%)',
-        deltaStallsValue: +1.5,
-        tradeoffRationale: 'Event attendees encroach on accessible stalls and block driveway sightlines.',
-        curbsideImpactSummary: 'Restricts mobility access and increases safety hazards.',
-        benefitText: 'Less aggressive ticketing and fewer officers on patrol during major community events.',
-        costText: 'Accessible spots are taken by non-disabled eventgoers, forcing disabled residents to park blocks away.'
-      };
-    }
-    return {
-      questionNumber: 7,
-      questionTitle: question.text,
-      hasAnswer: false,
-      tradeoffRationale: 'Choose enforcement policy for accessible curbside stalls during events.',
-      curbsideImpactSummary: 'Protects mobility zones during peak neighbourhood events.',
-      benefitText: 'Protect accessible parking for people with mobility needs.',
-      costText: 'Select an answer to see the community trade-off.'
-    };
-  }
-
-  if (question.id === 'q8') {
-    if (selectedAnswerId === 'q8_a') {
-      return {
-        questionNumber: 8,
-        questionTitle: question.text,
-        hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'City-wide standardized rules',
-        deltaStallsText: '-1.0 stall (-6%)',
-        deltaStallsValue: -1.0,
-        tradeoffRationale: 'Consistent city-wide parking rules prevent drivers from dodging restrictions onto adjacent blocks.',
-        curbsideImpactSummary: 'Prevents parking spillover onto unregulated neighbouring streets.',
-        benefitText: 'Clear, consistent rules across Edmonton prevent parking problems from spilling onto the next street.',
-        costText: 'Neighbourhoods have less freedom to create unique local rules.'
-      };
-    }
-    if (selectedAnswerId === 'q8_b') {
-      return {
-        questionNumber: 8,
-        questionTitle: question.text,
-        hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Block-by-block opt-in',
-        deltaStallsText: '+2.0 stalls (+13%)',
-        deltaStallsValue: +2.0,
-        tradeoffRationale: 'Unregulated blocks absorb overflow from nearby restricted blocks.',
-        curbsideImpactSummary: 'Increases parking spillover pressure on unregulated blocks.',
-        benefitText: 'Each neighbourhood or block can customize rules to fit their specific street needs.',
-        costText: 'Unregulated blocks get crowded with cars dodging restrictions from nearby streets.'
-      };
-    }
-    return {
-      questionNumber: 8,
-      questionTitle: question.text,
-      hasAnswer: false,
-      tradeoffRationale: 'Choose between city-wide standardized rules and block-by-block opt-in.',
-      curbsideImpactSummary: 'Determines whether parking restrictions push cars to neighbouring streets.',
-      benefitText: 'Compare city-wide consistency with local block choice.',
+      tradeoffRationale: 'Decide whether access to private driveways or garages should affect permit eligibility.',
+      curbsideImpactSummary: 'Balances priority for homes with no private parking against equal eligibility for all.',
+      benefitText: 'Examine how off-street garages and driveways impact on-street permit allocation.',
       costText: 'Select an answer to see the community trade-off.'
     };
   }

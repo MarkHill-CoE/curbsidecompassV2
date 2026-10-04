@@ -19,7 +19,9 @@ import {
   Check,
   RotateCcw,
   Sparkles,
-  Info
+  Info,
+  UploadCloud,
+  FileText
 } from 'lucide-react';
 
 import { getDirectGoogleSheetWebUrl, isEditableGoogleSheetUrl } from '../utils/textSync';
@@ -27,7 +29,7 @@ import { getDirectGoogleSheetWebUrl, isEditableGoogleSheetUrl } from '../utils/t
 interface GoogleSheetSyncModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialTab?: 'inventory' | 'url' | 'paste' | 'guide';
+  initialTab?: 'csv' | 'inventory' | 'url' | 'paste' | 'guide';
 }
 
 const CATEGORY_FILTERS = [
@@ -62,21 +64,27 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
 
   const [inputUrl, setInputUrl] = useState(sheetUrl);
   const [pastedCsv, setPastedCsv] = useState('');
-  const [activeTab, setActiveTab] = useState<'inventory' | 'url' | 'paste' | 'guide'>('inventory');
+  const [activeTab, setActiveTab] = useState<'csv' | 'inventory' | 'url' | 'paste' | 'guide'>('inventory');
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Check if current connected URL is an active editable sheet (vs static published CSV feed)
   const isDirectEditable = useMemo(() => {
     return isEditableGoogleSheetUrl(inputUrl || sheetUrl);
   }, [inputUrl, sheetUrl]);
 
-  // Sync initial tab and URL on open
+  // Only sync initial tab when the modal transitions from closed to open,
+  // so Browse & Search Copy and active tabs remain open while viewing/editing.
+  const prevIsOpenRef = React.useRef(false);
   React.useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !prevIsOpenRef.current) {
       if (initialTab) {
         setActiveTab(initialTab);
       }
       setInputUrl(sheetUrl);
     }
+    prevIsOpenRef.current = isOpen;
   }, [isOpen, initialTab, sheetUrl]);
 
   // Direct clickable link to open Google Sheet in browser
@@ -96,13 +104,53 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
   });
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
+const QUESTION_FIELD_ORDER_MAP: Record<string, number> = {
+  'Progress Step Header': 1,
+  'Policy Category Badge': 2,
+  'Question Card': 3,
+  'Option A Choice': 4,
+  'Option B Choice': 5,
+  'Simulation Hint A': 6,
+  'Simulation Hint B': 7
+};
+
+function getQuestionFieldOrder(item: TextInventoryItem): number {
+  const k = item.key;
+  if (k.endsWith('_progress_title')) return 1;
+  if (k.endsWith('_category')) return 2;
+  if (k.endsWith('_question')) return 3;
+  if (k.endsWith('_option_a')) return 4;
+  if (k.endsWith('_option_b')) return 5;
+  if (k.endsWith('_hint_a')) return 6;
+  if (k.endsWith('_hint_b')) return 7;
+
+  if (item.container === 'Progress Step Header') return 1;
+  if (item.container === 'Policy Category Badge') return 2;
+  if (item.container === 'Option A Choice') return 4;
+  if (item.container === 'Option B Choice') return 5;
+  if (item.container === 'Simulation Hint A') return 6;
+  if (item.container === 'Simulation Hint B') return 7;
+  if (item.container === 'Question Card' && !k.includes('error') && !k.includes('opt_out')) return 3;
+
+  if (k.includes('opt_out')) return 8;
+  if (k.includes('helper')) return 9;
+  if (k.includes('placeholder')) return 10;
+  if (k.includes('error')) return 11;
+  return 12;
+}
+
+function getQuestionNumber(key: string): number {
+  const match = key.match(/^q(\d+)_/);
+  return match ? parseInt(match[1], 10) : 999;
+}
+
   // Filter inventory items based on search query and category
   const filteredItems = useMemo(() => {
-    return TEXT_INVENTORY.filter((item) => {
+    const list = TEXT_INVENTORY.filter((item) => {
       // Category filter
       if (selectedCategory !== 'All') {
         if (selectedCategory === 'Questions (Q1-Q9)') {
-          if (!/^q[0-9]_/.test(item.key)) return false;
+          if (!/^q[1-9]_/.test(item.key)) return false;
         } else if (selectedCategory === 'Results & Personas') {
           if (!item.key.startsWith('persona_') && !item.key.startsWith('results_') && !item.key.startsWith('share_')) return false;
         } else if (selectedCategory === 'Neighbourhood Simulation') {
@@ -134,6 +182,33 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
         activeText.includes(q)
       );
     });
+
+    // When viewing Questions (Q1-Q9), enforce strict field ordering per question:
+    // 1. Progress Step Header, 2. Policy Category Badge, 3. Question Card, 4. Option A Choice, 5. Option B Choice, 6. Simulation Hint A, 7. Simulation Hint B
+    if (selectedCategory === 'Questions (Q1-Q9)' || (list.length > 0 && list.some(i => /^q[1-9]_/.test(i.key)))) {
+      return [...list].sort((a, b) => {
+        const isQA = /^q[1-9]_/.test(a.key);
+        const isQB = /^q[1-9]_/.test(b.key);
+        if (isQA && isQB) {
+          const qA = getQuestionNumber(a.key);
+          const qB = getQuestionNumber(b.key);
+          if (qA !== qB) {
+            return qA - qB;
+          }
+          const orderA = getQuestionFieldOrder(a);
+          const orderB = getQuestionFieldOrder(b);
+          if (orderA !== orderB) {
+            return orderA - orderB;
+          }
+          return a.key.localeCompare(b.key);
+        }
+        if (isQA) return -1;
+        if (isQB) return 1;
+        return a.key.localeCompare(b.key);
+      });
+    }
+
+    return list;
   }, [searchQuery, selectedCategory, customTexts]);
 
   // Copy single text key to clipboard
@@ -246,6 +321,39 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
     }
   };
 
+  const handleFileProcess = (file: File) => {
+    if (!file) return;
+    setUploadedFileName(file.name);
+    setFeedbackNotice(null);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result as string;
+      if (content) {
+        const ok = applyDirectCsv(content);
+        if (ok) {
+          setFeedbackNotice(`Successfully updated questions and copy from ${file.name}!`);
+        }
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileProcess(file);
+    }
+  };
+
+  const handleFileDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileProcess(file);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -255,10 +363,14 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
       aria-labelledby="sync-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/75 backdrop-blur-xs animate-fadeIn"
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        // Modal remains open until the user explicitly clicks the Close button
+        e.stopPropagation();
       }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden text-gray-800">
+      <div 
+        className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden text-gray-800"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="bg-[#004B8D] text-white px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -268,29 +380,43 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
             <div>
               <div className="flex items-center gap-2">
                 <h2 id="sync-modal-title" className="text-base sm:text-lg font-black leading-tight">
-                  {t('sync_modal_title', 'App Text Inventory & Google Sheets Sync')}
+                  Curbside Compass Content Manager
                 </h2>
                 <span className="hidden sm:inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFC72C] text-[#002B49] uppercase tracking-wide">
-                  Communications Tool
+                  Live Content &amp; Copy Sync
                 </span>
               </div>
               <p className="text-xs text-white/80 font-medium mt-0.5">
-                {t('sync_modal_subtitle', 'Browse 562 app texts, edit copy inline, or live sync with Google Sheets')}
+                Browse 562 app texts, edit copy inline, or live sync with spreadsheets
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label={t('sync_modal_close_aria', 'Close sync modal')}
-            className="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+            aria-label="Close Curbside Compass Content Manager"
+            className="text-white/90 hover:text-white px-2.5 py-1.5 rounded-lg hover:bg-white/15 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold border border-white/20 shadow-xs"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
+            <span>Close</span>
           </button>
         </div>
 
         {/* Tab Navigation */}
         <div className="flex border-b border-gray-200 bg-gray-50 px-3 sm:px-6 overflow-x-auto">
+          <button
+            type="button"
+            onClick={() => setActiveTab('csv')}
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-bold border-b-2 transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
+              activeTab === 'csv'
+                ? 'border-[#004B8D] text-[#004B8D] bg-white'
+                : 'border-transparent text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            <FileSpreadsheet className="w-4 h-4 text-[#004B8D]" />
+            <span>Questions CSV (Download / Upload)</span>
+          </button>
+
           <button
             type="button"
             onClick={() => setActiveTab('inventory')}
@@ -301,7 +427,7 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
             }`}
           >
             <Search className="w-4 h-4" />
-            <span>Browse & Search App Copy</span>
+            <span>Browse &amp; Search Copy</span>
             <span className="ml-1 text-[11px] px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-800 font-mono">
               562
             </span>
@@ -442,6 +568,145 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
             <div className="p-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-semibold flex items-center gap-2 animate-fadeIn">
               <CheckCircle className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <span>{feedbackNotice}</span>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* TAB 0: QUESTIONS CSV (DOWNLOAD, REVISE & UPLOAD)                          */}
+          {/* ========================================================================= */}
+          {activeTab === 'csv' && (
+            <div className="space-y-4">
+              {/* Introduction Card */}
+              <div className="bg-gradient-to-r from-blue-50 to-slate-50 border border-blue-200/80 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#004B8D] text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <FileSpreadsheet className="w-5 h-5 text-[#FFC72C]" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-[#002B49]">
+                      Questions CSV Workflow (Download &rarr; Revise &rarr; Re-upload)
+                    </h3>
+                    <p className="text-xs text-gray-600 mt-1 leading-relaxed">
+                      Download the complete survey questions spreadsheet, modify question prompts, answer choices, or hints in Excel or Google Sheets, and drag &amp; drop the revised CSV here to instantly update the live application.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2-Step Action Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                {/* Step 1: Download Box */}
+                <div className="bg-white border-2 border-slate-200 rounded-xl p-4 flex flex-col justify-between shadow-2xs hover:border-[#004B8D]/40 transition-colors">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-[#004B8D] text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                        1
+                      </span>
+                      <h4 className="font-bold text-xs sm:text-sm text-gray-900">
+                        Download Questions CSV
+                      </h4>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Contains all 9 questions (Q0 through Q8), Option A and B statements, hints, curbside stall impact numbers, gains/benefits, pains/costs, and municipal policy rationales.
+                    </p>
+                  </div>
+
+                  <div className="pt-4 space-y-2">
+                    <a
+                      href="/curbside_compass_all_questions_text.csv"
+                      download="curbside_compass_all_questions_text.csv"
+                      className="w-full py-2.5 px-3 bg-[#004B8D] hover:bg-[#00386a] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Download className="w-4 h-4 text-[#FFC72C]" />
+                      <span>Download Questions Dataset (.csv)</span>
+                    </a>
+
+                    <a
+                      href="/curbside_compass_text_inventory.csv"
+                      download="curbside_compass_text_inventory.csv"
+                      className="w-full py-1.5 px-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-gray-500" />
+                      <span>Or download full app copy inventory (562 items)</span>
+                    </a>
+                  </div>
+                </div>
+
+                {/* Step 2: Upload Box */}
+                <div className="bg-white border-2 border-slate-200 rounded-xl p-4 flex flex-col justify-between shadow-2xs">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                        2
+                      </span>
+                      <h4 className="font-bold text-xs sm:text-sm text-gray-900">
+                        Upload Revised CSV
+                      </h4>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      Select or drop your revised spreadsheet. The survey and simulation will update live immediately.
+                    </p>
+                  </div>
+
+                  <div className="pt-3">
+                    <div
+                      onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                      onDragLeave={() => setIsDragging(false)}
+                      onDrop={handleFileDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={`border-2 border-dashed rounded-xl p-4 sm:p-5 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                        isDragging
+                          ? 'border-emerald-500 bg-emerald-50/70 scale-[1.01]'
+                          : 'border-slate-300 hover:border-emerald-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".csv,text/csv,text/plain"
+                        onChange={handleFileInputChange}
+                        className="hidden"
+                      />
+                      <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shadow-inner">
+                        <UploadCloud className="w-5 h-5 text-emerald-700" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-xs text-emerald-800 hover:underline block">
+                          Click to browse or drop CSV file here
+                        </span>
+                        <span className="text-[10px] text-gray-500">
+                          Supports .csv files from Excel, Google Sheets, or Numbers
+                        </span>
+                      </div>
+                    </div>
+
+                    {uploadedFileName && (
+                      <div className="mt-2 text-center text-xs text-gray-600 font-medium">
+                        Last uploaded: <span className="font-bold text-gray-800">{uploadedFileName}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Status and Active Changes Card */}
+              {isCustomActive && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between gap-3 text-xs">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span className="text-emerald-950 truncate">
+                      <strong>Custom copy active:</strong> {itemCount} items currently overriding City defaults.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={resetToDefaults}
+                    className="px-2.5 py-1 text-xs font-semibold text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors cursor-pointer shrink-0"
+                  >
+                    Reset to Defaults
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -993,17 +1258,20 @@ export const GoogleSheetSyncModal: React.FC<GoogleSheetSyncModalProps> = ({ isOp
         {/* Modal Footer */}
         <div className="bg-gray-50 border-t border-gray-200 px-4 py-3 sm:px-6 flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs text-gray-600">
-            <span className="font-medium">Curbside Compass Content Manager</span>
+            <span className="font-bold text-gray-800">Curbside Compass Content Manager</span>
             <span>•</span>
-            <span className="text-[11px] font-mono">562 Keys Total</span>
+            <span className="text-[11px] font-mono text-gray-500">562 Keys Total</span>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-1.5 bg-[#004B8D] hover:bg-[#00386a] text-white font-bold rounded-lg transition-colors text-xs sm:text-sm cursor-pointer shadow-xs"
+            aria-label="Close Curbside Compass Content Manager"
+            className="px-5 py-2 bg-[#004B8D] hover:bg-[#00386a] text-white font-bold rounded-lg transition-colors text-xs sm:text-sm cursor-pointer shadow-xs flex items-center gap-1.5"
+            title="Close Curbside Compass Content Manager"
           >
-            {t('sync_modal_close_btn', 'Done & Return to App')}
+            <X className="w-4 h-4" />
+            <span>Close</span>
           </button>
         </div>
       </div>

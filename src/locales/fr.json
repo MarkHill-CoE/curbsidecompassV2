@@ -563,5 +563,9 @@
   "watch_title": "Observez la rue!",
   "rotate_screen_title": "Veuillez tourner votre appareil à la verticale (portrait)",
   "rotate_screen_desc": "La Boussole du stationnement est conçue pour le mode portrait vertical sur mobile afin d'explorer la simulation de quartier et répondre aux questions clairement.",
-  "rotate_screen_continue_anyway": "Continuer en vue horizontale malgré tout"
+  "rotate_screen_continue_anyway": "Continuer en vue horizontale malgré tout",
+  "compat_canvas_switched_title": "Mode accessible activé",
+  "compat_canvas_switched_desc": "Votre navigateur ne prend pas en charge les graphismes 2.5D. La Boussole du stationnement a automatiquement activé le sommaire accessible de la rue.",
+  "compat_storage_private_title": "Session privée active",
+  "compat_storage_private_desc": "Le stockage du navigateur est désactivé. Vos réponses seront conservées pendant cette session, mais ne seront pas sauvegardées si vous fermez cet onglet."
 }
