@@ -1,4 +1,5 @@
 {
+  "results_stage_tag": "Resident Profile",
   "OCCUPIED": "OCCUPIED",
   "VACANT": "VACANT",
   "compass_badge_your_result": "Your Result",
@@ -83,6 +84,8 @@
   "header_logo_alt": "SafeMobility Compass",
   "header_mode_live": "Live Model",
   "header_mode_simplified": "Simplified Mode",
+  "header_switch_to_live": "Switch to Live Model",
+  "header_switch_to_simplified": "Switch to Simplified Mode",
   "header_reset_btn": "Reset",
   "header_reset_title": "Reset Survey and Simulation",
   "header_retake_btn": "Retake",

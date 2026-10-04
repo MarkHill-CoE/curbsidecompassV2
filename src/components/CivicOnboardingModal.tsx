@@ -170,10 +170,6 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
               );
             })}
           </div>
-
-          <span className="text-sm sm:text-base font-bold text-gray-700 hidden md:inline">
-            {t('intro_screen_counter_label', 'Screen')} {currentStep} {t('intro_screen_counter_of', 'of')} {totalSteps}
-          </span>
         </div>
 
         {/* Body Content Area: Sized strictly above the fold with NO vertical scrolling */}

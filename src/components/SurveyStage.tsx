@@ -17,7 +17,6 @@ import { useAppText } from '../context/TextContentContext';
 import { QuestionTradeoffOutcome } from '../data/surveyData';
 import {
   getStreetLayoutInfo,
-  getTypologyFromPostalCode,
   detectLayoutAndNeighbourhood,
   searchNeighbourhoods,
   findNeighbourhood,

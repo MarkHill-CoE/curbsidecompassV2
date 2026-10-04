@@ -29,11 +29,8 @@ import {
   HelpCircle,
   ZapOff,
   Eye,
-  Sparkles,
   ChevronDown,
   ChevronUp,
-  ChevronLeft,
-  ChevronRight,
   ExternalLink,
   Download
 } from 'lucide-react';
@@ -484,23 +481,23 @@ export default function App() {
               triggerFeedback('button');
               handleToggleSimplifiedMode();
             }}
-            title={isSimplifiedMode ? 'Switch to Live Animated Simulation' : 'Switch to Simplified Static Summary (Low Motion)'}
-            aria-label={isSimplifiedMode ? 'Switch to Live Simulation' : 'Switch to Simplified View'}
+            title={isSimplifiedMode ? t('header_switch_to_live', 'Switch to Live Model') : t('header_switch_to_simplified', 'Switch to Simplified Mode')}
+            aria-label={isSimplifiedMode ? 'Switch to Live Model' : 'Switch to Simplified Mode'}
             className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded transition-all min-h-[44px] min-w-[44px] cursor-pointer border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] ${
               isSimplifiedMode
-                ? 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border-amber-400/40'
-                : 'bg-white/10 hover:bg-white/20 text-gray-200 border-white/20'
+                ? 'bg-white/10 hover:bg-white/20 text-gray-200 border-white/20'
+                : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-200 border-amber-400/40'
             }`}
           >
             {isSimplifiedMode ? (
               <>
-                <ZapOff className="w-4 h-4 text-amber-300" />
-                <span className="hidden sm:inline font-bold">{t('header_mode_simplified', 'Simplified')}</span>
+                <Eye className="w-4 h-4 text-[#FFC72C]" />
+                <span className="hidden sm:inline font-bold">{t('header_mode_live', 'Live Model')}</span>
               </>
             ) : (
               <>
-                <Eye className="w-4 h-4 text-[#FFC72C]" />
-                <span className="hidden sm:inline font-bold">{t('header_mode_live', 'Live Model')}</span>
+                <ZapOff className="w-4 h-4 text-amber-300" />
+                <span className="hidden sm:inline font-bold">{t('header_mode_simplified', 'Simplified Mode')}</span>
               </>
             )}
           </button>

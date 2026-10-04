@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PersonaResult, SimulationConfig } from '../types';
-import { Award, MapPin, Target, CheckCircle, ChevronRight, Compass, Share2, AlertTriangle, Printer, RotateCcw, Check } from 'lucide-react';
+import { Award, Target, CheckCircle, ChevronRight, Compass, Share2, AlertTriangle, Printer, RotateCcw, Check } from 'lucide-react';
 import { ThankYouView } from './ThankYouView';
 import { PolicyCompassGraph } from './PolicyCompassGraph';
 import { triggerFeedback } from '../utils/feedback';
@@ -141,7 +141,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
         {/* Header with Share & Print Controls */}
         <div className="flex justify-between items-center mb-1 sm:mb-2 flex-shrink-0">
           <span className="text-[10pt] font-extrabold uppercase tracking-wider text-gray-500">
-            {t('results_stage_tag', 'Your Policy Profile')}
+            {t('results_stage_tag', 'Resident Profile')}
           </span>
           <div className="flex items-center gap-2">
             <button

@@ -5,11 +5,7 @@
 // honoring browser autoplay policies on user interaction.
 
 const CANDIDATE_AMBIENT_PATHS = [
-  '/city_traffic_ambient.mp3',
-  '/audio/city_traffic_ambient.mp3',
-  '/traffic_ambient.mp3',
-  '/city-traffic.mp3',
-  '/audio/city-traffic.mp3'
+  '/city_traffic_ambient.mp3'
 ];
 
 class AmbientAudioManager {

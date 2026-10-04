@@ -10,7 +10,6 @@ import {
   Check,
   ArrowLeft,
   RotateCcw,
-  ExternalLink,
   User,
   Users,
   Download,

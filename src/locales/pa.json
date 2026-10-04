@@ -1,4 +1,5 @@
 {
+  "results_stage_tag": "ਨਿਵਾਸੀ ਪ੍ਰੋਫਾਈਲ",
   "OCCUPIED": "ਭਰਿਆ ਹੋਇਆ",
   "VACANT": "ਖ਼ਾਲੀ",
   "compass_badge_your_result": "ਤੁਹਾਡਾ ਨਤੀਜਾ",
@@ -83,6 +84,8 @@
   "header_logo_alt": "SafeMobility Compass",
   "header_mode_live": "ਲਾਈਵ ਮਾਡਲ",
   "header_mode_simplified": "ਸਰਲ ਮੋਡ",
+  "header_switch_to_live": "ਲਾਈਵ ਮਾਡਲ 'ਤੇ ਜਾਓ",
+  "header_switch_to_simplified": "ਸਰਲ ਮੋਡ 'ਤੇ ਜਾਓ",
   "header_reset_btn": "ਰੀਸੈੱਟ ਕਰੋ",
   "header_reset_title": "ਸਰਵੇਖਣ ਅਤੇ ਸਿਮੂਲੇਸ਼ਨ ਮੁੜ-ਸੈੱਟ ਕਰੋ",
   "header_retake_btn": "ਮੁੜ ਲਵੋ",
