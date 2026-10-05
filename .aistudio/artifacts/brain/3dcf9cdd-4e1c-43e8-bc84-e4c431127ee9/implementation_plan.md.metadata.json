@@ -1,6 +1,6 @@
 {
-  "summary":  "Revised implementation plan for a direct CSV workflow: Download questions CSV, edit locally in Excel or Google Sheets, and re-upload directly into the app to instantly update all survey questions.",
-  "updatedAt":  "2026-10-03T20:53:35.640015758Z",
+  "summary":  "Revised implementation plan for reversible AES-256-GCM encryption with an administrative secret key to allow unlocking full postal codes while maintaining visible neighbourhood names and 3-character FSAs.",
+  "updatedAt":  "2026-10-05T18:04:04.874265710Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

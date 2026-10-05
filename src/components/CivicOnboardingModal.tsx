@@ -132,8 +132,8 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
               <Compass className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
             <div className="min-w-0">
-              <h2 id="civic-modal-title" className="text-base sm:text-xl font-black tracking-tight leading-tight truncate">
-                {t('intro_header_title', 'Curbside Compass')}
+              <h2 id="civic-modal-title" className="text-base sm:text-xl font-black tracking-tight leading-tight truncate text-[#FFC72C]">
+                {t('intro_header_title', 'How it Works')}
               </h2>
               <p className="text-xs sm:text-sm text-blue-100 font-semibold leading-tight hidden xs:block">
                 {t('intro_header_subtitle', 'City of Edmonton Guide')}
@@ -141,19 +141,8 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             </div>
           </div>
 
-          {/* Large, Prominent Skip Intro Button */}
+          {/* Header Close Button */}
           <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={handleFinish}
-              className="flex items-center gap-2 px-3.5 sm:px-5 py-2 bg-[#FFC72C] hover:bg-[#ffe066] active:bg-[#f5bc20] text-[#004B8D] font-black text-sm sm:text-base rounded-xl shadow-md transition-all cursor-pointer min-h-[44px] border-2 border-[#003566]/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-              title={t('intro_btn_skip_title', 'Skip this guide and start the survey right now')}
-              aria-label={t('intro_btn_skip_aria', 'Skip introduction and start survey')}
-            >
-              <FastForward className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
-              <span className="font-black">{t('intro_btn_skip', 'Skip Intro')}</span>
-            </button>
-
             <button
               type="button"
               onClick={handleFinish}
@@ -166,32 +155,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
           </div>
         </div>
 
-        {/* Section Quick Jump Bar */}
-        <div className="bg-gray-100 px-2 sm:px-4 py-1.5 border-b border-gray-300 flex items-center justify-between overflow-x-auto shrink-0 scrollbar-none gap-1 sm:gap-2">
-          {[
-            { id: 'civic-step-intro', step: 1, label: t('intro_step_1_label', 'Introduction') },
-            { id: 'civic-step-1', step: 2, label: `${t('intro_step_label', 'Step')} 1: ${t('intro_s2_private_title', 'Street Types')}` },
-            { id: 'civic-step-2', step: 3, label: `${t('intro_step_label', 'Step')} 2: ${t('intro_s4_title', 'Choose View')}` },
-            { id: 'civic-step-3', step: 4, label: `${t('intro_step_label', 'Step')} 3: ${t('intro_s5_title', 'Ready')}` },
-          ].map((item) => (
-            <button
-              key={item.step}
-              type="button"
-              onClick={() => scrollToSection(item.id, item.step)}
-              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-xs sm:text-sm font-black whitespace-nowrap transition-all cursor-pointer min-h-[36px] flex items-center gap-1.5 ${
-                activeSection === item.step
-                  ? 'bg-[#004B8D] text-white shadow-xs'
-                  : 'bg-white text-gray-700 hover:bg-gray-200 border border-gray-300'
-              }`}
-              aria-label={`Jump to ${item.label}`}
-            >
-              <span>{item.label}</span>
-              {activeSection > item.step && (
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 inline shrink-0" />
-              )}
-            </button>
-          ))}
-        </div>
+
 
         {/* Combined One Long Scroll Body Area */}
         <div 
@@ -431,13 +395,16 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
 
         {/* Modal Bottom Footer Navigation Bar: Sticky & Always Visible */}
         <div className="bg-gray-100 px-3 sm:px-5 py-2.5 sm:py-3 border-t-2 border-gray-300 flex items-center justify-between shrink-0 gap-2">
-          {/* Close / Skip button */}
+          {/* Prominent Yellow Skip Intro button */}
           <button
             type="button"
             onClick={handleFinish}
-            className="px-4 py-2 text-sm sm:text-base font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-xl transition-all cursor-pointer min-h-[46px]"
+            className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-[#FFC72C] hover:bg-[#ffe066] active:bg-[#f5bc20] text-[#004B8D] font-black text-sm sm:text-base rounded-xl shadow-md transition-all cursor-pointer min-h-[46px] border-2 border-[#003566]/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
+            title={t('intro_btn_skip_title', 'Skip this guide and start the survey right now')}
+            aria-label={t('intro_btn_skip_aria', 'Skip introduction and start survey')}
           >
-            {t('intro_btn_skip', 'Skip Intro')}
+            <FastForward className="w-4 h-4 sm:w-5 sm:h-5 stroke-[2.5]" />
+            <span className="font-black">{t('intro_btn_skip', 'Skip Intro')}</span>
           </button>
 
           {/* Sticky Start Survey Button */}

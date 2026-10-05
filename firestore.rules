@@ -15,7 +15,8 @@ service cloud.firestore {
       return data.keys().hasOnly([
         'personaId', 'personaTitle', 'quadrant', 'totalX', 'totalY',
         'answers', 'simConfig', 'rating', 'feedback', 'postalCode',
-        'fsa', 'isPostalScrubbed', 'scrubReason', 'userAgent',
+        'encryptedPostalCode', 'fsa', 'neighbourhood', 'isEncrypted',
+        'isPostalScrubbed', 'scrubReason', 'userAgent',
         'timestamp', 'authUid', 'updatedAt'
       ])
       && data.personaId is string
@@ -29,8 +30,11 @@ service cloud.firestore {
       && (data.simConfig is map)
       && (data.feedback == null || (data.feedback is string && data.feedback.size() <= 600))
       && (data.rating == null || ((data.rating is int || data.rating is number) && data.rating >= 1 && data.rating <= 5))
-      && (data.postalCode == null || (data.postalCode is string && data.postalCode.size() <= 20))
-      && (data.fsa == null || (data.fsa is string && data.fsa.size() <= 10));
+      && (data.encryptedPostalCode == null || (data.encryptedPostalCode is string && data.encryptedPostalCode.size() <= 256))
+      && (data.fsa == null || (data.fsa is string && data.fsa.size() <= 10))
+      && (data.neighbourhood == null || (data.neighbourhood is string && data.neighbourhood.size() <= 80))
+      && (data.isEncrypted == null || data.isEncrypted is bool)
+      && (data.postalCode == null || (data.postalCode is string && data.postalCode.size() <= 20));
     }
 
     // Curbside Compass public survey responses

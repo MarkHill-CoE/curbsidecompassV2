@@ -9,6 +9,7 @@ import {
 import { getDb, getFirebaseAuth, ensureAnonymousAuth } from '../lib/firebase';
 import { PersonaResult, SimulationConfig } from '../types';
 import { sanitizeOpenTextInput } from '../utils/securitySanitizer';
+import { encryptPostalCode } from '../utils/postalEncryption';
 import {
   parseAndNormalizePostalCode,
   applyKAnonymityPostalScrub,
@@ -75,7 +76,10 @@ export interface SurveySubmissionData {
   rating?: number | null;
   feedback?: string;
   postalCode?: string;
+  encryptedPostalCode?: string;
   fsa?: string;
+  neighbourhood?: string;
+  isEncrypted?: boolean;
   isPostalScrubbed?: boolean;
   scrubReason?: string;
   userAgent?: string;
@@ -109,7 +113,7 @@ export function getSessionId(): string {
 }
 
 /**
- * Saves or updates a completed survey & feedback response to Firestore with strict input bounds checking.
+ * Saves or updates a completed survey & feedback response to Firestore with strict input bounds checking and AES-256 postal encryption.
  */
 export async function saveSurveyResponse(data: {
   persona: PersonaResult;
@@ -154,11 +158,23 @@ export async function saveSurveyResponse(data: {
       }
     }
 
-    const rawPostal = sanitizedAnswers['q_demographics_fsa'] || sanitizedAnswers['q_demographics_fsa_input'] || sanitizedAnswers['q0'] || sanitizedAnswers['q9'] || '';
-    const parsedPostal = parseAndNormalizePostalCode(rawPostal);
-    const finalPostal = parsedPostal.isOptOut ? 'OPT_OUT' : (parsedPostal.normalized || rawPostal.slice(0, 8));
+    const rawLocation = sanitizedAnswers['q7'] || sanitizedAnswers['q_demographics_fsa'] || sanitizedAnswers['q0'] || sanitizedAnswers['q9'] || '';
+    const parsedPostal = parseAndNormalizePostalCode(rawLocation);
     const finalFsa = parsedPostal.isOptOut ? 'OPT_OUT' : (parsedPostal.fsa || '');
     const isAlreadyFsaOnly = !parsedPostal.isOptOut && parsedPostal.normalized.length <= 3;
+    
+    // Resolve human-readable neighbourhood
+    const neighbourhoodName = data.simConfig?.neighbourhoodName || sanitizedAnswers['q7_neighbourhood'] || (parsedPostal.isOptOut ? 'Anonymous' : (parsedPostal.normalized.length <= 3 && rawLocation.length > 3 ? rawLocation : undefined));
+
+    // Perform AES-256-GCM encryption on the full postal code
+    let encryptedPostalCode = '';
+    if (!parsedPostal.isOptOut && parsedPostal.normalized && parsedPostal.normalized.length >= 3) {
+      try {
+        encryptedPostalCode = await encryptPostalCode(parsedPostal.normalized);
+      } catch (encErr) {
+        console.warn('[Postal Encryption] Encryption notice:', encErr);
+      }
+    }
 
     // Try ensuring anonymous auth if permitted
     const authUid = await ensureAnonymousAuth();
@@ -173,8 +189,10 @@ export async function saveSurveyResponse(data: {
       simConfig: data.simConfig,
       rating: sanitizedRating,
       feedback: sanitizedFeedback,
-      postalCode: finalPostal,
-      fsa: finalFsa,
+      encryptedPostalCode: encryptedPostalCode || undefined,
+      fsa: finalFsa || undefined,
+      neighbourhood: neighbourhoodName ? String(neighbourhoodName).slice(0, 80) : undefined,
+      isEncrypted: Boolean(encryptedPostalCode),
       isPostalScrubbed: isAlreadyFsaOnly,
       scrubReason: isAlreadyFsaOnly ? 'submitted_as_fsa_only' : undefined,
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent.slice(0, 200) : '',

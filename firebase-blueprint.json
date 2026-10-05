@@ -41,13 +41,21 @@
           "type": "string",
           "description": "Optional open-ended user commentary or rationale"
         },
-        "postalCode": {
+        "encryptedPostalCode": {
           "type": "string",
-          "description": "Edmonton postal code FSA or entered code for spatial analysis"
+          "description": "Reversible AES-256-GCM encrypted postal code bundle with salt and IV"
         },
         "fsa": {
           "type": "string",
-          "description": "Forward Sortation Area (first 3 characters) of postal code"
+          "description": "Forward Sortation Area (first 3 characters) of postal code for planning"
+        },
+        "neighbourhood": {
+          "type": "string",
+          "description": "Human-readable Edmonton neighbourhood name for spatial analytics"
+        },
+        "isEncrypted": {
+          "type": "boolean",
+          "description": "Indicates whether the postal code is encrypted with AES-256-GCM"
         },
         "isPostalScrubbed": {
           "type": "boolean",

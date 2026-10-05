@@ -2359,7 +2359,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "sim_eps_desc",
     "category": "Neighbourhood Simulation",
     "container": "Live Interactive Street Model",
-    "defaultText": "Traffic blockage detected >20s • Cruiser clearing lane",
+    "defaultText": "Traffic congestion detected >20s • Cruiser clearing lane",
     "guidance": "Curbside animation, parking lane, or traffic notice"
   },
   {

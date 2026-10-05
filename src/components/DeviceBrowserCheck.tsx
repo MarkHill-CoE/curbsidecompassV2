@@ -14,7 +14,13 @@ export const DeviceBrowserCheck: React.FC<DeviceBrowserCheckProps> = ({
 }) => {
   const { t } = useAppText();
   const [compat, setCompat] = useState<BrowserCompatibilityResult>(() => checkBrowserCompatibility());
-  const [landscapeDismissed, setLandscapeDismissed] = useState<boolean>(false);
+  const [landscapeDismissed, setLandscapeDismissed] = useState<boolean>(() => {
+    try {
+      return typeof window !== 'undefined' && sessionStorage.getItem('curbside_compass_landscape_dismissed') === 'true';
+    } catch {
+      return false;
+    }
+  });
   const [canvasNoticeDismissed, setCanvasNoticeDismissed] = useState<boolean>(false);
   const [storageNoticeDismissed, setStorageNoticeDismissed] = useState<boolean>(false);
 
@@ -28,11 +34,6 @@ export const DeviceBrowserCheck: React.FC<DeviceBrowserCheckProps> = ({
       if (!result.hasCanvas && onAutoSwitchSimplifiedMode) {
         onAutoSwitchSimplifiedMode();
       }
-
-      // If user rotates back to portrait, reset dismissed flag so future landscape enters re-prompt
-      if (!result.isMobileLandscape) {
-        setLandscapeDismissed(false);
-      }
     };
 
     runCheck();
@@ -45,6 +46,18 @@ export const DeviceBrowserCheck: React.FC<DeviceBrowserCheckProps> = ({
       window.removeEventListener('orientationchange', runCheck);
     };
   }, [onAutoSwitchSimplifiedMode]);
+
+  const handleDismissLandscape = () => {
+    setLandscapeDismissed(true);
+    try {
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('curbside_compass_landscape_dismissed', 'true');
+      }
+    } catch {
+      // ignore
+    }
+    onBlockStateChange?.(false);
+  };
 
   // Synchronize blocking state with parent so the start screen / onboarding modal doesn't open over the advisory
   const isLandscapeBlocking = compat.isMobileLandscape && !landscapeDismissed;
@@ -61,15 +74,15 @@ export const DeviceBrowserCheck: React.FC<DeviceBrowserCheckProps> = ({
         aria-modal="true"
         aria-labelledby="rotate-notice-title"
         aria-describedby="rotate-notice-desc"
-        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#002B49]/98 text-white p-4 sm:p-6 backdrop-blur-md select-none animate-in fade-in duration-200"
+        className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#002B49]/98 text-white p-3 sm:p-6 backdrop-blur-md select-none animate-in fade-in duration-200 overflow-y-auto"
       >
-        <div className="max-w-md w-full flex flex-col items-center text-center">
+        <div className="max-w-md w-full flex flex-col items-center text-center my-auto">
           {/* Safe Mobility Logo */}
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-2 sm:mb-3">
             <img
               src="/SafeMobility_Compass.png"
               alt="SafeMobility Compass"
-              className="w-8 h-8 object-contain drop-shadow-md"
+              className="w-7 h-7 sm:w-8 sm:h-8 object-contain drop-shadow-md"
             />
             <span className="text-xs font-black tracking-widest uppercase text-white/80">
               City of Edmonton · Curbside Compass
@@ -77,12 +90,12 @@ export const DeviceBrowserCheck: React.FC<DeviceBrowserCheckProps> = ({
           </div>
 
           {/* Animated Phone Rotation Graphic */}
-          <div className="relative my-2 sm:my-3 flex items-center justify-center w-28 h-28 sm:w-32 sm:h-32">
+          <div className="relative my-1.5 sm:my-3 flex items-center justify-center w-24 h-24 sm:w-32 sm:h-32">
             <div className="absolute inset-0 rounded-full bg-[#004B8D]/40 border border-[#0081BC]/30 animate-pulse" />
 
             {/* Rotating Phone Icon with smooth CSS keyframe animation */}
             <div className="relative flex items-center justify-center animate-[rotatePhone_2.6s_ease-in-out_infinite]">
-              <Smartphone className="w-16 h-16 sm:w-20 sm:h-20 text-[#FFC72C] drop-shadow-[0_0_12px_rgba(255,199,44,0.4)]" />
+              <Smartphone className="w-14 h-14 sm:w-20 sm:h-20 text-[#FFC72C] drop-shadow-[0_0_12px_rgba(255,199,44,0.4)]" />
             </div>
 
             {/* Curved rotation indicator badge */}
@@ -95,7 +108,7 @@ export const DeviceBrowserCheck: React.FC<DeviceBrowserCheckProps> = ({
           {/* Headline */}
           <h2
             id="rotate-notice-title"
-            className="text-lg sm:text-xl font-black text-white tracking-tight mt-1 mb-1.5 flex items-center justify-center gap-2"
+            className="text-base sm:text-xl font-black text-white tracking-tight mt-1 mb-1 flex items-center justify-center gap-2"
           >
             <span>{t('rotate_screen_title', 'Please Rotate to Vertical (Portrait)')}</span>
           </h2>
@@ -103,7 +116,7 @@ export const DeviceBrowserCheck: React.FC<DeviceBrowserCheckProps> = ({
           {/* Instructions Description */}
           <p
             id="rotate-notice-desc"
-            className="text-xs sm:text-sm text-blue-100/90 leading-snug max-w-sm mb-4 px-2"
+            className="text-xs sm:text-sm text-blue-100/90 leading-snug max-w-sm mb-3 sm:mb-4 px-2"
           >
             {t(
               'rotate_screen_desc',
@@ -112,16 +125,13 @@ export const DeviceBrowserCheck: React.FC<DeviceBrowserCheckProps> = ({
           </p>
 
           {/* Action Controls */}
-          <div className="flex flex-col sm:flex-row items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full max-w-xs justify-center">
             <button
               type="button"
-              onClick={() => {
-                setLandscapeDismissed(true);
-                onBlockStateChange?.(false);
-              }}
-              className="text-xs font-bold text-white bg-white/15 hover:bg-white/25 active:bg-white/30 border border-white/30 py-2 px-4 rounded-xl cursor-pointer transition-all active:scale-95 shadow-sm"
+              onClick={handleDismissLandscape}
+              className="w-full sm:w-auto text-xs sm:text-sm font-bold text-white bg-white/20 hover:bg-white/30 active:bg-white/40 border-2 border-white/50 py-2 sm:py-2.5 px-4 sm:px-6 rounded-xl cursor-pointer transition-all active:scale-95 shadow-md flex items-center justify-center gap-2 min-h-[44px]"
             >
-              {t('rotate_screen_continue_anyway', 'Continue in Horizontal view anyway')}
+              <span>{t('rotate_screen_continue_anyway', 'Continue in Horizontal view anyway')}</span>
             </button>
           </div>
         </div>

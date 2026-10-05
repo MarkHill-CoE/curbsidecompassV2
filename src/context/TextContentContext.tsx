@@ -264,6 +264,11 @@ const TextContentContext = createContext<TextContentContextValue | undefined>(un
 
 export const TextContentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [texts, setTexts] = useState<Record<string, string>>(() => {
+    const url = getActiveSheetUrl();
+    if (!url || !url.trim() || url === '/curbside_compass_text_inventory.csv') {
+      clearCachedTexts();
+      return {};
+    }
     const cached = getCachedTexts();
     if (Object.keys(cached).length > 0) {
       applyTextsToData(cached);
@@ -380,8 +385,25 @@ export const TextContentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setErrorMessage(null);
   }, []);
 
-  // Initial load: fetch live text from active sheet URL
+  // Initial load: ensure any legacy cache or obsolete sheets URL is wiped
   useEffect(() => {
+    try {
+      const storedUrl = localStorage.getItem('curbside_compass_sheets_url');
+      if (!storedUrl || storedUrl.includes('2PACX-1vQUZyEh-MPWjgoBxXHPMcV3rWMO1z4unO') || storedUrl === '/curbside_compass_text_inventory.csv') {
+        clearCachedTexts();
+        localStorage.removeItem('curbside_compass_sheets_url');
+        localStorage.removeItem('curbside_compass_cached_text');
+        localStorage.removeItem('curbside_compass_last_sync_time');
+        setTexts({});
+        setItemCount(0);
+        setSyncStatus('idle');
+        setSheetUrlState('');
+        return;
+      }
+    } catch {
+      // ignore
+    }
+
     const activeUrl = getActiveSheetUrl();
     if (activeUrl) {
       setSheetUrlState(activeUrl);

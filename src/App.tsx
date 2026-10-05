@@ -39,6 +39,11 @@ export default function App() {
   const [showMagnifiedGauge, setShowMagnifiedGauge] = useState<boolean>(false);
   const [isDeviceCheckBlocking, setIsDeviceCheckBlocking] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
+    try {
+      if (sessionStorage.getItem('curbside_compass_landscape_dismissed') === 'true') return false;
+    } catch {
+      // ignore
+    }
     const compat = checkBrowserCompatibility();
     return compat.isMobileLandscape;
   });
@@ -201,8 +206,8 @@ export default function App() {
   const handleLayoutChange = useCallback((layout: StreetLayoutTypology, neighbourhoodName?: string, postalCode?: string) => {
     setSelectedAnswers((prev) => ({
       ...prev,
-      q0_layout: layout,
-      ...(prev.q0 ? {} : { q0: layout })
+      q0: layout,
+      q0_layout: layout
     }));
     setManualOverride((prev) => ({
       ...(prev || {}),
@@ -211,7 +216,7 @@ export default function App() {
       postalCode: postalCode || prev?.postalCode
     }));
     const layoutInfo = getStreetLayoutInfo(layout);
-    setPolicyNote(`Matched to ${layoutInfo.title} (${layoutInfo.shortTitle}) with ${layoutInfo.curbsideCapacity} legal curbside stalls.`);
+    setPolicyNote(`Selected model street: ${layoutInfo.title} (${layoutInfo.shortTitle}) with ${layoutInfo.curbsideCapacity} legal curbside stalls.`);
   }, []);
 
   // Handle when a user clicks on an answer option
@@ -221,24 +226,35 @@ export default function App() {
     setSelectedAnswers((prev) => ({ ...prev, [questionId]: optionId }));
 
     const question = SURVEY_QUESTIONS.find((q) => q.id === questionId);
-    // If this is the location or postal code question, find the matching neighbourhood type
-    if (question?.type === 'text' || questionId === 'q0' || questionId === 'q9') {
+
+    // Step 0: Model street choice
+    if (questionId === 'q0') {
+      const layout = (optionId as StreetLayoutTypology) || 'mature_laned';
+      const layoutInfo = getStreetLayoutInfo(layout);
+      setSelectedAnswers((prev) => ({ ...prev, q0: layout, q0_layout: layout }));
+      setManualOverride((prev) => ({
+        ...(prev || {}),
+        streetLayout: layout
+      }));
+      setPolicyNote(`Selected model street: ${layoutInfo.title} (${layoutInfo.shortTitle}) with ${layoutInfo.curbsideCapacity} legal curbside stalls.`);
+      return;
+    }
+
+    // Step 7: Location question (Postal code / neighbourhood)
+    if (questionId === 'q7' || question?.type === 'text') {
       const trimmed = optionId.trim();
       if (trimmed && trimmed !== 'OPT_OUT') {
         const detection = detectLayoutAndNeighbourhood(trimmed);
-        const layout = detection.typology;
-        const layoutInfo = getStreetLayoutInfo(layout);
         const neighbourhoodName = detection.neighbourhood?.name;
+        // Keep active street layout chosen in Step 0, only record location demographics
         setManualOverride((prev) => ({
           ...(prev || {}),
-          streetLayout: layout,
-          neighbourhoodName: neighbourhoodName || prev?.neighbourhoodName,
+          neighbourhoodName: neighbourhoodName || prev?.neighbourhoodName || trimmed,
           postalCode: trimmed
         }));
-        const matchTitle = neighbourhoodName ? `${neighbourhoodName} • ${layoutInfo.title}` : layoutInfo.title;
-        setPolicyNote(`Matched to ${matchTitle} (${layoutInfo.shortTitle}) with ${layoutInfo.curbsideCapacity} legal curbside stalls.`);
+        setPolicyNote(neighbourhoodName ? `Location recorded: ${neighbourhoodName}` : `Location recorded: ${trimmed}`);
       } else if (trimmed === 'OPT_OUT') {
-        setPolicyNote('Location opt-out chosen. Using standard Mature Laned baseline.');
+        setPolicyNote('Location opt-out chosen. Participation recorded anonymously.');
       }
       return;
     }
@@ -267,16 +283,29 @@ export default function App() {
       const currentQuestion = SURVEY_QUESTIONS[currentStep];
       const answer = selectedAnswers[currentQuestion.id];
 
-      // Make sure the user entered a valid postal code or selected an answer before moving on
-      if (currentQuestion.type === 'text' || currentQuestion.id === 'q0' || currentQuestion.id === 'q9') {
-        const hasLayoutChoice = !!(selectedAnswers['q0_layout'] || selectedAnswers['q9_layout']);
-        const valResult = validatePostalCode(answer || '');
-        if (!valResult.isValid && !hasLayoutChoice) {
-          setValidationErrorMsg(valResult.message || 'Please enter your postal code or select your neighbourhood.');
+      // Step 0: Model street selection
+      if (currentQuestion.id === 'q0') {
+        const layoutChoice = answer || selectedAnswers['q0_layout'] || 'mature_laned';
+        if (!selectedAnswers['q0']) {
+          setSelectedAnswers(prev => ({ ...prev, q0: layoutChoice, q0_layout: layoutChoice }));
+        }
+      }
+      // Step 7: Location question (Postal code / neighbourhood / opt-out)
+      else if (currentQuestion.type === 'text' || currentQuestion.id === 'q7') {
+        if (!answer) {
+          setValidationErrorMsg('Please enter your postal code, neighbourhood, or check "Prefer not to share location".');
           setShowValidationError(true);
           return;
         }
-      } else if (!answer) {
+        const valResult = validatePostalCode(answer);
+        if (!valResult.isValid) {
+          setValidationErrorMsg(valResult.message || 'Please enter a valid Edmonton postal code or neighbourhood.');
+          setShowValidationError(true);
+          return;
+        }
+      }
+      // Step 1..6: Policy questions
+      else if (!answer) {
         setValidationErrorMsg('Please select an option to advance.');
         setShowValidationError(true);
         return;
@@ -319,15 +348,7 @@ export default function App() {
   }, []);
 
 
-  // Device & Browser Guard: Validates mobile orientation and browser compatibility before displaying start screen
-  if (isDeviceCheckBlocking) {
-    return (
-      <DeviceBrowserCheck
-        onBlockStateChange={setIsDeviceCheckBlocking}
-        onAutoSwitchSimplifiedMode={() => handleToggleSimplifiedMode(true)}
-      />
-    );
-  }
+
 
   return (
     <div className="flex flex-col h-[100dvh] max-h-[100dvh] w-screen bg-[#f4f6f8] text-gray-800 overflow-hidden font-sans">
@@ -343,7 +364,7 @@ export default function App() {
           />
           <div className="min-w-0">
             <h1 className="text-xs sm:text-sm font-black tracking-wide flex items-center gap-1 leading-none truncate">
-              <span className="text-white">{t('header_title_curbside', 'Curbside')}</span>
+              <span className="text-[#FFC72C]">{t('header_title_curbside', 'Curbside Compass')}</span>
             </h1>
           </div>
         </div>

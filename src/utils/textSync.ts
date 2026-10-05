@@ -4,7 +4,7 @@ import { SurveyQuestion } from '../types';
 // ============================================================================
 // GOOGLE SHEET SYNC CONFIGURATION
 // Paste your published Google Sheet CSV URL or share link here to make it the default:
-export const DEFAULT_GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQUZyEh-MPWjgoBxXHPMcV3rWMO1z4unO-6JpDaxhpxNQF80rQwrRLBDJ5k3bzVxVlleaIUWCNkyPsb/pub?gid=6494939&single=true&output=csv';
+export const DEFAULT_GOOGLE_SHEET_URL = '';
 // ============================================================================
 
 const STORAGE_URL_KEY = 'curbside_compass_sheets_url';
@@ -573,28 +573,22 @@ export function getGoogleSheetCandidateUrls(rawUrl: string): string[] {
  * Get active sheet URL from code default, local storage or environment.
  */
 export function getActiveSheetUrl(): string {
-  if (DEFAULT_GOOGLE_SHEET_URL && DEFAULT_GOOGLE_SHEET_URL.trim()) {
-    try {
-      const stored = localStorage.getItem(STORAGE_URL_KEY);
-      // If user configured a custom URL in modal that is different and not local fallback, respect user preference
-      if (stored && stored.trim() && stored !== '/curbside_compass_text_inventory.csv' && stored !== DEFAULT_GOOGLE_SHEET_URL) {
-        return stored.trim();
-      }
-    } catch {
-      // Ignore localStorage errors
-    }
-    return DEFAULT_GOOGLE_SHEET_URL.trim();
-  }
-
   try {
     const stored = localStorage.getItem(STORAGE_URL_KEY);
+    // Ignore legacy or outdated published Google Sheet test URLs
+    if (stored && (stored.includes('2PACX-1vQUZyEh-MPWjgoBxXHPMcV3rWMO1z4unO') || stored === '/curbside_compass_text_inventory.csv')) {
+      localStorage.removeItem(STORAGE_URL_KEY);
+      localStorage.removeItem(STORAGE_CACHED_TEXT_KEY);
+      localStorage.removeItem(STORAGE_LAST_SYNC_KEY);
+      return '';
+    }
     if (stored && stored.trim()) return stored.trim();
   } catch {
     // Ignore localStorage errors
   }
 
   const envUrl = (import.meta as unknown as { env?: { VITE_GOOGLE_SHEET_CSV_URL?: string } }).env?.VITE_GOOGLE_SHEET_CSV_URL;
-  if (envUrl && envUrl.trim()) {
+  if (envUrl && envUrl.trim() && !envUrl.includes('2PACX-1vQUZyEh-MPWjgoBxXHPMcV3rWMO1z4unO')) {
     return envUrl.trim();
   }
 
@@ -615,7 +609,7 @@ export function isEditableGoogleSheetUrl(rawUrl?: string): boolean {
  * Resolves the direct browser-viewable or editable Google Sheets URL from any configured sheet link.
  */
 export function getDirectGoogleSheetWebUrl(rawUrl?: string): string {
-  const url = (rawUrl || getActiveSheetUrl() || DEFAULT_GOOGLE_SHEET_URL).trim();
+  const url = (rawUrl || getActiveSheetUrl()).trim();
   if (!url) {
     return 'https://docs.google.com/spreadsheets';
   }
@@ -662,6 +656,10 @@ export function setActiveSheetUrl(url: string): void {
  */
 export function getCachedTexts(): Record<string, string> {
   try {
+    const storedUrl = localStorage.getItem(STORAGE_URL_KEY);
+    if (!storedUrl || storedUrl.includes('2PACX-1vQUZyEh-MPWjgoBxXHPMcV3rWMO1z4unO')) {
+      return {};
+    }
     const data = localStorage.getItem(STORAGE_CACHED_TEXT_KEY);
     if (data) {
       return JSON.parse(data);

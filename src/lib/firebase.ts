@@ -1,13 +1,13 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, Firestore } from 'firebase/firestore';
+import { getFirestore, Firestore, doc, getDocFromServer } from 'firebase/firestore';
 import { getAuth, Auth, signInAnonymously } from 'firebase/auth';
 
 // Firebase configuration provided by user / environment variables
 export const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyCWiWWa5XsmkKeuB7XTGvS6WTMCuNt1zu8",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "apps-parking-tradeoff-dev.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "apps-parking-tradeoff-dev",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "apps-parking-tradeoff-dev.firebasestorage.app",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "apps-parking-tradeoff-tool-dev.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "apps-parking-tradeoff-tool-dev",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "apps-parking-tradeoff-tool-dev.firebasestorage.app",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "1073690749503",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:1073690749503:web:d3d0c0dd5c15047ba4668a",
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-GTSPXG6VD9"
@@ -55,9 +55,17 @@ export function getFirebaseAuth(): Auth | null {
 export async function testConnection(): Promise<boolean> {
   if (connectionTested) return true;
   connectionTested = true;
-  const db = getDb();
-  if (!db) return false;
-  return true;
+  try {
+    const db = getDb();
+    if (!db) return false;
+    await getDocFromServer(doc(db, 'test', 'connection'));
+    return true;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('the client is offline')) {
+      console.warn("Please check your Firebase configuration.");
+    }
+    return false;
+  }
 }
 
 /**

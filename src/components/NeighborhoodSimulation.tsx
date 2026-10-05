@@ -829,17 +829,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       // 2. Continuous solid white bike lane boundary demarcation line
       drawFlatRect(0, 101.5, blockLength, 0.6, '#FFFFFF', bgGroundCtx);
 
-      // 3. Stenciled bicycle symbols & directional arrows painted on the green surface
+      // 3. Directional pavement chevron markings on the green surface
       for (let bx = 30; bx < blockLength - 20; bx += 45) {
-        const stencilPos = project(bx, 97.2, 0);
-        bgGroundCtx.save();
-        bgGroundCtx.fillStyle = '#FFFFFF';
-        bgGroundCtx.font = 'bold 9px system-ui, sans-serif';
-        bgGroundCtx.textAlign = 'center';
-        bgGroundCtx.fillText('🚲 BIKE LANE', stencilPos.x, stencilPos.y);
-        bgGroundCtx.restore();
-
-        // Directional chevron markings on pavement
         drawFlatRect(bx + 14, 96.8, 4.0, 0.6, '#FFFFFF', bgGroundCtx);
         drawFlatRect(bx + 16, 96.0, 2.0, 2.2, '#FFFFFF', bgGroundCtx);
       }
@@ -914,9 +905,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
           const startX = 8 + h * lotWidth;
           if (isEightPlexLot(h)) {
-            // 8-Plex entrance plaza & side pedestrian walkway (keeps front curb intact)
+            // 8-Plex entrance plaza (keeps front curb intact)
             drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
-            drawFlatRect(startX + 0.5, 11, 2.0, 59, '#D0D4D8', bgGroundCtx);
             continue;
           }
           // Concrete double driveway pad from garage (y = 48) through lawn, sidewalk, boulevard, and curb into street (y = 93)
@@ -980,7 +970,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const startX = 8 + h * lotWidth;
           if (isEightPlexLot(h)) {
             drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
-            drawFlatRect(startX + 0.5, 11, 2.0, 59, '#D0D4D8', bgGroundCtx);
             continue;
           }
           drawFlatRect(startX + 14, -6, 12, 6, '#9CA0A4', bgGroundCtx);
@@ -1031,7 +1020,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const startX = 8 + h * lotWidth;
           if (isEightPlexLot(h)) {
             drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
-            drawFlatRect(startX + 0.5, 11, 2.0, 59, '#D0D4D8', bgGroundCtx);
             continue;
           }
           drawFlatRect(startX + 16, -6, 12, 6, '#9CA0A4', bgGroundCtx);
@@ -1073,7 +1061,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const startX = 8 + h * lotWidth;
           if (isEightPlexLot(h)) {
             drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
-            drawFlatRect(startX + 0.5, 11, 2.0, 59, '#D0D4D8', bgGroundCtx);
             continue;
           }
           drawFlatRect(startX + 17.5, -6, 11.5, 6, '#9CA0A4', bgGroundCtx);
@@ -1214,7 +1201,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
       // 3. Upper Storeys (Storeys 2 & 3): Crisp architectural composite paneling (z: 6.2 to 18.6)
       const upperH = bH - baseH;
-      drawBlock(bX, bY, baseH, bW, bD, upperH, '#F8FAFC', '#E2E8F0', '#CBD5E1', targetCtx);
+      drawBlock(bX, bY, baseH, bW, bD, upperH, '#1E293B', '#E2E8F0', '#CBD5E1', targetCtx);
 
       // 4. Architectural Warm Cedar Accent Bay (Vertical rainscreen feature across front facade)
       drawBlock(bX + 3.0, bY + bD - 0.4, baseH, 6.5, 0.5, upperH, '#B45309', '#92400E', '#78350F', targetCtx);
@@ -1245,14 +1232,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       drawBlock(bX + 10.5, bY + bD + 0.05, 1.4, 4.4, 0.2, 4.0, '#0F172A', '#020617', '#000000', targetCtx);
       drawBlock(bX + 10.8, bY + bD + 0.15, 1.7, 3.8, 0.1, 3.5, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
 
-      // Address plaque on entrance portico
-      const signPos = project(bX + 12.7, bY + bD + 0.3, 4.6);
-      targetCtx.save();
-      targetCtx.fillStyle = '#FFC72C';
-      targetCtx.font = 'bold 7px system-ui, -apple-system, sans-serif';
-      targetCtx.textAlign = 'center';
-      targetCtx.fillText('8-PLEX', signPos.x, signPos.y);
-      targetCtx.restore();
+
 
       // 7. Storey 1 Windows (Large ground-floor picture windows with black thermal frames)
       drawBlock(bX + 3.2, bY + bD + 0.05, 1.8, 4.5, 0.2, 3.8, '#0F172A', '#020617', '#000000', targetCtx);
@@ -1302,20 +1282,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         drawBlock(bikeRackX + 0.6 + br * 1.5, bikeRackY + 0.3, 0.4, 0.3, 0.6, 2.2, '#94A3B8', '#64748B', '#475569', targetCtx);
       }
 
-      // Side pedestrian access walkway with bollard lights leading to side units
-      drawFlatRect(startX + 0.5, bY, 1.8, bD, '#CBD5E1', targetCtx);
-      drawBlock(startX + 0.8, bY + 18, 0, 0.6, 0.6, 2.4, '#1F2937', '#111827', '#0F172A', targetCtx);
-      drawBlock(startX + 0.8, bY + 36, 0, 0.6, 0.6, 2.4, '#1F2937', '#111827', '#0F172A', targetCtx);
 
-      // Rear green courtyard, amenity patio & waste enclosure (zero garage parking)
-      drawFlatRect(startX + 1.0, -5, lotWidth - 2.0, 15, '#76AF65', targetCtx);
-      drawFlatRect(startX + 3.0, -3, lotWidth - 6.0, 11, '#CBD5E1', targetCtx);
-      // Resident picnic bench / amenity table in rear courtyard
-      drawBlock(startX + 14.0, 0, 0, 7.5, 3.5, 1.8, '#B45309', '#92400E', '#78350F', targetCtx);
-      // Waste & recycling cart enclosure (3 carts)
-      drawBlock(startX + 2.0, 0, 0, 6.0, 3.5, 3.5, '#78350F', '#5A260C', '#431C08', targetCtx);
-      drawBlock(startX + 2.5, 0.5, 0, 1.4, 1.4, 2.6, '#15803D', '#166534', '#14532D', targetCtx); // Green organics
-      drawBlock(startX + 4.2, 0.5, 0, 1.4, 1.4, 2.6, '#1E40AF', '#1D4ED8', '#1E3A8A', targetCtx); // Blue recycling
     }
 
     function renderHousesBackground() {
@@ -2757,7 +2724,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     function createDeliveryVan(id: number, targetHouse: number): DeliveryVan {
       const houseIndex = targetHouse % TOTAL_MIDCENTURY_HOMES;
       const houseBaseX = 8 + houseIndex * 30.5;
-      const doorX = houseBaseX + 13;
+      const is8Plex = isEightPlexLot(houseIndex);
+      const doorX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 13;
+      const doorY = is8Plex ? 70.8 : 44;
       const stopX = getTargetStopX(houseIndex);
       return {
         id,
@@ -2779,7 +2748,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           x: 0,
           y: 0,
           targetDoorX: doorX,
-          targetDoorY: 44,
+          targetDoorY: doorY,
           hasPackage: true,
           active: false
         }
@@ -3135,8 +3104,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
           const targetHouse = van.targetHouse % TOTAL_MIDCENTURY_HOMES;
           const houseBaseX = 8 + targetHouse * 30.5;
-          const doorX = houseBaseX + 13;
-          const doorY = 44;
+          const is8Plex = isEightPlexLot(targetHouse);
+          const doorX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 13;
+          const doorY = is8Plex ? 70.8 : 44;
           const walkwayX = houseBaseX + 11.5;
 
           // Left side of van (driver cab door facing curb/travel lane edge)
@@ -3150,14 +3120,25 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           van.driver.targetDoorX = doorX;
           van.driver.targetDoorY = doorY;
 
-          // Pedestrian courier path: cab -> street curb -> boulevard -> sidewalk -> front walkway -> veranda steps -> doorstep
-          van.driver.path = [
-            { x: cabX, y: cabY },
-            { x: cabX, y: 78 },
-            { x: walkwayX, y: 74 },
-            { x: walkwayX, y: 51 },
-            { x: doorX, y: doorY }
-          ];
+          // Pedestrian courier path:
+          // For 8-plex: follow sidewalk directly to front stoop (never walk on/through building or roof!)
+          // For houses: cab -> curb -> boulevard -> sidewalk -> walkway -> porch
+          if (is8Plex) {
+            van.driver.path = [
+              { x: cabX, y: cabY },
+              { x: cabX, y: 74.0 },     // step onto sidewalk
+              { x: doorX, y: 74.0 },    // follow sidewalk laterally to 8-plex front entrance
+              { x: doorX, y: doorY }    // step up to front stoop (y = 70.8)
+            ];
+          } else {
+            van.driver.path = [
+              { x: cabX, y: cabY },
+              { x: cabX, y: 78 },
+              { x: walkwayX, y: 74 },
+              { x: walkwayX, y: 51 },
+              { x: doorX, y: doorY }
+            ];
+          }
           van.driver.pathIdx = 1;
         } else {
           van.x = targetX;
@@ -3190,17 +3171,18 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         if (van.stopTimer === 25) {
           van.driver.hasPackage = false;
 
+          const is8Plex = isEightPlexLot(van.targetHouse % TOTAL_MIDCENTURY_HOMES);
           const doorX = van.driver.targetDoorX;
           const existingParcelsAtHouse = deliveredParcels.filter(p => p.houseIndex === van.targetHouse).length;
-          const pOffsetX = (existingParcelsAtHouse % 3) * 2.6 - 1.2;
-          const pOffsetY = Math.floor(existingParcelsAtHouse / 3) * 1.5;
+          const pOffsetX = (existingParcelsAtHouse % 3) * 2.2 - 1.1;
+          const pOffsetY = Math.floor(existingParcelsAtHouse / 3) * 1.2;
 
           deliveredParcels.push({
             id: `parcel_${Date.now()}_${Math.random()}`,
             houseIndex: van.targetHouse,
             x: doorX + pOffsetX,
-            y: 44.5 + pOffsetY,
-            z: 2.2,
+            y: (is8Plex ? 71.0 : 44.5) + pOffsetY,
+            z: is8Plex ? 0.8 : 2.2,
             w: 2.4,
             d: 2.0,
             h: 1.6,
@@ -3218,6 +3200,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           van.state = 'RETURNING';
           const targetHouse = van.targetHouse % TOTAL_MIDCENTURY_HOMES;
           const houseBaseX = 8 + targetHouse * 30.5;
+          const is8Plex = isEightPlexLot(targetHouse);
           const doorX = van.driver.targetDoorX;
           const doorY = van.driver.targetDoorY;
           const walkwayX = houseBaseX + 11.5;
@@ -3225,14 +3208,23 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const cabX = van.x + 14;
           const cabY = van.y >= 100 ? 102.5 : 92.5;
 
-          // Return pedestrian path: doorstep -> veranda steps -> front walkway -> sidewalk -> boulevard -> street curb -> cab
-          van.driver.path = [
-            { x: doorX, y: doorY },
-            { x: walkwayX, y: 51 },
-            { x: walkwayX, y: 74 },
-            { x: cabX, y: 78 },
-            { x: cabX, y: cabY }
-          ];
+          if (is8Plex) {
+            // For 8-plex: step from front stoop back to sidewalk and follow sidewalk to van cab
+            van.driver.path = [
+              { x: doorX, y: doorY },
+              { x: doorX, y: 74.0 },
+              { x: cabX, y: 74.0 },
+              { x: cabX, y: cabY }
+            ];
+          } else {
+            van.driver.path = [
+              { x: doorX, y: doorY },
+              { x: walkwayX, y: 51 },
+              { x: walkwayX, y: 74 },
+              { x: cabX, y: 78 },
+              { x: cabX, y: cabY }
+            ];
+          }
           van.driver.pathIdx = 1;
         }
       } else if (van.state === 'RETURNING') {
@@ -3289,11 +3281,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const newHouse = (van.targetHouse + 1) % TOTAL_MIDCENTURY_HOMES;
           van.targetHouse = newHouse;
           const nextHouseBaseX = 8 + newHouse * 30.5;
-          const nextDoorX = nextHouseBaseX + 13;
+          const isNext8Plex = isEightPlexLot(newHouse);
+          const nextDoorX = isNext8Plex ? nextHouseBaseX + 14.5 : nextHouseBaseX + 13;
+          const nextDoorY = isNext8Plex ? 70.8 : 44;
 
           van.targetStopX = getTargetStopX(newHouse);
           van.driver.targetDoorX = nextDoorX;
-          van.driver.targetDoorY = 44;
+          van.driver.targetDoorY = nextDoorY;
 
           let spawnX = -140 - Math.random() * 80;
           for (let j = 0; j < allObstacles.length; j++) {
@@ -4109,7 +4103,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         policeBlockageUnit.targetBlockageX = leadObstacle ? leadObstacle.x : (isNorth ? 150 : 200);
         policeBlockageUnit.stageTimer = 0;
         policeBlockageUnit.sirenSoundTimer = 0;
-        policeBlockageUnit.bubbleText = '🚨 EPS: Taking right hand lane to traffic blockage!';
+        policeBlockageUnit.bubbleText = '🚨 EPS: Taking right hand lane to traffic congestion!';
 
         // The police cruiser takes the right hand lane (y = 124) to get to the scene of the traffic blockage
         policeTrafficCar.x = -130;
@@ -4157,7 +4151,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               policeTrafficCar.speed = 0;
               policeBlockageUnit.state = 'investigating';
               policeBlockageUnit.stageTimer = 160;
-              policeBlockageUnit.bubbleText = '🚨 EPS: Investigating scene of blockage...';
+              policeBlockageUnit.bubbleText = '🚨 EPS: Investigating scene of traffic congestion...';
               policeTrafficCar.policeBubbleText = policeBlockageUnit.bubbleText;
               playPoliceSirenSoundRef.current('chirp');
 
@@ -4170,7 +4164,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             policeTrafficCar.speed = 0;
             policeBlockageUnit.state = 'investigating';
             policeBlockageUnit.stageTimer = 160;
-            policeBlockageUnit.bubbleText = '🚨 EPS: Investigating scene of blockage...';
+            policeBlockageUnit.bubbleText = '🚨 EPS: Investigating scene of traffic congestion...';
             policeTrafficCar.policeBubbleText = policeBlockageUnit.bubbleText;
             playPoliceSirenSoundRef.current('chirp');
 
@@ -4185,7 +4179,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if (policeBlockageUnit.stageTimer <= 0) {
             policeBlockageUnit.state = 'clearing';
             policeBlockageUnit.stageTimer = 180;
-            policeBlockageUnit.bubbleText = '🚨 EPS: Directing traffic — move along! Clearing blockage.';
+            policeBlockageUnit.bubbleText = '🚨 EPS: Directing traffic — move along! Clearing traffic congestion.';
             policeTrafficCar.policeBubbleText = policeBlockageUnit.bubbleText;
             playPoliceSirenSoundRef.current('yelp');
 
@@ -4302,6 +4296,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       const midCenturyLotWidth = 30.5;
       const currentLayout: StreetLayoutTypology = configRef.current.streetLayout || 'mature_laned';
       for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+        if (isEightPlexLot(h)) continue;
         const startX = 8 + h * midCenturyLotWidth;
         let garageX = startX + 17.5;
         let garageY = 0;
@@ -5050,7 +5045,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                   {t('sim_eps_title', '🚨 EPS TRAFFIC INVESTIGATION')}
                 </span>
                 <span className="text-[#93C5FD] text-[10px] sm:text-xs font-semibold leading-tight">
-                  {t('sim_eps_desc', 'Traffic blockage detected >20s • Cruiser clearing lane')}
+                  {t('sim_eps_desc', 'Traffic congestion detected >20s • Cruiser clearing lane')}
                 </span>
               </div>
             </div>
