@@ -71,7 +71,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
               <Sliders className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h3 id="manual-sliders-title" className="font-bold text-white text-xs sm:text-sm md:text-base leading-none">
+              <h3 id="manual-sliders-title" className="font-bold !text-white text-xs sm:text-sm md:text-base leading-none" style={{ color: '#ffffff' }}>
                 {t('drawer_sliders_title', 'Adjust the Neighbourhood')}
               </h3>
               <span className="text-[9px] sm:text-[10px] text-gray-300">

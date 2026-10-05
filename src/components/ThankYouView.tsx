@@ -12,8 +12,7 @@ import {
   RotateCcw,
   User,
   Users,
-  Download,
-  Image as ImageIcon
+  Download
 } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
@@ -96,7 +95,6 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
   const { t } = useAppText();
   const [shareMode, setShareMode] = useState<'with_persona' | 'general'>('with_persona');
   const [copied, setCopied] = useState<boolean>(false);
-  const [imageCopied, setImageCopied] = useState<boolean>(false);
   const [platformNotice, setPlatformNotice] = useState<string | null>(null);
 
   const curbsideSocialImg = '/CurbsideCompass_Social_Media_IMG.jpg';
@@ -196,24 +194,6 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
     }
   };
 
-  const handleCopyImage = async () => {
-    triggerFeedback('button');
-    try {
-      const res = await fetch(curbsideSocialImg);
-      const blob = await res.blob();
-      if (typeof ClipboardItem !== 'undefined') {
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            [blob.type]: blob
-          })
-        ]);
-        setImageCopied(true);
-        setTimeout(() => setImageCopied(false), 3000);
-      }
-    } catch (err) {
-      console.warn('Could not copy image directly to clipboard:', err);
-    }
-  };
 
   const handlePlatformClick = async (platform: string) => {
     try {
@@ -272,7 +252,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
           <p className="text-xs text-gray-600 leading-snug mb-3">
             {t(
               'share_intro',
-              'Your perspectives on neighbourhood parking provide valuable insight for the City of Edmonton. Encourage your neighbours, friends, and community members to discover their parking persona and have their say on curbside policies:'
+              'Your perspectives on neighbourhood parking provide valuable insight for the City of Edmonton. Encourage your neighbours, friends, and community members to discover their residential parking profile and have their say on curbside policies:'
             )}
           </p>
 
@@ -300,7 +280,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <User className={`w-3.5 h-3.5 ${shareMode === 'with_persona' ? 'text-[#004B8D]' : 'text-gray-500'}`} />
                   <span className="text-[0.6875rem] font-bold">
-                    {t('share_opt_persona', 'Include My Persona & Selections')}
+                    {t('share_opt_persona', 'Include "My Residential Profile"')}
                   </span>
                 </div>
                 <div className="text-[0.59375rem] text-gray-600 leading-tight line-clamp-1">
@@ -328,8 +308,8 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                     {t('share_opt_general', 'General Invite Only')}
                   </span>
                 </div>
-                <div className="text-[0.59375rem] text-gray-600 leading-tight">
-                  {t('share_opt_general_desc', 'Encouraging post without persona results')}
+                <div className="text-[0.59375rem] text-gray-600 leading-tight line-clamp-1">
+                  {t('share_opt_general_desc', 'Encouraging post without sharing your residential profile results')}
                 </div>
               </button>
             </div>
@@ -367,15 +347,6 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                         {t('share_preview_label', 'Social Post Preview')}
                       </span>
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={handleCopyImage}
-                          className="text-[0.5625rem] text-[#004B8D] hover:underline flex items-center gap-0.5 font-bold cursor-pointer"
-                          title="Copy screen image directly to clipboard"
-                        >
-                          <ImageIcon className="w-2.5 h-2.5" />
-                          <span>{imageCopied ? 'Image Copied!' : 'Copy Image'}</span>
-                        </button>
                         <a
                           href={curbsideSocialImg}
                           download="CurbsideCompass_Social_Media_IMG.jpg"
@@ -404,10 +375,16 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                         </div>
                       </div>
                     ) : (
-                      <div className="bg-slate-50 rounded p-2 border border-slate-100 max-h-36 overflow-y-auto">
-                        <p className="text-[0.625rem] sm:text-[0.6875rem] text-gray-800 leading-relaxed whitespace-pre-line font-medium">
-                          {shareTextGeneral}
+                      <div className="space-y-1">
+                        <p className="text-xs font-bold text-gray-900 leading-snug">
+                          📢 {t('share_opt_general', 'General Invite')}
                         </p>
+                        <div className="bg-slate-50 rounded p-1.5 border border-slate-100 space-y-0.5 max-h-24 overflow-y-auto">
+                          <span className="text-[0.5625rem] font-bold text-gray-500 uppercase block">Post Message:</span>
+                          <p className="text-[0.59375rem] text-gray-700 leading-tight whitespace-pre-line">
+                            {shareTextGeneral}
+                          </p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -527,10 +504,10 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                 </>
               )}
             </button>
-            <p className="text-center text-xs text-gray-500 mt-1.5 whitespace-pre-line">
+            <p className="text-center text-xs text-gray-500 mt-1.5">
               {t(
                 'share_copy_helper_text',
-                'Copies your full post with your policy selections, the survey link, and street model image ready to paste anywhere.'
+                'Copies your Curbside Compass result and the survey link to paste and share anywhere'
               )}
             </p>
           </div>
@@ -548,7 +525,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
           className="text-xs sm:text-sm font-bold text-[#004B8D] hover:text-[#003366] flex items-center gap-1.5 py-2 px-3 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer active:scale-95 min-h-[44px] min-w-[44px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{t('share_view_persona_btn', 'View Parking Persona')}</span>
+          <span>{t('share_view_persona_btn', 'View Resident Profile')}</span>
         </button>
 
         {onRetake && (

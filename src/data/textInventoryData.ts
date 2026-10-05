@@ -2037,7 +2037,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "share_copy_helper_text",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Copies your Curbside Compass result\\nand the survey link to paste and share anywhere",
+    "defaultText": "Copies your Curbside Compass result and the survey link to paste and share anywhere",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
@@ -2086,7 +2086,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "share_intro",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Your perspectives on neighbourhood parking provide valuable insight for the City of Edmonton. Encourage your neighbours, friends, and community members to discover their parking persona and have their say on curbside policies:",
+    "defaultText": "Your perspectives on neighbourhood parking provide valuable insight for the City of Edmonton. Encourage your neighbours, friends, and community members to discover their residential parking profile and have their say on curbside policies:",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
@@ -2128,14 +2128,14 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "share_opt_general_desc",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Encouraging post without persona results",
+    "defaultText": "Encouraging post without sharing your residential profile results",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
     "key": "share_opt_persona",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Include My Persona",
+    "defaultText": "Include \"My Residential Profile\"",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
@@ -2177,7 +2177,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "share_view_persona_btn",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "View Parking Persona",
+    "defaultText": "View Resident Profile",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
@@ -3353,7 +3353,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "thankyou_btn_view_persona",
     "category": "Thank You View",
     "container": "Submission & Feedback View",
-    "defaultText": "View Parking Persona",
+    "defaultText": "View Resident Profile",
     "guidance": "Completion message, open text feedback, or close prompt"
   },
   {
@@ -3388,7 +3388,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "thankyou_mode_general_sub",
     "category": "Thank You View",
     "container": "Submission & Feedback View",
-    "defaultText": "Encouraging post without persona results",
+    "defaultText": "Encouraging post without sharing your residential profile results",
     "guidance": "Completion message, open text feedback, or close prompt"
   },
   {
@@ -3402,7 +3402,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "thankyou_mode_persona_title",
     "category": "Thank You View",
     "container": "Submission & Feedback View",
-    "defaultText": "Include My Persona",
+    "defaultText": "Include \"My Residential Profile\"",
     "guidance": "Completion message, open text feedback, or close prompt"
   },
   {

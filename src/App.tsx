@@ -9,8 +9,6 @@ import { MagnifiedGaugeDrawer } from './components/MagnifiedGaugeDrawer';
 import { DeviceBrowserCheck } from './components/DeviceBrowserCheck';
 import { safeStorage, checkBrowserCompatibility } from './utils/browserCheck';
 
-// Temporary tool for the City communications team to review and edit copy directly
-import { GoogleSheetSyncModal } from './components/GoogleSheetSyncModal';
 import { useAppText } from './context/TextContentContext';
 
 import {
@@ -25,25 +23,17 @@ import { getStreetLayoutInfo, detectLayoutAndNeighbourhood } from './data/edmont
 import {
   Compass,
   RotateCcw,
-  FileSpreadsheet,
   HelpCircle,
   ZapOff,
   Eye,
   ChevronDown,
-  ChevronUp,
-  ExternalLink,
-  Download
+  ChevronUp
 } from 'lucide-react';
-import { getDirectGoogleSheetWebUrl, isEditableGoogleSheetUrl } from './utils/textSync';
 import { feedback, triggerFeedback } from './utils/feedback';
 import { ambientAudio } from './utils/ambientAudio';
 
 export default function App() {
-  // # BEGIN TEMPORARY SHEETS SYNC
-  const { t, isCustomActive, itemCount, sheetUrl } = useAppText();
-  const [isSyncModalOpen, setIsSyncModalOpen] = useState<boolean>(false);
-  const [syncModalTab, setSyncModalTab] = useState<'csv' | 'inventory' | 'url'>('inventory');
-  // # END TEMPORARY SHEETS SYNC
+  const { t } = useAppText();
 
   const [showManualSliders, setShowManualSliders] = useState<boolean>(false);
   const [showMagnifiedGauge, setShowMagnifiedGauge] = useState<boolean>(false);
@@ -328,16 +318,6 @@ export default function App() {
     setManualOverride((prev) => ({ ...(prev || {}), ...updated }));
   }, []);
 
-  const isDirectEditable = useMemo(() => isEditableGoogleSheetUrl(sheetUrl), [sheetUrl]);
-
-  const handleOpenGoogleSheet = () => {
-    if (isDirectEditable) {
-      window.open(getDirectGoogleSheetWebUrl(sheetUrl), '_blank', 'noopener,noreferrer');
-    } else {
-      setSyncModalTab('url');
-      setIsSyncModalOpen(true);
-    }
-  };
 
   // Device & Browser Guard: Validates mobile orientation and browser compatibility before displaying start screen
   if (isDeviceCheckBlocking) {
@@ -370,72 +350,6 @@ export default function App() {
         </div>
 
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-          {/* Communications Team: Live Content & Copy Sync (Browse & Search Copy) */}
-          <div className="flex items-center rounded-lg border border-white/20 bg-white/10 overflow-hidden shadow-xs">
-            <button
-              type="button"
-              onClick={() => {
-                setSyncModalTab('inventory');
-                setIsSyncModalOpen(true);
-              }}
-              title="Live Content & Copy Sync: Browse, search, and edit copy across the application"
-              aria-label="Browse & Search Copy"
-              className={`text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 transition-all min-h-[38px] sm:min-h-[44px] cursor-pointer ${
-                isCustomActive
-                  ? 'bg-emerald-700 hover:bg-emerald-600 text-white'
-                  : 'hover:bg-white/20 text-[#FFC72C]'
-              }`}
-            >
-              <FileSpreadsheet className="w-4 h-4 text-[#FFC72C]" />
-              <span className="font-bold flex items-center gap-1">
-                <span>Browse &amp; Search Copy</span>
-                {isCustomActive && (
-                  <span className="inline-flex items-center px-1.5 py-0.2 rounded-full text-[10px] font-mono bg-emerald-400 text-emerald-950 font-black">
-                    {itemCount}
-                  </span>
-                )}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSyncModalTab('csv');
-                setIsSyncModalOpen(true);
-              }}
-              title="Download questions as CSV, revise in Excel/Sheets, or upload updated questions"
-              aria-label="Download and upload questions CSV"
-              className="px-2 sm:px-2.5 py-1.5 text-white hover:bg-white/20 transition-all border-l border-white/20 flex items-center gap-1 text-[0.6875rem] sm:text-xs font-bold min-h-[38px] sm:min-h-[44px] cursor-pointer"
-            >
-              <span>CSV</span>
-              <Download className="w-3.5 h-3.5 text-[#FFC72C]" />
-            </button>
-            {isDirectEditable ? (
-              <a
-                href={getDirectGoogleSheetWebUrl(sheetUrl)}
-                target="_blank"
-                rel="noopener noreferrer"
-                title="Open live editable Google Sheet directly in new tab to edit app copy"
-                aria-label="Open live editable Google Sheet directly in new tab"
-                className="px-2 sm:px-2.5 py-1.5 text-white hover:bg-white/20 transition-all border-l border-white/20 flex items-center gap-1 text-[0.6875rem] sm:text-xs font-bold min-h-[38px] sm:min-h-[44px]"
-              >
-                <span className="hidden xs:inline">Google</span>
-                <span>Sheet</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#FFC72C]" />
-              </a>
-            ) : (
-              <button
-                type="button"
-                onClick={handleOpenGoogleSheet}
-                title="Connect your team's live Google Sheet to edit copy"
-                aria-label="Connect live Google Sheet"
-                className="px-2 sm:px-2.5 py-1.5 text-white hover:bg-white/20 transition-all border-l border-white/20 flex items-center gap-1 text-[0.6875rem] sm:text-xs font-bold min-h-[38px] sm:min-h-[44px] cursor-pointer"
-              >
-                <span className="hidden xs:inline">Google</span>
-                <span>Sheet</span>
-                <ExternalLink className="w-3.5 h-3.5 text-[#FFC72C]" />
-              </button>
-            )}
-          </div>
 
           <div className="hidden md:flex items-center bg-[#003566] rounded-md border border-[#002244] overflow-hidden flex-shrink-0">
             <button
@@ -751,14 +665,6 @@ export default function App() {
         </section>
       </main>
 
-      {/* # BEGIN TEMPORARY SHEETS SYNC */}
-      {/* Google Sheets Sync Modal - To be removed prior to public production release */}
-      <GoogleSheetSyncModal
-        isOpen={isSyncModalOpen}
-        onClose={() => setIsSyncModalOpen(false)}
-        initialTab={syncModalTab}
-      />
-      {/* # END TEMPORARY SHEETS SYNC */}
 
       {/* 3-Step Civic Onboarding Walkthrough Modal - only displayed when device check is not blocking */}
       <CivicOnboardingModal
