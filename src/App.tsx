@@ -343,8 +343,7 @@ export default function App() {
           />
           <div className="min-w-0">
             <h1 className="text-xs sm:text-sm font-black tracking-wide flex items-center gap-1 leading-none truncate">
-              <span className="text-white hidden xs:inline">{t('header_title_curbside', 'Curbside')}</span>
-              <span className="text-[#FFC72C]">{t('header_title_compass', 'Compass')}</span>
+              <span className="text-white">{t('header_title_curbside', 'Curbside')}</span>
             </h1>
           </div>
         </div>

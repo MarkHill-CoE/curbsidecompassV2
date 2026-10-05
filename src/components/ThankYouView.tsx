@@ -110,7 +110,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
 
   const shareTextWithPersona = [
     `Help Shape Edmonton's Neighborhood Streets`,
-    `How should local parking and curbside spaces be balanced? Explore the City's Cubside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.`,
+    `How should local parking and curbside spaces be balanced? Explore the City's Curbside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.`,
     ``,
     `🎯 My Policy Profile: "${persona.title}"`,
     config.neighbourhoodName ? `📍 Typology: ${config.neighbourhoodName}` : null,
@@ -126,7 +126,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
 
   const shareTextGeneral = [
     `Help Shape Edmonton's Neighborhood Streets`,
-    `How should local parking and curbside spaces be balanced? Explore the City's Cubside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.`,
+    `How should local parking and curbside spaces be balanced? Explore the City's Curbside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.`,
     `Explore Curbside Compass Today : ${shareUrl}`,
     `#YEG #YEGtraffic #CurbsideCompass`
   ].join('\n');
@@ -147,7 +147,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
             const htmlFormatted = shareMode === 'with_persona' ? `
               <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #1e293b;">
                 <p style="font-size: 16px; font-weight: bold; color: #004B8D;">Help Shape Edmonton's Neighborhood Streets</p>
-                <p>How should local parking and curbside spaces be balanced? Explore the City's Cubside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.</p>
+                <p>How should local parking and curbside spaces be balanced? Explore the City's Curbside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.</p>
                 <p style="font-size: 15px; color: #004B8D;"><strong>🎯 My Policy Profile: ${persona.title}</strong></p>
                 ${config.neighbourhoodName ? `<p>📍 <em>Neighbourhood: ${config.neighbourhoodName}</em></p>` : ''}
                 <p><strong>My Curbside Selections:</strong><br/>
@@ -161,7 +161,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
             `.trim() : `
               <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 14px; line-height: 1.5; color: #1e293b;">
                 <p style="font-size: 16px; font-weight: bold; color: #004B8D;">Help Shape Edmonton's Neighborhood Streets</p>
-                <p>How should local parking and curbside spaces be balanced? Explore the City's Cubside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.</p>
+                <p>How should local parking and curbside spaces be balanced? Explore the City's Curbside Compass interactive tool, a street model to visualize potential tradeoffs and share your input directly.</p>
                 <p><img src="${imageUrl}" alt="Curbside Compass Screen Image" style="max-width: 100%; width: 560px; height: auto; border-radius: 8px; border: 1px solid #cbd5e1; display: block; margin: 12px 0;" /></p>
                 <p><strong>Explore Curbside Compass Today :</strong> <a href="${shareUrl}" style="color: #0081BC; font-weight: bold;">${shareUrl}</a></p>
                 <p style="color: #64748b; font-size: 12px;">#YEG #YEGtraffic #CurbsideCompass</p>

@@ -210,24 +210,34 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           <div className="flex justify-between">
             <span className="text-gray-300 font-medium">{t('drawer_infill_label', 'Home Density')}</span>
             <span className="font-bold text-[#009A44]">
-              {totalDwellings} {t('drawer_dwellings_unit', 'Dwellings')}
+              {Math.min(7, Math.max(0, config.splitInfillLots ?? 0))} 8-Plex{Math.min(7, Math.max(0, config.splitInfillLots ?? 0)) === 1 ? '' : 'es'} ({totalDwellings} {t('drawer_dwellings_unit', 'Dwellings')})
             </span>
           </div>
           <input
             type="range"
             aria-label={t('drawer_sliders_density_aria', 'Home density')}
-            min="2"
-            max="12"
-            step="2"
-            value={config.splitInfillLots ?? 2}
-            onChange={(e) =>
-              onConfigChange?.({ splitInfillLots: parseInt(e.target.value, 10) })
-            }
+            min="0"
+            max="7"
+            step="1"
+            value={Math.min(7, Math.max(0, config.splitInfillLots ?? 0))}
+            onChange={(e) => {
+              const new8Plex = parseInt(e.target.value, 10);
+              const tiers = Math.floor(new8Plex / 3);
+              onConfigChange?.({
+                splitInfillLots: new8Plex,
+                deliveriesPerHomePerWeek: tiers >= 1 && config.deliveriesPerHomePerWeek < 2.0 ? 2.0 : config.deliveriesPerHomePerWeek
+              });
+            }}
             className="accent-[#009A44] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
           />
           <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
-            {t('drawer_density_explainer', 'Subdivided lots and skinny duplexes increase residents, vehicles, and visitor parking demand.')}
+            {t('drawer_density_explainer', 'Adds up to 7 8-plex multi-units (9.5m tall × 13m wide × 30m long) replacing houses on 15.6m lots.')}
           </p>
+          {totalDwellings > 60 && (
+            <span className="text-[#10B981] font-bold text-[10px] flex items-center gap-1 mt-0.5">
+              <span>🚲</span> {t('drawer_bikelane_active', 'Active Transportation Protected Bike Lane Active • On-street parking removed')}
+            </span>
+          )}
         </div>
 
         {/* Deliveries Per Home */}
@@ -235,7 +245,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           <div className="flex justify-between">
             <span className="text-gray-300 font-medium">{t('sim_deliveries_label', 'Weekly Deliveries')}</span>
             <span className="font-bold text-[#FF5500]">
-              {config.deliveriesPerHomePerWeek.toFixed(1)} ({totalWeeklyDeliveries}/wk)
+              {(Math.floor(Math.min(7, Math.max(0, config.splitInfillLots ?? 0)) / 3) >= 1 ? Math.max(2.0, config.deliveriesPerHomePerWeek) : config.deliveriesPerHomePerWeek).toFixed(1)} ({totalWeeklyDeliveries}/wk)
             </span>
           </div>
           <input
@@ -244,7 +254,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
             min="1"
             max="4"
             step="0.25"
-            value={config.deliveriesPerHomePerWeek}
+            value={Math.floor(Math.min(7, Math.max(0, config.splitInfillLots ?? 0)) / 3) >= 1 ? Math.max(2.0, config.deliveriesPerHomePerWeek) : config.deliveriesPerHomePerWeek}
             onChange={(e) =>
               onConfigChange?.({ deliveriesPerHomePerWeek: parseFloat(e.target.value) })
             }

@@ -1120,7 +1120,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "nav_btn_calc_persona",
     "category": "Navigation",
     "container": "Bottom Action Bar",
-    "defaultText": "Calculate Final Persona",
+    "defaultText": "Calculate Resident Profile",
     "guidance": "Step advancement or question navigation"
   },
   {
@@ -1827,7 +1827,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "results_alignment_title",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Parking Program Trade-off Outcomes",
+    "defaultText": "Trade-off Outcomes",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
@@ -1869,7 +1869,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "results_compass_result_title",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Your Curbside Compass Result",
+    "defaultText": "Your Resident Profile Result",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
@@ -1925,14 +1925,14 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "results_outcome_title",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Parking Program Trade-off Outcomes",
+    "defaultText": "Trade-off Outcomes",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
     "key": "results_parking_program_outcomes_title",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Parking Program Trade-off Outcomes",
+    "defaultText": "Trade-off Outcomes",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
@@ -1967,14 +1967,14 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "results_step2_title",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Your Curbside Compass Result",
+    "defaultText": "Your Resident Profile Result",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
     "key": "results_tradeoff_outcomes_title",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Parking Program Trade-off Outcomes",
+    "defaultText": "Trade-off Outcomes",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {

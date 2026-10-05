@@ -39,8 +39,8 @@ interface NeighborhoodSimulationProps {
 
 // 1950s–1960s Mid-Century Laned Bungalow Street (12 homes, gravel rear lane with detached garages, zero front curb cuts, continuous curbside parking)
 const TOTAL_MIDCENTURY_HOMES = 12;
-const BASE_LEGAL_CURBSIDE_STALLS = 16;
-const TOTAL_LEGAL_CURBSIDE_STALLS = 16;
+const BASE_LEGAL_CURBSIDE_STALLS = 12;
+const TOTAL_LEGAL_CURBSIDE_STALLS = 12;
 
 // =========================================================================================
 // COMPONENT OVERVIEW (Plain English Security & Oversight Summary)
@@ -494,21 +494,24 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     //    adapted specifically to either single-family houses or infill skinny duplex configurations.
     // =========================================================================================
 
-    // Helper to determine if a lot index (0 to 5) is converted into split infill skinny homes
-    // Split infill lots count is 2 to 12 (increasing by 2 per physical lot split).
-    const getSplitInfillCount = () => {
+    // 8-Plex Multi-Unit Infill Allocation across 15.6m lots:
+    // Models Edmonton's Missing-Middle residential zoning where up to 7 8-plex buildings
+    // (9.5m tall × 13m wide × 30m long) replace existing houses across any neighbourhood layout.
+    const EIGHT_PLEX_LOT_ORDER = [10, 2, 6, 4, 8, 1, 7];
+
+    const getEightPlexCount = () => {
       const raw = configRef.current.splitInfillLots;
-      const count = typeof raw === 'number' ? raw : 2;
-      return Math.min(12, Math.max(2, Math.round(count / 2) * 2));
+      const count = typeof raw === 'number' ? raw : 0;
+      return Math.min(7, Math.max(0, count));
     };
 
-    const isLotSplit = (lotIndex: number, splitCount = getSplitInfillCount()) => {
-      const numPhysicalLotsSplit = Math.floor(splitCount / 2);
-      // Allocate from right to left: e.g. 2 splits -> lot 5; 4 -> lots 5, 4; 6 -> lots 5, 4, 3; etc.
-      return lotIndex >= 6 - numPhysicalLotsSplit;
+    const isEightPlexLot = (lotIndex: number, count = getEightPlexCount()) => {
+      if (count <= 0) return false;
+      const activeLots = EIGHT_PLEX_LOT_ORDER.slice(0, count);
+      return activeLots.includes(lotIndex);
     };
 
-    // Dynamic lawn gathering hubs matching 12 mid-century bungalow front verandas and yards
+    // Dynamic lawn gathering hubs matching residential front yards
     let lawnGatheringHubs: Array<{ centerX: number; centerY: number }> = [];
 
     let residentIdCounter = 0;
@@ -520,6 +523,40 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
       for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
         const startX = 8 + h * midCenturyLotWidth;
+        const isEightPlex = isEightPlexLot(h);
+
+        if (isEightPlex) {
+          const hubIdx = lawnGatheringHubs.length;
+          lawnGatheringHubs.push({ centerX: startX + 12.7, centerY: 65 });
+
+          // Residents for 8-plex multi-unit building chatting on front plaza
+          for (let r = 0; r < 4; r++) {
+            const doorX = startX + 10.5 + (r % 2) * 4.0;
+            residents.push({
+              x: doorX,
+              y: 69,
+              state: 'inside',
+              targetX: doorX,
+              targetY: 69,
+              color: shirtColors[residentIdCounter % shirtColors.length],
+              homeX: doorX,
+              timer: 0.1 + Math.random() * 1.5,
+              groupId: hubIdx,
+              talkBubbleTimer: Math.random() * 4
+            });
+            residentIdCounter++;
+          }
+
+          // Modern landscaped perennial flower beds flanking the 8-plex entrance
+          for (let j = 0; j < 6; j++) {
+            const fx = startX + 3.0 + (j < 3 ? j * 1.5 : 17.0 + (j - 3) * 1.8);
+            const bedColor = allFlowerColors[Math.floor(Math.random() * allFlowerColors.length)];
+            const scale = 0.45 + Math.random() * 0.45;
+            flowerBeds.push({ x: fx, y: 65 + Math.random() * 2.0, z: Math.random() * 1.2, color: bedColor, sizeScale: scale, id: flowerIdCounter++ });
+          }
+          continue;
+        }
+
         const hubIdx = lawnGatheringHubs.length;
         lawnGatheringHubs.push({ centerX: startX + 11, centerY: 58 });
 
@@ -783,10 +820,78 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
     if (!bgGroundCtx || !bgHousesCtx || !bgTreesCtx) return;
 
+    function drawProtectedBikeLane() {
+      // 1. High-visibility emerald green asphalt surface along the north curbline (y = 93 to 101.5, width 8.5m)
+      drawFlatRect(0, 93, blockLength, 8.5, '#059669', bgGroundCtx);
+      drawFlatRect(0, 93, blockLength, 0.4, '#10B981', bgGroundCtx);
+      drawFlatRect(0, 101.1, blockLength, 0.4, '#047857', bgGroundCtx);
+
+      // 2. Continuous solid white bike lane boundary demarcation line
+      drawFlatRect(0, 101.5, blockLength, 0.6, '#FFFFFF', bgGroundCtx);
+
+      // 3. Stenciled bicycle symbols & directional arrows painted on the green surface
+      for (let bx = 30; bx < blockLength - 20; bx += 45) {
+        const stencilPos = project(bx, 97.2, 0);
+        bgGroundCtx.save();
+        bgGroundCtx.fillStyle = '#FFFFFF';
+        bgGroundCtx.font = 'bold 9px system-ui, sans-serif';
+        bgGroundCtx.textAlign = 'center';
+        bgGroundCtx.fillText('🚲 BIKE LANE', stencilPos.x, stencilPos.y);
+        bgGroundCtx.restore();
+
+        // Directional chevron markings on pavement
+        drawFlatRect(bx + 14, 96.8, 4.0, 0.6, '#FFFFFF', bgGroundCtx);
+        drawFlatRect(bx + 16, 96.0, 2.0, 2.2, '#FFFFFF', bgGroundCtx);
+      }
+
+      // 4. Physical Protective Buffer & Flex-Post Delineator Bollards (separating bike lane from motor vehicle lane)
+      // Painted hatched buffer zone (y = 101.5 to 103.5)
+      drawFlatRect(0, 101.5, blockLength, 2.0, '#374151', bgGroundCtx);
+      for (let hx = 5; hx < blockLength; hx += 12) {
+        drawFlatRect(hx, 101.6, 1.2, 1.8, '#FBBF24', bgGroundCtx);
+      }
+
+      // White heavy-duty reflective flex-post delineator bollards every 18m
+      for (let bx = 15; bx < blockLength - 10; bx += 18) {
+        // Concrete curb buffer mount
+        drawBlock(bx - 0.6, 102.0, 0, 1.2, 1.2, 0.4, '#E5E7EB', '#D1D5DB', '#9CA3AF', bgGroundCtx);
+        // Vertical flex-post bollard (white cylinder with yellow reflective bands)
+        drawBlock(bx - 0.3, 102.3, 0.4, 0.6, 0.6, 2.8, '#FFFFFF', '#E5E7EB', '#D1D5DB', bgGroundCtx);
+        // Yellow retroreflective collar
+        drawBlock(bx - 0.35, 102.25, 2.2, 0.7, 0.7, 0.6, '#FBBF24', '#F59E0B', '#D97706', bgGroundCtx);
+      }
+    }
+
     function renderGroundBackground() {
       bgGroundCtx.clearRect(0, 0, bgGroundCanvas.width, bgGroundCanvas.height);
       const layout: StreetLayoutTypology = configRef.current.streetLayout || 'mature_laned';
       const lotWidth = 30.5;
+
+      // 30-meter ETS Bus Stop prohibited parking zone: x = 295 to 375 (80m coordinate span)
+      function drawEtsBusStopCurbZone() {
+        // Top curb surface painted traffic safety yellow (#FBBF24)
+        drawFlatRect(295, 92.4, 80, 1.2, '#FBBF24', bgGroundCtx);
+        // Curb face painted traffic safety yellow (#FBBF24)
+        drawFlatRect(295, 93.3, 80, 0.6, '#FBBF24', bgGroundCtx);
+
+        // Yellow diagonal pavement clearance hatch lines along road edge
+        for (let bx = 298; bx <= 372; bx += 4.5) {
+          drawFlatRect(bx, 94.0, 1.0, 3.5, 'rgba(251, 191, 36, 0.85)', bgGroundCtx);
+        }
+
+        // White boundary limit lines marking the 30m zone ends
+        drawFlatRect(294.8, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+        drawFlatRect(375.0, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+
+        // Roadway stencil marking
+        const busLabelPos = project(335, 96, 0);
+        bgGroundCtx.save();
+        bgGroundCtx.fillStyle = '#FBBF24';
+        bgGroundCtx.font = 'bold 8px "Open Sans", system-ui, sans-serif';
+        bgGroundCtx.textAlign = 'center';
+        bgGroundCtx.fillText('BUS STOP - NO PARKING 30m', busLabelPos.x, busLabelPos.y);
+        bgGroundCtx.restore();
+      }
 
       if (layout === 'suburban_front_driveway') {
         // 1. Private enclosed backyard lawns (NO rear gravel alley in modern subdivisions!)
@@ -805,9 +910,15 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawFlatRect(s, 70, 0.5, 8, '#9a9fa3', bgGroundCtx);
         }
 
-        // 5. Front Concrete Driveways & Curb Cuts for all suburban homes
+        // 5. Front Concrete Driveways & Curb Cuts for suburban homes
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
           const startX = 8 + h * lotWidth;
+          if (isEightPlexLot(h)) {
+            // 8-Plex entrance plaza & side pedestrian walkway (keeps front curb intact)
+            drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
+            drawFlatRect(startX + 0.5, 11, 2.0, 59, '#D0D4D8', bgGroundCtx);
+            continue;
+          }
           // Concrete double driveway pad from garage (y = 48) through lawn, sidewalk, boulevard, and curb into street (y = 93)
           drawFlatRect(startX + 13.5, 48, 13.5, 45, '#CBD5E1', bgGroundCtx);
           // Driveway expansion joints
@@ -823,8 +934,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         drawFlatRect(0, 92.4, blockLength, 1.2, '#B5BAC0', bgGroundCtx);
         drawFlatRect(0, 93.3, blockLength, 0.4, '#8E9398', bgGroundCtx);
 
-        // Depressed driveway curb cut aprons over curbline
+        // Depressed driveway curb cut aprons over curbline (only for single-family homes)
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          if (isEightPlexLot(h)) continue;
           const startX = 8 + h * lotWidth;
           drawFlatRect(startX + 13.5, 92.4, 13.5, 1.2, '#CBD5E1', bgGroundCtx);
         }
@@ -837,6 +949,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
         drawFlatRect(10.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
         drawFlatRect(43.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+
+        // 7b. 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
+        drawEtsBusStopCurbZone();
 
         // 8. Asphalt roadway
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
@@ -863,6 +978,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         // 5. Stoop walkways & rear tuck-under aprons
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
           const startX = 8 + h * lotWidth;
+          if (isEightPlexLot(h)) {
+            drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
+            drawFlatRect(startX + 0.5, 11, 2.0, 59, '#D0D4D8', bgGroundCtx);
+            continue;
+          }
           drawFlatRect(startX + 14, -6, 12, 6, '#9CA0A4', bgGroundCtx);
           drawFlatRect(startX + 5, 50, 3.5, 20, '#D0D4D8', bgGroundCtx);
         }
@@ -878,12 +998,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawFlatRect(bx + 3, 84, 12, 6, '#3c6e32', bgGroundCtx);
         }
 
-        // Pocket bay stall markings
+        // Pocket bay stall markings (Bays 1-3; 4th bay at 296-376 is dedicated 30m ETS Bus Stop zone)
         const pocketBayXs = [
           46, 68, 90,
           138, 160, 182,
-          230, 252, 274,
-          322, 344, 366
+          230, 252, 274
         ];
         for (const px of pocketBayXs) {
           drawFlatRect(px - 1, 93, 0.4, 7.5, '#FFFFFF', bgGroundCtx);
@@ -891,6 +1010,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         // 7. Hydrant safety zone
         drawFlatRect(10.5, 92.5, 33, 1.2, '#FBBF24', bgGroundCtx);
+
+        // 7b. 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
+        drawEtsBusStopCurbZone();
 
         // 8. Asphalt roadway
         drawFlatRect(0, 93, blockLength, 45, '#45484C', bgGroundCtx);
@@ -907,6 +1029,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         // Concrete rear parking pads for garage suites & dual walkways
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
           const startX = 8 + h * lotWidth;
+          if (isEightPlexLot(h)) {
+            drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
+            drawFlatRect(startX + 0.5, 11, 2.0, 59, '#D0D4D8', bgGroundCtx);
+            continue;
+          }
           drawFlatRect(startX + 16, -6, 12, 6, '#9CA0A4', bgGroundCtx);
           drawFlatRect(startX + 4, -6, 10, 6, '#9CA0A4', bgGroundCtx);
 
@@ -922,6 +1049,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         // Hydrant zone
         drawFlatRect(10.5, 92.5, 33, 1.2, '#FBBF24', bgGroundCtx);
+
+        // 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
+        drawEtsBusStopCurbZone();
 
         // Asphalt roadway
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
@@ -941,6 +1071,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
           const startX = 8 + h * lotWidth;
+          if (isEightPlexLot(h)) {
+            drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
+            drawFlatRect(startX + 0.5, 11, 2.0, 59, '#D0D4D8', bgGroundCtx);
+            continue;
+          }
           drawFlatRect(startX + 17.5, -6, 11.5, 6, '#9CA0A4', bgGroundCtx);
           drawFlatRect(startX + 17.5, 16, 11.5, 6, '#9CA0A4', bgGroundCtx);
           drawFlatRect(startX + 4.5, -6, 9.5, 8, '#B2AA9D', bgGroundCtx);
@@ -975,10 +1110,20 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         bgGroundCtx.fillText('NO PARKING 5m', roadLabelPos.x, roadLabelPos.y);
         bgGroundCtx.restore();
 
+        // 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
+        drawEtsBusStopCurbZone();
+
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
         for (let i = 10; i < blockLength; i += 25) {
           drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
         }
+      }
+
+      // If street density exceeds 60 dwellings, replace on-street parking with an active transportation protected bike lane!
+      const active8PlexGround = getEightPlexCount();
+      const currentDwellingsGround = 12 + active8PlexGround * 7;
+      if (currentDwellingsGround > 60) {
+        drawProtectedBikeLane();
       }
     }
 
@@ -1038,6 +1183,141 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       targetCtx.restore();
     }
 
+    function drawEightPlexInfill(
+      startX: number,
+      lotWidth: number,
+      h: number,
+      targetCtx: CanvasRenderingContext2D = bgHousesCtx
+    ) {
+      // 8-Plex Multi-Unit Building Specifications (Edmonton Missing-Middle Housing):
+      // - 15.6m wide standard residential lot (lotWidth = 30.5 coordinate units)
+      // - 13m wide building footprint (bW = 25.4 units, centered with 2.55 unit landscaped side yard setbacks)
+      // - 30m long building depth (bD = 58.0 units, from y = 11.0 to 69.0)
+      // - 9.5m tall modern 3-storey profile (bH = 18.6 units tall with parapet)
+      const bX = startX + 2.55;
+      const bY = 11.0;
+      const bW = 25.4;
+      const bD = 58.0;
+      const bH = 18.6;
+
+      const brand = edmontonPalette[h % edmontonPalette.length];
+      const accentColor = brand.hex;
+
+      // 1. Concrete foundation & permeable perimeter apron
+      drawFlatRect(bX - 1.2, bY - 1.0, bW + 2.4, bD + 2.0, '#CBD5E1', targetCtx);
+
+      // 2. Ground Storey (Storey 1): Charcoal architectural brick/masonry base (z: 0 to 6.2)
+      const baseH = 6.2;
+      drawBlock(bX, bY, 0, bW, bD, baseH, '#334155', '#1E293B', '#0F172A', targetCtx);
+      // Subtle masonry belt course cap
+      drawBlock(bX - 0.2, bY - 0.2, baseH - 0.4, bW + 0.4, bD + 0.4, 0.4, '#475569', '#334155', '#1E293B', targetCtx);
+
+      // 3. Upper Storeys (Storeys 2 & 3): Crisp architectural composite paneling (z: 6.2 to 18.6)
+      const upperH = bH - baseH;
+      drawBlock(bX, bY, baseH, bW, bD, upperH, '#F8FAFC', '#E2E8F0', '#CBD5E1', targetCtx);
+
+      // 4. Architectural Warm Cedar Accent Bay (Vertical rainscreen feature across front facade)
+      drawBlock(bX + 3.0, bY + bD - 0.4, baseH, 6.5, 0.5, upperH, '#B45309', '#92400E', '#78350F', targetCtx);
+      for (let s = baseH + 1.2; s < bH - 1.0; s += 2.0) {
+        drawBlock(bX + 3.2, bY + bD + 0.1, s, 6.1, 0.1, 0.2, '#78350F', '#5A260C', '#431C08', targetCtx);
+      }
+
+      // Secondary Accent Bay on right front facade (brand-colored architectural metal panel)
+      drawBlock(bX + 16.0, bY + bD - 0.4, baseH, 7.0, 0.5, upperH, adjustColor(accentColor, -10), adjustColor(accentColor, -25), adjustColor(accentColor, -40), targetCtx);
+
+      // 5. Modern Flat Roofline & Parapet Coping (at 9.5m height)
+      drawBlock(bX - 0.4, bY - 0.4, bH, bW + 0.8, bD + 0.8, 0.8, '#0F172A', '#020617', '#000000', targetCtx);
+      // Rooftop solar photovoltaic array modules
+      for (let sp = 0; sp < 3; sp++) {
+        drawBlock(bX + 4.0 + sp * 6.5, bY + 16.0, bH + 0.8, 5.0, 8.0, 0.4, '#1E3A8A', '#172554', '#0F172A', targetCtx);
+      }
+
+      // 6. Recessed Main Front Portico / Entrance (Units 1A–2D) at y = bY + bD (69.0)
+      // Entrance stoop with concrete landing and steps
+      drawBlock(bX + 8.5, bY + bD - 0.2, 0, 8.4, 3.2, 1.4, '#CBD5E1', '#94A3B8', '#64748B', targetCtx);
+      drawBlock(bX + 9.5, bY + bD + 3.0, 0, 6.4, 1.8, 0.7, '#D0D4D8', '#B5BAC0', '#9A9FA3', targetCtx);
+      // Entrance canopy roof
+      drawBlock(bX + 8.0, bY + bD, 5.5, 9.4, 3.0, 0.6, '#0F172A', '#020617', '#000000', targetCtx);
+      // Steel support columns
+      drawBlock(bX + 8.5, bY + bD + 2.6, 1.4, 0.6, 0.6, 4.1, '#1F2937', '#111827', '#0F172A', targetCtx);
+      drawBlock(bX + 16.8, bY + bD + 2.6, 1.4, 0.6, 0.6, 4.1, '#1F2937', '#111827', '#0F172A', targetCtx);
+      // Glazed commercial-style entry doors (double wide with sidelights)
+      drawBlock(bX + 10.5, bY + bD + 0.05, 1.4, 4.4, 0.2, 4.0, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 10.8, bY + bD + 0.15, 1.7, 3.8, 0.1, 3.5, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+
+      // Address plaque on entrance portico
+      const signPos = project(bX + 12.7, bY + bD + 0.3, 4.6);
+      targetCtx.save();
+      targetCtx.fillStyle = '#FFC72C';
+      targetCtx.font = 'bold 7px system-ui, -apple-system, sans-serif';
+      targetCtx.textAlign = 'center';
+      targetCtx.fillText('8-PLEX', signPos.x, signPos.y);
+      targetCtx.restore();
+
+      // 7. Storey 1 Windows (Large ground-floor picture windows with black thermal frames)
+      drawBlock(bX + 3.2, bY + bD + 0.05, 1.8, 4.5, 0.2, 3.8, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 3.5, bY + bD + 0.15, 2.1, 3.9, 0.1, 3.2, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+
+      drawBlock(bX + 17.5, bY + bD + 0.05, 1.8, 5.0, 0.2, 3.8, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 17.8, bY + bD + 0.15, 2.1, 4.4, 0.1, 3.2, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+
+      // 8. Storey 2 & 3 Modern Windows and Cantilevered Glass Balconies
+      // Floor 2 Balcony (Left)
+      drawBlock(bX + 3.2, bY + bD, 6.2, 5.5, 2.8, 0.5, '#475569', '#334155', '#1E293B', targetCtx);
+      drawBlock(bX + 3.0, bY + bD + 2.6, 6.7, 5.9, 0.2, 2.0, 'rgba(180, 220, 245, 0.65)', 'rgba(140, 190, 225, 0.7)', 'rgba(140, 190, 225, 0.7)', targetCtx);
+      drawBlock(bX + 3.8, bY + bD + 0.05, 7.2, 4.2, 0.2, 4.6, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 4.1, bY + bD + 0.15, 7.5, 3.6, 0.1, 4.0, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+
+      // Floor 2 Balcony (Right)
+      drawBlock(bX + 17.0, bY + bD, 6.2, 5.5, 2.8, 0.5, '#475569', '#334155', '#1E293B', targetCtx);
+      drawBlock(bX + 16.8, bY + bD + 2.6, 6.7, 5.9, 0.2, 2.0, 'rgba(180, 220, 245, 0.65)', 'rgba(140, 190, 225, 0.7)', 'rgba(140, 190, 225, 0.7)', targetCtx);
+      drawBlock(bX + 17.6, bY + bD + 0.05, 7.2, 4.2, 0.2, 4.6, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 17.9, bY + bD + 0.15, 7.5, 3.6, 0.1, 4.0, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+
+      // Floor 3 Windows & Balconies
+      drawBlock(bX + 3.2, bY + bD, 12.4, 5.5, 2.8, 0.5, '#475569', '#334155', '#1E293B', targetCtx);
+      drawBlock(bX + 3.0, bY + bD + 2.6, 12.9, 5.9, 0.2, 2.0, 'rgba(180, 220, 245, 0.65)', 'rgba(140, 190, 225, 0.7)', 'rgba(140, 190, 225, 0.7)', targetCtx);
+      drawBlock(bX + 3.8, bY + bD + 0.05, 13.4, 4.2, 0.2, 4.6, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 4.1, bY + bD + 0.15, 13.7, 3.6, 0.1, 4.0, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+
+      drawBlock(bX + 17.0, bY + bD, 12.4, 5.5, 2.8, 0.5, '#475569', '#334155', '#1E293B', targetCtx);
+      drawBlock(bX + 16.8, bY + bD + 2.6, 12.9, 5.9, 0.2, 2.0, 'rgba(180, 220, 245, 0.65)', 'rgba(140, 190, 225, 0.7)', 'rgba(140, 190, 225, 0.7)', targetCtx);
+      drawBlock(bX + 17.6, bY + bD + 0.05, 13.4, 4.2, 0.2, 4.6, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 17.9, bY + bD + 0.15, 13.7, 3.6, 0.1, 4.0, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+
+      // Center windows on Floor 2 and 3 above entry
+      drawBlock(bX + 11.2, bY + bD + 0.05, 7.5, 3.0, 0.2, 4.2, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 11.4, bY + bD + 0.15, 7.7, 2.6, 0.1, 3.8, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+      drawBlock(bX + 11.2, bY + bD + 0.05, 13.5, 3.0, 0.2, 4.2, '#0F172A', '#020617', '#000000', targetCtx);
+      drawBlock(bX + 11.4, bY + bD + 0.15, 13.7, 2.6, 0.1, 3.8, '#EEF5F9', '#A2C8E0', '#6BA1C4', targetCtx);
+
+
+
+      // 10. Active Transportation & Amenity Infrastructure:
+      // Front yard bicycle parking rack (holding 4 bikes for transit/active commuters)
+      const bikeRackX = bX + 1.2;
+      const bikeRackY = bY + bD + 1.5;
+      drawBlock(bikeRackX, bikeRackY, 0, 4.5, 1.2, 0.4, '#475569', '#334155', '#1E293B', targetCtx);
+      for (let br = 0; br < 3; br++) {
+        drawBlock(bikeRackX + 0.6 + br * 1.5, bikeRackY + 0.3, 0.4, 0.3, 0.6, 2.2, '#94A3B8', '#64748B', '#475569', targetCtx);
+      }
+
+      // Side pedestrian access walkway with bollard lights leading to side units
+      drawFlatRect(startX + 0.5, bY, 1.8, bD, '#CBD5E1', targetCtx);
+      drawBlock(startX + 0.8, bY + 18, 0, 0.6, 0.6, 2.4, '#1F2937', '#111827', '#0F172A', targetCtx);
+      drawBlock(startX + 0.8, bY + 36, 0, 0.6, 0.6, 2.4, '#1F2937', '#111827', '#0F172A', targetCtx);
+
+      // Rear green courtyard, amenity patio & waste enclosure (zero garage parking)
+      drawFlatRect(startX + 1.0, -5, lotWidth - 2.0, 15, '#76AF65', targetCtx);
+      drawFlatRect(startX + 3.0, -3, lotWidth - 6.0, 11, '#CBD5E1', targetCtx);
+      // Resident picnic bench / amenity table in rear courtyard
+      drawBlock(startX + 14.0, 0, 0, 7.5, 3.5, 1.8, '#B45309', '#92400E', '#78350F', targetCtx);
+      // Waste & recycling cart enclosure (3 carts)
+      drawBlock(startX + 2.0, 0, 0, 6.0, 3.5, 3.5, '#78350F', '#5A260C', '#431C08', targetCtx);
+      drawBlock(startX + 2.5, 0.5, 0, 1.4, 1.4, 2.6, '#15803D', '#166534', '#14532D', targetCtx); // Green organics
+      drawBlock(startX + 4.2, 0.5, 0, 1.4, 1.4, 2.6, '#1E40AF', '#1D4ED8', '#1E3A8A', targetCtx); // Blue recycling
+    }
+
     function renderHousesBackground() {
       bgHousesCtx.clearRect(0, 0, bgHousesCanvas.width, bgHousesCanvas.height);
       bgTreesCtx.clearRect(0, 0, bgTreesCanvas.width, bgTreesCanvas.height);
@@ -1051,6 +1331,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const leftC = adjustColor(brand.hex, -15);
         const rightC = adjustColor(brand.hex, -30);
         const roofC = adjustColor(brand.hex, -45);
+
+        // Check if this lot is replaced by an 8-plex multi-unit infill (adds up to 7 8-plexes across any neighbourhood)
+        if (isEightPlexLot(h)) {
+          drawEightPlexInfill(startX, lotWidth, h, bgHousesCtx);
+          continue;
+        }
 
         if (layout === 'suburban_front_driveway') {
           // 1. Backyard cedar privacy fence along property lines & rear boundary
@@ -1278,6 +1564,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const color = edmontonPalette[h % edmontonPalette.length].hex;
         const startX = 8 + h * lotWidth;
 
+        // If lot h is replaced by an 8-plex infill, zero garage parking (100% transit/curbside oriented)
+        if (isEightPlexLot(h)) {
+          continue;
+        }
+
         if (layout === 'suburban_front_driveway') {
           // Spot 1: In front-attached double garage
           assignments.push({
@@ -1366,10 +1657,17 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
       }
 
-      // 2. On-Street Curbside Stalls based on layout
+      // 2. On-Street Curbside Stalls based on layout:
+      // If street has more than 60 dwellings, remove all curbside parking (converted to protected active transportation bike lane)
+      const active8PlexStalls = getEightPlexCount();
+      const currentDwellingsStalls = 12 + active8PlexStalls * 7;
+      if (currentDwellingsStalls > 60) {
+        return assignments; // Zero curbside parking stalls!
+      }
+
       if (layout === 'suburban_front_driveway') {
-        // 10 legal curbside spots situated safely between driveway curb cuts
-        const suburbanStallXs = [47, 78, 108, 139, 169, 200, 230, 261, 291, 322];
+        // 8 legal curbside spots situated safely between driveway curb cuts (excluding 30m ETS bus stop)
+        const suburbanStallXs = [47, 78, 108, 139, 169, 200, 230, 261];
         for (let s = 0; s < suburbanStallXs.length; s++) {
           assignments.push({
             type: typesX[s % 3],
@@ -1382,12 +1680,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           });
         }
       } else if (layout === 'contemporary_townhomes') {
-        // 12 stalls in 4 pocket bays of 3 stalls each
+        // 9 stalls in 3 pocket bays of 3 stalls each (4th bay reserved for 30m ETS bus stop)
         const pocketBayXs = [
           46, 68, 90,
           138, 160, 182,
-          230, 252, 274,
-          322, 344, 366
+          230, 252, 274
         ];
         for (let s = 0; s < pocketBayXs.length; s++) {
           assignments.push({
@@ -1401,13 +1698,14 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           });
         }
       } else {
-        // Mature Laned & Infill Skinny: 16 unbroken continuous curbside stalls
+        // Mature Laned & Infill Skinny: 12 continuous curbside stalls outside the 30m ETS bus stop zone
         const curbsideStartX = 47;
         const stallWidth = 16;
         const stallSpacing = 19.8;
         for (let s = 0; s < 16; s++) {
           const stallX = curbsideStartX + s * stallSpacing;
-          if (stallX + stallWidth > 375) break;
+          // 30m ETS Bus Stop clearance zone (x = 295 to 375): no parking stalls permitted
+          if (stallX + stallWidth > 295) break;
           assignments.push({
             type: typesX[s % 3],
             x: stallX,
@@ -1425,8 +1723,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
     let currentDrivewayCap = configRef.current.drivewayCapacity;
     let currentStreetLayout = configRef.current.streetLayout || 'mature_laned';
-    let currentSplitLots = getSplitInfillCount();
-    let currentTotalHomesCount = (6 - Math.floor(currentSplitLots / 2)) + (Math.floor(currentSplitLots / 2) * 2);
+    let currentSplitLots = getEightPlexCount();
+    let currentTotalHomesCount = TOTAL_MIDCENTURY_HOMES;
     let houseCarAssignments = generateHouseCarAssignments(currentDrivewayCap, currentStreetLayout);
     let activeIndices = Array.from({ length: houseCarAssignments.length }, (_, i) => i);
 
@@ -2126,31 +2424,33 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       drawBlock(x + 0.1, y + 0.1, z + 5.5, 1.2, 1.2, 1.4, skin, skin, skin);
     }
 
-    function drawBusStopShelter(x: number, y: number) {
+    function drawBusStopShelter(x: number, y: number, hasFullShelter: boolean = true) {
       // Concrete boarding & waiting pad extending across the boulevard to the curb edge (y: 80 to 93)
       drawFlatRect(x - 2, y - 1, 25, 13.5, '#c5cbd2');
       // High-visibility tactile yellow warning paving strip along the curb edge (y = 91.8 to 93)
       drawFlatRect(x - 2, y + 11.2, 25, 1.2, '#ffc72c');
 
-      // Four dark steel stanchion posts for the bus stop shelter (y: y + 0.8 and y + 7.5)
-      const postColor = '#1f2937';
-      drawBlock(x + 1, y + 0.8, 0, 1.2, 1.2, 9.5, postColor, postColor, postColor);
-      drawBlock(x + 17, y + 0.8, 0, 1.2, 1.2, 9.5, postColor, postColor, postColor);
-      drawBlock(x + 1, y + 7.2, 0, 1.2, 1.2, 9.5, postColor, postColor, postColor);
-      drawBlock(x + 17, y + 7.2, 0, 1.2, 1.2, 9.5, postColor, postColor, postColor);
+      if (hasFullShelter) {
+        // Four dark steel stanchion posts for the bus stop shelter (y: y + 0.8 and y + 7.5)
+        const postColor = '#1f2937';
+        drawBlock(x + 1, y + 0.8, 0, 1.2, 1.2, 9.5, postColor, postColor, postColor);
+        drawBlock(x + 17, y + 0.8, 0, 1.2, 1.2, 9.5, postColor, postColor, postColor);
+        drawBlock(x + 1, y + 7.2, 0, 1.2, 1.2, 9.5, postColor, postColor, postColor);
+        drawBlock(x + 17, y + 7.2, 0, 1.2, 1.2, 9.5, postColor, postColor, postColor);
 
-      // Wooden waiting bench inside shelter
-      drawBlock(x + 3.5, y + 1.8, 0, 11, 2.5, 2.8, '#b45309', '#92400e', '#78350f');
+        // Wooden waiting bench inside shelter
+        drawBlock(x + 3.5, y + 1.8, 0, 11, 2.5, 2.8, '#b45309', '#92400e', '#78350f');
 
-      // Rear tempered glass wind-screen panels
-      drawBlock(x + 2, y + 1.0, 0.5, 15, 0.6, 8.5, 'rgba(180, 220, 245, 0.45)', 'rgba(140, 190, 225, 0.5)', 'rgba(140, 190, 225, 0.5)');
+        // Rear tempered glass wind-screen panels
+        drawBlock(x + 2, y + 1.0, 0.5, 15, 0.6, 8.5, 'rgba(180, 220, 245, 0.45)', 'rgba(140, 190, 225, 0.5)', 'rgba(140, 190, 225, 0.5)');
 
-      // Left wind-screen panel
-      drawBlock(x + 1.2, y + 1.6, 0.5, 0.6, 5.5, 8.5, 'rgba(180, 220, 245, 0.45)', 'rgba(140, 190, 225, 0.5)', 'rgba(140, 190, 225, 0.5)');
+        // Left wind-screen panel
+        drawBlock(x + 1.2, y + 1.6, 0.5, 0.6, 5.5, 8.5, 'rgba(180, 220, 245, 0.45)', 'rgba(140, 190, 225, 0.5)', 'rgba(140, 190, 225, 0.5)');
 
-      // Curved / cantilevered canopy roof (ETS Blue top fascia)
-      drawBlock(x - 0.5, y + 0.3, 9.5, 20, 9.2, 1.2, '#005087', '#003a63', '#002844');
-      drawBlock(x - 0.2, y + 0.6, 10.7, 19.4, 8.6, 0.6, '#0081bc', '#0066aa', '#005087');
+        // Curved / cantilevered canopy roof (ETS Blue top fascia)
+        drawBlock(x - 0.5, y + 0.3, 9.5, 20, 9.2, 1.2, '#005087', '#003a63', '#002844');
+        drawBlock(x - 0.2, y + 0.6, 10.7, 19.4, 8.6, 0.6, '#0081bc', '#0066aa', '#005087');
+      }
 
       // ETS Bus Stop Sign Post at the curb edge of the boulevard
       const signPostX = x + 20.5;
@@ -2161,7 +2461,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       drawBlock(signPostX - 0.4, signPostY - 0.1, 10.6, 1.6, 2.0, 1.2, '#ffffff', '#e5e7eb', '#ffffff');
 
       // Floating Stop Label
-      const labelPos = project(x + 10, y + 5, 16);
+      const labelPos = project(x + 10, y + 5, hasFullShelter ? 16 : 14);
       ctx!.save();
       ctx!.font = 'bold 8.5px system-ui, -apple-system, sans-serif';
       const labelText = 'ETS Bus Stop';
@@ -2213,9 +2513,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       };
     });
 
-    const microMobility = Array.from({ length: 12 }, (_, i) => ({
+    const microMobility = Array.from({ length: 24 }, (_, i) => ({
       type: i % 2 === 0 ? 'bike' : 'scooter',
-      x: -50 - i * 65,
+      x: -50 - i * 42,
       y: i % 2 === 0 ? 110 : 124,
       baseY: i % 2 === 0 ? 110 : 124,
       targetY: i % 2 === 0 ? 110 : 124,
@@ -2269,25 +2569,45 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       { type: 'boxTruck', x: -420, y: 124, baseY: 124, targetY: 124, w: 24, d: 8.5, baseSpeed: 0.85, speed: 0.85, color: '', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false }
     ];
 
-    // Secondary frequent ETS Bus (injected when dwellings > 10)
-    const extraEtsBus: RoadObstacle = {
-      type: 'etsBus',
-      x: -360,
-      y: 110,
-      baseY: 110,
-      targetY: 110,
-      w: 33,
-      d: 9,
-      baseSpeed: 0.95,
-      speed: 0.95,
-      color: '#005087',
-      stuckTimer: 0,
-      honkCooldown: 0,
-      honkBubbleTimer: 0,
-      isCircling: false,
-      isExtraBus: true,
-      busStopState: 'approaching'
-    };
+    // Additional ETS Buses pool (injected for every three 8-plexes on the road)
+    const extraEtsBuses: RoadObstacle[] = [
+      {
+        type: 'etsBus',
+        x: -360,
+        y: 110,
+        baseY: 110,
+        targetY: 110,
+        w: 33,
+        d: 9,
+        baseSpeed: 0.95,
+        speed: 0.95,
+        color: '#005087',
+        stuckTimer: 0,
+        honkCooldown: 0,
+        honkBubbleTimer: 0,
+        isCircling: false,
+        isExtraBus: true,
+        busStopState: 'approaching'
+      },
+      {
+        type: 'etsBus',
+        x: -600,
+        y: 110,
+        baseY: 110,
+        targetY: 110,
+        w: 33,
+        d: 9,
+        baseSpeed: 0.95,
+        speed: 0.95,
+        color: '#005087',
+        stuckTimer: 0,
+        honkCooldown: 0,
+        honkBubbleTimer: 0,
+        isCircling: false,
+        isExtraBus: true,
+        busStopState: 'approaching'
+      }
+    ];
 
     // Cruising / Circling vehicle pool: activates as street parking fills up, creating realistic traffic searching for spots
     const cruisingVehiclePool: RoadObstacle[] = [
@@ -2467,7 +2787,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     }
 
     function updateDeliveryPool(weeklyDeliveries: number) {
-      const numVansNeeded = Math.min(3, Math.max(1, Math.ceil(weeklyDeliveries / 8)));
+      const numVansNeeded = Math.min(5, Math.max(1, Math.ceil(weeklyDeliveries / 8)));
       while (deliveryVansList.length < numVansNeeded) {
         const id = deliveryVansList.length;
         const houseIdx = (id * 3) % TOTAL_MIDCENTURY_HOMES;
@@ -2479,9 +2799,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     }
 
     function isCurbsideSpotOccupied(targetStopX: number, obstacles: RoadObstacle[] = []): boolean {
-      // Zone checks: bus stop zone (x: 300 - 350) and fire hydrant zone (x: 20 - 35) prohibit curbside parking
-      if (targetStopX + 21 >= 300 && targetStopX <= 350) return true;
-      if (targetStopX + 21 >= 20 && targetStopX <= 35) return true;
+      // Zone checks: 30m ETS bus stop zone (x: 295 - 375) and fire hydrant zone (x: 10 - 45) prohibit curbside parking
+      if (targetStopX + 21 >= 295 && targetStopX <= 375) return true;
+      if (targetStopX + 21 >= 10 && targetStopX <= 45) return true;
 
       for (let i = 0; i < obstacles.length; i++) {
         const obs = obstacles[i];
@@ -2781,7 +3101,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     ) {
       if (van.state === 'APPROACHING') {
         if (van.x > van.targetStopX - 60) {
-          const occupied = isCurbsideSpotOccupied(van.targetStopX, allObstacles);
+          const active8PlexVan = getEightPlexCount();
+          const currentDwellingsVan = 12 + active8PlexVan * 7;
+          const occupied = currentDwellingsVan > 60 || isCurbsideSpotOccupied(van.targetStopX, allObstacles);
           van.targetY = occupied ? 104 : 94;
         }
 
@@ -3020,11 +3342,17 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         shuffleSlots();
       }
 
-      // Check if driveway capacity or street layout changed
+      // Check if driveway capacity, street layout, or 8-plex home density count changed
       const newStreetLayout = configRef.current.streetLayout || 'mature_laned';
-      if (currentDrivewayCap !== configRef.current.drivewayCapacity || currentStreetLayout !== newStreetLayout) {
+      const newSplitLots = getEightPlexCount();
+      if (
+        currentDrivewayCap !== configRef.current.drivewayCapacity ||
+        currentStreetLayout !== newStreetLayout ||
+        currentSplitLots !== newSplitLots
+      ) {
         currentDrivewayCap = configRef.current.drivewayCapacity;
         currentStreetLayout = newStreetLayout;
+        currentSplitLots = newSplitLots;
         rebuildResidentsAndFlowers();
         houseCarAssignments = generateHouseCarAssignments(currentDrivewayCap, currentStreetLayout);
         activeIndices = Array.from({ length: houseCarAssignments.length }, (_, i) => i);
@@ -3033,7 +3361,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         renderHousesBackground();
       }
 
-      const simTotalDwellings = TOTAL_MIDCENTURY_HOMES;
+      const num8PlexSim = getEightPlexCount();
+      const simTotalDwellings = 12 + num8PlexSim * 7;
 
       const activeHouseholdCars = Math.round(configRef.current.householdCarsPerHome * simTotalDwellings);
       const activeVisitorCars = Math.round(configRef.current.visitorPassesPerHome * simTotalDwellings);
@@ -3053,21 +3382,32 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         setOccupiedGaragesCount(occupiedGaragesNow);
       }
 
-      const weeklyDeliveries = Math.round(configRef.current.deliveriesPerHomePerWeek * simTotalDwellings);
+      // Deliveries: For every three 8-plexes, increase weekly deliveries to 2.0+
+      const numThree8PlexTiers = Math.floor(num8PlexSim / 3);
+      const effectiveDeliveriesRate = numThree8PlexTiers >= 1
+        ? Math.max(configRef.current.deliveriesPerHomePerWeek, 2.0 + (numThree8PlexTiers - 1) * 1.0)
+        : configRef.current.deliveriesPerHomePerWeek;
+      const weeklyDeliveries = Math.round(effectiveDeliveriesRate * simTotalDwellings);
       updateDeliveryPool(weeklyDeliveries);
 
-      // Off-street garage capacity: in detached garages & rear parking pads backing onto gravel back alley
-      const totalGarageSpots = Math.min(2, Math.max(1, currentDrivewayCap)) * simTotalDwellings;
+      // Off-street garage capacity: in detached garages & driveways for single-family homes (8-plexes have 0 garage parking)
+      const singleFamilyLotsCount = Math.max(0, TOTAL_MIDCENTURY_HOMES - num8PlexSim);
+      const totalGarageSpots = Math.min(2, Math.max(1, currentDrivewayCap)) * singleFamilyLotsCount;
       const calculatedDemand = Math.max(0, totalContinuousCars - totalGarageSpots);
       const curbsideDemand = propCurbsideDemandRef.current !== undefined
         ? propCurbsideDemandRef.current
         : calculatedDemand;
-      const currentLegalCurbsideStalls = propCurbsideStallsCapacityRef.current !== undefined
-        ? propCurbsideStallsCapacityRef.current
-        : BASE_LEGAL_CURBSIDE_STALLS;
-      const gaugePercent = propCurbsidePctRef.current !== undefined
-        ? propCurbsidePctRef.current
-        : (curbsideDemand / currentLegalCurbsideStalls) * 100;
+      const hasProtectedBikeLane = simTotalDwellings > 60;
+      const currentLegalCurbsideStalls = hasProtectedBikeLane
+        ? 0
+        : (propCurbsideStallsCapacityRef.current !== undefined
+          ? propCurbsideStallsCapacityRef.current
+          : BASE_LEGAL_CURBSIDE_STALLS);
+      const gaugePercent = currentLegalCurbsideStalls > 0
+        ? (propCurbsidePctRef.current !== undefined
+          ? propCurbsidePctRef.current
+          : (curbsideDemand / currentLegalCurbsideStalls) * 100)
+        : 0;
 
       const roundedDemand = Math.round(curbsideDemand);
       if (roundedDemand !== lastReportedDemand) {
@@ -3144,26 +3484,30 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         setCirclingCarCount(currentCirclingCount);
       }
 
-      // ETS Transit Frequency: When there are greater than 10 dwellings on the street,
-      // transit demand triggers higher ETS bus frequency (extra bus running in rotation)
-      const hasHighTransitDemand = simTotalDwellings > 10;
-      const isExtraBusActive = activeVehicles.includes(extraEtsBus);
+      // ETS Transit Frequency: For every three 8-plexes, add an additional ETS bus to the road
+      const additionalEtsBusesNeeded = Math.floor(num8PlexSim / 3);
 
-      if (hasHighTransitDemand && !isExtraBusActive) {
-        extraEtsBus.x = -360 - Math.random() * 80;
-        extraEtsBus.y = 110;
-        extraEtsBus.baseY = 110;
-        extraEtsBus.targetY = 110;
-        extraEtsBus.speed = 0.95;
-        extraEtsBus.isBurning = false;
-        extraEtsBus.busStopState = 'approaching';
-        extraEtsBus.busDwellTimer = 0;
-        extraEtsBus.searchingBubbleTimer = 90;
-        activeVehicles.push(extraEtsBus);
-      } else if (!hasHighTransitDemand && isExtraBusActive) {
-        const extraIdx = activeVehicles.indexOf(extraEtsBus);
-        if (extraIdx !== -1 && (extraEtsBus.x > blockLength + 40 || extraEtsBus.x < 0)) {
-          activeVehicles.splice(extraIdx, 1);
+      for (let b = 0; b < extraEtsBuses.length; b++) {
+        const extraBus = extraEtsBuses[b];
+        const isActive = activeVehicles.includes(extraBus);
+        const shouldBeActive = b < additionalEtsBusesNeeded;
+
+        if (shouldBeActive && !isActive) {
+          extraBus.x = -360 - b * 240 - Math.random() * 60;
+          extraBus.y = 110;
+          extraBus.baseY = 110;
+          extraBus.targetY = 110;
+          extraBus.speed = 0.95;
+          extraBus.isBurning = false;
+          extraBus.busStopState = 'approaching';
+          extraBus.busDwellTimer = 0;
+          extraBus.searchingBubbleTimer = 90;
+          activeVehicles.push(extraBus);
+        } else if (!shouldBeActive && isActive) {
+          const extraIdx = activeVehicles.indexOf(extraBus);
+          if (extraIdx !== -1 && (extraBus.x > blockLength + 40 || extraBus.x < -100)) {
+            activeVehicles.splice(extraIdx, 1);
+          }
         }
       }
 
@@ -3184,7 +3528,34 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       ctx!.drawImage(bgGroundCanvas, 0, 0);
 
       const activePedCount = Math.min(pedestrians.length, Math.floor(2 + totalParkedCars * 0.45));
-      const activeMicroCount = Math.min(microMobility.length, Math.floor(totalParkedCars * 0.35));
+      // Micro-mobility: For every three 8-plexes, double the bikes and scooters on the road
+      const microMultiplier = Math.pow(2, numThree8PlexTiers);
+      const baseMicroCount = Math.max(3, Math.floor(totalParkedCars * 0.35));
+      const activeMicroCount = Math.min(microMobility.length, baseMicroCount * microMultiplier);
+
+      // Route all bikes and scooters onto the protected bike lane when dwellings > 60
+      for (let i = 0; i < microMobility.length; i++) {
+        const mm = microMobility[i];
+        if (hasProtectedBikeLane) {
+          const targetBikeY = (i % 2 === 0 ? 95.8 : 98.4);
+          mm.baseY = targetBikeY;
+          mm.targetY = targetBikeY;
+          if (Math.abs(mm.y - targetBikeY) > 0.4) {
+            mm.y += (targetBikeY - mm.y) * 0.15;
+          } else {
+            mm.y = targetBikeY;
+          }
+        } else {
+          const targetRoadY = (i % 2 === 0 ? 110 : 124);
+          mm.baseY = targetRoadY;
+          mm.targetY = targetRoadY;
+          if (Math.abs(mm.y - targetRoadY) > 0.4) {
+            mm.y += (targetRoadY - mm.y) * 0.15;
+          } else {
+            mm.y = targetRoadY;
+          }
+        }
+      }
 
       // 1. Pedestrian Movement: Peaceful Sidewalk Stroll
       const activeRoadProtesters: { x: number; y: number }[] = [];
@@ -3430,16 +3801,20 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         if (emergencyApproaching) {
           targetLane = (A.baseY || 110) < 118 ? 108 : 126;
           isPullingOver = true;
-        } else if (A.type === 'etsBus' && simTotalDwellings > 11 && !A.isBurning) {
-          // Curbside pull-in / pull-out navigation for ETS Bus
-          // When approaching or dwelling at bus stop (x: 250 - 325) with passengers, steer into curbside stall lane (y = 94.5)
-          const isAtStopZone = A.x >= 250 && A.x <= 325;
-          if ((A.busStopState === 'approaching' && isAtStopZone && busStopPassengerCount > 0) || A.busStopState === 'dwelling') {
-            targetLane = 94.5;
-            isPullingOver = true;
-          } else if (A.busStopState === 'departing' || A.x > 325) {
-            // Once passengers have boarded/alighted, merge back out into the standard roadway lane
+        } else if (A.type === 'etsBus' && !A.isBurning) {
+          // When protected bike lane is present (>60 dwellings), ETS bus halts in-lane (y = 110) at floating platform
+          if (hasProtectedBikeLane) {
             targetLane = A.baseY || 110;
+          } else {
+            const anotherBusDwelling = activeVehicles.some(v => v !== A && v.type === 'etsBus' && v.busStopState === 'dwelling');
+            const isAtStopZone = A.x >= 250 && A.x <= 335;
+            if (!anotherBusDwelling && ((A.busStopState === 'approaching' && isAtStopZone && busStopPassengerCount > 0) || A.busStopState === 'dwelling')) {
+              targetLane = 94.5;
+              isPullingOver = true;
+            } else if (A.busStopState === 'departing' || A.x > 335 || anotherBusDwelling) {
+              // Once passengers have boarded/alighted or if another bus is dwelling, merge back out into the standard roadway lane
+              targetLane = A.baseY || 110;
+            }
           }
         } else if (!A.parkingState || A.parkingState === 'cruising') {
           let isBlockedInLane = false;
@@ -3506,10 +3881,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           ? Math.max(0.38, (A.baseSpeed || 0.7) * 0.65)
           : (A.baseSpeed || BASE_CAR_SPEED);
 
-        // ETS Bus Stop Dwelling & Curbside Loading/Unloading (active if dwellings > 11 and bus shelter is present at x = 324)
-        const hasBusStop = simTotalDwellings > 11;
-        if (A.type === 'etsBus' && hasBusStop) {
-          const stopTargetX = 308;
+        // ETS Bus Stop Dwelling & Curbside Loading/Unloading at designated 30m yellow curb
+        if (A.type === 'etsBus') {
+          const stopTargetX = 312;
           if (A.busStopState === 'approaching' || !A.busStopState) {
             // Only initiate curbside pull-over stop if passengers are waiting
             if (busStopPassengerCount > 0) {
@@ -3639,6 +4013,17 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if (A.type === 'etsBus') {
             A.busStopState = 'approaching';
             A.busDwellTimer = 0;
+            A.isBurning = false;
+          }
+          if (A.isExtraBus) {
+            const extraBusIdx = extraEtsBuses.indexOf(A);
+            if (extraBusIdx >= additionalEtsBusesNeeded) {
+              const idx = activeVehicles.indexOf(A);
+              if (idx !== -1) {
+                activeVehicles.splice(idx, 1);
+              }
+              continue;
+            }
           }
           if (A.stuckTimer !== undefined) {
             A.stuckTimer = 0;
@@ -4309,23 +4694,23 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       }
 
       // 9. ETS Bus Stop Shelter & Waiting/Boarding Passengers
-      const hasBusStopShelter = simTotalDwellings > 11;
-      if (hasBusStopShelter) {
-        if (busStopPassengerRespawnTimer > 0) {
-          busStopPassengerRespawnTimer--;
-          if (busStopPassengerRespawnTimer === 0) {
-            busStopPassengerCount = 2;
-          }
+      // The 30m ETS Bus Stop zone is permanently active along the street
+      if (busStopPassengerRespawnTimer > 0) {
+        busStopPassengerRespawnTimer--;
+        if (busStopPassengerRespawnTimer === 0) {
+          busStopPassengerCount = 2;
         }
+      }
 
-        renderQueue.push({
-          type: 'busStopShelter',
-          x: 324,
-          y: 80.5,
-          w: 20,
-          d: 9.5,
-          depthKey: getIsometricDepthKey(324, 80.5, 20, 9.5)
-        });
+      renderQueue.push({
+        type: 'busStopShelter',
+        x: 324,
+        y: 80.5,
+        w: 20,
+        d: 9.5,
+        hasFullShelter: simTotalDwellings > 11,
+        depthKey: getIsometricDepthKey(324, 80.5, 20, 9.5)
+      });
 
         const dwellingBus = activeVehicles.find(v => v.type === 'etsBus' && v.busStopState === 'dwelling');
         if (dwellingBus) {
@@ -4378,7 +4763,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             });
           }
         }
-      }
 
       // 10. Update & include residents walking from parked cars to house doorways
       for (let i = parkedWalkers.length - 1; i >= 0; i--) {
@@ -4436,7 +4820,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       // Render all items in exact depth order
       for (const item of renderQueue) {
         if (item.type === 'busStopShelter') {
-          drawBusStopShelter(item.x, item.y);
+          drawBusStopShelter(item.x, item.y, item.hasFullShelter !== false);
         } else if (item.type === 'policeOfficer') {
           drawPedestrian(item.x, item.y, 0, '#002B49', 'officer');
         } else if (item.type === 'pedestrian') {
@@ -4563,12 +4947,19 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     };
   }, [playHonk, playCriticalAlarm]);
 
-  const totalDwellings = config.splitInfillLots !== undefined ? 10 + config.splitInfillLots : TOTAL_MIDCENTURY_HOMES;
-  const totalLegalCurbsideStalls = TOTAL_LEGAL_CURBSIDE_STALLS;
+  const num8PlexCount = Math.min(7, Math.max(0, config.splitInfillLots ?? 0));
+  const totalDwellings = 12 + num8PlexCount * 7;
+  const hasProtectedBikeLane = totalDwellings > 60;
+  const totalLegalCurbsideStalls = hasProtectedBikeLane ? 0 : TOTAL_LEGAL_CURBSIDE_STALLS;
+
+  const numThree8PlexTiers = Math.floor(num8PlexCount / 3);
+  const effectiveDeliveriesPerHome = numThree8PlexTiers >= 1
+    ? Math.max(config.deliveriesPerHomePerWeek, 2.0 + (numThree8PlexTiers - 1) * 1.0)
+    : config.deliveriesPerHomePerWeek;
 
   const activeHouseholdCars = Math.round(config.householdCarsPerHome * totalDwellings);
   const activeVisitorCars = Math.round(config.visitorPassesPerHome * totalDwellings);
-  const totalWeeklyDeliveries = Math.round(config.deliveriesPerHomePerWeek * totalDwellings);
+  const totalWeeklyDeliveries = Math.round(effectiveDeliveriesPerHome * totalDwellings);
 
   // Notify parent of simulation live metrics for the question-overlay drawer
   useEffect(() => {

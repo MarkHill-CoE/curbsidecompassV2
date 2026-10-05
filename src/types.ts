@@ -11,7 +11,7 @@ export interface SurveyQuestion {
   id: string;
   number: number;
   text: string;
-  category: 'residential' | 'visitors' | 'finance' | 'commercial' | 'pricing' | 'enforcement' | 'revenue' | 'demographics' | 'location';
+  category: 'residential' | 'visitors' | 'finance' | 'commercial' | 'pricing' | 'enforcement' | 'revenue' | 'demographics' | 'location' | 'Proximity to Destination' | (string & {});
   type?: 'choice' | 'text';
   placeholder?: string;
   helperText?: string;
@@ -28,7 +28,7 @@ export interface SimulationConfig {
   householdCarsPerHome: number; // 0 - 5 (default 2.5)
   visitorPassesPerHome: number; // 0 - 5 (default 0.5)
   drivewayCapacity: number; // 1 - 2 (single-car wide: 1 or 2 tandem)
-  splitInfillLots?: number; // 2 - 12 (increasing by 2 for each lot split, default 2)
+  splitInfillLots?: number; // 0 - 7 (number of 8-plex multi-unit infill buildings replacing houses, default 0)
   deliveriesPerHomePerWeek: number; // 1 - 4 (default 1.0)
   enforcementLevel: 'strict' | 'standard' | 'lenient';
   cruisingTrafficLevel: 'low' | 'moderate' | 'high';

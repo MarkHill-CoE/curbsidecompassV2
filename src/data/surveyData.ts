@@ -4,8 +4,7 @@ import { getTypologyFromPostalCode, getStreetLayoutInfo } from './edmontonNeighb
 export const INITIAL_SIM_CONFIG: SimulationConfig = {
   householdCarsPerHome: 2.0,
   visitorPassesPerHome: 0.3333, // Calibrated to 60% default starting curbside occupancy across all neighbourhood typologies
-  drivewayCapacity: 2,
-  splitInfillLots: 2,
+  splitInfillLots: 0,
   deliveriesPerHomePerWeek: 1.0,
   enforcementLevel: 'standard',
   cruisingTrafficLevel: 'moderate',
@@ -48,7 +47,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         y: 0,
         hint: 'Because street parking is free, more vehicles park on the street.',
         simEffects: {
-          drivewayCapacity: 1,
+          drivewayCapacity: 0.75,
           householdCarsPerHome: 2.6
         }
       }
@@ -64,7 +63,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         id: 'q2_a',
         label: 'Yes',
         x: 0,
-        y: -3,
+        y: -1,
         hint: 'Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.',
         simEffects: {
           drivewayCapacity: 2,
@@ -75,7 +74,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         id: 'q2_b',
         label: 'No',
         x: 0,
-        y: 3,
+        y: -3,
         hint: 'Homes can get permits for 3 or more vehicles, so more cars end up parked along the curb.',
         simEffects: {
           drivewayCapacity: 1,
@@ -93,22 +92,22 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       {
         id: 'q3_a',
         label: 'Yes',
-        x: 0,
+        x: 2,
         y: 2,
         hint: 'Allows visitors, family, and service providers equal access to park near the home they are visiting.',
         simEffects: {
-          visitorPassesPerHome: 1.2,
+          visitorPassesPerHome: 1.75,
           enforcementLevel: 'standard'
         }
       },
       {
         id: 'q3_b',
         label: 'No',
-        x: 0,
+        x: -2,
         y: -2,
         hint: 'Prioritizes street parking for residents, reducing competition from visitor and service vehicles.',
         simEffects: {
-          visitorPassesPerHome: 0.3,
+          visitorPassesPerHome: 0.75,
           enforcementLevel: 'strict'
         }
       }
@@ -117,14 +116,14 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q4',
     number: 4,
-    category: 'enforcement',
+    category: 'Proximity to Destination',
     text: 'When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking (within a few blocks)?',
     options: [
       {
         id: 'q4_a',
         label: 'Yes',
-        x: 0,
-        y: 3,
+        x: -2,
+        y: -3,
         hint: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
         simEffects: {
           cruisingTrafficLevel: 'high',
@@ -135,7 +134,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         id: 'q4_b',
         label: 'No',
         x: 0,
-        y: -3,
+        y: 3,
         hint: 'Protects nearby residential street parking for residents and guests near major destinations.',
         simEffects: {
           cruisingTrafficLevel: 'low',
@@ -154,7 +153,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         id: 'q5_a',
         label: 'On my Block',
         x: 0,
-        y: -2,
+        y: 3,
         hint: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
         simEffects: {
           drivewayCapacity: 2,
@@ -165,7 +164,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         id: 'q5_b',
         label: 'More possible spaces fall within the distance you consider acceptable.',
         x: 0,
-        y: 2,
+        y: -2,
         hint: 'Increases available parking options by extending acceptable parking distance into the wider neighbourhood.',
         simEffects: {
           drivewayCapacity: 1,
@@ -184,18 +183,18 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         id: 'q6_a',
         label: 'Yes households with no private parking should get priority for permits',
         x: 2,
-        y: -3,
+        y: 4,
         hint: 'Prioritizes street parking permits for households with fewer off-street parking alternatives.',
         simEffects: {
-          drivewayCapacity: 2,
+          drivewayCapacity: 2.5,
           enforcementLevel: 'strict'
         }
       },
       {
         id: 'q6_b',
         label: 'No, households should have the same eligibility, whether or not they have private parking.',
-        x: -2,
-        y: 3,
+        x: 1,
+        y: 2,
         hint: 'Ensures equal permit eligibility for all households regardless of their private parking arrangements.',
         simEffects: {
           drivewayCapacity: 1,
@@ -235,13 +234,14 @@ export function calculateSimulationMetricsFromAnswers(
     (answers['q9_layout'] as StreetLayoutTypology) ||
     (answers['q0'] ? getTypologyFromPostalCode(answers['q0']) : (answers['q9'] ? getTypologyFromPostalCode(answers['q9']) : 'mature_laned'));
 
-  const layoutInfo = getStreetLayoutInfo(activeLayout);
-  const curbsideStallsCapacity = layoutInfo.curbsideCapacity;
-
   // Dwellings (Home Density):
-  // splitInfillLots range 2 to 12 in slider (min 2 = 12 dwellings, max 12 = 22 dwellings)
-  const splitLots = overrides.splitInfillLots ?? (activeLayout === 'infill_skinny' ? 6 : 2);
-  const totalDwellings = 10 + splitLots;
+  // splitInfillLots range 0 to 7 (adds up to 7 8-plex multi-unit infill buildings replacing houses on 15.6m lots)
+  const num8Plex = Math.min(7, Math.max(0, overrides.splitInfillLots ?? (activeLayout === 'infill_skinny' ? 2 : 0)));
+  const totalDwellings = 12 + num8Plex * 7;
+  const hasProtectedBikeLane = totalDwellings > 60;
+
+  const layoutInfo = getStreetLayoutInfo(activeLayout);
+  const curbsideStallsCapacity = hasProtectedBikeLane ? 0 : layoutInfo.curbsideCapacity;
 
   // Household Cars:
   // Baseline cars per home (~2.0, modified by q2 unlimited permits)
@@ -262,9 +262,9 @@ export function calculateSimulationMetricsFromAnswers(
     : baseDrivewayCap;
 
   // Private off-street capacity (garages / private driveways)
-  // When drivewayCap is 0: 0 off-street parking -> all cars park on the curb!
-  // When drivewayCap > 0: garages absorb up to ~85% of their capacity
-  const totalOffStreetStalls = drivewayCap * totalDwellings;
+  // 8-Plex lots have zero garage parking (100% transit/curbside oriented under Edmonton missing-middle zoning)
+  const singleFamilyHomes = Math.max(0, 12 - num8Plex);
+  const totalOffStreetStalls = drivewayCap * singleFamilyHomes;
   const occupiedGarages = drivewayCap === 0
     ? 0
     : Math.min(householdCars, Math.round(totalOffStreetStalls * 0.85));
@@ -285,13 +285,17 @@ export function calculateSimulationMetricsFromAnswers(
   // Visitors park on the street
   const visitorCurbsideDemand = visitorDemand;
 
-  // Deliveries:
+  // Deliveries: For every three 8-plexes, increase weekly deliveries to 2.0+
+  const numThree8PlexTiers = Math.floor(num8Plex / 3);
   let baseDeliveriesPerWeek = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
   if (answers['q3'] === 'q3_b') baseDeliveriesPerWeek += 1.5;
   if (answers['q3'] === 'q3_a') baseDeliveriesPerWeek = 1.0;
+  if (numThree8PlexTiers >= 1) {
+    baseDeliveriesPerWeek = Math.max(baseDeliveriesPerWeek, 2.0 + (numThree8PlexTiers - 1) * 1.0);
+  }
 
   const deliveriesPerWeek = overrides.deliveriesPerHomePerWeek !== undefined
-    ? overrides.deliveriesPerHomePerWeek
+    ? (numThree8PlexTiers >= 1 ? Math.max(overrides.deliveriesPerHomePerWeek, 2.0 + (numThree8PlexTiers - 1) * 1.0) : overrides.deliveriesPerHomePerWeek)
     : baseDeliveriesPerWeek;
 
   const totalWeeklyDeliveries = Math.round(deliveriesPerWeek * totalDwellings);
@@ -322,18 +326,18 @@ export function calculateSimulationMetricsFromAnswers(
 
   // Q3: Visitor Access
   if (answers['q3'] === 'q3_a') {
-    policyDemandShift -= 2.0;
+    policyDemandShift -= 3.0;
     enforcement = 'standard';
   } else if (answers['q3'] === 'q3_b') {
-    policyDemandShift += 2.0;
+    policyDemandShift += 3.0;
   }
 
   // Q4: Parking Proximity to Destination
   if (answers['q4'] === 'q4_a') {
-    policyDemandShift -= 2.5;
+    policyDemandShift = 2.5;
     cruisingLevel = 'high';
   } else if (answers['q4'] === 'q4_b') {
-    policyDemandShift += 2.5;
+    policyDemandShift = -2.5;
     cruisingLevel = 'low';
   }
 
@@ -346,10 +350,10 @@ export function calculateSimulationMetricsFromAnswers(
 
   // Q6: Residential Parking Permit Eligibility
   if (answers['q6'] === 'q6_a') {
-    policyDemandShift -= 3.5;
+    policyDemandShift = -3.5;
     enforcement = 'strict';
   } else if (answers['q6'] === 'q6_b') {
-    policyDemandShift += 3.5;
+    policyDemandShift = 3.5;
     enforcement = 'lenient';
   }
 
@@ -383,12 +387,14 @@ export function calculateSimulationMetricsFromAnswers(
 
   // Clamp demand between 0 and realistic upper bound
   const roundedDemand = Math.max(0, Math.min(36, Math.round(totalCalculatedDemand)));
-  // Calculate percentage: exactly 60% at start, scaling smoothly with demand shifts
-  const curbsidePct = Math.max(0, Math.round((totalCalculatedDemand / curbsideStallsCapacity) * 100));
+  // Calculate percentage: exactly 60% at start, scaling smoothly with demand shifts (0% when stalls converted to bike lane)
+  const curbsidePct = curbsideStallsCapacity > 0
+    ? Math.max(0, Math.round((totalCalculatedDemand / curbsideStallsCapacity) * 100))
+    : 0;
 
   // Circling vehicles: when demand approaches or exceeds capacity
   let circlingCarCount = 0;
-  if (roundedDemand >= curbsideStallsCapacity + 4) {
+  if (curbsideStallsCapacity > 0 && roundedDemand >= curbsideStallsCapacity + 4) {
     circlingCarCount = 5;
   } else if (roundedDemand >= curbsideStallsCapacity + 2) {
     circlingCarCount = 4;
@@ -404,7 +410,7 @@ export function calculateSimulationMetricsFromAnswers(
     householdCarsPerHome,
     visitorPassesPerHome,
     drivewayCapacity: drivewayCap,
-    splitInfillLots: splitLots,
+    splitInfillLots: num8Plex,
     deliveriesPerHomePerWeek: deliveriesPerWeek,
     enforcementLevel: overrides.enforcementLevel || enforcement,
     cruisingTrafficLevel: overrides.cruisingTrafficLevel || cruisingLevel,

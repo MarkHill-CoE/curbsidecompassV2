@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PersonaResult, SimulationConfig } from '../types';
-import { Award, Target, CheckCircle, ChevronRight, Compass, Share2, AlertTriangle, Printer, RotateCcw, Check } from 'lucide-react';
+import { Award, Target, CheckCircle, ChevronRight, Compass, AlertTriangle, Check } from 'lucide-react';
 import { ThankYouView } from './ThankYouView';
 import { PolicyCompassGraph } from './PolicyCompassGraph';
 import { triggerFeedback } from '../utils/feedback';
@@ -31,8 +31,6 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
   const [feedback, setFeedback] = useState<string>('');
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [step, setStep] = useState<1 | 2>(1);
-  const [copied, setCopied] = useState<boolean>(false);
 
   // Auto-save survey results to Firestore on initial render of ResultsView
   React.useEffect(() => {
@@ -94,149 +92,18 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
     );
   }
 
-  // Step 1: Persona Identity
-  if (step === 1) {
-    const handleShare = async () => {
-      triggerFeedback('button');
-      const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://curbside-compass.edmonton.ca';
-      const imageUrl = `${shareUrl}/CurbsideCompass_Social_Media_IMG.jpg`;
-      const priorities = (persona.keyPriorities || []).map(p => `• ${p}`).join('\n');
-      const fullText = [
-        `I took Edmonton's Curbside Compass public engagement tool and got "${persona.title}"!`,
-        config.neighbourhoodName ? `📍 Neighbourhood: ${config.neighbourhoodName}` : '',
-        priorities ? `\nKey Priorities:\n${priorities}` : '',
-        `\n🖼️ Screen Image: ${imageUrl}`,
-        `🔗 Find your persona and have your say: ${shareUrl}`,
-        `\n#YEGcurbside #Edmonton #YEGtraffic #CurbsideCompass`
-      ].filter(Boolean).join('\n');
-
-      const shareData = {
-        title: 'Curbside Compass',
-        text: fullText,
-        url: shareUrl,
-      };
-      
-      if (navigator.share) {
-        try {
-          await navigator.share(shareData);
-        } catch {
-          // Fallback or user canceled share
-        }
-      } else {
-        try {
-          if (navigator.clipboard) {
-            await navigator.clipboard.writeText(fullText);
-          }
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2500);
-        } catch {
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2500);
-        }
-      }
-    };
-
-    return (
-      <div className="w-full max-w-4xl mx-auto h-full flex flex-col justify-between p-2 sm:p-4 overflow-y-auto">
-        {/* Header with Share & Print Controls */}
-        <div className="flex justify-between items-center mb-1 sm:mb-2 flex-shrink-0">
-          <span className="text-[10pt] font-extrabold uppercase tracking-wider text-gray-500">
-            {t('results_stage_tag', 'Resident Profile')}
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => window.print()}
-              aria-label={t('results_print_summary_aria', 'Print or save summary PDF')}
-              className="flex items-center gap-1.5 px-3 py-2 border transition-colors rounded-lg font-bold text-xs sm:text-sm active:scale-95 cursor-pointer bg-white text-gray-700 border-gray-300 hover:bg-gray-100 min-h-[44px]"
-            >
-              <Printer className="w-4 h-4 text-gray-600" />
-              <span className="hidden xs:inline">{t('results_print_btn', 'Print')}</span>
-            </button>
-
-            <button
-              onClick={handleShare}
-              className={`flex items-center gap-1.5 px-3.5 py-2 border transition-colors rounded-lg font-bold text-xs sm:text-sm active:scale-95 cursor-pointer min-h-[44px] ${
-                copied
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                  : 'bg-blue-50 text-[#004B8D] border-blue-200 hover:bg-[#004B8D] hover:text-white'
-              }`}
-            >
-              {copied ? (
-                <>
-                  <CheckCircle className="w-4 h-4 text-emerald-600" />
-                  <span>{t('results_link_copied', 'Link Copied!')}</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-4 h-4" />
-                  <span>{t('results_share_btn', 'Share Persona')}</span>
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-grow flex flex-col gap-2 sm:gap-2.5 min-h-0">
-          {/* Policy Compass Graph */}
-          <div className="bg-white border border-gray-200 rounded-xl p-1.5 sm:p-3 shadow-xs h-[28vh] max-h-[240px] min-h-[160px] [@media(orientation:landscape)_and_(max-height:540px)]:h-[48vh] [@media(orientation:landscape)_and_(max-height:540px)]:max-h-[180px] [@media(orientation:landscape)_and_(max-height:540px)]:min-h-[140px] sm:h-[34vh] sm:max-h-[290px] flex flex-col items-center justify-center flex-shrink-0">
-            <PolicyCompassGraph persona={persona} totalX={totalX} totalY={totalY} />
-          </div>
-
-          {/* Persona Info */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 shadow-xs flex-1 flex flex-col justify-center min-h-0">
-            <div className="flex items-center gap-2.5 mb-2 flex-shrink-0">
-              <div
-                className="w-9 h-9 sm:w-11 sm:h-11 rounded-lg flex items-center justify-center text-white shadow-xs flex-shrink-0"
-                style={{ backgroundColor: persona.badgeColor }}
-              >
-                <Award className="w-6 h-6" />
-              </div>
-              <h2 className="text-[18pt] sm:text-[22pt] font-black text-gray-900 leading-tight tracking-[-0.05em]">
-                {persona.title}
-              </h2>
-            </div>
-            <p className="text-[11pt] font-medium text-gray-800 leading-relaxed overflow-y-auto">
-              {persona.description}
-            </p>
-          </div>
-        </div>
-
-        {/* Next Button Footer - Accessible 48px min touch target */}
-        <div className="mt-2 flex items-center justify-between flex-shrink-0">
-          {onRetake ? (
-            <button
-              type="button"
-              onClick={onRetake}
-              className="px-4 py-2.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[48px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
-              title={t('results_retake_title', 'Retake survey and adjust your answers')}
-            >
-              <RotateCcw className="w-4 h-4 text-gray-500" />
-              <span>{t('results_retake_btn', 'Retake Survey')}</span>
-            </button>
-          ) : <div />}
-          <button
-            onClick={() => setStep(2)}
-            className="flex items-center justify-center gap-2 px-6 py-3 bg-[#004B8D] text-white rounded-xl font-bold shadow hover:bg-[#003866] transition-colors active:scale-95 text-sm sm:text-base min-h-[48px] min-w-[48px] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-[#004B8D]"
-          >
-            <span>{t('results_next_feedback', 'Next: Share Feedback')}</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Step 2: Policy Details & Feedback
+  // Unified Results View: Profile, Compass, Outcomes, and Feedback
   return (
     <div className="w-full max-w-4xl mx-auto h-full flex flex-col justify-between gap-2 p-2 sm:p-3 overflow-y-auto">
       
-      {/* Compass Result Section at the very top */}
-      <div className="bg-white border border-gray-200 rounded-xl p-2.5 sm:p-3 shadow-xs flex-shrink-0">
-        <h3 className="text-[10pt] font-bold uppercase tracking-wider text-gray-500 mb-1 flex items-center gap-1.5">
+      {/* Merged Curbside Compass Result & Outcomes Container */}
+      <div className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 shadow-xs flex flex-col gap-3 flex-shrink-0">
+        <h3 className="text-[10pt] font-bold uppercase tracking-wider text-gray-500 flex items-center gap-1.5 border-b border-gray-100 pb-2">
           <Compass className="w-4 h-4 text-[#0081BC]" />
-          {t('results_compass_result_title', 'Your Curbside Compass Result')}
+          {t('results_compass_result_title', 'Your Resident Profile Result')}
         </h3>
+
+        {/* Persona Profile Header */}
         <div className="bg-blue-50/80 border border-blue-100 rounded-lg p-2.5 sm:p-3 flex flex-col gap-1.5">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-md flex items-center justify-center text-white shadow-xs flex-shrink-0" style={{ backgroundColor: persona.badgeColor }}>
@@ -250,14 +117,16 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
             {persona.description}
           </p>
         </div>
-      </div>
 
-      {/* Two Column Priorities & Parking Program Trade-off Outcomes */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 items-stretch flex-shrink-0">
-        
-        {/* Left Column: You Believe */}
-        <div className="flex flex-col">
-          <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-xs flex flex-col h-full justify-center">
+        {/* Policy Compass Graph (Positioned just under the resident profile header) */}
+        <div className="bg-slate-50/50 border border-gray-200 rounded-xl p-2 sm:p-3 shadow-xs w-full flex flex-col items-center justify-center h-[340px] sm:h-[400px] max-h-[50dvh]">
+          <PolicyCompassGraph persona={persona} totalX={totalX} totalY={totalY} />
+        </div>
+
+        {/* Two Column Priorities & Parking Program Trade-off Outcomes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 items-stretch">
+          {/* Left Column: You Believe */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 flex flex-col justify-center">
             <h4 className="text-[10pt] font-bold uppercase tracking-wider text-gray-600 mb-1.5">
               {t('results_you_believe_title', 'You Believe')}
             </h4>
@@ -270,25 +139,22 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
               ))}
             </ul>
           </div>
-        </div>
 
-        {/* Right Column: Parking Program Trade-off Outcomes */}
-        <div className="flex flex-col">
-          <div className="bg-white border border-gray-200 rounded-xl p-3 shadow-xs flex flex-col h-full justify-center">
+          {/* Right Column: Parking Program Trade-off Outcomes */}
+          <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 flex flex-col justify-center">
             <div className="flex items-center gap-1.5 mb-1.5">
-              <div className="w-6 h-6 rounded-md bg-[#0081BC]/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-5 h-5 rounded-md bg-[#0081BC]/10 flex items-center justify-center flex-shrink-0">
                 <Target className="w-3.5 h-3.5 text-[#0081BC]" />
               </div>
               <h3 className="text-[10pt] font-bold uppercase tracking-wider text-[#004B8D] truncate">
-                {t('results_tradeoff_outcomes_title', t('results_parking_program_outcomes_title', 'Parking Program Trade-off Outcomes'))}
+                {t('results_tradeoff_outcomes_title', t('results_parking_program_outcomes_title', 'Trade-off Outcomes'))}
               </h3>
             </div>
-            <p className="text-[11pt] text-gray-700 leading-normal bg-gray-50 p-2.5 rounded-lg border border-gray-200">
+            <p className="text-[10.5pt] text-gray-700 leading-normal bg-white p-2.5 rounded-md border border-slate-200/80">
               {persona.outcome || persona.description}
             </p>
           </div>
         </div>
-        
       </div>
 
       {/* Feedback Section */}
@@ -394,19 +260,8 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
         </div>
       </div>
 
-      {/* Navigation Footer for Step 2 */}
-      <div className="pt-2 border-t border-gray-200 flex items-center justify-between gap-2.5 mt-auto flex-shrink-0">
-        <button
-          type="button"
-          onClick={() => {
-            triggerFeedback('button');
-            setStep(1);
-          }}
-          className="px-4 py-2.5 border border-gray-300 bg-white hover:bg-gray-100 text-gray-700 rounded-xl text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors cursor-pointer min-h-[48px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
-        >
-          <ChevronRight className="w-4 h-4 rotate-180" />
-          {t('results_back_to_compass', 'Back to Compass')}
-        </button>
+      {/* Navigation Footer */}
+      <div className="pt-2 border-t border-gray-200 flex items-center justify-end gap-2.5 mt-auto flex-shrink-0">
 
         <div className="flex items-center gap-2">
           {submitted ? (

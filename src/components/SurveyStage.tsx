@@ -739,7 +739,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
               className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-2 shadow-xs transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] min-w-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
             >
               <CheckCircle2 className="w-4 h-4 text-[#FFC72C] stroke-[2.5]" />
-              <span>{t('nav_btn_calc_persona', 'See Results')}</span>
+              <span>{t('nav_btn_calc_persona', 'Calculate Resident Profile')}</span>
             </button>
           ) : (
             <button
