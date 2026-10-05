@@ -1,4 +1,160 @@
+/* ==========================================================================
+   0. FONT IMPORT (Open Sans via Google Fonts) & FRAMEWORK
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400..700;1,400..700&display=swap');
 @import "tailwindcss";
+
+/* ==========================================================================
+   1. BASE ROOT & SCALING
+   ========================================================================== */
+
+/* 
+   Set base font size to 100% so it respects user-defined browser font settings 
+   (typically defaults to 16px). NEVER set body font-size in fixed 'px'.
+*/
+html {
+  font-size: 100%;
+  box-sizing: border-box;
+  /* Prevent horizontal layout shifts when text scales up to 200% */
+  overflow-x: hidden;
+  height: 100%;
+  width: 100%;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* ==========================================================================
+   2. ACCESSIBLE BODY TYPOGRAPHY
+   ========================================================================== */
+
+body {
+  /* Set primary font family to Open Sans with clean fallback options */
+  font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  
+  /* 
+     1rem = 16px by default. 
+     Never go below 1rem for primary mobile body text.
+  */
+  font-size: 1rem; 
+  
+  /* 
+     WCAG 1.4.12: Line height must be at least 1.5x font size for body text.
+     Ensures comfortable reading line pitch on small screens.
+  */
+  line-height: 1.5; 
+  
+  /* 
+     WCAG 1.4.3: Ensure text color hits at least 4.5:1 contrast against background.
+     #121212 on white yields ~16:1 contrast ratio.
+  */
+  color: #121212;
+  background-color: #f4f6f8;
+  
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  
+  /* Optimization for legibility and crisp rendering */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   3. HEADINGS (Visual Hierarchy & Fluid Scaling)
+   ========================================================================== */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Open Sans', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #000000;
+  /* Headings require tighter line height than body text for visual grouping */
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+/* 
+   Large text (>= 18pt / 24px or >= 14pt / 18.5px bold) only requires 
+   a minimum 3:1 contrast ratio under WCAG SC 1.4.3.
+*/
+h1 { font-size: 2rem; }    /* 32px equivalent */
+h2 { font-size: 1.625rem; letter-spacing: -0.05em; }/* 26px equivalent */
+h3 { font-size: 1.375rem; letter-spacing: -0.05em; }/* 22px equivalent */
+h4 { font-size: 1.125rem; letter-spacing: -0.05em; }/* 18px equivalent */
+
+/* ==========================================================================
+   4. PARAGRAPHS & SPACING (WCAG 1.4.12)
+   ========================================================================== */
+
+p {
+  margin-top: 0;
+}
+
+/* Secondary / Caption text (Use sparingly) */
+small, .caption {
+  /* Absolute lower floor for secondary text on mobile (14px equivalent) */
+  font-size: 0.875rem; 
+  line-height: 1.4;
+  color: #4a4a4a; /* Maintains > 4.5:1 contrast against white */
+}
+
+/* ==========================================================================
+   5. FORM INPUTS (iOS Auto-Zoom Prevention)
+   ========================================================================== */
+
+/* 
+   CRITICAL FOR MOBILE: 
+   Explicitly setting font-size to 1rem (16px) on form elements prevents 
+   iOS Safari from forcefully zooming in on input focus.
+*/
+input,
+select,
+textarea,
+button {
+  font-family: inherit; /* Inherits Open Sans from body */
+  font-size: 1rem; 
+  line-height: 1.5;
+}
+
+/* Ensure touch targets meet WCAG 2.2 SC 2.5.8 (Min 24x24px, recommended 44x44px) */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+select {
+  min-height: 2.75rem; /* 44px minimum touch target height */
+  padding: 0.625rem 0.875rem;
+}
+
+/* ==========================================================================
+   6. CONTAINER SAFETY FOR TEXT RESIZING (WCAG 1.4.4)
+   ========================================================================== */
+
+/* 
+   AVOID fixed height on containers containing text! 
+   Use min-height or auto height to allow text to expand gracefully up to 200%.
+*/
+.card,
+.content-box,
+.nav-item {
+  height: auto;
+  min-height: 3rem;
+  overflow: visible; /* Prevents clipped text when font size is increased */
+}
+
+/* ==========================================================================
+   7. CUSTOM ANIMATIONS
+   ========================================================================== */
 
 @keyframes marquee {
   0% { transform: translateX(100%); }
@@ -15,14 +171,4 @@
   display: inline-block;
   white-space: nowrap;
   animation: marquee 128s linear infinite;
-}
-
-html, body, #root {
-  height: 100%;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-  font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #f4f6f8;
 }

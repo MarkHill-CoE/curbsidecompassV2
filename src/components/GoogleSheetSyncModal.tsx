@@ -607,7 +607,7 @@ function getQuestionNumber(key: string): number {
                       </h4>
                     </div>
                     <p className="text-xs text-gray-600 leading-relaxed">
-                      Contains all 9 questions (Q0 through Q8), Option A and B statements, hints, curbside stall impact numbers, gains/benefits, pains/costs, and municipal policy rationales.
+                      Contains all 6 policy questions and street selection (Q0 through Q6), Option A and B statements, hints, curbside stall impact numbers, gains/benefits, pains/costs, and municipal policy rationales.
                     </p>
                   </div>
 

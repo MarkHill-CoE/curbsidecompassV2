@@ -13,8 +13,7 @@ import {
   User,
   Users,
   Download,
-  Image as ImageIcon,
-  Upload
+  Image as ImageIcon
 } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
@@ -100,40 +99,13 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
   const [imageCopied, setImageCopied] = useState<boolean>(false);
   const [platformNotice, setPlatformNotice] = useState<string | null>(null);
 
-  const [customImage, setCustomImage] = useState<string | null>(() => {
-    try {
-      return localStorage.getItem('curbside_user_social_img');
-    } catch {
-      return null;
-    }
-  });
-
-  const curbsideSocialImg = customImage || '/CurbsideCompass_Social_Media_IMG.jpg';
-
-  const handleCustomImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        const dataUrl = loadEvent.target?.result as string;
-        if (dataUrl) {
-          setCustomImage(dataUrl);
-          try {
-            localStorage.setItem('curbside_user_social_img', dataUrl);
-          } catch {
-            // Storage quota fallback
-          }
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  const curbsideSocialImg = '/CurbsideCompass_Social_Media_IMG.jpg';
 
   const defaultAppUrl = 'https://ais-dev-j7ghsp42y77c6djfbgfkd5-460515158127.us-east1.run.app';
   const shareUrl = typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null' 
     ? window.location.origin 
     : defaultAppUrl;
-  const imageUrl = customImage ? shareUrl : (typeof window !== 'undefined' ? `${window.location.origin}${curbsideSocialImg}` : `${defaultAppUrl}${curbsideSocialImg}`);
+  const imageUrl = typeof window !== 'undefined' ? `${window.location.origin}${curbsideSocialImg}` : `${defaultAppUrl}${curbsideSocialImg}`;
 
   const userSelections = formatUserSelections(answers, config);
   const priorities = (persona.keyPriorities || []).map(p => `• ${p}`);
@@ -395,36 +367,6 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
                         {t('share_preview_label', 'Social Post Preview')}
                       </span>
                       <div className="flex items-center gap-2">
-                        <label
-                          className="text-[0.5625rem] text-[#004B8D] hover:underline flex items-center gap-0.5 font-bold cursor-pointer"
-                          title="Upload or select your exact CurbsideCompass_Social_Media_IMG.jpg file from device"
-                        >
-                          <Upload className="w-2.5 h-2.5" />
-                          <span>{customImage ? 'Uploaded' : 'Upload File'}</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={handleCustomImageUpload}
-                          />
-                        </label>
-                        {customImage && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setCustomImage(null);
-                              try {
-                                localStorage.removeItem('curbside_user_social_img');
-                              } catch {
-                                // ignore
-                              }
-                            }}
-                            className="text-[0.5625rem] text-gray-500 hover:text-red-600 underline cursor-pointer"
-                            title="Reset to default image"
-                          >
-                            Reset
-                          </button>
-                        )}
                         <button
                           type="button"
                           onClick={handleCopyImage}

@@ -931,7 +931,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "intro_s5_point1",
     "category": "Civic Onboarding",
     "container": "3-Step Walkthrough Modal",
-    "defaultText": "Answer 9 quick questions about parking rules.",
+    "defaultText": "Answer 6 quick questions about parking rules.",
     "guidance": "Onboarding walkthrough card, title, bullet, or button"
   },
   {

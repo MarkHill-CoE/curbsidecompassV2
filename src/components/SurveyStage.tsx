@@ -218,7 +218,12 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             <span className="font-bold text-[#004B8D]">
               {currentQuestion.id === 'q0' || currentQuestion.category === 'location'
                 ? t('q0_step1_progress_title', 'Find Your Neighbourhood')
-                : t(`q${currentQuestion.number}_progress_title`, `Question ${currentQuestion.number} of ${questions.length - 1}`)}
+                : t(`q${currentQuestion.number}_progress_title`, `Question ${currentQuestion.number} of ${questions.length - 1}`)
+                    .replace(/\bOF 9\b/gi, 'of 6')
+                    .replace(/\bSUR 9\b/gi, 'sur 6')
+                    .replace(/\bNG 9\b/gi, 'ng 6')
+                    .replace(/9 ਵਿੱਚੋਂ/g, '6 ਵਿੱਚੋਂ')
+                    .replace(/\bof 9\b/gi, 'of 6')}
             </span>
             <span className="text-gray-300">·</span>
             <span className="text-gray-500 font-medium truncate">
@@ -245,7 +250,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             animate={{
               width: currentQuestion.id === 'q0'
                 ? q0SubScreen === 0 ? '50%' : '100%'
-                : `${((currentQuestion.number) / 8) * 100}%`
+                : `${((currentQuestion.number) / Math.max(1, questions.length - 1)) * 100}%`
             }}
             transition={{ duration: 0.35 }}
           />
@@ -263,13 +268,13 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             transition={{ duration: 0.18 }}
             className="flex flex-col w-full"
           >
-            <h3 className="text-[13pt] sm:text-[15pt] md:text-[17pt] font-bold text-[#193A5A] mb-1 sm:mb-1.5 leading-snug tracking-tight">
+            <h4 className="text-[13pt] sm:text-[15pt] md:text-[17pt] font-bold text-[#193A5A] mb-1 sm:mb-1.5 leading-snug tracking-[-0.05em]">
               {currentQuestion.id === 'q0'
                 ? q0SubScreen === 0
                   ? t('q0_title_step1', 'Where do you live in Edmonton?')
                   : t('q0_title_step2', 'Confirm your street style')
                 : t(`q${currentQuestion.number}_question`, currentQuestion.text)}
-            </h3>
+            </h4>
 
             {isTextQuestion ? (
               q0SubScreen === 0 ? (

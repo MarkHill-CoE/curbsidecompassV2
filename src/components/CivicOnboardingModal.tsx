@@ -354,7 +354,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
               <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-3 sm:p-4 space-y-2 text-base sm:text-lg text-gray-900 font-semibold">
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>{t('intro_s5_point1', 'Set your neighbourhood and answer 8 quick parking questions.')}</span>
+                  <span>{t('intro_s5_point1', 'Set your neighbourhood and answer 6 quick parking questions.')}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />

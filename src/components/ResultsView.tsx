@@ -192,7 +192,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
               >
                 <Award className="w-6 h-6" />
               </div>
-              <h2 className="text-[18pt] sm:text-[22pt] font-black text-gray-900 leading-tight">
+              <h2 className="text-[18pt] sm:text-[22pt] font-black text-gray-900 leading-tight tracking-[-0.05em]">
                 {persona.title}
               </h2>
             </div>
