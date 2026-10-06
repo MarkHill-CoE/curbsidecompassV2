@@ -108,7 +108,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
     {
       id: 'mature_laned',
       icon: '🏡',
-      title: 'Mature Laned',
+      title: 'Homes with Rear-lane Access',
       era: '1950s–1960s Heritage',
       tag: 'Continuous curb • Rear gravel lane & garages • Zero front driveways',
       stalls: getStreetLayoutInfo('mature_laned').curbsideCapacity,
@@ -117,7 +117,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
     {
       id: 'infill_skinny',
       icon: '🏘️',
-      title: 'Infill & Duplex',
+      title: 'Multiple Homes on Smaller Lots',
       era: 'Post-2015 Redeveloping',
       tag: 'Subdivided lots • Narrow skinny duplexes & garden suites',
       stalls: getStreetLayoutInfo('infill_skinny').curbsideCapacity,
@@ -126,7 +126,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
     {
       id: 'suburban_front_driveway',
       icon: '🚗',
-      title: 'Suburban Front Driveway',
+      title: 'Homes with Front Driveways',
       era: '1980s–2000s Subdivisions',
       tag: 'Attached garages • Unmarked road (35–55 km/h) • Driveways (10+ stalls)',
       stalls: getStreetLayoutInfo('suburban_front_driveway').curbsideCapacity,
@@ -135,7 +135,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
     {
       id: 'contemporary_townhomes',
       icon: '🏢',
-      title: 'Contemporary Townhomes',
+      title: 'Townhomes',
       era: '2020s City Plan Developing',
       tag: 'Dense townhomes • Rear garage lane • Pocket parking bays',
       stalls: getStreetLayoutInfo('contemporary_townhomes').curbsideCapacity,
@@ -186,7 +186,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
   // Step header title and category
   const headerTitle = useMemo(() => {
     if (isModelStreetStep) {
-      return t('q0_progress_title', 'WHERE DO YOU LIVE?');
+      return t('q0_progress_title', 'STREET STYLE');
     }
     if (isLocationStep) {
       return t('q7_progress_title', 'YOUR LOCATION IN EDMONTON');
@@ -261,17 +261,17 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
           >
             <h4 className="text-[13pt] sm:text-[15pt] md:text-[17pt] font-bold text-[#193A5A] mb-1 sm:mb-1.5 leading-snug tracking-[-0.05em]">
               {isModelStreetStep
-                ? t('q0_question', 'Where do you live?')
+                ? t('q0_question', 'Choose your model neighbourhood.')
                 : isLocationStep
-                ? t('q7_question', 'Where do you live in Edmonton?')
+                ? t('q7_question', 'Choose your model neighbourhood.')
                 : t(`q${currentQuestion.number}_question`, currentQuestion.text)}
             </h4>
 
-            {/* Step 0: Choose Your Neighbourhood Type (Street Layout + Home Density Infill Slider) */}
+            {/* Step 0: Choose Your Model Neighbourhood (Street Layout + Home Density Infill Slider) */}
             {isModelStreetStep && (
               <div className="w-full flex flex-col gap-2 pt-0.5">
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                  {t('q0_helper', currentQuestion.helperText || 'Select an Edmonton street style to calibrate live curbside parking stalls in your simulation, and adjust home density to increase infill:')}
+                  {t('q0_helper', currentQuestion.helperText || 'Choose one of the four neighbourhoods to calibrate live curbside parking stalls in your simulation and adjust home density to increase new infill:')}
                 </p>
 
                 {/* 4 Cards Grid - 2x2 Layout */}
@@ -345,9 +345,6 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                         </span>
                       </div>
                     </div>
-                    <span className="font-black text-xs sm:text-sm text-purple-900 bg-purple-100 border border-purple-300 px-2.5 py-1 rounded-lg shrink-0 shadow-2xs">
-                      {(config?.splitInfillLots ?? 0)} 8-Plex{(config?.splitInfillLots ?? 0) === 1 ? '' : 'es'} ({totalDwellings ?? (12 + (config?.splitInfillLots ?? 0) * 7)} {t('drawer_dwellings_unit', 'Dwellings')})
-                    </span>
                   </div>
 
                   <div className="flex items-center gap-2.5 pt-0.5">
@@ -404,11 +401,11 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
               </div>
             )}
 
-            {/* Step 7: Choose your neighbourhood type? (Location & Home Density) */}
+            {/* Step 7: Choose your neighbourhood type? (Location) */}
             {isLocationStep && (
               <div className="w-full flex flex-col gap-2 pt-0.5">
                 <label htmlFor="location-smart-input" className="block text-xs sm:text-sm font-semibold text-[#193A5A] leading-snug">
-                  {t('q7_helper', 'Search your neighbourhood or enter a postal code to record your location, and adjust your neighbourhood home density:')}
+                  {t('q7_helper', 'Search your neighbourhood or enter a postal code to record your location:')}
                 </label>
 
                 {/* Single Smart Unified Search Input with explicit 48px touch target */}
@@ -498,51 +495,6 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     )}
                   </div>
                 )}
-
-                {/* Home Density (Infill) Slider */}
-                <div className="bg-gradient-to-r from-purple-50/90 to-blue-50/90 border-2 border-purple-200/90 rounded-xl p-3 sm:p-3.5 shadow-2xs flex flex-col gap-1.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-[#7B2CBF] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
-                        🏘️
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-xs sm:text-sm font-black text-gray-900 block leading-tight truncate">
-                          {t('drawer_infill_label', 'Home Density')} (Infill)
-                        </span>
-                        <span className="text-[10px] sm:text-[10.5px] text-gray-600 font-semibold block leading-tight">
-                          {t('density_slider_subtitle', 'Adjust 8-plex infill lots in your street simulation')}
-                        </span>
-                      </div>
-                    </div>
-                    <span className="font-black text-xs sm:text-sm text-purple-900 bg-purple-100 border border-purple-300 px-2.5 py-1 rounded-lg shrink-0 shadow-2xs">
-                      {(config?.splitInfillLots ?? 0)} 8-Plex{(config?.splitInfillLots ?? 0) === 1 ? '' : 'es'} ({totalDwellings ?? (12 + (config?.splitInfillLots ?? 0) * 7)} {t('drawer_dwellings_unit', 'Dwellings')})
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-2.5 pt-1">
-                    <span className="text-[10px] font-bold text-gray-500 shrink-0">Baseline (0)</span>
-                    <input
-                      type="range"
-                      aria-label={t('drawer_sliders_density_aria', 'Home density')}
-                      min="0"
-                      max="7"
-                      step="1"
-                      value={Math.min(7, Math.max(0, config?.splitInfillLots ?? 0))}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value, 10);
-                        triggerFeedback('choice');
-                        onConfigChange?.({ splitInfillLots: val });
-                      }}
-                      className="accent-[#7B2CBF] cursor-pointer h-2.5 bg-gray-200 rounded-lg w-full"
-                    />
-                    <span className="text-[10px] font-bold text-purple-700 shrink-0">Max Infill (7)</span>
-                  </div>
-
-                  <p className="text-[10px] sm:text-[10.5px] text-gray-600 leading-snug">
-                    {t('sim_density_explainer', 'Each infill adds multi-unit housing (8 dwellings per 15.6m lot).')}
-                  </p>
-                </div>
 
                 {/* Opt-Out Option & Privacy */}
                 <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">
@@ -704,36 +656,6 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       </p>
                     </div>
                   </div>
-
-                  {/* Impact to Stall Parking Container */}
-                  {tradeoffOutcome?.curbsideImpactSummary && (
-                    <div className="overflow-hidden bg-sky-50/75 border border-sky-300 rounded-md text-slate-900 shadow-2xs">
-                      <div className="w-full bg-[#004B8D] px-2 py-0.5 flex items-center justify-between text-white">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-[10px] leading-none" role="img" aria-label="Parking">🅿️</span>
-                          <span className="text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider leading-none">
-                            {t('tradeoff_stall_impact_pill', 'Impact to Stall Parking')}
-                          </span>
-                        </div>
-                        {tradeoffOutcome?.deltaStallsText && (
-                          <span className={`text-[8pt] font-bold px-1.5 py-0.5 rounded-full leading-none shadow-2xs ${
-                            (tradeoffOutcome.deltaStallsValue ?? 0) < 0
-                              ? 'bg-emerald-500 text-white'
-                              : (tradeoffOutcome.deltaStallsValue ?? 0) > 0
-                              ? 'bg-amber-400 text-amber-950'
-                              : 'bg-white/20 text-white'
-                          }`}>
-                            {tradeoffOutcome.deltaStallsText}
-                          </span>
-                        )}
-                      </div>
-                      <div className="px-2 py-1.5">
-                        <p className="text-[12pt] font-normal leading-tight text-slate-900">
-                          {tradeoffOutcome.curbsideImpactSummary}
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             )}

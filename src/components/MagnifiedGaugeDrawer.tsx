@@ -350,7 +350,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 className="flex-1 py-1.5 sm:py-2 px-2.5 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-xs min-h-[38px] active:scale-95"
               >
                 <CheckCircle className="w-3.5 h-3.5 text-[#4ade80]" />
-                {t('gauge_back_survey_btn', 'Back to Parking Survey')}
+                {t('gauge_back_survey_btn', 'Back to Exploring Parking')}
               </button>
             </div>
           </div>

@@ -18,8 +18,8 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q0',
     number: 0,
     category: 'Neighbourhood Type' as any,
-    text: 'Where do you live?',
-    helperText: 'Select an Edmonton street style to calibrate live curbside parking stalls in your simulation, and adjust home density to increase infill:',
+    text: 'Choose your model neighbourhood.',
+    helperText: 'Choose one of the four neighbourhoods to calibrate live curbside parking stalls in your simulation and adjust home density to increase new infill:',
     options: [
       {
         id: 'mature_laned',
@@ -236,7 +236,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     number: 7,
     category: 'Location' as any,
     type: 'text',
-    text: 'Where do you live in Edmonton?',
+    text: 'Choose your model neighbourhood.',
     placeholder: 'e.g. T5J 2R7 or Strathcona',
     helperText: 'Search your neighbourhood or enter a postal code to record your location:',
     options: []

@@ -34,7 +34,6 @@ interface NeighborhoodSimulationProps {
     curbsidePct: number;
     onReshuffle: () => void;
   }) => void;
-  onHarmonyActiveChange?: (isActive: boolean) => void;
 }
 
 // 1950s–1960s Mid-Century Laned Bungalow Street (12 homes, gravel rear lane with detached garages, zero front curb cuts, continuous curbside parking)
@@ -71,8 +70,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
   occupiedGaragesCount: propOccupiedGaragesCount,
   hideGaragePill = false,
   isExpanded = false,
-  onSimulationMetricsChange,
-  onHarmonyActiveChange
+  onSimulationMetricsChange
 }) => {
   const { t } = useAppText();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -3836,15 +3834,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
       if (alarmCooldown > 0) {
         alarmCooldown -= 1 / 60;
-      }
-
-      // Riot / Vehicle Fire Invariant: ONLY cars on the road (y >= 90) can burn. Driveway cars (y < 70) NEVER burn.
-      const roadCarRenderIndices: number[] = [];
-      for (let i = 0; i < totalToRender; i++) {
-        const car = houseCarAssignments[activeIndices[i]];
-        if (car && car.y >= 90) {
-          roadCarRenderIndices.push(i);
-        }
       }
 
       // Layer 1: Ground, Road, Sidewalks, Driveways

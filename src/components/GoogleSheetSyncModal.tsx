@@ -629,6 +629,16 @@ function getQuestionNumber(key: string): number {
                       <FileText className="w-3.5 h-3.5 text-gray-500" />
                       <span>Or download full app copy inventory (562 items)</span>
                     </a>
+
+                    <a
+                      href="/curbside_compass_onscreen_text_grouped.csv"
+                      download="curbside_compass_onscreen_text_grouped.csv"
+                      className="w-full py-1.5 px-2 bg-blue-50 hover:bg-blue-100 text-[#004B8D] border border-blue-200 rounded-lg text-[11px] font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                      title="Download on-screen text grouped by UX/UI Global Navigation, Simulation, Gauges, Questions, and For Your Choice"
+                    >
+                      <Download className="w-3.5 h-3.5 text-[#004B8D]" />
+                      <span>Download Grouped On-Screen Text (.csv)</span>
+                    </a>
                   </div>
                 </div>
 

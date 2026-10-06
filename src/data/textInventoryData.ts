@@ -147,7 +147,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "drawer_back_survey_btn",
     "category": "Manual Sliders Drawer",
     "container": "Policy Sliders Drawer",
-    "defaultText": "Back to Parking Survey",
+    "defaultText": "Back to Exploring",
     "guidance": "Direct policy slider label, description, or reset action"
   },
   {
@@ -336,7 +336,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "gauge_back_survey_btn",
     "category": "Metrics Gauge Drawer",
     "container": "Magnified Gauge Drawer",
-    "defaultText": "Back to Parking Survey",
+    "defaultText": "Back to Exploring",
     "guidance": "Live score explanation, tradeoff impact tag, or zone badge"
   },
   {
@@ -735,7 +735,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "intro_btn_start",
     "category": "Civic Onboarding",
     "container": "3-Step Walkthrough Modal",
-    "defaultText": "Start Survey",
+    "defaultText": "Start Exploring",
     "guidance": "Onboarding walkthrough card, title, bullet, or button"
   },
   {
@@ -2405,55 +2405,6 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "guidance": "Curbside animation, parking lane, or traffic notice"
   },
   {
-    "key": "sim_harmony_award",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "AWARD: OPTIMAL CURB MANAGEMENT",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_harmony_badge",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "⭐ EXCELLENCE",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_harmony_headline",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "NEIGHBORHOOD ACHIEVES PERFECT TRAFFIC HARMONY",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_harmony_quote",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "\"It's beautiful out here. Delivery vans have space, visitors are finding spots easily, and the air is clear. A masterclass in urban planning!\"",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_harmony_reporter",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "REPORTER",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_harmony_subheadline",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "SMART POLICIES KEEP STREETS CLEAR • BUSINESSES BOOMING • RESIDENTS HAPPY",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_harmony_title",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "CITY PLANNING COMMENDATION",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
     "key": "sim_rear_garages_label",
     "category": "Neighbourhood Simulation",
     "container": "Live Interactive Street Model",
@@ -2472,55 +2423,6 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "category": "Neighbourhood Simulation",
     "container": "Live Interactive Street Model",
     "defaultText": "Randomize Parking Distribution",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_riot_badge",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "🔴 LIVE",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_riot_banner",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "BREAKING: ROADWAY VEHICLE FIRE & DEMONSTRATION",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_riot_headline",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "CAR BURNING ON ROADWAY • PROTESTERS BLOCKING TRAFFIC",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_riot_subheadline",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "PROTESTERS ASSEMBLED IN ROAD LANES • BYSTANDERS OBSERVING SAFELY FROM SIDEWALK",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_riot_ticker",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "⚠️ VEHICLE BURNING ON ROADWAY — PROTESTERS GATHER ON ROAD STOPPING TRAFFIC — BYSTANDERS SAFELY ON SIDEWALK — DRIVEWAYS UNAFFECTED — ⚠️",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_riot_ticker_tag",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "TICKER",
-    "guidance": "Curbside animation, parking lane, or traffic notice"
-  },
-  {
-    "key": "sim_riot_title",
-    "category": "Neighbourhood Simulation",
-    "container": "Live Interactive Street Model",
-    "defaultText": "EDMONTON NEWS • INCIDENT REPORT",
     "guidance": "Curbside animation, parking lane, or traffic notice"
   },
   {

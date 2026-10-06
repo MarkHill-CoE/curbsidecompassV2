@@ -115,13 +115,13 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
               className="w-full appearance-none bg-black/40 hover:bg-black/55 text-white font-medium text-xs sm:text-sm py-2 pl-3 pr-9 rounded-lg border-2 border-white/20 hover:border-[#0081BC] focus:border-[#FFC72C] focus:outline-none focus:ring-2 focus:ring-[#FFC72C]/30 transition-all cursor-pointer shadow-inner"
             >
               <option value="mature_laned" className="bg-[#11283f] text-white">
-                🏡 {t('drawer_sliders_typology_mature_laned', 'Mature Laned (12 stalls)')} — Detached Rear Garages
+                🏡 {t('drawer_sliders_typology_mature_laned', 'Homes with Rear-lane Access (12 stalls)')} — Detached Rear Garages
               </option>
               <option value="infill_skinny" className="bg-[#11283f] text-white">
-                🏘️ {t('drawer_sliders_typology_infill_skinny', 'Infill & Duplex (12 stalls)')} — Laneway & Skinny Lots
+                🏘️ {t('drawer_sliders_typology_infill_skinny', 'Multiple Homes on Smaller Lots (12 stalls)')} — Laneway & Skinny Lots
               </option>
               <option value="suburban_front_driveway" className="bg-[#11283f] text-white">
-                🚗 {t('drawer_sliders_typology_suburban_front', 'Front Driveway (10+ stalls)')} — Front Garages; 8-Plexes Restore Stalls
+                🚗 {t('drawer_sliders_typology_suburban_front', 'Homes with Front Driveways (10+ stalls)')} — Front Garages; 8-Plexes Restore Stalls
               </option>
               <option value="contemporary_townhomes" className="bg-[#11283f] text-white">
                 🏢 {t('drawer_sliders_typology_townhomes', 'Townhomes (9 stalls)')} — Multi-Unit Row Housing
@@ -209,9 +209,6 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
         <div className="flex flex-col gap-0.5">
           <div className="flex justify-between">
             <span className="text-gray-300 font-medium">{t('drawer_infill_label', 'Home Density')}</span>
-            <span className="font-bold text-[#009A44]">
-              {Math.min(7, Math.max(0, config.splitInfillLots ?? 0))} 8-Plex{Math.min(7, Math.max(0, config.splitInfillLots ?? 0)) === 1 ? '' : 'es'} ({totalDwellings} {t('drawer_dwellings_unit', 'Dwellings')})
-            </span>
           </div>
           <input
             type="range"
@@ -295,7 +292,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
             className="flex-1 py-2 px-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-xs min-h-[40px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
           >
             <CheckCircle className="w-4 h-4 text-[#4ade80]" />
-            {t('drawer_back_survey_btn', 'Back to Parking Survey')}
+            {t('drawer_back_survey_btn', 'Back to Exploring Parking')}
           </button>
         </div>
       </div>
