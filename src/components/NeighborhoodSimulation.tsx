@@ -105,7 +105,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     }
   }, [onToggleControls]);
   const [curbsideDemandCount, setCurbsideDemandCount] = useState<number>(() => propCurbsideDemandCount ?? 10);
-  const [curbsideStallsCapacity, setCurbsideStallsCapacity] = useState<number>(() => propCurbsideStallsCapacity ?? BASE_LEGAL_CURBSIDE_STALLS);
+  const [curbsideStallsCapacity, setCurbsideStallsCapacity] = useState<number>(() => {
+    if (propCurbsideStallsCapacity !== undefined) return propCurbsideStallsCapacity;
+    return getStreetLayoutInfo(config.streetLayout).curbsideCapacity;
+  });
   const [curbsidePct, setCurbsidePct] = useState<number>(() => propCurbsidePct ?? 60);
   const [circlingCarCount, setCirclingCarCount] = useState<number>(() => propCirclingCarCount ?? 0);
   const [isPoliceTrafficActive, setIsPoliceTrafficActive] = useState<boolean>(false);
@@ -497,7 +500,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     // 8-Plex Multi-Unit Infill Allocation across 15.6m lots:
     // Models Edmonton's Missing-Middle residential zoning where up to 7 8-plex buildings
     // (9.5m tall × 13m wide × 30m long) replace existing houses across any neighbourhood layout.
-    const EIGHT_PLEX_LOT_ORDER = [10, 2, 6, 4, 8, 1, 7];
+    const EIGHT_PLEX_LOT_ORDER = [2, 6, 4, 8, 1, 7, 10];
 
     const getEightPlexCount = () => {
       const raw = configRef.current.splitInfillLots;
@@ -909,26 +912,132 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             drawFlatRect(startX + 8.5, 69, 8.4, 3, '#CBD5E1', bgGroundCtx);
             continue;
           }
-          // Concrete double driveway pad from garage (y = 48) through lawn, sidewalk, boulevard, and curb into street (y = 93)
-          drawFlatRect(startX + 13.5, 48, 13.5, 45, '#CBD5E1', bgGroundCtx);
-          // Driveway expansion joints
-          drawFlatRect(startX + 13.5, 63, 13.5, 0.4, '#94A3B8', bgGroundCtx);
-          drawFlatRect(startX + 13.5, 70, 13.5, 0.4, '#94A3B8', bgGroundCtx);
-          drawFlatRect(startX + 13.5, 78, 13.5, 0.4, '#94A3B8', bgGroundCtx);
+          // Concrete upper driveway parking pad from garage doors (y = 48) to sidewalk boundary (y = 70)
+          drawFlatRect(startX + 13.5, 48, 13.5, 22, '#CBD5E1', bgGroundCtx);
+          // Driveway expansion joint
+          drawFlatRect(startX + 13.5, 59, 13.5, 0.4, '#94A3B8', bgGroundCtx);
 
-          // Front entry pedestrian walkway from porch deck to driveway
+          // Dedicated Continuous Pedestrian Sidewalk across the driveway (y = 70 to 78)
+          // Pristine sidewalk concrete (#b5bac0) with distinct expansion joints and sidewalk boundary lines
+          // ensures vehicles in driveways never block the sidewalk and pedestrians always have priority
+          drawFlatRect(startX + 13.5, 70, 13.5, 8, '#b5bac0', bgGroundCtx);
+          drawFlatRect(startX + 13.5, 70, 13.5, 0.5, '#8E9398', bgGroundCtx);
+          drawFlatRect(startX + 13.5, 77.5, 13.5, 0.5, '#8E9398', bgGroundCtx);
+          drawFlatRect(startX + 13.5 + 6.75, 70, 0.4, 8, '#9a9fa3', bgGroundCtx);
+
+          // Concrete lower driveway apron crossing boulevard to street curb (y = 78 to 92.4)
+          drawFlatRect(startX + 13.5, 78, 13.5, 14.4, '#CBD5E1', bgGroundCtx);
+          drawFlatRect(startX + 13.5, 85, 13.5, 0.4, '#94A3B8', bgGroundCtx);
+
+          // Front entry pedestrian walkway from porch deck to driveway pad
           drawFlatRect(startX + 5, 50, 2.5, 20, '#D0D4D8', bgGroundCtx);
         }
 
-        // 6. Curb between driveways
+        // 6. Concrete curb along street
         drawFlatRect(0, 92.4, blockLength, 1.2, '#B5BAC0', bgGroundCtx);
         drawFlatRect(0, 93.3, blockLength, 0.4, '#8E9398', bgGroundCtx);
 
-        // Depressed driveway curb cut aprons over curbline (only for single-family homes)
+        // Depressed driveway curb cut aprons over curbline and 1.5m yellow curb setbacks (City of Edmonton Bylaw 5590)
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
           if (isEightPlexLot(h)) continue;
           const startX = 8 + h * lotWidth;
+
+          // Concrete driveway apron depressed over curb (13.5m driveway width)
           drawFlatRect(startX + 13.5, 92.4, 13.5, 1.2, '#CBD5E1', bgGroundCtx);
+          drawFlatRect(startX + 13.5, 93.3, 13.5, 0.4, '#94A3B8', bgGroundCtx);
+
+          // City of Edmonton Traffic Bylaw 5590, Section 37:
+          // Vehicles cannot park in front of driveways and must not park within 1.5m of either side of a driveway.
+          // Show the "no parking" with bright safety-yellow curbside on either side of the driveway for 1.5m:
+          const leftYellowStart = startX + 13.5 - 1.5; // startX + 12.0
+          const rightYellowStart = startX + 27.0;
+
+          // 1.5m Yellow Curbside on LEFT side of driveway
+          // Top curb surface in high-visibility traffic yellow (#FBBF24)
+          drawFlatRect(leftYellowStart, 92.4, 1.5, 1.2, '#FBBF24', bgGroundCtx);
+          // Curb face in traffic yellow shadow (#F59E0B)
+          drawFlatRect(leftYellowStart, 93.3, 1.5, 0.4, '#F59E0B', bgGroundCtx);
+          // Yellow diagonal road-edge clearance hatching for 1.5m
+          drawFlatRect(leftYellowStart + 0.2, 93.7, 1.1, 1.6, 'rgba(251, 191, 36, 0.9)', bgGroundCtx);
+          // White limit demarcation line
+          drawFlatRect(leftYellowStart, 91.8, 0.3, 3.5, '#FFFFFF', bgGroundCtx);
+
+          // 1.5m Yellow Curbside on RIGHT side of driveway
+          // Top curb surface in high-visibility traffic yellow (#FBBF24)
+          drawFlatRect(rightYellowStart, 92.4, 1.5, 1.2, '#FBBF24', bgGroundCtx);
+          // Curb face in traffic yellow shadow (#F59E0B)
+          drawFlatRect(rightYellowStart, 93.3, 1.5, 0.4, '#F59E0B', bgGroundCtx);
+          // Yellow diagonal road-edge clearance hatching for 1.5m
+          drawFlatRect(rightYellowStart + 0.2, 93.7, 1.1, 1.6, 'rgba(251, 191, 36, 0.9)', bgGroundCtx);
+          // White limit demarcation line
+          drawFlatRect(rightYellowStart + 1.5, 91.8, 0.3, 3.5, '#FFFFFF', bgGroundCtx);
+        }
+
+        // Pavement stall limit ticks for legal curbside stalls safely between the 1.5m yellow curb zones (10 legal stalls, no bus stop)
+        const suburbanLegalStallIntervals = [
+          { start: 67.0, end: 81.0 },
+          { start: 97.5, end: 111.5 },
+          { start: 128.0, end: 142.0 },
+          { start: 158.5, end: 172.5 },
+          { start: 189.0, end: 203.0 },
+          { start: 219.5, end: 233.5 },
+          { start: 250.0, end: 264.0 },
+          { start: 280.5, end: 294.5 },
+          { start: 311.0, end: 325.0 },
+          { start: 341.5, end: 355.5 }
+        ];
+        for (const stall of suburbanLegalStallIntervals) {
+          drawFlatRect(stall.start, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
+          drawFlatRect(stall.end, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
+        }
+
+        // Pavement stall limit ticks for newly restored curbside stalls from removed 8-plex driveways
+        for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          if (isEightPlexLot(h) && h !== 10) {
+            const startX = 8 + h * lotWidth;
+            drawFlatRect(startX + 13.0, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
+            drawFlatRect(startX + 27.0, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
+          }
+        }
+
+        // When an 8-plex is built on Lot 10 (the transit stop lot), activate the designated 30m ETS Bus Stop yellow zone along Lot 10
+        if (isEightPlexLot(10)) {
+          // Top curb surface painted traffic safety yellow (#FBBF24)
+          drawFlatRect(313.0, 92.4, 30.5, 1.2, '#FBBF24', bgGroundCtx);
+          // Curb face painted traffic safety yellow (#FBBF24)
+          drawFlatRect(313.0, 93.3, 30.5, 0.6, '#FBBF24', bgGroundCtx);
+
+          // Yellow diagonal pavement clearance hatch lines along road edge
+          for (let bx = 315; bx <= 341; bx += 4.5) {
+            drawFlatRect(bx, 94.0, 1.0, 3.5, 'rgba(251, 191, 36, 0.85)', bgGroundCtx);
+          }
+
+          // White boundary limit lines marking the 30m zone ends
+          drawFlatRect(312.8, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+          drawFlatRect(343.5, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+
+          // Roadway stencil marking
+          const busLabelPos = project(328, 96, 0);
+          bgGroundCtx.save();
+          bgGroundCtx.fillStyle = '#FBBF24';
+          bgGroundCtx.font = 'bold 7px "Open Sans", system-ui, sans-serif';
+          bgGroundCtx.textAlign = 'center';
+          bgGroundCtx.fillText('BUS STOP - NO PARKING', busLabelPos.x, busLabelPos.y);
+          bgGroundCtx.restore();
+        }
+
+        // Roadway stencil marking along the suburban curb reminding of 1.5m driveway setback
+        const suburbanStencilHomes = [1, 3, 7];
+        for (const sh of suburbanStencilHomes) {
+          if (isEightPlexLot(sh)) continue;
+          const sX = 8 + sh * lotWidth + 20.25;
+          const labelPos = project(sX, 96.0, 0);
+          bgGroundCtx.save();
+          bgGroundCtx.fillStyle = '#FBBF24';
+          bgGroundCtx.font = 'bold 6.5px "Open Sans", system-ui, sans-serif';
+          bgGroundCtx.textAlign = 'center';
+          bgGroundCtx.fillText('DRIVEWAY 1.5m NO PARKING', labelPos.x, labelPos.y);
+          bgGroundCtx.restore();
         }
 
         // 7. Fire Hydrant safety zone at x = 27
@@ -940,14 +1049,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         drawFlatRect(10.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
         drawFlatRect(43.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
 
-        // 7b. 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
-        drawEtsBusStopCurbZone();
+        // (No on-street ETS bus stop in suburban front driveway layout)
 
-        // 8. Asphalt roadway
+        // 8. Asphalt roadway (unmarked residential roadway - no marked center lane)
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
-        for (let i = 10; i < blockLength; i += 25) {
-          drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
-        }
       } else if (layout === 'contemporary_townhomes') {
         // 1. Paved rear service lane
         drawFlatRect(0, -24, blockLength, 18, '#4A4E54', bgGroundCtx);
@@ -987,7 +1092,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawFlatRect(bx + 3, 84, 12, 6, '#3c6e32', bgGroundCtx);
         }
 
-        // Pocket bay stall markings (Bays 1-3; 4th bay at 296-376 is dedicated 30m ETS Bus Stop zone)
+        // Pocket bay stall markings (3 designated bays of 3 stalls each = 9 legal stalls; 4th bay at 296-376 is dedicated 30m ETS Bus Stop zone)
         const pocketBayXs = [
           46, 68, 90,
           138, 160, 182,
@@ -995,6 +1100,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         ];
         for (const px of pocketBayXs) {
           drawFlatRect(px - 1, 93, 0.4, 7.5, '#FFFFFF', bgGroundCtx);
+          drawFlatRect(px + 15, 93, 0.4, 7.5, '#FFFFFF', bgGroundCtx);
         }
 
         // 7. Hydrant safety zone
@@ -1040,6 +1146,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         // 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
         drawEtsBusStopCurbZone();
+
+        // Pavement stall limit ticks for the 12 legal curbside stalls (x = 47 to 281)
+        for (let s = 0; s < 12; s++) {
+          const sx = 47 + s * 19.8;
+          drawFlatRect(sx, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
+          drawFlatRect(sx + 16, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
+        }
 
         // Asphalt roadway
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
@@ -1099,6 +1212,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         // 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
         drawEtsBusStopCurbZone();
+
+        // Pavement stall limit ticks for the 12 legal curbside stalls (x = 47 to 281)
+        for (let s = 0; s < 12; s++) {
+          const sx = 47 + s * 19.8;
+          drawFlatRect(sx, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
+          drawFlatRect(sx + 16, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
+        }
 
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
         for (let i = 10; i < blockLength; i += 25) {
@@ -1537,7 +1657,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
 
         if (layout === 'suburban_front_driveway') {
-          // Spot 1: In front-attached double garage
+          // Spot 1: In front-attached double garage (y: 39)
           assignments.push({
             type: typesY[h % 3],
             x: startX + 16,
@@ -1548,24 +1668,24 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             isGarage: true,
             homeIndex: h
           });
-          // Spot 2: In front concrete driveway pad
+          // Spot 2: In private double concrete driveway (Left stall: parked safely back at y: 49.5, ending at y: 64.5 — 5.5m clear buffer before sidewalk at y: 70)
           assignments.push({
             type: typesY[(h + 1) % 3],
-            x: startX + 16,
-            y: 54,
-            w: 8,
+            x: startX + 14.5,
+            y: 49.5,
+            w: 6.5,
             d: 12,
             color,
             isGarage: false,
             homeIndex: h
           });
-          // Spot 3: Lower driveway spot if cap >= 2
+          // Spot 3: In private double concrete driveway (Right stall: parked safely back at y: 49.5, side-by-side — NEVER blocks pedestrian sidewalk!)
           if (effectiveCap >= 2) {
             assignments.push({
               type: typesY[(h + 2) % 3],
-              x: startX + 16,
-              y: 70,
-              w: 8,
+              x: startX + 21.5,
+              y: 49.5,
+              w: 6.5,
               d: 12,
               color,
               isGarage: false,
@@ -1633,18 +1753,40 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       }
 
       if (layout === 'suburban_front_driveway') {
-        // 8 legal curbside spots situated safely between driveway curb cuts (excluding 30m ETS bus stop)
-        const suburbanStallXs = [47, 78, 108, 139, 169, 200, 230, 261];
+        // Base legal curbside spots situated safely between driveway 1.5m yellow clearance zones
+        // Each stall sits inside the 14m legal gap between homes with 0.5m buffer from the yellow curb setbacks
+        const suburbanStallXs = [
+          67.5, 98.0, 128.5, 159.0, 189.5,
+          220.0, 250.5, 281.0, 311.5, 342.0
+        ];
         for (let s = 0; s < suburbanStallXs.length; s++) {
           assignments.push({
             type: typesX[s % 3],
             x: suburbanStallXs[s],
             y: 94,
-            w: 15,
+            w: 13,
             d: 7.5,
             color: edmontonPalette[s % edmontonPalette.length].hex,
             isGarage: false
           });
+        }
+
+        // Each 8-plex removes a driveway and the driveway's necessary 1.5m clearance,
+        // creating curbside space for an additional street parking stall.
+        // Add those parking spaces back for every 8-plex built, except where there is an ETS bus stop (Lot 10).
+        for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          if (isEightPlexLot(h) && h !== 10) {
+            const startX = 8 + h * lotWidth;
+            assignments.push({
+              type: typesX[(h + 1) % 3],
+              x: startX + 13.5,
+              y: 94,
+              w: 13,
+              d: 7.5,
+              color: edmontonPalette[(h * 3 + 1) % edmontonPalette.length].hex,
+              isGarage: false
+            });
+          }
         }
       } else if (layout === 'contemporary_townhomes') {
         // 9 stalls in 3 pocket bays of 3 stalls each (4th bay reserved for 30m ETS bus stop)
@@ -1685,7 +1827,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
       }
 
-      return assignments;
+      // Keep garage assignments and sort curbside stalls by x coordinate along the street
+      const garageStalls = assignments.filter(a => a.isGarage);
+      const curbStalls = assignments.filter(a => !a.isGarage).sort((a, b) => a.x - b.x);
+      return [...garageStalls, ...curbStalls];
     }
 
     let currentDrivewayCap = configRef.current.drivewayCapacity;
@@ -1929,6 +2074,61 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       ctx!.textBaseline = 'middle';
       ctx!.fillText(text, bubbleX + 12, bubbleY + 8);
 
+      ctx!.restore();
+    }
+
+    function drawSpeedBadge(x: number, y: number, z: number, speedKmH: number) {
+      const pos = project(x + 7.5, y, z + 8);
+      ctx!.save();
+      const diff = speedKmH - 40;
+      const diffStr = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : 'limit';
+      const label = `${speedKmH} km/h (${diffStr})`;
+      ctx!.font = 'bold 7.5px system-ui, -apple-system, sans-serif';
+      const textMetrics = ctx!.measureText(label);
+      const bubbleW = textMetrics.width + 10;
+      const bubbleH = 13;
+      const bubbleX = pos.x - bubbleW / 2;
+      const bubbleY = pos.y - bubbleH - 2;
+
+      // Soft shadow
+      ctx!.fillStyle = 'rgba(0, 0, 0, 0.25)';
+      ctx!.beginPath();
+      if (ctx!.roundRect) {
+        ctx!.roundRect(bubbleX + 1, bubbleY + 1, bubbleW, bubbleH, 3);
+      } else {
+        ctx!.rect(bubbleX + 1, bubbleY + 1, bubbleW, bubbleH);
+      }
+      ctx!.fill();
+
+      // Background color: amber if > 40 km/h, sky-blue if < 40 km/h, emerald if == 40 km/h
+      const bgCol = diff > 0 ? '#B45309' : diff < 0 ? '#0284C7' : '#047857';
+      const borderCol = diff > 0 ? '#FBBF24' : diff < 0 ? '#38BDF8' : '#34D399';
+
+      ctx!.fillStyle = bgCol;
+      ctx!.strokeStyle = borderCol;
+      ctx!.lineWidth = 1;
+      ctx!.beginPath();
+      if (ctx!.roundRect) {
+        ctx!.roundRect(bubbleX, bubbleY, bubbleW, bubbleH, 3);
+      } else {
+        ctx!.rect(bubbleX, bubbleY, bubbleW, bubbleH);
+      }
+      ctx!.fill();
+      ctx!.stroke();
+
+      // Small pointer down to vehicle roof
+      ctx!.beginPath();
+      ctx!.moveTo(pos.x - 2.5, bubbleY + bubbleH);
+      ctx!.lineTo(pos.x, bubbleY + bubbleH + 3);
+      ctx!.lineTo(pos.x + 2.5, bubbleY + bubbleH);
+      ctx!.fillStyle = bgCol;
+      ctx!.fill();
+
+      // Text label
+      ctx!.fillStyle = '#FFFFFF';
+      ctx!.textAlign = 'center';
+      ctx!.textBaseline = 'middle';
+      ctx!.fillText(label, pos.x, bubbleY + bubbleH / 2);
       ctx!.restore();
     }
 
@@ -2464,6 +2664,20 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     const MICRO_SPEED = BASE_CAR_SPEED * 0.75;
     const PED_SPEED = MICRO_SPEED * 0.25;
 
+    // Suburban Front Driveway Speed Model:
+    // Speed limit is 40 km/h. Speed ranges from 5 km/h under (35 km/h) to 15 km/h above (55 km/h).
+    // Exhibits larger standard deviation (spread widely across 35 to 55 km/h).
+    function getSuburbanVehicleSpeed(): { simSpeed: number; speedKmH: number } {
+      const u1 = Math.random();
+      const u2 = Math.random();
+      const randStdNormal = Math.sqrt(-2.0 * Math.log(u1 || 0.001)) * Math.cos(2.0 * Math.PI * u2);
+      // Centered at 44 km/h with wide standard deviation (sigma = 7.0 km/h), clamped between 35 and 55 km/h
+      const rawKmH = 44.0 + randStdNormal * 7.0;
+      const speedKmH = Math.round(Math.min(55, Math.max(35, rawKmH)));
+      const simSpeed = (speedKmH / 40) * BASE_CAR_SPEED;
+      return { simSpeed, speedKmH };
+    }
+
     const pedColors = ['#E8552D', '#0081BC', '#FFC72C', '#ffffff', '#68217A', '#009A44'];
     const pedestrians = Array.from({ length: 24 }, (_, i) => {
       const dir = i % 2 === 0 ? 1 : -1;
@@ -2527,14 +2741,50 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       spaceRatio?: number;
       policeBubbleText?: string;
       isFlipped?: boolean;
+      speedKmH?: number;
     }
 
     // Baseline through-traffic vehicles (constant through flow across the neighborhood)
+    const initialLayoutType = configRef.current.streetLayout || 'mature_laned';
+    const isSuburbanInit = initialLayoutType === 'suburban_front_driveway';
     const throughVehicles: RoadObstacle[] = [
       { type: 'sedan', x: -40, y: 110, baseY: 110, targetY: 110, w: 15, d: 7, baseSpeed: 1.25, speed: 1.25, color: edmontonPalette[0].hex, stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false },
-      { type: 'etsBus', x: -220, y: 110, baseY: 110, targetY: 110, w: 33, d: 9, baseSpeed: 0.95, speed: 0.95, color: '#005087', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false, busStopState: 'approaching' },
+      {
+        type: 'etsBus',
+        x: -220,
+        y: 110,
+        baseY: 110,
+        targetY: 110,
+        w: 33,
+        d: 9,
+        baseSpeed: 0.95,
+        speed: 0.95,
+        color: '#005087',
+        stuckTimer: 0,
+        honkCooldown: 0,
+        honkBubbleTimer: 0,
+        isCircling: false,
+        busStopState: 'approaching',
+        searchingBubbleTimer: 0
+      },
       { type: 'boxTruck', x: -420, y: 124, baseY: 124, targetY: 124, w: 24, d: 8.5, baseSpeed: 0.85, speed: 0.85, color: '', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false }
     ];
+
+    // In Suburban Front Driveway neighbourhood, reduce two-way traffic and space vehicles with wide speed standard deviation
+    if (isSuburbanInit) {
+      throughVehicles[0].x = -60;
+      throughVehicles[1].x = -2600; // Minimal ETS bus frequency
+      throughVehicles[2].x = -520;  // Long headway interval
+      const s0 = getSuburbanVehicleSpeed();
+      throughVehicles[0].baseSpeed = s0.simSpeed;
+      throughVehicles[0].speed = s0.simSpeed;
+      throughVehicles[0].speedKmH = s0.speedKmH;
+
+      const s2 = getSuburbanVehicleSpeed();
+      throughVehicles[2].baseSpeed = s2.simSpeed;
+      throughVehicles[2].speed = s2.simSpeed;
+      throughVehicles[2].speedKmH = s2.speedKmH;
+    }
 
     // Additional ETS Buses pool (injected for every three 8-plexes on the road)
     const extraEtsBuses: RoadObstacle[] = [
@@ -2768,9 +3018,47 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     }
 
     function isCurbsideSpotOccupied(targetStopX: number, obstacles: RoadObstacle[] = []): boolean {
-      // Zone checks: 30m ETS bus stop zone (x: 295 - 375) and fire hydrant zone (x: 10 - 45) prohibit curbside parking
-      if (targetStopX + 21 >= 295 && targetStopX <= 375) return true;
+      // Zone checks: 30m ETS bus stop zone (x: 295 - 375 for standard layouts, x: 312 - 344 for suburban front driveway Lot 10)
+      const currentLayoutForSpots = configRef.current.streetLayout || 'mature_laned';
+      const isSuburban = currentLayoutForSpots === 'suburban_front_driveway';
+      if (isSuburban) {
+        if (targetStopX + 21 >= 312 && targetStopX <= 344) return true;
+      } else {
+        if (targetStopX + 21 >= 295 && targetStopX <= 375) return true;
+      }
       if (targetStopX + 21 >= 10 && targetStopX <= 45) return true;
+
+      // In suburban front driveway layout, vehicles cannot park in front of driveways and must not park within 1.5m of either side
+      if ((configRef.current.streetLayout || 'mature_laned') === 'suburban_front_driveway') {
+        const vanStart = targetStopX;
+        const vanEnd = targetStopX + 21;
+        for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
+          if (isEightPlexLot(h)) continue;
+          const startX = 8 + h * 30.5;
+          const noParkingStart = startX + 12.0; // 1.5m left of driveway
+          const noParkingEnd = startX + 28.5;   // 1.5m right of driveway
+          if (vanStart < noParkingEnd && vanEnd > noParkingStart) {
+            return true;
+          }
+        }
+      }
+
+      // In contemporary townhomes, vehicles cannot park on landscaped bioswale bulb-outs
+      if (currentLayoutForSpots === 'contemporary_townhomes') {
+        const bulbOuts = [
+          { start: 20, end: 38 },
+          { start: 112, end: 130 },
+          { start: 204, end: 222 },
+          { start: 296, end: 314 }
+        ];
+        const vanStart = targetStopX;
+        const vanEnd = targetStopX + 21;
+        for (const bo of bulbOuts) {
+          if (vanStart < bo.end && vanEnd > bo.start) {
+            return true;
+          }
+        }
+      }
 
       for (let i = 0; i < obstacles.length; i++) {
         const obs = obstacles[i];
@@ -3355,8 +3643,32 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         renderHousesBackground();
       }
 
+      const currentLayout: StreetLayoutTypology = currentStreetLayout;
       const num8PlexSim = getEightPlexCount();
       const simTotalDwellings = 12 + num8PlexSim * 7;
+
+      // In Suburban Front Driveway neighbourhood, ensure vehicles have wide speed variance (35 to 55 km/h)
+      if (currentLayout === 'suburban_front_driveway') {
+        for (const v of activeVehicles) {
+          if (!v.speedKmH && v.type !== 'etsBus') {
+            const { simSpeed, speedKmH } = getSuburbanVehicleSpeed();
+            v.baseSpeed = simSpeed;
+            v.speed = simSpeed;
+            v.speedKmH = speedKmH;
+          }
+        }
+      } else {
+        for (const v of activeVehicles) {
+          if (v.speedKmH) {
+            delete v.speedKmH;
+            if (v.type === 'sedan') v.baseSpeed = 1.25;
+            else if (v.type === 'boxTruck') v.baseSpeed = 0.85;
+            else if (v.type === 'etsBus') v.baseSpeed = 0.95;
+            else if (v.isCircling) v.baseSpeed = 0.7;
+            else v.baseSpeed = BASE_CAR_SPEED;
+          }
+        }
+      }
 
       const activeHouseholdCars = Math.round(configRef.current.householdCarsPerHome * simTotalDwellings);
       const activeVisitorCars = Math.round(configRef.current.visitorPassesPerHome * simTotalDwellings);
@@ -3392,11 +3704,17 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         ? propCurbsideDemandRef.current
         : calculatedDemand;
       const hasProtectedBikeLane = simTotalDwellings > 60;
+      let fallbackCurbsideCap = getStreetLayoutInfo(currentLayout).curbsideCapacity;
+      if (currentLayout === 'suburban_front_driveway') {
+        const activeLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8PlexSim);
+        const restoredStallsCount = activeLots.filter(lot => lot !== 10).length;
+        fallbackCurbsideCap += restoredStallsCount;
+      }
       const currentLegalCurbsideStalls = hasProtectedBikeLane
         ? 0
         : (propCurbsideStallsCapacityRef.current !== undefined
           ? propCurbsideStallsCapacityRef.current
-          : BASE_LEGAL_CURBSIDE_STALLS);
+          : fallbackCurbsideCap);
       const gaugePercent = currentLegalCurbsideStalls > 0
         ? (propCurbsidePctRef.current !== undefined
           ? propCurbsidePctRef.current
@@ -3432,7 +3750,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         ? propCirclingCarCountRef.current
         : (curbsideDemand >= 20 ? 5 : curbsideDemand >= 17 ? 4 : curbsideDemand >= 15 ? 2 : curbsideDemand >= 13 ? 1 : 0);
 
-      if (configRef.current.cruisingTrafficLevel === 'high') {
+      if (currentLayout === 'suburban_front_driveway') {
+        // Reduced two-way traffic: minimal cruising traffic on suburban residential road
+        targetCirclingCount = Math.min(targetCirclingCount, 1);
+      } else if (configRef.current.cruisingTrafficLevel === 'high') {
         targetCirclingCount = Math.min(5, targetCirclingCount + 1);
       } else if (configRef.current.cruisingTrafficLevel === 'low') {
         targetCirclingCount = Math.max(0, targetCirclingCount - 1);
@@ -3454,7 +3775,14 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           candidate.x = spawnX;
           candidate.y = candidate.baseY || 110;
           candidate.targetY = candidate.baseY || 110;
-          candidate.speed = candidate.baseSpeed || 0.7;
+          if (currentLayout === 'suburban_front_driveway') {
+            const { simSpeed, speedKmH } = getSuburbanVehicleSpeed();
+            candidate.baseSpeed = simSpeed;
+            candidate.speed = simSpeed;
+            candidate.speedKmH = speedKmH;
+          } else {
+            candidate.speed = candidate.baseSpeed || 0.7;
+          }
           candidate.circlingLap = 1;
           candidate.searchingBubbleTimer = 75;
           candidate.searchScanTimer = Math.floor(Math.random() * 100);
@@ -3478,8 +3806,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         setCirclingCarCount(currentCirclingCount);
       }
 
-      // ETS Transit Frequency: For every three 8-plexes, add an additional ETS bus to the road
-      const additionalEtsBusesNeeded = Math.floor(num8PlexSim / 3);
+      // ETS Transit Frequency: For every three 8-plexes, add an additional ETS bus to the road (except suburban front driveway which has minimal ETS service)
+      const isSuburbanSim = (configRef.current.streetLayout || 'mature_laned') === 'suburban_front_driveway';
+      const additionalEtsBusesNeeded = isSuburbanSim ? 0 : Math.floor(num8PlexSim / 3);
 
       for (let b = 0; b < extraEtsBuses.length; b++) {
         const extraBus = extraEtsBuses[b];
@@ -3665,7 +3994,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if (!A.parkingState || A.parkingState === 'cruising') {
             A.parkingState = 'cruising';
             // Only search while in the curbside lane and along the curbside block
-            if (A.x > 35 && A.x < 270) {
+            const maxCurbsideSearchX = ((configRef.current.streetLayout || 'mature_laned') === 'suburban_front_driveway') ? 355 : 270;
+            if (A.x > 35 && A.x < maxCurbsideSearchX) {
               // Find all curbside parking stalls that are currently vacant
               const curbsideStalls = houseCarAssignments.filter(s => s.y >= 92 && s.y <= 96);
               const occupiedStalls = houseCarAssignments.slice(0, totalToRender);
@@ -3796,8 +4126,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           targetLane = (A.baseY || 110) < 118 ? 108 : 126;
           isPullingOver = true;
         } else if (A.type === 'etsBus' && !A.isBurning) {
-          // When protected bike lane is present (>60 dwellings), ETS bus halts in-lane (y = 110) at floating platform
           if (hasProtectedBikeLane) {
+            // When protected bike lane is present (>60 dwellings), ETS bus halts in-lane (y = 110) at floating platform
             targetLane = A.baseY || 110;
           } else {
             const anotherBusDwelling = activeVehicles.some(v => v !== A && v.type === 'etsBus' && v.busStopState === 'dwelling');
@@ -3879,37 +4209,37 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         if (A.type === 'etsBus') {
           const stopTargetX = 312;
           if (A.busStopState === 'approaching' || !A.busStopState) {
-            // Only initiate curbside pull-over stop if passengers are waiting
-            if (busStopPassengerCount > 0) {
-              if (A.x >= 260 && A.x < stopTargetX) {
-                // Decelerate smoothly as bus steers over to the curb
-                const distToStop = stopTargetX - A.x;
-                assignedBaseSpeed = Math.max(0.18, (distToStop / 48) * (A.baseSpeed || 0.95));
-              } else if (A.x >= stopTargetX && A.x < stopTargetX + 8) {
-                // Curbside reached: initiate dwelling for boarding and alighting
-                A.busStopState = 'dwelling';
-                A.busDwellTimer = 180; // ~3 seconds dwell time
-                assignedBaseSpeed = 0;
+              // Only initiate curbside pull-over stop if passengers are waiting
+              if (busStopPassengerCount > 0) {
+                if (A.x >= 260 && A.x < stopTargetX) {
+                  // Decelerate smoothly as bus steers over to the curb
+                  const distToStop = stopTargetX - A.x;
+                  assignedBaseSpeed = Math.max(0.18, (distToStop / 48) * (A.baseSpeed || 0.95));
+                } else if (A.x >= stopTargetX && A.x < stopTargetX + 8) {
+                  // Curbside reached: initiate dwelling for boarding and alighting
+                  A.busStopState = 'dwelling';
+                  A.busDwellTimer = 180; // ~3 seconds dwell time
+                  assignedBaseSpeed = 0;
+                }
               }
+            } else if (A.busStopState === 'dwelling') {
+              assignedBaseSpeed = 0;
+              if ((A.busDwellTimer || 0) > 0) {
+                A.busDwellTimer!--;
+                // Passengers finish boarding midway through the dwell
+                if (A.busDwellTimer! === 60) {
+                  busStopPassengerCount = 0; // Loaded onto bus
+                  busStopPassengerRespawnTimer = 400; // Will respawn next waiting passengers in ~6.5s
+                }
+                if (A.busDwellTimer! <= 0) {
+                  A.busStopState = 'departing';
+                }
+              }
+            } else if (A.busStopState === 'departing') {
+              // Accelerate and merge back out into street traffic
+              assignedBaseSpeed = (A.baseSpeed || 0.95) * 0.85;
             }
-          } else if (A.busStopState === 'dwelling') {
-            assignedBaseSpeed = 0;
-            if ((A.busDwellTimer || 0) > 0) {
-              A.busDwellTimer!--;
-              // Passengers finish boarding midway through the dwell
-              if (A.busDwellTimer! === 60) {
-                busStopPassengerCount = 0; // Loaded onto bus
-                busStopPassengerRespawnTimer = 400; // Will respawn next waiting passengers in ~6.5s
-              }
-              if (A.busDwellTimer! <= 0) {
-                A.busStopState = 'departing';
-              }
-            }
-          } else if (A.busStopState === 'departing') {
-            // Accelerate and merge back out into street traffic
-            assignedBaseSpeed = (A.baseSpeed || 0.95) * 0.85;
           }
-        }
 
         // Adjust speed for parking maneuver states
         if (A.parkingState === 'found_spot') {
@@ -3998,6 +4328,23 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               if (B.x <= 35 && B.x >= respawnX - (A.w || 15) - 20) {
                 respawnX = Math.min(respawnX, B.x - (A.w || 15) - 25);
               }
+            }
+          }
+          if (currentLayout === 'suburban_front_driveway') {
+            if (A.type === 'etsBus') {
+              // Minimal ETS Service on suburban front driveway blocks (long headway interval)
+              respawnX = -2600 - Math.random() * 600;
+            } else {
+              // Reduced two-way traffic on suburban front driveway blocks (long headway intervals between vehicles)
+              respawnX = -450 - Math.random() * 400;
+              // Alternate lane (110 vs 124) for balanced light two-way flow
+              A.baseY = A.baseY === 110 ? 124 : 110;
+            }
+            // Assign vehicle speed with larger standard deviation: 35 km/h to 55 km/h (-5 km/h to +15 km/h from 40 km/h limit)
+            if (A.type !== 'etsBus') {
+              const { simSpeed, speedKmH } = getSuburbanVehicleSpeed();
+              A.baseSpeed = simSpeed;
+              A.speedKmH = speedKmH;
             }
           }
           A.x = respawnX;
@@ -4294,7 +4641,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       }
 
       const midCenturyLotWidth = 30.5;
-      const currentLayout: StreetLayoutTypology = configRef.current.streetLayout || 'mature_laned';
       for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
         if (isEightPlexLot(h)) continue;
         const startX = 8 + h * midCenturyLotWidth;
@@ -4524,7 +4870,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
       // 1. Static and parked household vehicles (outdoor curbside stalls and outdoor gravel/concrete pads)
       const curbsideStalls = houseCarAssignments.filter(c => !c.isGarage && c.y === 94);
-      const drivewayPads = houseCarAssignments.filter(c => !c.isGarage && c.y < 50);
+      const drivewayPads = houseCarAssignments.filter(c => !c.isGarage && c.y < 85);
 
       // Render exactly the number of curbside cars that corresponds to curbsideDemand (up to 16 stalls)
       const curbsideCountToRender = Math.min(curbsideStalls.length, Math.max(0, Math.round(curbsideDemand)));
@@ -4689,23 +5035,25 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       }
 
       // 9. ETS Bus Stop Shelter & Waiting/Boarding Passengers
-      // The 30m ETS Bus Stop zone is permanently active along the street
-      if (busStopPassengerRespawnTimer > 0) {
-        busStopPassengerRespawnTimer--;
-        if (busStopPassengerRespawnTimer === 0) {
-          busStopPassengerCount = 2;
+      // Designated ETS bus stop at Lot 10
+      const hasEtsBusStop = true;
+      if (hasEtsBusStop) {
+        if (busStopPassengerRespawnTimer > 0) {
+          busStopPassengerRespawnTimer--;
+          if (busStopPassengerRespawnTimer === 0) {
+            busStopPassengerCount = 2;
+          }
         }
-      }
 
-      renderQueue.push({
-        type: 'busStopShelter',
-        x: 324,
-        y: 80.5,
-        w: 20,
-        d: 9.5,
-        hasFullShelter: simTotalDwellings > 11,
-        depthKey: getIsometricDepthKey(324, 80.5, 20, 9.5)
-      });
+        renderQueue.push({
+          type: 'busStopShelter',
+          x: 324,
+          y: 80.5,
+          w: 20,
+          d: 9.5,
+          hasFullShelter: simTotalDwellings > 11,
+          depthKey: getIsometricDepthKey(324, 80.5, 20, 9.5)
+        });
 
         const dwellingBus = activeVehicles.find(v => v.type === 'etsBus' && v.busStopState === 'dwelling');
         if (dwellingBus) {
@@ -4758,6 +5106,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             });
           }
         }
+      }
 
       // 10. Update & include residents walking from parked cars to house doorways
       for (let i = parkedWalkers.length - 1; i >= 0; i--) {
@@ -4878,10 +5227,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             } else if (item.type === 'etsBus') {
               if (item.busStopState === 'dwelling') {
                 drawBusBubble(item.x, item.y, 0, 'ETS Bus Stop - Boarding');
-              } else if (item.isExtraBus && item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
+              } else if (item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
                 item.searchingBubbleTimer--;
-                drawBusBubble(item.x, item.y, 0, 'Frequent ETS Service (10+ homes)');
+                drawBusBubble(item.x, item.y, 0, item.isExtraBus ? 'Frequent ETS Service (10+ homes)' : 'ETS Transit Route');
               }
+            } else if (currentLayout === 'suburban_front_driveway' && item.speedKmH && item.isAnimatedTraffic) {
+              drawSpeedBadge(item.x, item.y, 0, item.speedKmH);
             }
           }
           ctx!.restore();
@@ -4945,7 +5296,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
   const num8PlexCount = Math.min(7, Math.max(0, config.splitInfillLots ?? 0));
   const totalDwellings = 12 + num8PlexCount * 7;
   const hasProtectedBikeLane = totalDwellings > 60;
-  const totalLegalCurbsideStalls = hasProtectedBikeLane ? 0 : TOTAL_LEGAL_CURBSIDE_STALLS;
+  let layoutStallsCapacity = getStreetLayoutInfo(config.streetLayout).curbsideCapacity;
+  if ((config.streetLayout || 'mature_laned') === 'suburban_front_driveway') {
+    const activeLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8PlexCount);
+    const restoredStallsCount = activeLots.filter(lot => lot !== 10).length;
+    layoutStallsCapacity += restoredStallsCount;
+  }
+  const totalLegalCurbsideStalls = hasProtectedBikeLane ? 0 : layoutStallsCapacity;
 
   const numThree8PlexTiers = Math.floor(num8PlexCount / 3);
   const effectiveDeliveriesPerHome = numThree8PlexTiers >= 1
@@ -5032,8 +5389,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           <p>{t('sim_canvas_unsupported', 'Your browser does not support the canvas element needed to render the neighborhood simulation.')}</p>
         </canvas>
 
-        {/* Top-Left Status: Emergency Alerts */}
-        {isPoliceTrafficActive && (
+        {/* Top-Left Status: Emergency Alerts or Suburban Front Driveway Profile */}
+        {isPoliceTrafficActive ? (
           <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-30 flex flex-col items-start gap-1.5 sm:gap-2 pointer-events-none">
             <div
               id="police-traffic-status"
@@ -5050,7 +5407,14 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               </div>
             </div>
           </div>
-        )}
+        ) : (config.streetLayout || 'mature_laned') === 'suburban_front_driveway' ? (
+          <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-20 pointer-events-none">
+            <div className="flex items-center gap-1.5 bg-[#193A5A]/95 border border-[#0081BC]/40 px-2 sm:px-2.5 py-1 rounded-md sm:rounded-lg shadow-md backdrop-blur-xs text-[10px] sm:text-xs text-blue-100 font-semibold">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+              <span>Unmarked Road • Light 2-Way Traffic (35–55 km/h)</span>
+            </div>
+          </div>
+        ) : null}
 
         {/* Top Right HUD: Audio + Gauge + Manual Controls Toggle */}
         <div className="absolute top-1.5 right-1.5 sm:top-3 sm:right-3 z-20 flex flex-col items-end gap-1 sm:gap-1.5">

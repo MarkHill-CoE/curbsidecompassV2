@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { SurveyQuestion, StreetLayoutTypology } from '../types';
+import { SurveyQuestion, StreetLayoutTypology, SimulationConfig } from '../types';
 import {
   ChevronLeft,
   ChevronRight,
@@ -38,6 +38,9 @@ interface SurveyStageProps {
   currentStreetLayout?: StreetLayoutTypology;
   currentNeighbourhoodName?: string;
   onLayoutChange?: (layout: StreetLayoutTypology, neighbourhoodName?: string, postalCode?: string) => void;
+  config?: SimulationConfig;
+  totalDwellings?: number;
+  onConfigChange?: (newConfig: Partial<SimulationConfig>) => void;
 }
 
 const SurveyStageComponent: React.FC<SurveyStageProps> = ({
@@ -51,14 +54,17 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
   tradeoffOutcome,
   currentStreetLayout = 'mature_laned',
   currentNeighbourhoodName,
-  onLayoutChange
+  onLayoutChange,
+  config,
+  totalDwellings,
+  onConfigChange
 }) => {
   const { t } = useAppText();
   const currentQuestion = questions[currentStep] || questions[0];
   const isLastQuestion = currentStep === questions.length - 1;
   const currentAnswer = selectedAnswers[currentQuestion.id];
-  const isModelStreetStep = currentQuestion.id === 'q0' || currentQuestion.category === 'Street Model';
-  const isLocationStep = currentQuestion.id === 'q7' || currentQuestion.category === 'location' || currentQuestion.type === 'text';
+  const isModelStreetStep = currentQuestion.id === 'q0' || currentQuestion.category === 'Street Model' || currentQuestion.category === 'Neighbourhood Type';
+  const isLocationStep = currentQuestion.id === 'q7' || currentQuestion.category === 'location' || currentQuestion.category === 'Location' || currentQuestion.category === 'Location & Community' || currentQuestion.type === 'text';
 
   // Responsive column classes for question options
   const optionCount = currentQuestion.options.length;
@@ -105,7 +111,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       title: 'Mature Laned',
       era: '1950s–1960s Heritage',
       tag: 'Continuous curb • Rear gravel lane & garages • Zero front driveways',
-      stalls: 16,
+      stalls: getStreetLayoutInfo('mature_laned').curbsideCapacity,
       desc: 'Strathcona, Westmount, Glenora, Highlands, Bonnie Doon'
     },
     {
@@ -114,7 +120,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       title: 'Infill & Duplex',
       era: 'Post-2015 Redeveloping',
       tag: 'Subdivided lots • Narrow skinny duplexes & garden suites',
-      stalls: 14,
+      stalls: getStreetLayoutInfo('infill_skinny').curbsideCapacity,
       desc: 'Garneau, Oliver (Wîhkwêntôwin), Downtown, Queen Alex, McKernan'
     },
     {
@@ -122,8 +128,8 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       icon: '🚗',
       title: 'Suburban Front Driveway',
       era: '1980s–2000s Subdivisions',
-      tag: 'Attached garages • Concrete driveways • Driveway curb cuts',
-      stalls: 10,
+      tag: 'Attached garages • Unmarked road (35–55 km/h) • Driveways (10+ stalls)',
+      stalls: getStreetLayoutInfo('suburban_front_driveway').curbsideCapacity,
       desc: 'Mill Woods, Callingwood, Riverbend, Castledowns, Blue Quill'
     },
     {
@@ -132,7 +138,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       title: 'Contemporary Townhomes',
       era: '2020s City Plan Developing',
       tag: 'Dense townhomes • Rear garage lane • Pocket parking bays',
-      stalls: 12,
+      stalls: getStreetLayoutInfo('contemporary_townhomes').curbsideCapacity,
       desc: 'Griesbach, Blatchford, Windermere, Chappelle, Laurel, Secord'
     }
   ];
@@ -180,7 +186,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
   // Step header title and category
   const headerTitle = useMemo(() => {
     if (isModelStreetStep) {
-      return t('q0_progress_title', 'CHOOSE YOUR MODEL STREET');
+      return t('q0_progress_title', 'WHERE DO YOU LIVE?');
     }
     if (isLocationStep) {
       return t('q7_progress_title', 'YOUR LOCATION IN EDMONTON');
@@ -190,10 +196,10 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
 
   const headerCategory = useMemo(() => {
     if (isModelStreetStep) {
-      return t('q0_category', 'Street Model');
+      return t('q0_category', 'Neighbourhood Type');
     }
     if (isLocationStep) {
-      return t('q7_category', 'Location');
+      return t('q7_category', 'Location & Community');
     }
     return t(`q${currentQuestion.number}_category`, `${currentQuestion.category}`);
   }, [isModelStreetStep, isLocationStep, currentQuestion.number, currentQuestion.category, t]);
@@ -255,17 +261,17 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
           >
             <h4 className="text-[13pt] sm:text-[15pt] md:text-[17pt] font-bold text-[#193A5A] mb-1 sm:mb-1.5 leading-snug tracking-[-0.05em]">
               {isModelStreetStep
-                ? t('q0_question', 'Choose your model street')
+                ? t('q0_question', 'Where do you live?')
                 : isLocationStep
                 ? t('q7_question', 'Where do you live in Edmonton?')
                 : t(`q${currentQuestion.number}_question`, currentQuestion.text)}
             </h4>
 
-            {/* Step 0: Choose Your Model Street */}
+            {/* Step 0: Choose Your Neighbourhood Type (Street Layout + Home Density Infill Slider) */}
             {isModelStreetStep && (
               <div className="w-full flex flex-col gap-2 pt-0.5">
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                  {t('q0_helper', currentQuestion.helperText || 'Select an Edmonton street style to calibrate live curbside parking stalls in your simulation:')}
+                  {t('q0_helper', currentQuestion.helperText || 'Select an Edmonton street style to calibrate live curbside parking stalls in your simulation, and adjust home density to increase infill:')}
                 </p>
 
                 {/* 4 Cards Grid - 2x2 Layout */}
@@ -323,9 +329,66 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                   })}
                 </div>
 
-                {/* Active selection feedback pill */}
+                {/* Home Density (Infill) Slider container just above the Active Simulation Model container */}
+                <div className="bg-gradient-to-r from-purple-50/90 to-blue-50/90 border-2 border-purple-200/90 rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col gap-1.5 mt-0.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-[#7B2CBF] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                        🏘️
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs sm:text-sm font-black text-gray-900 block leading-tight truncate">
+                          {t('drawer_infill_label', 'Home Density')} (Infill)
+                        </span>
+                        <span className="text-[10px] sm:text-[10.5px] text-gray-600 font-semibold block leading-tight">
+                          {t('density_slider_subtitle', 'Adjust 8-plex infill lots in your street simulation to increase infill')}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="font-black text-xs sm:text-sm text-purple-900 bg-purple-100 border border-purple-300 px-2.5 py-1 rounded-lg shrink-0 shadow-2xs">
+                      {(config?.splitInfillLots ?? 0)} 8-Plex{(config?.splitInfillLots ?? 0) === 1 ? '' : 'es'} ({totalDwellings ?? (12 + (config?.splitInfillLots ?? 0) * 7)} {t('drawer_dwellings_unit', 'Dwellings')})
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 pt-0.5">
+                    <span className="text-[10px] font-bold text-gray-500 shrink-0">Baseline (0)</span>
+                    <input
+                      type="range"
+                      aria-label={t('drawer_sliders_density_aria', 'Home density')}
+                      min="0"
+                      max="7"
+                      step="1"
+                      value={Math.min(7, Math.max(0, config?.splitInfillLots ?? 0))}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        triggerFeedback('choice');
+                        const tiers = Math.floor(val / 3);
+                        onConfigChange?.({
+                          splitInfillLots: val,
+                          deliveriesPerHomePerWeek: tiers >= 1 && (config?.deliveriesPerHomePerWeek ?? 1.2) < 2.0 ? 2.0 : config?.deliveriesPerHomePerWeek
+                        });
+                      }}
+                      className="accent-[#7B2CBF] cursor-pointer h-2.5 bg-gray-200 rounded-lg w-full"
+                    />
+                    <span className="text-[10px] font-bold text-purple-700 shrink-0">Max Infill (7)</span>
+                  </div>
+
+                  <p className="text-[10px] sm:text-[10.5px] text-gray-600 leading-snug">
+                    {t('sim_density_explainer', 'Each infill adds multi-unit housing (8 dwellings per 15.6m lot).')}
+                  </p>
+                </div>
+
+                {/* Active selection feedback pill / Active Simulation Model Container */}
                 {(() => {
-                  const activeInfo = getStreetLayoutInfo(currentAnswer as StreetLayoutTypology || currentStreetLayout);
+                  const activeTypology = (currentAnswer as StreetLayoutTypology || currentStreetLayout);
+                  const activeInfo = getStreetLayoutInfo(activeTypology);
+                  let displayCapacity = activeInfo.curbsideCapacity;
+                  if (activeTypology === 'suburban_front_driveway') {
+                    const num8Plex = Math.min(7, Math.max(0, config?.splitInfillLots ?? 0));
+                    const activeLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8Plex);
+                    const restoredCount = activeLots.filter(lot => lot !== 10).length;
+                    displayCapacity += restoredCount;
+                  }
                   return (
                     <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-xs text-[#004B8D] mt-0.5 shadow-2xs">
                       <span className="truncate">
@@ -333,7 +396,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                         <strong className="font-bold text-[#193A5A]">{activeInfo.title}</strong>
                       </span>
                       <span className="text-[10px] font-bold bg-[#004B8D] text-white px-2 py-0.5 rounded-full shrink-0 ml-2">
-                        {activeInfo.curbsideCapacity} Legal Stalls
+                        {displayCapacity} Legal Stalls
                       </span>
                     </div>
                   );
@@ -341,11 +404,11 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
               </div>
             )}
 
-            {/* Step 7: Where do you live in Edmonton? (Location) */}
+            {/* Step 7: Choose your neighbourhood type? (Location & Home Density) */}
             {isLocationStep && (
-              <div className="w-full flex flex-col gap-1.5 pt-0.5">
+              <div className="w-full flex flex-col gap-2 pt-0.5">
                 <label htmlFor="location-smart-input" className="block text-xs sm:text-sm font-semibold text-[#193A5A] leading-snug">
-                  {t('q7_helper', 'Search your neighbourhood or enter a postal code to record your location:')}
+                  {t('q7_helper', 'Search your neighbourhood or enter a postal code to record your location, and adjust your neighbourhood home density:')}
                 </label>
 
                 {/* Single Smart Unified Search Input with explicit 48px touch target */}
@@ -435,6 +498,51 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     )}
                   </div>
                 )}
+
+                {/* Home Density (Infill) Slider */}
+                <div className="bg-gradient-to-r from-purple-50/90 to-blue-50/90 border-2 border-purple-200/90 rounded-xl p-3 sm:p-3.5 shadow-2xs flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="w-7 h-7 rounded-lg bg-[#7B2CBF] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+                        🏘️
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-xs sm:text-sm font-black text-gray-900 block leading-tight truncate">
+                          {t('drawer_infill_label', 'Home Density')} (Infill)
+                        </span>
+                        <span className="text-[10px] sm:text-[10.5px] text-gray-600 font-semibold block leading-tight">
+                          {t('density_slider_subtitle', 'Adjust 8-plex infill lots in your street simulation')}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="font-black text-xs sm:text-sm text-purple-900 bg-purple-100 border border-purple-300 px-2.5 py-1 rounded-lg shrink-0 shadow-2xs">
+                      {(config?.splitInfillLots ?? 0)} 8-Plex{(config?.splitInfillLots ?? 0) === 1 ? '' : 'es'} ({totalDwellings ?? (12 + (config?.splitInfillLots ?? 0) * 7)} {t('drawer_dwellings_unit', 'Dwellings')})
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 pt-1">
+                    <span className="text-[10px] font-bold text-gray-500 shrink-0">Baseline (0)</span>
+                    <input
+                      type="range"
+                      aria-label={t('drawer_sliders_density_aria', 'Home density')}
+                      min="0"
+                      max="7"
+                      step="1"
+                      value={Math.min(7, Math.max(0, config?.splitInfillLots ?? 0))}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value, 10);
+                        triggerFeedback('choice');
+                        onConfigChange?.({ splitInfillLots: val });
+                      }}
+                      className="accent-[#7B2CBF] cursor-pointer h-2.5 bg-gray-200 rounded-lg w-full"
+                    />
+                    <span className="text-[10px] font-bold text-purple-700 shrink-0">Max Infill (7)</span>
+                  </div>
+
+                  <p className="text-[10px] sm:text-[10.5px] text-gray-600 leading-snug">
+                    {t('sim_density_explainer', 'Each infill adds multi-unit housing (8 dwellings per 15.6m lot).')}
+                  </p>
+                </div>
 
                 {/* Opt-Out Option & Privacy */}
                 <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">

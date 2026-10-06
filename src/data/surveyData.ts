@@ -17,35 +17,35 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q0',
     number: 0,
-    category: 'Street Model' as any,
-    text: 'Choose your model street',
-    helperText: 'Select an Edmonton street style to calibrate live curbside parking stalls in your simulation:',
+    category: 'Neighbourhood Type' as any,
+    text: 'Where do you live?',
+    helperText: 'Select an Edmonton street style to calibrate live curbside parking stalls in your simulation, and adjust home density to increase infill:',
     options: [
       {
         id: 'mature_laned',
         label: 'Mature Laned (1950s)',
-        hint: 'Detached garages with back lanes. 16 legal curbside stalls.',
+        hint: 'Detached garages with back lanes. 12 legal curbside stalls.',
         x: 0,
         y: 0
       },
       {
         id: 'infill_skinny',
         label: 'Infill & Skinny Homes',
-        hint: 'Subdivided narrow lots with detached rear garages. 14 legal curbside stalls.',
+        hint: 'Subdivided narrow lots with detached rear garages. 12 legal curbside stalls.',
         x: 0,
         y: 0
       },
       {
         id: 'suburban_front_driveway',
         label: 'Suburban Front Driveway (1980s)',
-        hint: 'Attached front driveways breaking up the curb. 10 legal curbside stalls.',
+        hint: 'Attached front driveways with 1.5m yellow curb setbacks (Bylaw 5590). 10 base stalls; each 8-plex removes a driveway to add a curbside stall back (except at the ETS bus stop).',
         x: 0,
         y: 0
       },
       {
         id: 'contemporary_townhomes',
         label: 'Contemporary Townhomes',
-        hint: 'Multi-unit rows with rear garage lane and front pocket bays. 12 legal curbside stalls.',
+        hint: 'Multi-unit rows with rear garage lane and front pocket bays. 9 legal curbside stalls.',
         x: 0,
         y: 0
       }
@@ -234,7 +234,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q7',
     number: 7,
-    category: 'location',
+    category: 'Location' as any,
     type: 'text',
     text: 'Where do you live in Edmonton?',
     placeholder: 'e.g. T5J 2R7 or Strathcona',
@@ -279,7 +279,15 @@ export function calculateSimulationMetricsFromAnswers(
   const hasProtectedBikeLane = totalDwellings > 60;
 
   const layoutInfo = getStreetLayoutInfo(activeLayout);
-  const curbsideStallsCapacity = hasProtectedBikeLane ? 0 : layoutInfo.curbsideCapacity;
+  let baseCurbsideCapacity = layoutInfo.curbsideCapacity;
+  if (activeLayout === 'suburban_front_driveway' && !hasProtectedBikeLane) {
+    // Each 8-plex removes a driveway pad and 1.5m yellow curb clearance, creating curbside space for 1 parking stall
+    // (except on Lot 10 where there is an ETS bus stop)
+    const active8PlexLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8Plex);
+    const restoredStallsCount = active8PlexLots.filter(lot => lot !== 10).length;
+    baseCurbsideCapacity = layoutInfo.curbsideCapacity + restoredStallsCount;
+  }
+  const curbsideStallsCapacity = hasProtectedBikeLane ? 0 : baseCurbsideCapacity;
 
   // Household Cars:
   // Baseline cars per home (~2.0, modified by q2 unlimited permits)

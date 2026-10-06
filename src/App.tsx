@@ -670,6 +670,9 @@ export default function App() {
               currentStreetLayout={simConfig.streetLayout || 'mature_laned'}
               currentNeighbourhoodName={simConfig.neighbourhoodName}
               onLayoutChange={handleLayoutChange}
+              config={simConfig}
+              totalDwellings={simulationMetrics.totalDwellings}
+              onConfigChange={handleConfigChange}
             />
           ) : (
             <ResultsView

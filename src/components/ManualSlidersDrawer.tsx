@@ -115,16 +115,16 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
               className="w-full appearance-none bg-black/40 hover:bg-black/55 text-white font-medium text-xs sm:text-sm py-2 pl-3 pr-9 rounded-lg border-2 border-white/20 hover:border-[#0081BC] focus:border-[#FFC72C] focus:outline-none focus:ring-2 focus:ring-[#FFC72C]/30 transition-all cursor-pointer shadow-inner"
             >
               <option value="mature_laned" className="bg-[#11283f] text-white">
-                🏡 {t('drawer_sliders_typology_mature_laned', 'Mature Laned (16 stalls)')} — Detached Rear Garages
+                🏡 {t('drawer_sliders_typology_mature_laned', 'Mature Laned (12 stalls)')} — Detached Rear Garages
               </option>
               <option value="infill_skinny" className="bg-[#11283f] text-white">
-                🏘️ {t('drawer_sliders_typology_infill_skinny', 'Infill & Duplex (16 stalls)')} — Laneway & Skinny Lots
+                🏘️ {t('drawer_sliders_typology_infill_skinny', 'Infill & Duplex (12 stalls)')} — Laneway & Skinny Lots
               </option>
               <option value="suburban_front_driveway" className="bg-[#11283f] text-white">
-                🚗 {t('drawer_sliders_typology_suburban_front', 'Front Driveway (10 stalls)')} — Front-Attached Garages
+                🚗 {t('drawer_sliders_typology_suburban_front', 'Front Driveway (10+ stalls)')} — Front Garages; 8-Plexes Restore Stalls
               </option>
               <option value="contemporary_townhomes" className="bg-[#11283f] text-white">
-                🏢 {t('drawer_sliders_typology_townhomes', 'Townhomes (12 stalls)')} — Multi-Unit Row Housing
+                🏢 {t('drawer_sliders_typology_townhomes', 'Townhomes (9 stalls)')} — Multi-Unit Row Housing
               </option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-gray-300">
