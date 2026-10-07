@@ -123,23 +123,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
             </div>
           </div>
 
-          {/* Stance highlights from CSV definition */}
-          {(persona.stanceOnRegulations || persona.stanceOnFunding) && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 border-t border-blue-200/50 text-xs">
-              {persona.stanceOnRegulations && (
-                <div className="bg-white/90 px-2.5 py-1 rounded-md border border-blue-100">
-                  <span className="font-bold text-gray-700 text-[10px] uppercase block">Regulations:</span>
-                  <span className="text-gray-700">{persona.stanceOnRegulations}</span>
-                </div>
-              )}
-              {persona.stanceOnFunding && (
-                <div className="bg-white/90 px-2.5 py-1 rounded-md border border-blue-100">
-                  <span className="font-bold text-gray-700 text-[10px] uppercase block">Funding:</span>
-                  <span className="text-gray-700">{persona.stanceOnFunding}</span>
-                </div>
-              )}
-            </div>
-          )}
+
 
           <p className="text-[11pt] text-gray-800 leading-normal">
             {persona.description}

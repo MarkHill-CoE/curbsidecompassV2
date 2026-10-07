@@ -35,7 +35,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "compass_bottom_axis",
     "category": "Policy Compass",
     "container": "2D Compass Graph",
-    "defaultText": "▼ Open Access",
+    "defaultText": "▼ Fewer Parking Rules",
     "guidance": "Quadrant title, axis label, or balance metric"
   },
   {
@@ -133,7 +133,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "compass_top_axis",
     "category": "Policy Compass",
     "container": "2D Compass Graph",
-    "defaultText": "▲ Regulated Management",
+    "defaultText": "▲ More Parking Rules",
     "guidance": "Quadrant title, axis label, or balance metric"
   },
   {

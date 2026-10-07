@@ -360,6 +360,66 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     );
                   })}
                 </div>
+
+                {/* Home Density Slider Control */}
+                <div className="mt-1 p-3 sm:p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2 shadow-2xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="p-1.5 rounded-lg bg-[#004B8D]/10 text-[#004B8D] shrink-0">
+                        <Building2 className="w-4 h-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <label htmlFor="home-density-slider" className="text-xs sm:text-sm font-bold text-[#193A5A] block leading-tight cursor-pointer">
+                            {t('drawer_infill_label', 'Home Density')}
+                          </label>
+                        </div>
+                        <p className="text-[11px] text-gray-600 leading-tight mt-0.5">
+                          {t('drawer_density_explainer', 'Adds multi-unit housing to the street.')}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0 text-right">
+                      <span className="text-xs font-bold text-[#004B8D] bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-full">
+                        {(() => {
+                          const lots = Math.min(7, Math.max(0, config?.splitInfillLots ?? 0));
+                          if (lots === 0) return 'Baseline (0 lots)';
+                          if (lots === 1) return '+1 Multi-unit lot';
+                          return `+${lots} Multi-unit lots`;
+                        })()}
+                      </span>
+                      <span className="text-[11px] font-bold text-gray-700 bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-2xs">
+                        {(totalDwellings ?? (12 + Math.min(7, Math.max(0, config?.splitInfillLots ?? 0)) * 7))} {t('drawer_dwellings_unit', 'Dwellings')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1 pt-0.5">
+                    <input
+                      id="home-density-slider"
+                      type="range"
+                      aria-label={t('drawer_sliders_density_aria', 'Home density')}
+                      min="0"
+                      max="7"
+                      step="1"
+                      value={Math.min(7, Math.max(0, config?.splitInfillLots ?? 0))}
+                      onChange={(e) => {
+                        const new8Plex = parseInt(e.target.value, 10);
+                        const tiers = Math.floor(new8Plex / 3);
+                        onConfigChange?.({
+                          splitInfillLots: new8Plex,
+                          deliveriesPerHomePerWeek: tiers >= 1 && (config?.deliveriesPerHomePerWeek ?? 1.5) < 2.0 ? 2.0 : (config?.deliveriesPerHomePerWeek ?? 1.5)
+                        });
+                      }}
+                      className="accent-[#009A44] cursor-pointer h-2 bg-gray-200 rounded-lg w-full"
+                    />
+                    <div className="flex justify-between text-[10px] text-gray-500 font-medium px-0.5">
+                      <span>Low Density (0)</span>
+                      <span>Moderate (+3 lots)</span>
+                      <span>High Density (+7 lots)</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

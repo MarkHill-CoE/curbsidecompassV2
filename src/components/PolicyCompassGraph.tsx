@@ -57,7 +57,7 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
         <div className="absolute inset-y-0 left-1/4 w-[1px] border-r border-dashed border-gray-200 pointer-events-none" />
         <div className="absolute inset-y-0 left-3/4 w-[1px] border-r border-dashed border-gray-200 pointer-events-none" />
 
-        {/* Quadrant 1: Top-Right (User-Fee) */}
+        {/* Quadrant 1: Top-Right (Regulated & User-Fee) */}
         <div
           className={`absolute top-0 right-0 w-1/2 h-1/2 border-l border-b border-gray-300 flex flex-col items-center justify-center p-1 sm:p-2 text-center transition-all ${
             persona.quadrant === 'Q1'
@@ -65,15 +65,14 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
               : 'text-gray-500 font-semibold hover:bg-gray-100/40'
           }`}
         >
-          <span className="text-xs sm:text-sm md:text-base font-bold leading-tight">{t('compass_q1_line2', 'User-Fee')}</span>
           {persona.quadrant === 'Q1' && (
-            <span className="mt-1 text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#0081BC] text-white rounded-full shadow-2xs">
+            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#0081BC] text-white rounded-full shadow-2xs">
               {t('compass_badge_your_result', 'Your Result')}
             </span>
           )}
         </div>
 
-        {/* Quadrant 2: Top-Left (Taxpayer) */}
+        {/* Quadrant 2: Top-Left (Protective & Taxpayer) */}
         <div
           className={`absolute top-0 left-0 w-1/2 h-1/2 border-r border-b border-gray-300 flex flex-col items-center justify-center p-1 sm:p-2 text-center transition-all ${
             persona.quadrant === 'Q2'
@@ -81,15 +80,14 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
               : 'text-gray-500 font-semibold hover:bg-gray-100/40'
           }`}
         >
-          <span className="text-xs sm:text-sm md:text-base font-bold leading-tight">{t('compass_q2_line2', 'Taxpayer')}</span>
           {persona.quadrant === 'Q2' && (
-            <span className="mt-1 text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#005087] text-white rounded-full shadow-2xs">
+            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#005087] text-white rounded-full shadow-2xs">
               {t('compass_badge_your_result', 'Your Result')}
             </span>
           )}
         </div>
 
-        {/* Quadrant 3: Bottom-Left (Open Access) */}
+        {/* Quadrant 3: Bottom-Left (Free/Open & Taxpayer) */}
         <div
           className={`absolute bottom-0 left-0 w-1/2 h-1/2 border-r border-t border-gray-300 flex flex-col items-center justify-center p-1 sm:p-2 text-center transition-all ${
             persona.quadrant === 'Q3'
@@ -97,15 +95,14 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
               : 'text-gray-500 font-semibold hover:bg-gray-100/40'
           }`}
         >
-          <span className="text-xs sm:text-sm md:text-base font-bold leading-tight">{t('compass_q3_line2', 'Open Access')}</span>
           {persona.quadrant === 'Q3' && (
-            <span className="mt-1 text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#009A44] text-white rounded-full shadow-2xs">
+            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#009A44] text-white rounded-full shadow-2xs">
               {t('compass_badge_your_result', 'Your Result')}
             </span>
           )}
         </div>
 
-        {/* Quadrant 4: Bottom-Right (Simple Fee) */}
+        {/* Quadrant 4: Bottom-Right (Flat Rate & User-Fee) */}
         <div
           className={`absolute bottom-0 right-0 w-1/2 h-1/2 border-l border-t border-gray-300 flex flex-col items-center justify-center p-1 sm:p-2 text-center transition-all ${
             persona.quadrant === 'Q4'
@@ -113,9 +110,8 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
               : 'text-gray-500 font-semibold hover:bg-gray-100/40'
           }`}
         >
-          <span className="text-xs sm:text-sm md:text-base font-bold leading-tight">{t('compass_q4_line2', 'Simple Fee')}</span>
           {persona.quadrant === 'Q4' && (
-            <span className="mt-1 text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#d49b00] text-white rounded-full shadow-2xs">
+            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#d49b00] text-white rounded-full shadow-2xs">
               {t('compass_badge_your_result', 'Your Result')}
             </span>
           )}
@@ -132,7 +128,7 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
         <div className="absolute top-1.5 sm:top-2.5 left-1/2 -translate-x-1/2 z-10 pointer-events-none flex items-center justify-center gap-1 px-2.5 py-0.5 sm:py-1 rounded-md bg-white/95 backdrop-blur-xs border border-gray-300 shadow-2xs">
           <span className="text-[#004B8D] text-[10px] sm:text-xs font-bold">▲</span>
           <span className="text-[10px] sm:text-xs md:text-sm font-black text-gray-900 uppercase tracking-tight whitespace-nowrap">
-            {t('compass_top_axis_label', t('compass_top_axis', '▲ Regulated Management').replace('▲', '').trim())}
+            {t('compass_top_axis_label', t('compass_top_axis', '▲ More Parking Rules').replace('▲', '').trim())}
           </span>
         </div>
 
@@ -140,7 +136,7 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
         <div className="absolute bottom-1.5 sm:bottom-2.5 left-1/2 -translate-x-1/2 z-10 pointer-events-none flex items-center justify-center gap-1 px-2.5 py-0.5 sm:py-1 rounded-md bg-white/95 backdrop-blur-xs border border-gray-300 shadow-2xs">
           <span className="text-[#004B8D] text-[10px] sm:text-xs font-bold">▼</span>
           <span className="text-[10px] sm:text-xs md:text-sm font-black text-gray-900 uppercase tracking-tight whitespace-nowrap">
-            {t('compass_bottom_axis_label', t('compass_bottom_axis', '▼ Open Access').replace('▼', '').trim())}
+            {t('compass_bottom_axis_label', t('compass_bottom_axis', '▼ Fewer Parking Rules').replace('▼', '').trim())}
           </span>
         </div>
 
