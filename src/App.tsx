@@ -404,7 +404,7 @@ export default function App() {
           >
             <HelpCircle className="w-4 h-4 text-[#FFC72C]" />
             <span className="hidden sm:inline font-bold">
-              {t('header_how_it_works', 'How It Works')}
+              {t('header_how_it_works', 'Help')}
             </span>
           </button>
 
@@ -426,12 +426,12 @@ export default function App() {
             {isSimplifiedMode ? (
               <>
                 <Eye className="w-4 h-4 text-[#FFC72C]" />
-                <span className="hidden sm:inline font-bold">{t('header_mode_live', 'Live Model')}</span>
+                <span className="hidden sm:inline font-bold">{t('header_mode_live', 'Animated View')}</span>
               </>
             ) : (
               <>
                 <ZapOff className="w-4 h-4 text-amber-300" />
-                <span className="hidden sm:inline font-bold">{t('header_mode_simplified', 'Simplified Mode')}</span>
+                <span className="hidden sm:inline font-bold">{t('header_mode_simplified', 'Static View')}</span>
               </>
             )}
           </button>
