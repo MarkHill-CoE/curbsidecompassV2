@@ -296,7 +296,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
           >
             <h4 className="text-[13pt] sm:text-[15pt] md:text-[17pt] font-bold text-[#193A5A] mb-1 sm:mb-1.5 leading-snug tracking-[-0.05em]">
               {isModelStreetStep
-                ? t('q0_question', 'Choose an example street - select a layout you’d like to explore')
+                ? t('q0_question', 'Choose one of the four neighbourhoods to calibrate live curbside parking stalls in your simulation and adjust home density.')
                 : isLocationStep
                 ? t('q7_question', 'Enter your full postal code or first three characters of your postal code.')
                 : t(`q${currentQuestion.number}_question`, currentQuestion.text)}
@@ -306,7 +306,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             {isModelStreetStep && (
               <div className="w-full flex flex-col gap-2 pt-0.5">
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                  {t('q0_helper', currentQuestion.helperText || "These simplified examples do not represent every street or household's parking options. For an example street, select a layout you would like to explore. These simplified examples do not represent every street or household's parking options.")}
+                  {t('q0_helper', currentQuestion.helperText || "For an example street, select a layout you would like to explore. These simplified examples do not represent every street or household's parking options.")}
                 </p>
 
                 {/* 4 Cards Grid - 2x2 Layout */}

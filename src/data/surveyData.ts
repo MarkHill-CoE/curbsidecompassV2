@@ -18,8 +18,8 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q0',
     number: 0,
     category: 'Neighbourhood Type' as any,
-    text: 'Choose an example street - select a layout you’d like to explore',
-    helperText: "These simplified examples do not represent every street or household's parking options. For an example street, select a layout you would like to explore. These simplified examples do not represent every street or household's parking options.",
+    text: 'Choose one of the four neighbourhoods to calibrate live curbside parking stalls in your simulation and adjust home density.',
+    helperText: "For an example street, select a layout you would like to explore. These simplified examples do not represent every street or household's parking options.",
     options: [
       {
         id: 'mature_laned',
@@ -609,7 +609,7 @@ export function getQuestionTradeoffImpact(
         tradeoffRationale: 'Limits acceptable parking distance to the immediate block to keep vehicles close to home',
         curbsideImpactSummary: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
         benefitText: 'A short distance between your vehicle and home',
-        costText: 'Fewer spaces meet your preferences and your block may be full even when parking is available nearby.'
+        costText: 'Parking on your block may be full even when parking is available nearby.'
       };
     }
     if (selectedAnswerId === 'q2_b') {
@@ -782,8 +782,8 @@ export function getQuestionTradeoffImpact(
         deltaStallsValue: 3.5,
         tradeoffRationale: 'Ensures equal permit eligibility for all households regardless of private parking availability',
         curbsideImpactSummary: 'Ensures equal permit eligibility for all households regardless of their private parking arrangements.',
-        benefitText: 'Households have the same opportunity to obtain permits, regardless of their private parking arrangements',
-        costText: 'Households without private parking receive no additional priority and may face more competition for limited permits'
+        benefitText: 'Households have the same opportunity to obtain permits, regardless of their private parking options.',
+        costText: 'Households without private parking receive no additional priority and may face more competition for limited permits.'
       };
     }
     return {
