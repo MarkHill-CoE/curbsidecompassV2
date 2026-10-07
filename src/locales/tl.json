@@ -25,6 +25,7 @@
   "drawer_dwellings_unit": "Mga Tirahan",
   "drawer_gauge_close_aria": "Isara ang pinalaking sukatan ng paradahan",
   "drawer_infill_label": "Density ng Bahay",
+  "density_slider_subtitle": "I-adjust ang bilang ng multi-unit lots sa iyong street simulation upang dagdagan ang density",
   "sim_density_explainer": "Ang bawat infill ay nagdaragdag ng multi-unit na pabahay (8 tirahan bawat 15.6m na lote).",
   "drawer_police_test_btn": "Tumawag sa EPS",
   "drawer_police_test_title": "Subukan ang 20-segundong pagbara ng linya: nagpapadala ng EPS police cruiser na may mga ilaw at sirena upang linisin ang trapiko",

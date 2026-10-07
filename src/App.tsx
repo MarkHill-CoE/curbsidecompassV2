@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect, useCallback } from 'react';
 import { NeighborhoodSimulation } from './components/NeighborhoodSimulation';
 import { SimplifiedStreetSummary } from './components/SimplifiedStreetSummary';
 import { CivicOnboardingModal } from './components/CivicOnboardingModal';
+import { PersonaMergerViewer } from './components/PersonaMergerViewer';
 import { SurveyStage } from './components/SurveyStage';
 import { ResultsView } from './components/ResultsView';
 import { ManualSlidersDrawer } from './components/ManualSlidersDrawer';
@@ -35,6 +36,7 @@ import { ambientAudio } from './utils/ambientAudio';
 export default function App() {
   const { t } = useAppText();
 
+  const [showPersonaMerger, setShowPersonaMerger] = useState<boolean>(false);
   const [showManualSliders, setShowManualSliders] = useState<boolean>(false);
   const [showMagnifiedGauge, setShowMagnifiedGauge] = useState<boolean>(false);
   const [isDeviceCheckBlocking, setIsDeviceCheckBlocking] = useState<boolean>(() => {
@@ -293,7 +295,7 @@ export default function App() {
       // Step 7: Location question (Postal code / neighbourhood / opt-out)
       else if (currentQuestion.type === 'text' || currentQuestion.id === 'q7') {
         if (!answer) {
-          setValidationErrorMsg('Please enter your postal code, neighbourhood, or check "Prefer not to share location".');
+          setValidationErrorMsg('Please enter your postal code or neighbourhood.');
           setShowValidationError(true);
           return;
         }
@@ -682,6 +684,7 @@ export default function App() {
               config={simConfig}
               answers={selectedAnswers}
               onRetake={handleRetake}
+              onOpenPersonaMerger={() => setShowPersonaMerger(true)}
             />
           )}
           </div>
@@ -695,6 +698,13 @@ export default function App() {
         onClose={() => setShowOnboarding(false)}
         isSimplifiedMode={isSimplifiedMode}
         onToggleSimplifiedMode={handleToggleSimplifiedMode}
+      />
+
+      {/* 16 -> 8 Persona Streamlining & CSV Importer Modal */}
+      <PersonaMergerViewer
+        isOpen={showPersonaMerger}
+        onClose={() => setShowPersonaMerger(false)}
+        activePersonaId={currentPersona.id}
       />
 
       {/* Device & Browser Verification Guard (Validates orientation, canvas, and storage before displaying start screen) */}

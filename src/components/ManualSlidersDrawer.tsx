@@ -230,11 +230,6 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
             {t('drawer_density_explainer', 'Adds up to 7 8-plex multi-units (9.5m tall × 13m wide × 30m long) replacing houses on 15.6m lots.')}
           </p>
-          {totalDwellings > 60 && (
-            <span className="text-[#10B981] font-bold text-[10px] flex items-center gap-1 mt-0.5">
-              <span>🚲</span> {t('drawer_bikelane_active', 'Active Transportation Protected Bike Lane Active • On-street parking removed')}
-            </span>
-          )}
         </div>
 
         {/* Deliveries Per Home */}

@@ -15,6 +15,7 @@ interface ResultsViewProps {
   config: SimulationConfig;
   answers?: Record<string, string>;
   onRetake?: () => void;
+  onOpenPersonaMerger?: () => void;
 }
 
 const ResultsViewComponent: React.FC<ResultsViewProps> = ({
@@ -23,7 +24,8 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
   totalY,
   config,
   answers = {},
-  onRetake
+  onRetake,
+  onOpenPersonaMerger
 }) => {
   const { t } = useAppText();
   const [rating, setRating] = useState<number | null>(null);
@@ -104,15 +106,41 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
         </h3>
 
         {/* Persona Profile Header */}
-        <div className="bg-blue-50/80 border border-blue-100 rounded-lg p-2.5 sm:p-3 flex flex-col gap-1.5">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md flex items-center justify-center text-white shadow-xs flex-shrink-0" style={{ backgroundColor: persona.badgeColor }}>
-              <Award className="w-5 h-5" />
+        <div className="bg-blue-50/80 border border-blue-100 rounded-lg p-2.5 sm:p-3 flex flex-col gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-md flex items-center justify-center text-white shadow-xs flex-shrink-0" style={{ backgroundColor: persona.badgeColor }}>
+                <Award className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="font-bold text-[#005087] leading-tight text-[18pt] block">
+                  {persona.title}
+                </span>
+                <span className="text-xs font-semibold text-gray-500">
+                  {persona.quadrant} • {persona.intensity ? (persona.intensity === 'strong' ? 'Strong Conviction' : 'Moderate Balance') : 'Curbside Archetype'}
+                </span>
+              </div>
             </div>
-            <span className="font-bold text-[#005087] leading-tight text-[18pt]">
-              {persona.title}
-            </span>
           </div>
+
+          {/* Stance highlights from CSV definition */}
+          {(persona.stanceOnRegulations || persona.stanceOnFunding) && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 pt-1 border-t border-blue-200/50 text-xs">
+              {persona.stanceOnRegulations && (
+                <div className="bg-white/90 px-2.5 py-1 rounded-md border border-blue-100">
+                  <span className="font-bold text-gray-700 text-[10px] uppercase block">Regulations:</span>
+                  <span className="text-gray-700">{persona.stanceOnRegulations}</span>
+                </div>
+              )}
+              {persona.stanceOnFunding && (
+                <div className="bg-white/90 px-2.5 py-1 rounded-md border border-blue-100">
+                  <span className="font-bold text-gray-700 text-[10px] uppercase block">Funding:</span>
+                  <span className="text-gray-700">{persona.stanceOnFunding}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <p className="text-[11pt] text-gray-800 leading-normal">
             {persona.description}
           </p>

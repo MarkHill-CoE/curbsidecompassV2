@@ -390,7 +390,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         osc2.frequency.exponentialRampToValueAtTime(625, now + 0.58);
 
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.16, now + 0.03);
+        gain.gain.linearRampToValueAtTime(0.12, now + 0.03);
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
         osc.connect(gain);
         osc2.connect(gain);
@@ -821,39 +821,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
     if (!bgGroundCtx || !bgHousesCtx || !bgTreesCtx) return;
 
-    function drawProtectedBikeLane() {
-      // 1. High-visibility emerald green asphalt surface along the north curbline (y = 93 to 101.5, width 8.5m)
-      drawFlatRect(0, 93, blockLength, 8.5, '#059669', bgGroundCtx);
-      drawFlatRect(0, 93, blockLength, 0.4, '#10B981', bgGroundCtx);
-      drawFlatRect(0, 101.1, blockLength, 0.4, '#047857', bgGroundCtx);
-
-      // 2. Continuous solid white bike lane boundary demarcation line
-      drawFlatRect(0, 101.5, blockLength, 0.6, '#FFFFFF', bgGroundCtx);
-
-      // 3. Directional pavement chevron markings on the green surface
-      for (let bx = 30; bx < blockLength - 20; bx += 45) {
-        drawFlatRect(bx + 14, 96.8, 4.0, 0.6, '#FFFFFF', bgGroundCtx);
-        drawFlatRect(bx + 16, 96.0, 2.0, 2.2, '#FFFFFF', bgGroundCtx);
-      }
-
-      // 4. Physical Protective Buffer & Flex-Post Delineator Bollards (separating bike lane from motor vehicle lane)
-      // Painted hatched buffer zone (y = 101.5 to 103.5)
-      drawFlatRect(0, 101.5, blockLength, 2.0, '#374151', bgGroundCtx);
-      for (let hx = 5; hx < blockLength; hx += 12) {
-        drawFlatRect(hx, 101.6, 1.2, 1.8, '#FBBF24', bgGroundCtx);
-      }
-
-      // White heavy-duty reflective flex-post delineator bollards every 18m
-      for (let bx = 15; bx < blockLength - 10; bx += 18) {
-        // Concrete curb buffer mount
-        drawBlock(bx - 0.6, 102.0, 0, 1.2, 1.2, 0.4, '#E5E7EB', '#D1D5DB', '#9CA3AF', bgGroundCtx);
-        // Vertical flex-post bollard (white cylinder with yellow reflective bands)
-        drawBlock(bx - 0.3, 102.3, 0.4, 0.6, 0.6, 2.8, '#FFFFFF', '#E5E7EB', '#D1D5DB', bgGroundCtx);
-        // Yellow retroreflective collar
-        drawBlock(bx - 0.35, 102.25, 2.2, 0.7, 0.7, 0.6, '#FBBF24', '#F59E0B', '#D97706', bgGroundCtx);
-      }
-    }
-
     function renderGroundBackground() {
       bgGroundCtx.clearRect(0, 0, bgGroundCanvas.width, bgGroundCanvas.height);
       const layout: StreetLayoutTypology = configRef.current.streetLayout || 'mature_laned';
@@ -1182,13 +1149,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         for (let i = 10; i < blockLength; i += 25) {
           drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
         }
-      }
-
-      // If street density exceeds 60 dwellings, replace on-street parking with an active transportation protected bike lane!
-      const active8PlexGround = getEightPlexCount();
-      const currentDwellingsGround = 12 + active8PlexGround * 7;
-      if (currentDwellingsGround > 60) {
-        drawProtectedBikeLane();
       }
     }
 
@@ -1704,13 +1664,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       }
 
       // 2. On-Street Curbside Stalls based on layout:
-      // If street has more than 60 dwellings, remove all curbside parking (converted to protected active transportation bike lane)
-      const active8PlexStalls = getEightPlexCount();
-      const currentDwellingsStalls = 12 + active8PlexStalls * 7;
-      if (currentDwellingsStalls > 60) {
-        return assignments; // Zero curbside parking stalls!
-      }
-
       if (layout === 'suburban_front_driveway') {
         // Base legal curbside spots situated safely between driveway 1.5m yellow clearance zones
         // Each stall sits inside the 14m legal gap between homes with 0.5m buffer from the yellow curb setbacks
@@ -2533,51 +2486,209 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawBlock(x + 18, y + 7.5, zOffset, 4, 1, 2, tire, tire, tire);
         }
       } else if (type === 'etsBus') {
-        const etsBlue = '#005087';
-        const etsBlueLight = '#0066aa';
-        const etsBlueDark = '#003a63';
-        const etsSilver = '#d9dfe5';
-        const etsSilverDark = '#b8c1cb';
-        const etsGlass = '#1a3347';
-        const amberLed = '#ffb300';
-        const bikeRack = '#2b2b2b';
+        const etsBlue = '#005087';        // Official City of Edmonton Transit Deep River Blue
+        const etsBlueLight = '#006eb3';   // Upper highlighted surfaces
+        const etsBlueDark = '#00385e';    // Shaded side/rear faces
+        const etsGold = '#FFC72C';        // Authentic ETS Marigold / Golden Yellow waistline stripe
+        const etsGoldDark = '#D99B00';
+        const etsSilver = '#E2E8F0';      // Metallic silver lower skirt and body panels
+        const etsSilverLight = '#F8FAFC';
+        const etsSilverDark = '#94A3B8';
+        const etsSkirt = '#1E293B';       // Undercarriage dark skirt trim
+        const etsSkirtDark = '#0F172A';
+        const etsGlass = '#0F1E2E';       // Deep tinted transit passenger glass
+        const etsGlassReflect = '#254E70'; // Window surface reflection
+        const etsPillar = '#111827';      // Dark window framing pillars
+        const amberLed = '#FFB300';       // Illuminated high-vis LED destination sign
+        const bikeRack = '#1E242D';       // Black tubular fold-down bike rack
+        const headLight = '#FFFFFF';      // Bright LED headlights
+        const tailLightRed = '#EF4444';   // Rear brake & taillights
+        const amberTurn = '#F59E0B';      // Amber indicator lights
+        const hubcapSilver = '#CBD5E1';   // Metallic transit wheel rims
 
+        // 1. Ground contact shadow
         drawFlatRect(x - 1, y - 0.5, 36, 10, 'rgba(0,0,0,0.32)');
 
         if (!isFlipped) {
-          // Facing +x (Down the road)
-          drawBlock(x + 5, y - 0.5, zOffset, 4, 1.2, 2.5, tire, tire, tire);
-          drawBlock(x + 24, y - 0.5, zOffset, 5, 1.2, 2.5, tire, tire, tire);
-          drawBlock(x + 5, y + 8.2, zOffset, 4, 1.2, 2.5, tire, tire, tire);
-          drawBlock(x + 24, y + 8.2, zOffset, 5, 1.2, 2.5, tire, tire, tire);
+          // Facing +x (Down the road towards bottom-right): Front is at x + 33 (+x face), Rear is at x (-x)
+          // =========================================================================================
+          // 1. Far wheels (background at y - 0.5, drawn beneath chassis)
+          drawBlock(x + 4.5, y - 0.5, zOffset, 4.5, 1.2, 2.4, tire, tire, tire);
+          drawBlock(x + 24.0, y - 0.5, zOffset, 3.8, 1.2, 2.4, tire, tire, tire);
 
-          drawBlock(x, y, zOffset + 1.2, 33, 9, 3.8, etsSilver, etsSilverDark, etsSilverDark);
-          drawBlock(x + 32, y + 0.5, zOffset + 0.8, 1.5, 8, 2.0, '#1a1a1a', '#111111', '#111111');
-          drawBlock(x + 33.5, y + 2, zOffset + 1.2, 2.0, 5, 1.4, bikeRack, bikeRack, bikeRack);
-          drawBlock(x + 1, y + 0.4, zOffset + 5.0, 31, 8.2, 3.2, etsGlass, etsGlass, etsGlass);
-          drawBlock(x, y, zOffset + 8.2, 33, 9, 2.4, etsBlue, etsBlueLight, etsBlueDark);
-          drawBlock(x + 6, y + 1.2, zOffset + 10.6, 18, 6.6, 1.6, etsBlue, etsBlueLight, etsBlueDark);
-          drawBlock(x + 32, y + 2, zOffset + 8.6, 0.8, 5, 1.4, amberLed, amberLed, amberLed);
-          drawBlock(x + 31.5, y + 0.8, zOffset + 5.0, 1.2, 7.4, 3.4, '#81a3ba', etsGlass, etsGlass);
-          drawBlock(x + 32.8, y + 1, zOffset + 2.4, 0.4, 1.8, 1.0, '#ffffff', '#ffffff', '#ffffff');
-          drawBlock(x + 32.8, y + 6.2, zOffset + 2.4, 0.4, 1.8, 1.0, '#ffffff', '#ffffff', '#ffffff');
+          // 2. Chassis lower dark skirt
+          drawBlock(x + 0.5, y + 0.2, zOffset + 0.6, 32.5, 8.4, 0.8, etsSkirt, etsSkirt, etsSkirtDark);
+
+          // 3. Lower silver metallic body panels (zOffset + 1.4 to 5.0)
+          drawBlock(x, y + 0.2, zOffset + 1.4, 32.5, 8.4, 3.6, etsSilver, etsSilver, etsSilverDark);
+
+          // Dark wheel-arch recessed housings on street side
+          drawBlock(x + 4.0, y + 8.3, zOffset + 1.4, 5.5, 0.4, 1.6, '#0F172A', '#0F172A', '#0F172A');
+          drawBlock(x + 23.5, y + 8.3, zOffset + 1.4, 4.8, 0.4, 1.6, '#0F172A', '#0F172A', '#0F172A');
+
+          // 4. Iconic ETS Golden Yellow horizontal accent waistline stripe
+          drawBlock(x, y + 0.1, zOffset + 5.0, 32.6, 8.5, 0.5, etsGold, etsGold, etsGoldDark);
+
+          // 5. Iconic ETS Royal Blue lower body accent band
+          drawBlock(x, y + 0.1, zOffset + 5.5, 32.6, 8.5, 0.7, etsBlue, etsBlue, etsBlueDark);
+
+          // 6. Continuous Tinted Passenger Window Band
+          drawBlock(x + 0.8, y + 0.3, zOffset + 6.2, 31.0, 8.2, 2.8, etsBlue, etsGlass, etsGlass);
+
+          // Vertical dark transit window mullions / pillars along street side
+          for (let p = 0; p < 4; p++) {
+            const px = x + 6.0 + p * 4.8;
+            drawBlock(px, y + 8.3, zOffset + 6.2, 0.6, 0.3, 2.8, etsPillar, etsPillar, etsPillar);
+          }
+
+          // Center bi-fold passenger exit doors
+          drawBlock(x + 13.5, y + 8.35, zOffset + 2.0, 3.2, 0.3, 6.8, '#1E293B', '#1E293B', '#0F172A');
+          drawBlock(x + 13.8, y + 8.45, zOffset + 3.8, 1.2, 0.2, 4.6, etsGlass, etsGlassReflect, etsGlassReflect);
+          drawBlock(x + 15.2, y + 8.45, zOffset + 3.8, 1.2, 0.2, 4.6, etsGlass, etsGlassReflect, etsGlassReflect);
+
+          // 7. Royal Blue Roof Body
+          drawBlock(x, y, zOffset + 9.0, 33.0, 8.6, 2.0, etsBlue, etsBlueLight, etsBlueDark);
+          drawBlock(x + 0.5, y + 0.2, zOffset + 10.8, 31.8, 8.2, 0.4, etsBlueLight, etsBlue, etsBlueDark);
+
+          // Rooftop HVAC climate control & battery pods
+          drawBlock(x + 7.5, y + 1.2, zOffset + 11.2, 17.0, 6.2, 1.4, etsSilver, etsSilver, etsSilverDark);
+          drawBlock(x + 9.5, y + 1.6, zOffset + 12.4, 13.0, 5.4, 0.4, etsSilverLight, etsSilver, etsSilverDark);
+          for (let rx = x + 11.0; rx <= x + 20.0; rx += 2.5) {
+            drawBlock(rx, y + 7.3, zOffset + 11.4, 0.5, 0.2, 1.0, '#475569', '#334155', '#1E293B');
+          }
+
+          // 8. Front Aerodynamic Cap, Panoramic Windshield & Destination Sign (at x + 32.5 to x + 33.5)
+          // Panoramic front windshield on forward-facing +x face
+          drawBlock(x + 32.2, y + 0.5, zOffset + 5.2, 1.0, 7.6, 3.8, '#0F172A', etsGlass, etsGlass);
+          drawBlock(x + 32.8, y + 0.8, zOffset + 5.4, 0.4, 7.0, 3.4, etsGlassReflect, etsGlassReflect, etsGlassReflect);
+          drawBlock(x + 33.1, y + 4.2, zOffset + 5.3, 0.2, 0.3, 3.2, '#000000', '#000000', '#000000'); // Center wiper divider
+
+          // Front Destination Sign Header (Amber LED Marquee)
+          drawBlock(x + 32.4, y + 1.2, zOffset + 9.0, 0.8, 6.2, 1.6, '#0B132B', '#0B132B', '#0B132B');
+          drawBlock(x + 33.1, y + 1.5, zOffset + 9.1, 0.2, 5.6, 1.3, amberLed, amberLed, amberLed);
+
+          // Front heavy-duty transit bumper
+          drawBlock(x + 32.6, y + 0.3, zOffset + 1.0, 1.2, 8.0, 2.0, '#1E293B', '#1E293B', '#0F172A');
+
+          // Front dual LED headlights & indicators on forward +x face
+          drawBlock(x + 33.7, y + 0.8, zOffset + 1.8, 0.2, 1.6, 0.8, headLight, headLight, headLight);
+          drawBlock(x + 33.7, y + 0.5, zOffset + 1.8, 0.2, 0.3, 0.8, amberTurn, amberTurn, amberTurn);
+          drawBlock(x + 33.7, y + 6.2, zOffset + 1.8, 0.2, 1.6, 0.8, headLight, headLight, headLight);
+          drawBlock(x + 33.7, y + 7.8, zOffset + 1.8, 0.2, 0.3, 0.8, amberTurn, amberTurn, amberTurn);
+
+          // Front fold-down tubular bike rack
+          drawBlock(x + 33.8, y + 2.0, zOffset + 1.2, 2.0, 4.6, 1.4, bikeRack, bikeRack, bikeRack);
+          drawBlock(x + 34.0, y + 2.3, zOffset + 1.4, 1.6, 4.0, 0.4, '#374151', '#1F2937', '#111827');
+          drawBlock(x + 34.3, y + 2.6, zOffset + 1.7, 1.0, 1.4, 0.7, '#4B5563', '#374151', '#1F2937');
+          drawBlock(x + 34.3, y + 4.6, zOffset + 1.7, 1.0, 1.4, 0.7, '#4B5563', '#374151', '#1F2937');
+
+          // 9. Near wheels (foreground at y + 8.0, drawn AFTER body so they are prominently visible)
+          // Rear dual wheels
+          drawBlock(x + 4.5, y + 8.0, zOffset, 4.5, 1.2, 2.4, tire, tire, tire);
+          drawBlock(x + 5.2, y + 8.7, zOffset + 0.4, 3.1, 0.4, 1.6, hubcapSilver, hubcapSilver, hubcapSilver);
+          drawBlock(x + 6.3, y + 9.0, zOffset + 0.9, 0.9, 0.2, 0.6, '#374151', '#374151', '#374151');
+          // Front steer wheels
+          drawBlock(x + 24.0, y + 8.0, zOffset, 3.8, 1.2, 2.4, tire, tire, tire);
+          drawBlock(x + 24.6, y + 8.7, zOffset + 0.4, 2.6, 0.4, 1.6, hubcapSilver, hubcapSilver, hubcapSilver);
+          drawBlock(x + 25.5, y + 9.0, zOffset + 0.9, 0.8, 0.2, 0.6, '#374151', '#374151', '#374151');
+
+          // Side route destination indicator & marker lights
+          drawBlock(x + 25.0, y + 8.4, zOffset + 7.8, 2.6, 0.2, 0.8, amberLed, amberLed, amberLed);
+          drawBlock(x + 2.0, y + 8.5, zOffset + 2.0, 0.6, 0.2, 0.4, tailLightRed, tailLightRed, tailLightRed);
+          drawBlock(x + 31.0, y + 8.5, zOffset + 2.0, 0.6, 0.2, 0.4, amberTurn, amberTurn, amberTurn);
         } else {
-          // Facing -x (Up the road): Front bumper, bike rack, headlights, and destination sign are near x
-          drawBlock(x + 5, y - 0.5, zOffset, 5, 1.2, 2.5, tire, tire, tire);
-          drawBlock(x + 24, y - 0.5, zOffset, 4, 1.2, 2.5, tire, tire, tire);
-          drawBlock(x + 5, y + 8.2, zOffset, 5, 1.2, 2.5, tire, tire, tire);
-          drawBlock(x + 24, y + 8.2, zOffset, 4, 1.2, 2.5, tire, tire, tire);
+          // Facing -x (Up the road towards top-left): Front is at x (-x, background), Rear is at x + 33 (+x, foreground)
+          // In isometric Painter's Algorithm: Front at lower X is drawn first, Rear at higher X is drawn last!
+          // =========================================================================================
+          // 1. Far wheels (background at y - 0.5)
+          drawBlock(x + 4.5, y - 0.5, zOffset, 3.8, 1.2, 2.4, tire, tire, tire); // Front steer wheels
+          drawBlock(x + 24.0, y - 0.5, zOffset, 4.5, 1.2, 2.4, tire, tire, tire); // Rear dual wheels
 
-          drawBlock(x, y, zOffset + 1.2, 33, 9, 3.8, etsSilver, etsSilverDark, etsSilverDark);
-          drawBlock(x - 0.5, y + 0.5, zOffset + 0.8, 1.5, 8, 2.0, '#1a1a1a', '#111111', '#111111');
-          drawBlock(x - 2.0, y + 2, zOffset + 1.2, 2.0, 5, 1.4, bikeRack, bikeRack, bikeRack);
-          drawBlock(x + 1, y + 0.4, zOffset + 5.0, 31, 8.2, 3.2, etsGlass, etsGlass, etsGlass);
-          drawBlock(x, y, zOffset + 8.2, 33, 9, 2.4, etsBlue, etsBlueLight, etsBlueDark);
-          drawBlock(x + 9, y + 1.2, zOffset + 10.6, 18, 6.6, 1.6, etsBlue, etsBlueLight, etsBlueDark);
-          drawBlock(x + 0.2, y + 2, zOffset + 8.6, 0.8, 5, 1.4, amberLed, amberLed, amberLed);
-          drawBlock(x + 0.3, y + 0.8, zOffset + 5.0, 1.2, 7.4, 3.4, '#81a3ba', etsGlass, etsGlass);
-          drawBlock(x - 0.2, y + 1, zOffset + 2.4, 0.4, 1.8, 1.0, '#ffffff', '#ffffff', '#ffffff');
-          drawBlock(x - 0.2, y + 6.2, zOffset + 2.4, 0.4, 1.8, 1.0, '#ffffff', '#ffffff', '#ffffff');
+          // 2. Front Cap & Aerodynamic Profile at x (background, lower X)
+          drawBlock(x - 1.8, y + 2.0, zOffset + 1.2, 1.8, 4.6, 1.4, bikeRack, bikeRack, bikeRack);
+          drawBlock(x - 0.4, y + 0.3, zOffset + 1.0, 1.2, 8.0, 2.0, '#1E293B', '#1E293B', '#0F172A');
+          drawBlock(x, y + 0.5, zOffset + 5.2, 4.0, 7.6, 3.8, '#0F172A', etsGlass, etsGlass);
+          drawBlock(x + 0.4, y + 8.3, zOffset + 5.4, 3.2, 0.3, 3.4, etsGlassReflect, etsGlassReflect, etsGlassReflect);
+          drawBlock(x, y + 1.0, zOffset + 9.0, 3.0, 6.6, 1.8, '#0B132B', '#0B132B', '#0B132B');
+          drawBlock(x + 5.2, y + 8.4, zOffset + 7.8, 2.6, 0.2, 0.8, amberLed, amberLed, amberLed);
+
+          // 3. Chassis lower dark skirt
+          drawBlock(x, y + 0.2, zOffset + 0.6, 32.5, 8.4, 0.8, etsSkirt, etsSkirt, etsSkirtDark);
+
+          // 4. Lower silver metallic body panels (zOffset + 1.4 to 5.0)
+          drawBlock(x, y + 0.2, zOffset + 1.4, 32.5, 8.4, 3.6, etsSilver, etsSilver, etsSilverDark);
+
+          // Dark wheel-arch recessed housings on street side
+          drawBlock(x + 4.0, y + 8.3, zOffset + 1.4, 4.8, 0.4, 1.6, '#0F172A', '#0F172A', '#0F172A');
+          drawBlock(x + 23.5, y + 8.3, zOffset + 1.4, 5.5, 0.4, 1.6, '#0F172A', '#0F172A', '#0F172A');
+
+          // 5. Iconic ETS Golden Yellow horizontal accent waistline stripe
+          drawBlock(x, y + 0.1, zOffset + 5.0, 32.6, 8.5, 0.5, etsGold, etsGold, etsGoldDark);
+
+          // 6. Iconic ETS Royal Blue lower body accent band
+          drawBlock(x, y + 0.1, zOffset + 5.5, 32.6, 8.5, 0.7, etsBlue, etsBlue, etsBlueDark);
+
+          // 7. Continuous Tinted Passenger Window Band
+          drawBlock(x + 0.8, y + 0.3, zOffset + 6.2, 31.0, 8.2, 2.8, etsBlue, etsGlass, etsGlass);
+
+          // Vertical dark transit window mullions / pillars along street side
+          for (let p = 0; p < 5; p++) {
+            const px = x + 4.5 + p * 4.8;
+            drawBlock(px, y + 8.3, zOffset + 6.2, 0.6, 0.3, 2.8, etsPillar, etsPillar, etsPillar);
+          }
+
+          // 8. Royal Blue Roof Body
+          drawBlock(x, y, zOffset + 9.0, 33.0, 8.6, 2.0, etsBlue, etsBlueLight, etsBlueDark);
+          drawBlock(x + 0.5, y + 0.2, zOffset + 10.8, 31.8, 8.2, 0.4, etsBlueLight, etsBlue, etsBlueDark);
+
+          // Rooftop HVAC climate control & battery pods
+          drawBlock(x + 7.5, y + 1.2, zOffset + 11.2, 17.0, 6.2, 1.4, etsSilver, etsSilver, etsSilverDark);
+          drawBlock(x + 9.5, y + 1.6, zOffset + 12.4, 13.0, 5.4, 0.4, etsSilverLight, etsSilver, etsSilverDark);
+          for (let rx = x + 11.0; rx <= x + 20.0; rx += 2.5) {
+            drawBlock(rx, y + 7.3, zOffset + 11.4, 0.5, 0.2, 1.0, '#475569', '#334155', '#1E293B');
+          }
+
+          // 9. Rear Transit Cap, Window, Engine Grill, Taillights & Bumper (at x + 32.6 to x + 33.2, highest X, facing camera!)
+          // Rear bumper
+          drawBlock(x + 32.6, y + 0.3, zOffset + 1.0, 0.8, 8.0, 2.0, '#1E293B', '#1E293B', '#0F172A');
+          drawBlock(x + 33.3, y + 3.4, zOffset + 1.4, 0.2, 1.8, 0.8, '#FFFFFF', '#FFFFFF', '#CBD5E1'); // Rear license plate
+
+          // Rear slatted engine cooling radiator louvers on the visible +x face
+          drawBlock(x + 32.7, y + 1.4, zOffset + 1.8, 0.2, 5.8, 2.8, '#0F172A', '#0F172A', '#0B0F19');
+          for (let vz = zOffset + 2.0; vz <= zOffset + 4.3; vz += 0.6) {
+            drawBlock(x + 32.8, y + 1.6, vz, 0.2, 5.4, 0.25, '#334155', '#334155', '#1E293B');
+          }
+
+          // Rear tinted transit window on visible +x face
+          drawBlock(x + 32.7, y + 1.2, zOffset + 6.2, 0.2, 6.2, 2.6, etsGlass, etsGlass, etsGlassReflect);
+
+          // Rear ETS Blue upper header with high-mount brake light
+          drawBlock(x + 32.6, y + 0.2, zOffset + 8.8, 0.6, 8.2, 2.2, etsBlue, etsBlue, etsBlueDark);
+          drawBlock(x + 33.1, y + 3.8, zOffset + 10.0, 0.2, 1.2, 0.4, tailLightRed, tailLightRed, tailLightRed);
+
+          // Rear LED Taillight clusters on left and right sides of visible +x face
+          // Left cluster
+          drawBlock(x + 33.1, y + 0.7, zOffset + 3.4, 0.2, 0.8, 1.0, tailLightRed, tailLightRed, tailLightRed);
+          drawBlock(x + 33.1, y + 0.7, zOffset + 2.4, 0.2, 0.8, 0.8, amberTurn, amberTurn, amberTurn);
+          drawBlock(x + 33.1, y + 0.7, zOffset + 1.6, 0.2, 0.8, 0.6, '#FFFFFF', '#FFFFFF', '#FFFFFF');
+          // Right cluster
+          drawBlock(x + 33.1, y + 7.1, zOffset + 3.4, 0.2, 0.8, 1.0, tailLightRed, tailLightRed, tailLightRed);
+          drawBlock(x + 33.1, y + 7.1, zOffset + 2.4, 0.2, 0.8, 0.8, amberTurn, amberTurn, amberTurn);
+          drawBlock(x + 33.1, y + 7.1, zOffset + 1.6, 0.2, 0.8, 0.6, '#FFFFFF', '#FFFFFF', '#FFFFFF');
+
+          // 10. Near wheels (foreground at y + 8.0, drawn AFTER body so they are prominently visible)
+          // Front steer wheels
+          drawBlock(x + 4.5, y + 8.0, zOffset, 3.8, 1.2, 2.4, tire, tire, tire);
+          drawBlock(x + 5.1, y + 8.7, zOffset + 0.4, 2.6, 0.4, 1.6, hubcapSilver, hubcapSilver, hubcapSilver);
+          drawBlock(x + 6.0, y + 9.0, zOffset + 0.9, 0.8, 0.2, 0.6, '#374151', '#374151', '#374151');
+          // Rear dual wheels
+          drawBlock(x + 24.0, y + 8.0, zOffset, 4.5, 1.2, 2.4, tire, tire, tire);
+          drawBlock(x + 24.7, y + 8.7, zOffset + 0.4, 3.1, 0.4, 1.6, hubcapSilver, hubcapSilver, hubcapSilver);
+          drawBlock(x + 25.8, y + 9.0, zOffset + 0.9, 0.9, 0.2, 0.6, '#374151', '#374151', '#374151');
+
+          // Side corner marker lights
+          drawBlock(x + 1.5, y + 8.5, zOffset + 2.0, 0.6, 0.2, 0.4, amberTurn, amberTurn, amberTurn);
+          drawBlock(x + 31.0, y + 8.5, zOffset + 2.0, 0.6, 0.2, 0.4, tailLightRed, tailLightRed, tailLightRed);
         }
       }
     }
@@ -3471,9 +3582,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     ) {
       if (van.state === 'APPROACHING') {
         if (van.x < van.targetStopX + 60) {
-          const active8PlexVan = getEightPlexCount();
-          const currentDwellingsVan = 12 + active8PlexVan * 7;
-          const occupied = currentDwellingsVan > 60 || isCurbsideSpotOccupied(van.targetStopX, allObstacles);
+          const occupied = isCurbsideSpotOccupied(van.targetStopX, allObstacles);
           van.targetY = occupied ? 104 : 94;
         }
 
@@ -3819,18 +3928,15 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       const curbsideDemand = propCurbsideDemandRef.current !== undefined
         ? propCurbsideDemandRef.current
         : calculatedDemand;
-      const hasProtectedBikeLane = simTotalDwellings > 60;
       let fallbackCurbsideCap = getStreetLayoutInfo(currentLayout).curbsideCapacity;
       if (currentLayout === 'suburban_front_driveway') {
         const activeLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8PlexSim);
         const restoredStallsCount = activeLots.filter(lot => lot !== 10).length;
         fallbackCurbsideCap += restoredStallsCount;
       }
-      const currentLegalCurbsideStalls = hasProtectedBikeLane
-        ? 0
-        : (propCurbsideStallsCapacityRef.current !== undefined
-          ? propCurbsideStallsCapacityRef.current
-          : fallbackCurbsideCap);
+      const currentLegalCurbsideStalls = propCurbsideStallsCapacityRef.current !== undefined
+        ? propCurbsideStallsCapacityRef.current
+        : fallbackCurbsideCap;
       const gaugePercent = currentLegalCurbsideStalls > 0
         ? (propCurbsidePctRef.current !== undefined
           ? propCurbsidePctRef.current
@@ -3869,6 +3975,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       if (currentLayout === 'suburban_front_driveway') {
         // Reduced two-way traffic: minimal cruising traffic on suburban residential road
         targetCirclingCount = Math.min(targetCirclingCount, 1);
+        if (configRef.current.cruisingTrafficLevel === 'low') {
+          targetCirclingCount = 0;
+        } else if (configRef.current.cruisingTrafficLevel === 'high') {
+          targetCirclingCount = Math.min(2, targetCirclingCount + 1);
+        }
       } else if (configRef.current.cruisingTrafficLevel === 'high') {
         targetCirclingCount = Math.min(5, targetCirclingCount + 1);
       } else if (configRef.current.cruisingTrafficLevel === 'low') {
@@ -3972,27 +4083,16 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       const baseMicroCount = Math.max(3, Math.floor(totalParkedCars * 0.35));
       const activeMicroCount = Math.min(microMobility.length, baseMicroCount * microMultiplier);
 
-      // Route all bikes and scooters onto the protected bike lane when dwellings > 60
+      // Route all bikes and scooters along standard travel lanes
       for (let i = 0; i < microMobility.length; i++) {
         const mm = microMobility[i];
-        if (hasProtectedBikeLane) {
-          const targetBikeY = (i % 2 === 0 ? 95.8 : 98.4);
-          mm.baseY = targetBikeY;
-          mm.targetY = targetBikeY;
-          if (Math.abs(mm.y - targetBikeY) > 0.4) {
-            mm.y += (targetBikeY - mm.y) * 0.15;
-          } else {
-            mm.y = targetBikeY;
-          }
+        const targetRoadY = (i % 2 === 0 ? 110 : 124);
+        mm.baseY = targetRoadY;
+        mm.targetY = targetRoadY;
+        if (Math.abs(mm.y - targetRoadY) > 0.4) {
+          mm.y += (targetRoadY - mm.y) * 0.15;
         } else {
-          const targetRoadY = (i % 2 === 0 ? 110 : 124);
-          mm.baseY = targetRoadY;
-          mm.targetY = targetRoadY;
-          if (Math.abs(mm.y - targetRoadY) > 0.4) {
-            mm.y += (targetRoadY - mm.y) * 0.15;
-          } else {
-            mm.y = targetRoadY;
-          }
+          mm.y = targetRoadY;
         }
       }
 
@@ -4246,8 +4346,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           isPullingOver = true;
         } else if (A.type === 'etsBus' && !A.isBurning) {
           const isSuburbanSim = (configRef.current.streetLayout || 'mature_laned') === 'suburban_front_driveway';
-          if (hasProtectedBikeLane || isSuburbanSim) {
-            // When protected bike lane is present (>60 dwellings) or in suburban front driveway layout (no on-street bus stop), ETS bus stays in standard travel lane
+          if (isSuburbanSim) {
+            // In suburban front driveway layout (no on-street bus stop), ETS bus stays in standard travel lane
             targetLane = A.baseY || 110;
           } else {
             const anotherBusDwelling = activeVehicles.some(v => v !== A && v.type === 'etsBus' && v.busStopState === 'dwelling');
@@ -5450,14 +5550,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
   const num8PlexCount = Math.min(7, Math.max(0, config.splitInfillLots ?? 0));
   const totalDwellings = 12 + num8PlexCount * 7;
-  const hasProtectedBikeLane = totalDwellings > 60;
   let layoutStallsCapacity = getStreetLayoutInfo(config.streetLayout).curbsideCapacity;
   if ((config.streetLayout || 'mature_laned') === 'suburban_front_driveway') {
     const activeLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8PlexCount);
     const restoredStallsCount = activeLots.filter(lot => lot !== 10).length;
     layoutStallsCapacity += restoredStallsCount;
   }
-  const totalLegalCurbsideStalls = hasProtectedBikeLane ? 0 : layoutStallsCapacity;
+  const totalLegalCurbsideStalls = layoutStallsCapacity;
 
   const numThree8PlexTiers = Math.floor(num8PlexCount / 3);
   const effectiveDeliveriesPerHome = numThree8PlexTiers >= 1
@@ -5544,25 +5643,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           <p>{t('sim_canvas_unsupported', 'Your browser does not support the canvas element needed to render the neighborhood simulation.')}</p>
         </canvas>
 
-        {/* Top-Left Status: Emergency Alerts or Suburban Front Driveway Profile */}
-        {isPoliceTrafficActive ? (
-          <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-30 flex flex-col items-start gap-1.5 sm:gap-2 pointer-events-none">
-            <div
-              id="police-traffic-status"
-              className="flex items-center gap-2.5 bg-[#002B49]/95 border-l-4 border-[#3B82F6] px-3 py-1.5 sm:px-4 sm:py-2 rounded shadow-2xl backdrop-blur-sm pointer-events-none"
-            >
-              <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444] animate-ping shrink-0" />
-              <div className="flex flex-col">
-                <span className="text-white text-xs sm:text-sm font-black tracking-wide flex items-center gap-1.5 leading-tight">
-                  {t('sim_eps_title', '🚨 EPS TRAFFIC INVESTIGATION')}
-                </span>
-                <span className="text-[#93C5FD] text-[10px] sm:text-xs font-semibold leading-tight">
-                  {t('sim_eps_desc', 'Traffic congestion detected >20s • Cruiser clearing lane')}
-                </span>
-              </div>
-            </div>
-          </div>
-        ) : (config.streetLayout || 'mature_laned') === 'suburban_front_driveway' ? (
+        {/* Top-Left Status: Suburban Front Driveway Profile */}
+        {(config.streetLayout || 'mature_laned') === 'suburban_front_driveway' ? (
           <div className="absolute top-1.5 left-1.5 sm:top-3 sm:left-3 z-20 pointer-events-none">
             <div className="flex items-center gap-1.5 bg-[#193A5A]/95 border border-[#0081BC]/40 px-2 sm:px-2.5 py-1 rounded-md sm:rounded-lg shadow-md backdrop-blur-xs text-[10px] sm:text-xs text-blue-100 font-semibold">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />

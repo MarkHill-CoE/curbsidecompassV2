@@ -51,6 +51,11 @@ export interface PersonaResult {
   edmontonPolicyFit: string;
   outcome: string;
   badgeColor: string;
+  stanceOnRegulations?: string;
+  stanceOnFunding?: string;
+  intensity?: 'moderate' | 'strong';
+  legacyMergedTitles?: string[];
+  targetCoordinates?: { x: number; y: number };
 }
 
 

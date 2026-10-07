@@ -1,6 +1,6 @@
 {
-  "summary":  "Revised implementation plan for reversible AES-256-GCM encryption with an administrative secret key to allow unlocking full postal codes while maintaining visible neighbourhood names and 3-character FSAs.",
-  "updatedAt":  "2026-10-05T18:04:04.874265710Z",
+  "summary":  "Revised implementation plan tailored to the user pasting their 4-column CSV (Persona, Stance on Regulations, Stance on Funding, Description) directly into chat, mapping stances to compass coordinates (2 per quadrant), updating the survey matching engine, and providing an interactive side-by-side visual merger of the legacy 16 into the new 8.",
+  "updatedAt":  "2026-10-07T19:08:31.217593169Z",
   "requestFeedback":  true,
   "userFacing":  true
 }

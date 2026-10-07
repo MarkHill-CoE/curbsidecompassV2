@@ -18,8 +18,8 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q0',
     number: 0,
     category: 'Neighbourhood Type' as any,
-    text: 'Choose your model neighbourhood.',
-    helperText: 'Choose one of the four neighbourhoods to calibrate live curbside parking stalls in your simulation and adjust home density to increase new infill:',
+    text: 'Choose an example street - select a layout you’d like to explore',
+    helperText: "These simplified examples do not represent every street or household's parking options. For an example street, select a layout you would like to explore. These simplified examples do not represent every street or household's parking options.",
     options: [
       {
         id: 'mature_laned',
@@ -150,23 +150,25 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       {
         id: 'q4_a',
         label: 'Yes',
-        x: 2,
-        y: -2,
+        x: -2,
+        y: 2,
         hint: 'Allows visitors, family, and service providers equal access to park near the home they are visiting.',
         simEffects: {
-          deliveriesPerHomePerWeek: 1.0,
-          enforcementLevel: 'strict'
+          deliveriesPerHomePerWeek: 2.5,
+          enforcementLevel: 'lenient',
+          cruisingTrafficLevel: 'high'
         }
       },
       {
         id: 'q4_b',
         label: 'No',
-        x: -2,
-        y: 2,
+        x: 2,
+        y: -2,
         hint: 'Prioritizes street parking for residents, reducing competition from visitor and service vehicles.',
         simEffects: {
-          deliveriesPerHomePerWeek: 2.5,
-          enforcementLevel: 'lenient'
+          deliveriesPerHomePerWeek: 1.0,
+          enforcementLevel: 'strict',
+          cruisingTrafficLevel: 'low'
         }
       }
     ]
@@ -276,18 +278,15 @@ export function calculateSimulationMetricsFromAnswers(
   // splitInfillLots range 0 to 7 (adds up to 7 8-plex multi-unit infill buildings replacing houses on 15.6m lots)
   const num8Plex = Math.min(7, Math.max(0, overrides.splitInfillLots ?? (activeLayout === 'infill_skinny' ? 2 : 0)));
   const totalDwellings = 12 + num8Plex * 7;
-  const hasProtectedBikeLane = totalDwellings > 60;
-
   const layoutInfo = getStreetLayoutInfo(activeLayout);
   let baseCurbsideCapacity = layoutInfo.curbsideCapacity;
-  if (activeLayout === 'suburban_front_driveway' && !hasProtectedBikeLane) {
+  if (activeLayout === 'suburban_front_driveway') {
     // Each 8-plex removes a driveway pad and 1.5m yellow curb clearance, creating curbside space for 1 parking stall
-    // (except on Lot 10 where there is an ETS bus stop)
     const active8PlexLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8Plex);
     const restoredStallsCount = active8PlexLots.filter(lot => lot !== 10).length;
     baseCurbsideCapacity = layoutInfo.curbsideCapacity + restoredStallsCount;
   }
-  const curbsideStallsCapacity = hasProtectedBikeLane ? 0 : baseCurbsideCapacity;
+  const curbsideStallsCapacity = baseCurbsideCapacity;
 
   // Household Cars:
   // Baseline cars per home (~2.0, modified by q3 unlimited permits - formerly q2)
@@ -334,8 +333,8 @@ export function calculateSimulationMetricsFromAnswers(
   // Deliveries: (Q4 Visitor Access - formerly q3)
   const numThree8PlexTiers = Math.floor(num8Plex / 3);
   let baseDeliveriesPerWeek = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
-  if (answers['q4'] === 'q4_b') baseDeliveriesPerWeek += 1.5;
-  if (answers['q4'] === 'q4_a') baseDeliveriesPerWeek = 1.0;
+  if (answers['q4'] === 'q4_a') baseDeliveriesPerWeek += 1.5;
+  if (answers['q4'] === 'q4_b') baseDeliveriesPerWeek = 1.0;
   if (numThree8PlexTiers >= 1) {
     baseDeliveriesPerWeek = Math.max(baseDeliveriesPerWeek, 2.0 + (numThree8PlexTiers - 1) * 1.0);
   }
@@ -378,13 +377,15 @@ export function calculateSimulationMetricsFromAnswers(
     policyDemandShift += 2.0;
   }
 
-  // Q4: Visitor Access (formerly Q3)
+  // Q4: Visitor Access (visitors, cleaners, and contractors)
   if (answers['q4'] === 'q4_a') {
-    policyDemandShift -= 1.5;
-    enforcement = 'strict';
-  } else if (answers['q4'] === 'q4_b') {
-    policyDemandShift += 1.5;
+    policyDemandShift += 2.0;
     enforcement = 'lenient';
+    cruisingLevel = 'high';
+  } else if (answers['q4'] === 'q4_b') {
+    policyDemandShift -= 2.0;
+    enforcement = 'strict';
+    cruisingLevel = 'low';
   }
 
   // Q5: Parking Proximity to Destination (formerly Q4)
@@ -470,6 +471,12 @@ export function calculateSimulationMetricsFromAnswers(
     circlingCarCount = 2;
   } else if (roundedDemand >= Math.round(curbsideStallsCapacity * 0.85)) {
     circlingCarCount = 1;
+  }
+
+  if (cruisingLevel === 'high') {
+    circlingCarCount = Math.min(5, circlingCarCount + 1);
+  } else if (cruisingLevel === 'low') {
+    circlingCarCount = Math.max(0, circlingCarCount - 1);
   }
 
   const simConfig: SimulationConfig = {
@@ -585,8 +592,8 @@ export function getQuestionTradeoffImpact(
       hasAnswer: false,
       tradeoffRationale: 'Residential parking programs cost money to operate. Who should pay for them?',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
-      benefitText: 'Select an option to see the gain.',
-      costText: 'Select an option to see the cost.'
+      benefitText: 'Select an option to see the benefit.',
+      costText: 'Select an option to see the trade-off.'
     };
   }
 
@@ -625,8 +632,8 @@ export function getQuestionTradeoffImpact(
       hasAnswer: false,
       tradeoffRationale: 'When parking on the street near your home, what would you consider reasonably close?',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
-      benefitText: 'Select an option to see the gain.',
-      costText: 'Select an option to see the cost.'
+      benefitText: 'Select an option to see the benefit.',
+      costText: 'Select an option to see the trade-off.'
     };
   }
 
@@ -665,8 +672,8 @@ export function getQuestionTradeoffImpact(
       hasAnswer: false,
       tradeoffRationale: 'Decide whether there should be a household permit limit in high demand neighbourhoods.',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
-      benefitText: 'Select an option to see the gain.',
-      costText: 'Select an option to see the cost.'
+      benefitText: 'Select an option to see the benefit.',
+      costText: 'Select an option to see the trade-off.'
     };
   }
 
@@ -677,12 +684,12 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'Yes',
-        deltaStallsText: '-2.0 stalls (-13%)',
-        deltaStallsValue: -2.0,
+        deltaStallsText: '+2.0 stalls (+13%)',
+        deltaStallsValue: 2.0,
         tradeoffRationale: 'Allows family, friends, and service providers to park conveniently close to the homes they visit',
         curbsideImpactSummary: 'Allows visitors, family, and service providers equal access to park near the home they are visiting.',
         benefitText: 'Family, friends and people providing services can use available spaces close to the home they’re visiting.',
-        costText: 'Residents face more competition for those spaces and may need to park farther from home.'
+        costText: 'Residents face more competition for those spaces and more vehicles are parked on the street.'
       };
     }
     if (selectedAnswerId === 'q4_b') {
@@ -691,11 +698,11 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'No',
-        deltaStallsText: '+2.0 stalls (+13%)',
-        deltaStallsValue: 2.0,
+        deltaStallsText: '-2.0 stalls (-13%)',
+        deltaStallsValue: -2.0,
         tradeoffRationale: 'Prioritizes residents for nearby spaces by reducing competition from visitor vehicles',
         curbsideImpactSummary: 'Prioritizes street parking for residents, reducing competition from visitor and service vehicles.',
-        benefitText: 'Residents have priority for nearby spaces, reducing competition from visitor vehicles.',
+        benefitText: 'Residents have priority for nearby spaces, reducing traffic and competition from visitor vehicles.',
         costText: 'Visitors and service providers may need to park farther away, making visits less convenient.'
       };
     }
@@ -705,8 +712,8 @@ export function getQuestionTradeoffImpact(
       hasAnswer: false,
       tradeoffRationale: 'Decide whether visitors and service providers should have equal parking opportunities.',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
-      benefitText: 'Select an option to see the gain.',
-      costText: 'Select an option to see the cost.'
+      benefitText: 'Select an option to see the benefit.',
+      costText: 'Select an option to see the trade-off.'
     };
   }
 
@@ -745,8 +752,8 @@ export function getQuestionTradeoffImpact(
       hasAnswer: false,
       tradeoffRationale: 'Decide whether visitors to hospitals, institutions and venues can use nearby residential streets.',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
-      benefitText: 'Select an option to see the gain.',
-      costText: 'Select an option to see the cost.'
+      benefitText: 'Select an option to see the benefit.',
+      costText: 'Select an option to see the trade-off.'
     };
   }
 
@@ -785,8 +792,8 @@ export function getQuestionTradeoffImpact(
       hasAnswer: false,
       tradeoffRationale: 'Decide whether access to private parking should affect permit eligibility.',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
-      benefitText: 'Select an option to see the gain.',
-      costText: 'Select an option to see the cost.'
+      benefitText: 'Select an option to see the benefit.',
+      costText: 'Select an option to see the trade-off.'
     };
   }
 
@@ -860,191 +867,36 @@ export function validatePostalCode(val: string): { isValid: boolean; message?: s
   };
 }
 
+import {
+  DEFAULT_8_PERSONAS,
+  getActive8Personas,
+  calculate8Persona
+} from './personaData8';
+
 export const PERSONA_PROFILES: Record<string, PersonaResult> = {
-  // Row 1: Strict / Most Rules (Y < -9)
-  block_resident: {
-    id: 'block-resident', quadrant: 'Q2', xRange: 'taxpayer', yRange: 'restrictive',
-    title: 'Block Resident', subtitle: 'Strict Rules • General Taxation',
-    description: 'You like strict parking rules to keep order. You prefer that everyone shares the costs through taxes, rather than just car owners.',
-    keyPriorities: ['Strict enforcement', 'General tax funding'],
-    edmontonPolicyFit: 'Aligns with highly regulated mature neighbourhoods.',
-    outcome: 'A strictly regulated residential permit zone where on-street parking is closely monitored, permits are capped per household, and municipal program costs are funded through general property taxes to preserve neighbourhood curb space.',
-    badgeColor: '#005087'
-  },
-  tidy_resident: {
-    id: 'tidy-resident', quadrant: 'Q2', xRange: 'taxpayer', yRange: 'restrictive',
-    title: 'Tidy Resident', subtitle: 'Some Rules • General Taxation',
-    description: 'You like some parking rules to keep streets neat. You feel everyone should share the costs through taxes, not just drivers.',
-    keyPriorities: ['Clear guidelines', 'Shared costs'],
-    edmontonPolicyFit: 'Aligns with standard residential parking guidelines.',
-    outcome: 'Standard residential parking guidelines funded through municipal taxes with basic time restrictions during peak hours to keep streets orderly while sharing public costs community-wide.',
-    badgeColor: '#005087'
-  },
-  picky_parker: {
-    id: 'picky-parker', quadrant: 'Q1', xRange: 'user', yRange: 'restrictive',
-    title: 'Picky Parker', subtitle: 'Clear Rules • User-Fee',
-    description: 'You like clear parking rules. You prefer that car owners pay for parking, rather than everyone sharing the costs through taxes.',
-    keyPriorities: ['Clear restrictions', 'User-pay model'],
-    edmontonPolicyFit: 'Aligns with targeted permit zones.',
-    outcome: 'A targeted, user-funded permit system where on-street parking requires direct vehicle permits and user fees, ensuring local residents and visitors who use the curb cover the program\'s operating costs.',
-    badgeColor: '#0081BC'
-  },
-  safety_parker: {
-    id: 'safety-parker', quadrant: 'Q1', xRange: 'user', yRange: 'restrictive',
-    title: 'Safety Parker', subtitle: 'Strict Rules • Strong User-Fee',
-    description: 'You like strict parking rules to keep streets safe. You strongly believe car owners should pay for their own parking, not everyone.',
-    keyPriorities: ['Strict safety enforcement', 'Direct user fees'],
-    edmontonPolicyFit: 'Aligns with high-traffic pedestrian safety corridors.',
-    outcome: 'Strictly enforced high-demand curbside corridors with rigorous user-fee permits, dedicated loading/safety zones, and active enforcement funded entirely by user fees and violation penalties.',
-    badgeColor: '#0081BC'
-  },
+  // === The 8 Active Curbside Policy Archetypes ===
+  safety_parker: DEFAULT_8_PERSONAS.safety_parker,
+  flexible_parker: DEFAULT_8_PERSONAS.flexible_parker,
+  block_resident: DEFAULT_8_PERSONAS.block_resident,
+  balanced_resident: DEFAULT_8_PERSONAS.balanced_resident,
+  zen_neighbour: DEFAULT_8_PERSONAS.zen_neighbour,
+  chill_neighbour: DEFAULT_8_PERSONAS.chill_neighbour,
+  casual_cruiser: DEFAULT_8_PERSONAS.casual_cruiser,
+  simple_driver: DEFAULT_8_PERSONAS.simple_driver,
 
-  // Row 2: Clear / Fair Balance (-9 <= Y < 0)
-  rule_resident: {
-    id: 'rule-resident', quadrant: 'Q2', xRange: 'taxpayer', yRange: 'restrictive',
-    title: 'Rule Resident', subtitle: 'Clear Rules • Shared Costs',
-    description: 'You like clear parking rules. You think everyone should share the costs through taxes, not just car owners.',
-    keyPriorities: ['Defined zones', 'Tax-supported maintenance'],
-    edmontonPolicyFit: 'Aligns with protected residential areas.',
-    outcome: 'Clearly defined residential parking zones with defined time limits and permit oversight, supported by municipal infrastructure maintenance to protect neighbourhood access.',
-    badgeColor: '#005087'
-  },
-  balanced_resident: {
-    id: 'balanced-resident', quadrant: 'Q2', xRange: 'taxpayer', yRange: 'restrictive',
-    title: 'Balanced Resident', subtitle: 'Fair Balance • Shared Costs',
-    description: 'You like a fair balance of parking rules. You slightly prefer that everyone shares the costs through taxes, instead of just drivers.',
-    keyPriorities: ['Balanced access', 'Community funding'],
-    edmontonPolicyFit: 'Aligns with flexible neighbourhood parking.',
-    outcome: 'A balanced, flexible neighbourhood parking framework where standard rules prevent congestion, funded through broad community taxation to ensure equitable public access.',
-    badgeColor: '#005087'
-  },
-  sensible_parker: {
-    id: 'sensible-parker', quadrant: 'Q1', xRange: 'user', yRange: 'restrictive',
-    title: 'Sensible Parker', subtitle: 'Fair Balance • User-Fee',
-    description: 'You like a fair balance of parking rules. You prefer that drivers pay for their own parking, instead of everyone sharing the costs.',
-    keyPriorities: ['Balanced enforcement', 'Driver-paid infrastructure'],
-    edmontonPolicyFit: 'Aligns with hybrid paid-parking zones.',
-    outcome: 'A hybrid user-pay system featuring paid hourly or digital daily visitor passes, ensuring that curbside maintenance and administrative costs are directly recovered from drivers.',
-    badgeColor: '#0081BC'
-  },
-  fair_parker: {
-    id: 'fair-parker', quadrant: 'Q1', xRange: 'user', yRange: 'restrictive',
-    title: 'Fair Parker', subtitle: 'Fair Balance • Strong User-Fee',
-    description: 'You like a fair balance of parking rules. You strongly feel that drivers should pay for parking, instead of everyone.',
-    keyPriorities: ['Fair access', 'Full cost-recovery from drivers'],
-    edmontonPolicyFit: 'Aligns with self-sustaining parking districts.',
-    outcome: 'Self-sustaining parking districts where variable curb pricing and user permit fees balance stall turnover and fund local neighbourhood street amenities without general tax subsidies.',
-    badgeColor: '#0081BC'
-  },
-
-  // Row 3: Fewer / Few Rules (0 <= Y <= 4)
-  easy_neighbor: {
-    id: 'easy-neighbor', quadrant: 'Q3', xRange: 'taxpayer', yRange: 'open',
-    title: 'Easy Neighbour', subtitle: 'Fewer Rules • Shared Costs',
-    description: 'You like fewer parking rules to make things easy. You prefer that everyone shares the costs through taxes, rather than just drivers.',
-    keyPriorities: ['Easy access', 'Taxpayer funding'],
-    edmontonPolicyFit: 'Aligns with open suburban parking.',
-    outcome: 'Open suburban curbside access with minimal restrictions, where street space is freely available on a first-come, first-served basis, funded through general city-wide taxation.',
-    badgeColor: '#009A44'
-  },
-  chill_neighbour: {
-    id: 'chill-neighbour', quadrant: 'Q3', xRange: 'taxpayer', yRange: 'open',
-    title: 'Chill Neighbour', subtitle: 'Few Rules • Shared Costs',
-    description: 'You like having few parking rules. You believe everyone should share the costs through taxes, not just car owners.',
-    keyPriorities: ['Minimal restrictions', 'Publicly funded'],
-    edmontonPolicyFit: 'Aligns with low-density residential guidelines.',
-    outcome: 'Low-density residential streets with relaxed parking regulations, relying on informal neighbourhood courtesy and broad municipal funding rather than active enforcement.',
-    badgeColor: '#009A44'
-  },
-  simple_driver: {
-    id: 'simple-driver', quadrant: 'Q4', xRange: 'user', yRange: 'open',
-    title: 'Simple Driver', subtitle: 'Fewer Rules • User-Fee',
-    description: 'You like fewer parking rules to keep life simple. You slightly prefer that car owners pay for parking, rather than everyone sharing the costs.',
-    keyPriorities: ['Simple access', 'Light user fees'],
-    edmontonPolicyFit: 'Aligns with simplified flat-rate zones.',
-    outcome: 'A simplified, open-access parking framework with modest flat-rate user fees during high-demand periods, keeping rules transparent and hassle-free for drivers.',
-    badgeColor: '#FFC72C'
-  },
-  casual_cruiser: {
-    id: 'casual-cruiser', quadrant: 'Q4', xRange: 'user', yRange: 'open',
-    title: 'Casual Cruiser', subtitle: 'Very Few Rules • Strong User-Fee',
-    description: 'You like very few parking rules on our streets. You strongly believe car owners must pay for their own parking, not everyone.',
-    keyPriorities: ['Unrestricted access', 'Direct user payments'],
-    edmontonPolicyFit: 'Aligns with unregulated paid public lots.',
-    outcome: 'Largely unregulated public curbside parking supported by targeted metered zones only in commercial areas, allowing drivers full mobility with pay-per-use convenience.',
-    badgeColor: '#FFC72C'
-  },
-
-  // Row 4: Almost No / Very Few Rules (Y > 4)
-  happy_neighbor: {
-    id: 'happy-neighbor', quadrant: 'Q3', xRange: 'taxpayer', yRange: 'open',
-    title: 'Happy Neighbour', subtitle: 'Almost No Rules • Strong Taxpayer',
-    description: 'You want almost no parking rules. You strongly believe everyone should share the costs through taxes, not just drivers.',
-    keyPriorities: ['Complete freedom', 'Fully public funding'],
-    edmontonPolicyFit: 'Aligns with historically unregulated rural/suburban edges.',
-    outcome: 'Maximum parking freedom with no permit restrictions or time limits, treating the curbside as a universal public amenity fully supported by the city\'s general operating budget.',
-    badgeColor: '#009A44'
-  },
-  zen_neighbor: {
-    id: 'zen-neighbor', quadrant: 'Q3', xRange: 'taxpayer', yRange: 'open',
-    title: 'Zen Neighbour', subtitle: 'Very Few Rules • Shared Costs',
-    description: 'You want very few parking rules for more freedom. You slightly prefer that everyone shares the costs through taxes, not just car owners.',
-    keyPriorities: ['High freedom', 'Shared municipal cost'],
-    edmontonPolicyFit: 'Aligns with unenforced open streets.',
-    outcome: 'Unrestricted open residential streets with no time limits or permit requirements, fostering high freedom and community neighborliness funded through municipal services.',
-    badgeColor: '#009A44'
-  },
-  happy_driver: {
-    id: 'happy-driver', quadrant: 'Q4', xRange: 'user', yRange: 'open',
-    title: 'Happy Driver', subtitle: 'Almost No Rules • User-Fee',
-    description: 'You want almost no parking rules. You prefer that drivers pay for parking, rather than everyone sharing the costs through taxes.',
-    keyPriorities: ['No restrictions', 'Flat user fees'],
-    edmontonPolicyFit: 'Aligns with open flat-rate parking regions.',
-    outcome: 'Free-flowing, rule-free curbside access where drivers pay minimal, flat-rate parking charges only where high turnover is strictly necessary, without bureaucratic permit programs.',
-    badgeColor: '#FFC72C'
-  },
-  free_wheeler: {
-    id: 'free-wheeler', quadrant: 'Q4', xRange: 'user', yRange: 'open',
-    title: 'Free Wheeler', subtitle: 'Almost No Rules • Strong User-Fee',
-    description: 'You want almost no parking rules so people are free. You strongly believe drivers should pay for their own parking, not everyone.',
-    keyPriorities: ['Absolute freedom', '100% user-funded'],
-    edmontonPolicyFit: 'Aligns with private unregulated toll/parking models.',
-    outcome: 'A fully deregulated curbside model with zero permit restrictions or city-imposed caps, where parking infrastructure is entirely market-driven and self-funded by motorists.',
-    badgeColor: '#FFC72C'
-  }
+  // === Legacy 16 Profile Aliases (Backwards compatibility & smooth migration) ===
+  tidy_resident: DEFAULT_8_PERSONAS.balanced_resident,
+  rule_resident: DEFAULT_8_PERSONAS.block_resident,
+  picky_parker: DEFAULT_8_PERSONAS.flexible_parker,
+  sensible_parker: DEFAULT_8_PERSONAS.flexible_parker,
+  fair_parker: DEFAULT_8_PERSONAS.safety_parker,
+  easy_neighbor: DEFAULT_8_PERSONAS.chill_neighbour,
+  happy_neighbor: DEFAULT_8_PERSONAS.zen_neighbour,
+  zen_neighbor: DEFAULT_8_PERSONAS.zen_neighbour,
+  happy_driver: DEFAULT_8_PERSONAS.simple_driver,
+  free_wheeler: DEFAULT_8_PERSONAS.casual_cruiser
 };
 
 export function calculatePersona(totalX: number, totalY: number): PersonaResult {
-  const isCol1 = totalX < -4;
-  const isCol2 = totalX >= -4 && totalX < 0;
-  const isCol3 = totalX >= 0 && totalX <= 4;
-  const isCol4 = totalX > 4;
-
-  const isRow1 = totalY < -4;
-  const isRow2 = totalY >= -4 && totalY < 0;
-  const isRow3 = totalY >= 0 && totalY <= 4;
-  const isRow4 = totalY > 4;
-
-  if (isCol1) {
-    if (isRow1) return PERSONA_PROFILES.block_resident;
-    if (isRow2) return PERSONA_PROFILES.rule_resident;
-    if (isRow3) return PERSONA_PROFILES.easy_neighbor;
-    return PERSONA_PROFILES.happy_neighbor;
-  } else if (isCol2) {
-    if (isRow1) return PERSONA_PROFILES.tidy_resident;
-    if (isRow2) return PERSONA_PROFILES.balanced_resident;
-    if (isRow3) return PERSONA_PROFILES.chill_neighbour;
-    return PERSONA_PROFILES.zen_neighbor;
-  } else if (isCol3) {
-    if (isRow1) return PERSONA_PROFILES.picky_parker;
-    if (isRow2) return PERSONA_PROFILES.sensible_parker;
-    if (isRow3) return PERSONA_PROFILES.simple_driver;
-    return PERSONA_PROFILES.happy_driver;
-  } else {
-    // Col 4
-    if (isRow1) return PERSONA_PROFILES.safety_parker;
-    if (isRow2) return PERSONA_PROFILES.fair_parker;
-    if (isRow3) return PERSONA_PROFILES.casual_cruiser;
-    return PERSONA_PROFILES.free_wheeler;
-  }
+  return calculate8Persona(totalX, totalY);
 }

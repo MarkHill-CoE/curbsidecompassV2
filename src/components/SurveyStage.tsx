@@ -5,7 +5,6 @@ import {
   ChevronRight,
   CheckCircle2,
   MapPin,
-  Shield,
   Search,
   Check,
   Sparkles,
@@ -122,7 +121,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       icon: '🏡',
       title: 'Homes with Rear-lane Access',
       era: '1950s–1960s Heritage',
-      tag: 'Continuous curb • Rear gravel lane & garages • Zero front driveways',
+      tag: 'Garages or parking areas accessed from a rear lane or alley.',
       stalls: getStreetLayoutInfo('mature_laned').curbsideCapacity,
       desc: 'Strathcona, Westmount, Glenora, Highlands, Bonnie Doon'
     },
@@ -297,7 +296,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
           >
             <h4 className="text-[13pt] sm:text-[15pt] md:text-[17pt] font-bold text-[#193A5A] mb-1 sm:mb-1.5 leading-snug tracking-[-0.05em]">
               {isModelStreetStep
-                ? t('q0_question', 'Choose your model neighbourhood.')
+                ? t('q0_question', 'Choose an example street - select a layout you’d like to explore')
                 : isLocationStep
                 ? t('q7_question', 'Choose your model neighbourhood.')
                 : t(`q${currentQuestion.number}_question`, currentQuestion.text)}
@@ -307,7 +306,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             {isModelStreetStep && (
               <div className="w-full flex flex-col gap-2 pt-0.5">
                 <p className="text-xs sm:text-sm text-gray-600 font-medium">
-                  {t('q0_helper', currentQuestion.helperText || 'Choose one of the four neighbourhoods to calibrate live curbside parking stalls in your simulation and adjust home density to increase new infill:')}
+                  {t('q0_helper', currentQuestion.helperText || "These simplified examples do not represent every street or household's parking options. For an example street, select a layout you would like to explore. These simplified examples do not represent every street or household's parking options.")}
                 </p>
 
                 {/* 4 Cards Grid - 2x2 Layout */}
@@ -338,9 +337,6 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                               <h4 className={`font-bold text-xs sm:text-sm leading-tight truncate ${isSelected ? 'text-[#004B8D]' : 'text-black'}`}>
                                 {layout.title}
                               </h4>
-                              <span className="text-[10px] text-gray-500 font-semibold block leading-tight truncate">
-                                {layout.era}
-                              </span>
                             </div>
                           </div>
                           <div className="shrink-0 pt-0.5 flex items-center gap-1.5">
@@ -364,76 +360,6 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     );
                   })}
                 </div>
-
-                {/* Home Density (Infill) Slider container just above the Active Simulation Model container */}
-                <div className="bg-gradient-to-r from-purple-50/90 to-blue-50/90 border-2 border-purple-200/90 rounded-xl p-2.5 sm:p-3 shadow-2xs flex flex-col gap-1.5 mt-0.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-[#7B2CBF] text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
-                        🏘️
-                      </div>
-                      <div className="min-w-0">
-                        <span className="text-xs sm:text-sm font-black text-gray-900 block leading-tight truncate">
-                          {t('drawer_infill_label', 'Home Density')} (Infill)
-                        </span>
-                        <span className="text-[10px] sm:text-[10.5px] text-gray-600 font-semibold block leading-tight">
-                          {t('density_slider_subtitle', 'Adjust 8-plex infill lots in your street simulation to increase infill')}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-2.5 pt-0.5">
-                    <span className="text-[10px] font-bold text-gray-500 shrink-0">Baseline (0)</span>
-                    <input
-                      type="range"
-                      aria-label={t('drawer_sliders_density_aria', 'Home density')}
-                      min="0"
-                      max="7"
-                      step="1"
-                      value={Math.min(7, Math.max(0, config?.splitInfillLots ?? 0))}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value, 10);
-                        triggerFeedback('choice');
-                        const tiers = Math.floor(val / 3);
-                        onConfigChange?.({
-                          splitInfillLots: val,
-                          deliveriesPerHomePerWeek: tiers >= 1 && (config?.deliveriesPerHomePerWeek ?? 1.2) < 2.0 ? 2.0 : config?.deliveriesPerHomePerWeek
-                        });
-                      }}
-                      className="accent-[#7B2CBF] cursor-pointer h-2.5 bg-gray-200 rounded-lg w-full"
-                    />
-                    <span className="text-[10px] font-bold text-purple-700 shrink-0">Max Infill (7)</span>
-                  </div>
-
-                  <p className="text-[10px] sm:text-[10.5px] text-gray-600 leading-snug">
-                    {t('sim_density_explainer', 'Each infill adds multi-unit housing (8 dwellings per 15.6m lot).')}
-                  </p>
-                </div>
-
-                {/* Active selection feedback pill / Active Simulation Model Container */}
-                {(() => {
-                  const activeTypology = (currentAnswer as StreetLayoutTypology || currentStreetLayout);
-                  const activeInfo = getStreetLayoutInfo(activeTypology);
-                  let displayCapacity = activeInfo.curbsideCapacity;
-                  if (activeTypology === 'suburban_front_driveway') {
-                    const num8Plex = Math.min(7, Math.max(0, config?.splitInfillLots ?? 0));
-                    const activeLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8Plex);
-                    const restoredCount = activeLots.filter(lot => lot !== 10).length;
-                    displayCapacity += restoredCount;
-                  }
-                  return (
-                    <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-xs text-[#004B8D] mt-0.5 shadow-2xs">
-                      <span className="truncate">
-                        {t('survey_active_style_label', 'Active simulation model:')}{' '}
-                        <strong className="font-bold text-[#193A5A]">{activeInfo.title}</strong>
-                      </span>
-                      <span className="text-[10px] font-bold bg-[#004B8D] text-white px-2 py-0.5 rounded-full shrink-0 ml-2">
-                        {displayCapacity} Legal Stalls
-                      </span>
-                    </div>
-                  );
-                })()}
               </div>
             )}
 
@@ -479,9 +405,6 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                   )}
 
                   <div className="relative">
-                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                      <Search className="w-5 h-5 text-[#004B8D]" />
-                    </div>
                     <input
                       type="text"
                       id="location-smart-input"
@@ -502,7 +425,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                           onNavigate(1);
                         }
                       }}
-                      className={`w-full pl-10 pr-9 py-2 sm:py-2.5 bg-white border-2 rounded-lg text-sm sm:text-base font-semibold placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-all min-h-[46px] shadow-2xs ${
+                      className={`w-full pl-3.5 sm:pl-4 pr-16 py-2 sm:py-2.5 bg-white border-2 rounded-lg text-sm sm:text-base font-semibold placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-all min-h-[46px] shadow-2xs ${
                         inputIntent.type === 'fsa' && inputIntent.isValid
                           ? 'border-emerald-500 text-emerald-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20'
                           : inputIntent.type === 'postal_code' && inputIntent.isValid
@@ -512,21 +435,26 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       aria-label={t('survey_location_input_aria', 'Edmonton postal code or neighbourhood')}
                       aria-autocomplete="list"
                     />
-                    {locationInput && currentAnswer !== 'OPT_OUT' && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLocationInput('');
-                          setSelectedDisambiguation(null);
-                          setShowDropdown(false);
-                          onSelectOption(currentQuestion.id, '');
-                        }}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1.5 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
-                        aria-label={t('survey_clear_location_aria', 'Clear location search')}
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    )}
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                      {locationInput && currentAnswer !== 'OPT_OUT' && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLocationInput('');
+                            setSelectedDisambiguation(null);
+                            setShowDropdown(false);
+                            onSelectOption(currentQuestion.id, '');
+                          }}
+                          className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
+                          aria-label={t('survey_clear_location_aria', 'Clear location search')}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                      <div className="pointer-events-none text-gray-400 flex items-center justify-center">
+                        <Search className="w-5 h-5 text-[#004B8D]" />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Autocomplete Dropdown: strictly for Neighbourhood search (Pattern 3), NEVER for FSA (Pattern 1) */}
@@ -537,20 +465,13 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                           key={n.name}
                           type="button"
                           onMouseDown={() => handleSelectNeighbourhood(n)}
-                          className="w-full text-left px-3 py-2 hover:bg-[#004B8D]/10 flex items-center justify-between text-xs cursor-pointer transition-colors"
+                          className="w-full text-left px-3 py-2.5 hover:bg-[#004B8D]/10 flex items-center gap-1.5 text-xs cursor-pointer transition-colors"
                         >
-                          <div className="flex items-center gap-1.5 truncate">
-                            <MapPin className="w-3.5 h-3.5 text-[#004B8D] shrink-0" />
-                            <span className="font-bold text-gray-800">{n.name}</span>
-                            {n.ward && (
-                              <span className="text-[10px] text-gray-500 font-medium">
-                                ({n.ward} Ward • {n.classification || 'Redeveloping'})
-                              </span>
-                            )}
-                          </div>
-                          {n.postalFSA?.[0] && (
-                            <span className="text-[10px] text-[#004B8D] font-bold bg-[#004B8D]/10 px-1.5 py-0.5 rounded shrink-0 ml-1.5">
-                              {n.postalFSA[0]}
+                          <MapPin className="w-3.5 h-3.5 text-[#004B8D] shrink-0" />
+                          <span className="font-bold text-gray-800">{n.name}</span>
+                          {n.ward && (
+                            <span className="text-[11px] text-gray-500 font-medium">
+                              ({n.ward.toLowerCase().includes('ward') ? n.ward : `${n.ward} Ward`})
                             </span>
                           )}
                         </button>
@@ -597,9 +518,9 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                   </div>
                 )}
 
-                {/* Identified Neighbourhood & Postal Code feedback with POSSE Ward and Classification */}
+                {/* Identified Neighbourhood & Postal Code feedback with Ward */}
                 {detectedLocation && currentAnswer !== 'OPT_OUT' && (
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-lg bg-[#004B8D]/5 border border-[#004B8D]/20 text-xs shadow-2xs gap-1.5 sm:gap-2">
+                  <div className="flex items-center p-2.5 rounded-lg bg-[#004B8D]/5 border border-[#004B8D]/20 text-xs shadow-2xs gap-1.5 sm:gap-2">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                       {detectedLocation.isFsaOnly ? (
                         <div className="flex items-center gap-1.5 font-bold text-[#004B8D]">
@@ -620,83 +541,22 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                         {detectedLocation.displayCode ? `Postal Code: ${detectedLocation.displayCode}` : `FSA: ${detectedLocation.postalFSA}`}
                       </span>
 
-                      {/* POSSE Ward */}
+                      {/* Ward */}
                       {detectedLocation.ward && (
                         <span className="text-[10px] font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">
                           Ward {detectedLocation.ward}
-                        </span>
-                      )}
-
-                      {/* POSSE Classification */}
-                      {detectedLocation.classification && (
-                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${
-                          detectedLocation.classification === 'Redeveloping'
-                            ? 'bg-emerald-100 text-emerald-800'
-                            : detectedLocation.classification === 'Developing'
-                            ? 'bg-blue-100 text-blue-800'
-                            : detectedLocation.classification === 'Industrial'
-                            ? 'bg-amber-100 text-amber-800'
-                            : 'bg-teal-100 text-teal-800'
-                        }`}>
-                          POSSE: {detectedLocation.classification}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0 text-[10px]">
-                      {detectedLocation.isFsaOnly ? (
-                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium">
-                          Region-level FSA Location
-                        </span>
-                      ) : detectedLocation.matchedBy === 'predictive_spelling' ? (
-                        <span className="text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded font-medium">
-                          Auto-corrected
-                        </span>
-                      ) : (
-                        <span className="text-emerald-700 font-medium flex items-center gap-1">
-                          <Check className="w-3 h-3 text-emerald-600" />
-                          Resolved
                         </span>
                       )}
                     </div>
                   </div>
                 )}
 
-                {/* Opt-Out Option & Privacy */}
-                <div className="flex items-center justify-between text-[10px] text-gray-500 pt-0.5">
-                  <label className="flex items-center gap-1.5 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={currentAnswer === 'OPT_OUT'}
-                      onChange={(e) => {
-                        triggerFeedback('choice');
-                        const checked = e.target.checked;
-                        if (checked) {
-                          setLocationInput('');
-                          setSelectedDisambiguation(null);
-                          setShowDropdown(false);
-                          onSelectOption(currentQuestion.id, 'OPT_OUT');
-                        } else {
-                          onSelectOption(currentQuestion.id, '');
-                        }
-                      }}
-                      className="w-3.5 h-3.5 text-[#004B8D] rounded border-gray-300 focus:ring-[#004B8D]"
-                    />
-                    <span className="text-gray-600 select-none font-medium">
-                      {t('survey_prefer_not_to_share', 'Prefer not to share location')}
-                    </span>
-                  </label>
-                  <span className="flex items-center gap-1 text-gray-400 hidden xs:inline-flex">
-                    <Shield className="w-3 h-3 text-[#004B8D]/70 shrink-0" />
-                    {t('survey_postal_codes_anonymized', 'Postal codes anonymized')}
-                  </span>
-                </div>
 
                 {/* City of Edmonton Statutory Collection Notice in 10pt font */}
                 <p className="text-[10pt] leading-normal text-gray-600 border-t border-gray-200/80 pt-2 mt-1 select-text">
                   {t(
                     'privacy_popa_statutory_notice',
-                    'Personal information is collected for the purpose of Residential Parking Public Engagement and will be used for analysis and insights. Collection is authorized under section 4(c) of the Protection of Privacy Act (POPA) and is managed and protected in accordance with the Act. The City intends to input the information into an automated system to generate content or make decisions, recommendations or predictions in accordance with the City of Edmonton Generative AI Standard. For questions about the collection, please contact [title], [business telephone number] and [email address].'
+                    'Personal information is collected for the purpose of Residential Parking Public Engagement and will be used for analysis and insights. Collection is authorized under section 4(c) of the Protection of Privacy Act (POPA) and is managed and protected in accordance with the Act. The City intends to input the information into an automated system to generate content or make decisions, recommendations or predictions in accordance with the City of Edmonton Generative AI Standard.(see Council Policies, standards section). For questions about the collection, please contact the Community Activator at 780-496-5236 and residentialparking@edmonton.ca'
                   )}
                 </p>
               </div>
@@ -794,12 +654,12 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  {/* The Gain Container */}
+                  {/* Benefit Container */}
                   <div className="overflow-hidden bg-emerald-50/70 border border-emerald-300 rounded-md text-emerald-950 shadow-2xs">
                     <div className="w-full bg-emerald-700 px-2 py-0.5 flex items-center gap-1.5 text-white">
                       <Check className="w-3 h-3 stroke-[3]" />
                       <span className="text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider leading-none">
-                        {t('tradeoff_gain_pill', 'The Gain')}
+                        {t('tradeoff_gain_pill', 'Benefit')}
                       </span>
                     </div>
                     <div className="px-2 py-1.5">
@@ -809,12 +669,12 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     </div>
                   </div>
 
-                  {/* The Cost Container */}
+                  {/* Trade-off Container */}
                   <div className="overflow-hidden bg-amber-50/70 border border-amber-300 rounded-md text-amber-950 shadow-2xs">
                     <div className="w-full bg-amber-700 px-2 py-0.5 flex items-center gap-1.5 text-white">
                       <span className="text-[10px] leading-none">⚡</span>
                       <span className="text-[8.5pt] sm:text-[9pt] font-black uppercase tracking-wider leading-none">
-                        {t('tradeoff_cost_pill', 'The Cost')}
+                        {t('tradeoff_cost_pill', 'Trade-off')}
                       </span>
                     </div>
                     <div className="px-2 py-1.5">

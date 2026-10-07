@@ -43,32 +43,32 @@ function formatUserSelections(answers: Record<string, string> = {}, config: Simu
     selections.push(`Funding: ${config.curbsideFeeModel === 'free' ? 'Free on-street parking' : 'User-pay permits & fees'}`);
   }
 
-  // Q2: Permit Limits
+  // Q2: Walking Distance / Proximity to Home
   if (answers['q2'] === 'q2_a') {
-    selections.push('Permit Limits: Cap permits at 2 per home in high-demand zones');
+    selections.push('Distance: Within immediate block');
   } else if (answers['q2'] === 'q2_b') {
+    selections.push('Distance: Within 2-3 blocks');
+  }
+
+  // Q3: Permit Limits
+  if (answers['q3'] === 'q3_a') {
+    selections.push('Permit Limits: Cap permits at 2 per home in high-demand zones');
+  } else if (answers['q3'] === 'q3_b') {
     selections.push('Permit Limits: Unlimited permits per household');
   }
 
-  // Q3: Visitor & Trade Access
-  if (answers['q3'] === 'q3_a') {
+  // Q4: Visitor & Service Provider Access (cleaners & contractors)
+  if (answers['q4'] === 'q4_a') {
     selections.push('Visitor Access: Equal opportunity for visitors & trades to park');
-  } else if (answers['q3'] === 'q3_b') {
+  } else if (answers['q4'] === 'q4_b') {
     selections.push('Visitor Access: Prioritize street parking for residents');
   }
 
-  // Q4: Hospital & Event Venue Traffic
-  if (answers['q4'] === 'q4_a') {
-    selections.push('Venue/Hospital Parking: Allow nearby street parking for visitors');
-  } else if (answers['q4'] === 'q4_b') {
-    selections.push('Venue/Hospital Parking: Protect local residential parking');
-  }
-
-  // Q5: Walking Distance
+  // Q5: Hospital & Event Venue Traffic
   if (answers['q5'] === 'q5_a') {
-    selections.push('Walking Distance: Expect parking spaces on the immediate block');
+    selections.push('Venue/Hospital Parking: Allow nearby street parking for visitors');
   } else if (answers['q5'] === 'q5_b') {
-    selections.push('Walking Distance: Accept parking in wider neighbourhood');
+    selections.push('Venue/Hospital Parking: Protect local residential parking');
   }
 
   // Q6: Private Parking Equity
