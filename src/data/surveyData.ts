@@ -875,25 +875,29 @@ import {
 
 export const PERSONA_PROFILES: Record<string, PersonaResult> = {
   // === The 8 Active Curbside Policy Archetypes ===
-  safety_parker: DEFAULT_8_PERSONAS.safety_parker,
+  user_funded_parker: DEFAULT_8_PERSONAS.user_funded_parker,
+  practical_parker: DEFAULT_8_PERSONAS.practical_parker,
+  city_funded_parker: DEFAULT_8_PERSONAS.city_funded_parker,
   flexible_parker: DEFAULT_8_PERSONAS.flexible_parker,
-  block_resident: DEFAULT_8_PERSONAS.block_resident,
-  balanced_resident: DEFAULT_8_PERSONAS.balanced_resident,
-  zen_neighbour: DEFAULT_8_PERSONAS.zen_neighbour,
   chill_neighbour: DEFAULT_8_PERSONAS.chill_neighbour,
+  balanced_resident: DEFAULT_8_PERSONAS.balanced_resident,
   casual_cruiser: DEFAULT_8_PERSONAS.casual_cruiser,
-  simple_driver: DEFAULT_8_PERSONAS.simple_driver,
+  balanced_neighbour: DEFAULT_8_PERSONAS.balanced_neighbour,
 
-  // === Legacy 16 Profile Aliases (Backwards compatibility & smooth migration) ===
-  tidy_resident: DEFAULT_8_PERSONAS.balanced_resident,
-  rule_resident: DEFAULT_8_PERSONAS.block_resident,
-  picky_parker: DEFAULT_8_PERSONAS.flexible_parker,
-  sensible_parker: DEFAULT_8_PERSONAS.flexible_parker,
-  fair_parker: DEFAULT_8_PERSONAS.safety_parker,
-  easy_neighbor: DEFAULT_8_PERSONAS.chill_neighbour,
-  happy_neighbor: DEFAULT_8_PERSONAS.zen_neighbour,
-  zen_neighbor: DEFAULT_8_PERSONAS.zen_neighbour,
-  happy_driver: DEFAULT_8_PERSONAS.simple_driver,
+  // === Legacy Profile Aliases (Backwards compatibility & smooth migration) ===
+  safety_parker: DEFAULT_8_PERSONAS.user_funded_parker,
+  block_resident: DEFAULT_8_PERSONAS.city_funded_parker,
+  zen_neighbour: DEFAULT_8_PERSONAS.chill_neighbour,
+  simple_driver: DEFAULT_8_PERSONAS.balanced_neighbour,
+  tidy_resident: DEFAULT_8_PERSONAS.flexible_parker,
+  rule_resident: DEFAULT_8_PERSONAS.city_funded_parker,
+  picky_parker: DEFAULT_8_PERSONAS.practical_parker,
+  sensible_parker: DEFAULT_8_PERSONAS.practical_parker,
+  fair_parker: DEFAULT_8_PERSONAS.user_funded_parker,
+  easy_neighbor: DEFAULT_8_PERSONAS.balanced_resident,
+  happy_neighbor: DEFAULT_8_PERSONAS.chill_neighbour,
+  zen_neighbor: DEFAULT_8_PERSONAS.chill_neighbour,
+  happy_driver: DEFAULT_8_PERSONAS.balanced_neighbour,
   free_wheeler: DEFAULT_8_PERSONAS.casual_cruiser
 };
 

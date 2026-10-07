@@ -1,158 +1,158 @@
 import { PersonaResult } from '../types';
 
-export const CUSTOM_PERSONAS_STORAGE_KEY = 'curbside_compass_custom_8_personas';
+export const CUSTOM_PERSONAS_STORAGE_KEY = 'curbside_compass_custom_8_personas_v2';
 
 export const DEFAULT_8_PERSONAS: Record<string, PersonaResult> = {
-  // === QUADRANT 1: User-Fee & Regulated (Top-Right) ===
-  safety_parker: {
-    id: 'safety_parker',
-    title: 'Safety Parker',
-    subtitle: 'Strict Regulations • Direct User-Fee',
-    description: 'You believe high-demand curb space must be strictly regulated with permit caps and dedicated loading/safety zones. Car owners should pay for their own parking through permits and user fees, not everyone through taxes.',
+  // === QUADRANT 1: User-Paid & Regulated (Top-Right) ===
+  user_funded_parker: {
+    id: 'user_funded_parker',
+    title: 'User-Funded Parker',
+    subtitle: 'More Rules • User Fees & Permits',
+    description: 'Your choices suggest you favour more rules to manage residential street parking, with program costs covered by users through fees and permits.',
     quadrant: 'Q1',
     xRange: 'user',
     yRange: 'restrictive',
     intensity: 'strong',
     targetCoordinates: { x: 10, y: -10 },
-    stanceOnRegulations: 'Strict safety rules, capped household permits, and active parking enforcement.',
-    stanceOnFunding: 'Direct user fees, paid permits, and full cost recovery from drivers.',
-    keyPriorities: ['Strict safety enforcement', 'Direct user fees'],
-    edmontonPolicyFit: 'Aligns with high-demand pedestrian safety corridors, entertainment districts, and university perimeters.',
-    outcome: 'Strictly regulated curbside corridors with rigorous user-fee permits, dedicated loading zones, and active enforcement funded entirely by users and violation penalties.',
+    stanceOnRegulations: 'Your choices suggest you favour more parking rules to manage demand for street parking.',
+    stanceOnFunding: 'Your choices suggest you prefer that people using the residential parking program pay for it through fees and permits.',
+    keyPriorities: ['More parking rules to manage demand', 'Users pay through fees and permits'],
+    edmontonPolicyFit: 'Aligns with high-demand pedestrian corridors, entertainment districts, and university perimeters.',
+    outcome: 'A regulated residential street parking program where parking rules manage high street parking demand, with program costs covered directly by users through fees and permits.',
     badgeColor: '#0081BC',
-    legacyMergedTitles: ['Safety Parker', 'Fair Parker']
+    legacyMergedTitles: ['User-Funded Parker', 'Safety Parker']
   },
-  flexible_parker: {
-    id: 'flexible_parker',
-    title: 'Flexible Parker',
-    subtitle: 'Clear Rules • Modest User-Fee',
-    description: 'You prefer clear, structured parking rules to maintain neighbourhood order. You support reasonable user fees and visitor passes to cover operating costs without heavy taxpayer subsidization.',
+  practical_parker: {
+    id: 'practical_parker',
+    title: 'Practical Parker',
+    subtitle: 'Limited Restrictions • User Fees & Permits',
+    description: 'Your choices suggest, you favour some parking rules while keeping restrictions limited, with program costs covered by users through permits and fees.',
     quadrant: 'Q1',
     xRange: 'user',
     yRange: 'restrictive',
     intensity: 'moderate',
     targetCoordinates: { x: 4, y: -4 },
-    stanceOnRegulations: 'Defined parking guidelines with reasonable time limits and permit oversight.',
-    stanceOnFunding: 'Targeted user fees and digital permits covering program operating costs.',
-    keyPriorities: ['Clear guidelines', 'User-pay model'],
+    stanceOnRegulations: 'Your choices suggest you favour some parking rules while keeping restrictions limited.',
+    stanceOnFunding: 'Your choices suggest you prefer that people using the residential parking program pay for it through fees and permits.',
+    keyPriorities: ['Limited restrictions', 'Users pay through permits and fees'],
     edmontonPolicyFit: 'Aligns with targeted residential permit zones and transit-oriented communities.',
-    outcome: 'A targeted, user-funded permit system where on-street parking requires direct vehicle permits and user fees, ensuring local residents and visitors who use the curb cover the program\'s operating costs.',
+    outcome: 'A targeted curbside permit framework keeping restrictions limited while ensuring users cover program costs through permits and fees.',
     badgeColor: '#0081BC',
-    legacyMergedTitles: ['Picky Parker', 'Sensible Parker']
+    legacyMergedTitles: ['Practical Parker', 'Picky Parker']
   },
 
   // === QUADRANT 2: Taxpayer-Funded & Regulated (Top-Left) ===
-  block_resident: {
-    id: 'block_resident',
-    title: 'Block Resident',
-    subtitle: 'Strict Regulations • General Taxation',
-    description: 'You want strict parking rules and defined time limits to protect neighbourhood curb space. You strongly believe everyone should share the costs through general municipal taxes rather than charging drivers separate fees.',
+  city_funded_parker: {
+    id: 'city_funded_parker',
+    title: 'City-Funded Parker',
+    subtitle: 'Firm Rules • Property Taxes',
+    description: 'Your choices suggest, you favour clear parking rules to manage residential street parking, with program costs covered through property taxes.',
     quadrant: 'Q2',
     xRange: 'taxpayer',
     yRange: 'restrictive',
     intensity: 'strong',
     targetCoordinates: { x: -10, y: -10 },
-    stanceOnRegulations: 'Strict enforcement and capped permits to preserve neighbourhood order.',
-    stanceOnFunding: 'City-wide property taxes and general municipal revenues; no user permit fees.',
-    keyPriorities: ['Strict enforcement', 'General tax funding'],
-    edmontonPolicyFit: 'Aligns with mature residential neighbourhoods experiencing external hospital or institutional commuter pressure.',
-    outcome: 'A strictly regulated residential permit zone where on-street parking is closely monitored, permits are capped per household, and municipal program costs are funded through general property taxes to preserve neighbourhood curb space.',
+    stanceOnRegulations: 'Your choices suggest you value clear and firm parking rules.',
+    stanceOnFunding: 'Your choices suggest you prefer residential parking programs to be covered through property taxes.',
+    keyPriorities: ['Clear and firm parking rules', 'Funded through property taxes'],
+    edmontonPolicyFit: 'Aligns with mature residential neighbourhoods experiencing external hospital or commuter pressure.',
+    outcome: 'A residential parking program with clear, firm parking rules to manage street parking, fully covered through municipal property taxes.',
     badgeColor: '#005087',
-    legacyMergedTitles: ['Block Resident', 'Rule Resident']
+    legacyMergedTitles: ['City-Funded Parker', 'Block Resident']
   },
-  balanced_resident: {
-    id: 'balanced_resident',
-    title: 'Balanced Resident',
-    subtitle: 'Fair Balance • Shared Costs',
-    description: 'You like a fair balance of parking rules to keep residential streets neat. You believe everyone should share the program costs through general municipal taxes, keeping on-street parking free and accessible.',
+  flexible_parker: {
+    id: 'flexible_parker',
+    title: 'Flexible Parker',
+    subtitle: 'Some Rules • Property Taxes',
+    description: 'As a Flexible Parker, you favour some parking rules while keeping restrictions limited, with program costs funded through property taxes.',
     quadrant: 'Q2',
     xRange: 'taxpayer',
     yRange: 'restrictive',
     intensity: 'moderate',
     targetCoordinates: { x: -4, y: -4 },
-    stanceOnRegulations: 'Moderate guidelines to manage street congestion without excessive ticketing.',
-    stanceOnFunding: 'Shared municipal property taxes; free access for neighbourhood residents.',
-    keyPriorities: ['Balanced access', 'Community funding'],
+    stanceOnRegulations: 'Your choices suggest you favour some parking rules while keeping restrictions limited.',
+    stanceOnFunding: 'You think all residents should pay for residential parking programs to be covered through property taxes.',
+    keyPriorities: ['Some rules with limited restrictions', 'All residents pay through property taxes'],
     edmontonPolicyFit: 'Aligns with standard residential parking guidelines in central mature communities.',
-    outcome: 'Standard residential parking guidelines funded through municipal taxes with basic time restrictions during peak hours to keep streets orderly while sharing public costs community-wide.',
+    outcome: 'A balanced residential parking program keeping restrictions limited, with program costs funded community-wide through property taxes.',
     badgeColor: '#005087',
-    legacyMergedTitles: ['Tidy Resident', 'Balanced Resident']
+    legacyMergedTitles: ['Flexible Parker', 'Balanced Resident']
   },
 
   // === QUADRANT 3: Taxpayer-Funded & Open Access (Bottom-Left) ===
-  zen_neighbour: {
-    id: 'zen_neighbour',
-    title: 'Zen Neighbour',
-    subtitle: 'Almost No Rules • Strong Taxpayer',
-    description: 'You want maximum parking freedom with virtually no restrictions, time limits, or permit bureaucracy. You strongly believe the street curb is a universal public asset funded entirely through general property taxes.',
+  chill_neighbour: {
+    id: 'chill_neighbour',
+    title: 'Chill Neighbour',
+    subtitle: 'Fewer Rules • Property Taxes',
+    description: 'Your choices suggest you favour fewer restrictions and first-come, first-served residential street parking, with program costs covered through property taxes.',
     quadrant: 'Q3',
     xRange: 'taxpayer',
     yRange: 'open',
     intensity: 'strong',
     targetCoordinates: { x: -10, y: 10 },
-    stanceOnRegulations: 'Unrestricted, open curbside parking with no permit caps or time limits.',
-    stanceOnFunding: '100% public funding through general municipal taxation.',
-    keyPriorities: ['Complete freedom', 'Fully public funding'],
-    edmontonPolicyFit: 'Aligns with low-density suburban neighbourhoods and developing communities.',
-    outcome: 'Maximum parking freedom with no permit restrictions or time limits, treating the curbside as a universal public amenity fully supported by the city\'s general operating budget.',
+    stanceOnRegulations: 'Your choices suggest you favour fewer parking rules, and first-come, first-served residential parking.',
+    stanceOnFunding: 'Your choices suggest you prefer residential parking programs to be covered through property taxes.',
+    keyPriorities: ['Fewer parking rules', 'First-come, first-served', 'Property tax funding'],
+    edmontonPolicyFit: 'Aligns with low-density suburban neighbourhoods and quiet residential streets.',
+    outcome: 'Open curbside parking with fewer restrictions and first-come, first-served street parking, fully covered through municipal property taxes.',
     badgeColor: '#009A44',
-    legacyMergedTitles: ['Happy Neighbour', 'Zen Neighbour']
+    legacyMergedTitles: ['Chill Neighbour', 'Zen Neighbour']
   },
-  chill_neighbour: {
-    id: 'chill_neighbour',
-    title: 'Chill Neighbour',
-    subtitle: 'Few Rules • Shared Costs',
-    description: 'You prefer having few parking rules to keep everyday life easy and stress-free. You believe everyone should share the maintenance costs through taxes rather than burdening drivers with permits.',
+  balanced_resident: {
+    id: 'balanced_resident',
+    title: 'Balanced Resident',
+    subtitle: 'Situational Rules • Taxes & User Fees',
+    description: 'Your choices suggest you favour different parking rules for different situations, with program costs covered by a combination of property taxes and user fees.',
     quadrant: 'Q3',
     xRange: 'taxpayer',
     yRange: 'open',
     intensity: 'moderate',
     targetCoordinates: { x: -4, y: 4 },
-    stanceOnRegulations: 'Minimal rules; reliance on informal neighbourhood courtesy.',
-    stanceOnFunding: 'Shared municipal taxation; free parking access across the community.',
-    keyPriorities: ['Minimal restrictions', 'Publicly funded'],
-    edmontonPolicyFit: 'Aligns with quiet suburban laned communities and residential cul-de-sacs.',
-    outcome: 'Low-density residential streets with relaxed parking regulations, relying on informal neighbourhood courtesy and broad municipal funding rather than active enforcement.',
+    stanceOnRegulations: 'Your choices suggest you favour different parking rules depending on the situation.',
+    stanceOnFunding: 'Your choices suggest you prefer residential parking programs to be covered through both property taxes and user fees.',
+    keyPriorities: ['Situational parking rules', 'Property taxes & user fees combined'],
+    edmontonPolicyFit: 'Aligns with mixed-density and evolving residential neighbourhoods.',
+    outcome: 'A adaptable parking framework tailoring rules to different neighbourhood situations, funded through a combination of property taxes and user fees.',
     badgeColor: '#009A44',
-    legacyMergedTitles: ['Easy Neighbour', 'Chill Neighbour']
+    legacyMergedTitles: ['Balanced Resident', 'Easy Neighbour']
   },
 
   // === QUADRANT 4: User-Paid & Open Access (Bottom-Right) ===
   casual_cruiser: {
     id: 'casual_cruiser',
     title: 'Casual Cruiser',
-    subtitle: 'Very Few Rules • Direct User-Fee',
-    description: 'You like very few parking rules on residential streets, allowing first-come first-served parking. However, you strongly believe car owners must pay for their own parking through metered rates or pay-per-use fees instead of taxpayer subsidies.',
+    subtitle: 'Fewer Rules • User Fees & Permits',
+    description: 'Your choices suggest you favour fewer restrictions and first-come, first served residential street parking, with program costs covered by users through fees and permits.',
     quadrant: 'Q4',
     xRange: 'user',
     yRange: 'open',
     intensity: 'strong',
     targetCoordinates: { x: 10, y: 10 },
-    stanceOnRegulations: 'Open curbside access without residential permit restrictions or caps.',
-    stanceOnFunding: 'Direct user-pay model via pay-per-use fees or commercial meter zones.',
-    keyPriorities: ['Unrestricted access', 'Direct user payments'],
+    stanceOnRegulations: 'Your choices suggest you favour fewer parking rules and first-come, first-served parking.',
+    stanceOnFunding: 'Your choices suggest you prefer people using the residential parking program to pay for it through fees and permits.',
+    keyPriorities: ['Fewer parking rules', 'First-come, first-served', 'Users pay through fees and permits'],
     edmontonPolicyFit: 'Aligns with commercial corridors, mixed-use infill streets, and retail parking edges.',
-    outcome: 'Largely unregulated public curbside parking supported by targeted metered zones only in commercial areas, allowing drivers full mobility with pay-per-use convenience.',
+    outcome: 'An open-access street parking setup with fewer restrictions and first-come, first-served parking, supported by user fees and permits.',
     badgeColor: '#E6A100',
-    legacyMergedTitles: ['Free Wheeler', 'Casual Cruiser']
+    legacyMergedTitles: ['Casual Cruiser', 'Free Wheeler']
   },
-  simple_driver: {
-    id: 'simple_driver',
-    title: 'Simple Driver',
-    subtitle: 'Simple Rules • Light User Fees',
-    description: 'You want straightforward, hassle-free parking with few restrictions. You slightly prefer that car owners pay modest fees to cover upkeep, keeping rules clear and transparent without red tape.',
+  balanced_neighbour: {
+    id: 'balanced_neighbour',
+    title: 'Balanced Neighbour',
+    subtitle: 'Moderate Rules • User Fees & Permits',
+    description: 'Your choices suggest you favour moderate parking rules and user-friendly programs, with program costs covered by users through fees and permits.',
     quadrant: 'Q4',
     xRange: 'user',
     yRange: 'open',
     intensity: 'moderate',
     targetCoordinates: { x: 4, y: 4 },
-    stanceOnRegulations: 'Simple, easy-to-understand parking guidelines without bureaucratic restrictions.',
-    stanceOnFunding: 'Modest flat user fees for parking users without general tax burdens.',
-    keyPriorities: ['Simple access', 'Light user fees'],
-    edmontonPolicyFit: 'Aligns with simplified flat-rate parking regions and mixed-density neighbourhood borders.',
-    outcome: 'A simplified, open-access parking framework with modest flat-rate user fees during high-demand periods, keeping rules transparent and hassle-free for drivers.',
+    stanceOnRegulations: 'Your choices suggest you favour moderate parking rules and that you would like a user-friendly program.',
+    stanceOnFunding: 'Your choices suggest you prefer people using the residential parking program to pay for it through fees and permits.',
+    keyPriorities: ['Moderate parking rules', 'User-friendly program', 'Users pay through fees and permits'],
+    edmontonPolicyFit: 'Aligns with simplified user-paid parking zones and mixed-density areas.',
+    outcome: 'A user-friendly residential parking program with moderate parking rules, funded by program users through permits and fees.',
     badgeColor: '#E6A100',
-    legacyMergedTitles: ['Simple Driver', 'Happy Driver']
+    legacyMergedTitles: ['Balanced Neighbour', 'Simple Driver']
   }
 };
 
@@ -209,28 +209,28 @@ export function calculate8Persona(totalX: number, totalY: number): PersonaResult
   // Quadrant 1: User-Paid (X >= 0) & Regulated (Y < 0) - Top-Right
   if (totalX >= 0 && totalY < 0) {
     const isStrong = totalX >= 6 || totalY <= -6;
-    return isStrong ? personas.safety_parker || DEFAULT_8_PERSONAS.safety_parker
-                    : personas.flexible_parker || DEFAULT_8_PERSONAS.flexible_parker;
+    return isStrong ? (personas.user_funded_parker || personas.safety_parker || DEFAULT_8_PERSONAS.user_funded_parker)
+                    : (personas.practical_parker || personas.flexible_parker || DEFAULT_8_PERSONAS.practical_parker);
   }
   
   // Quadrant 2: Taxpayer-Funded (X < 0) & Regulated (Y < 0) - Top-Left
   if (totalX < 0 && totalY < 0) {
     const isStrong = totalX <= -6 || totalY <= -6;
-    return isStrong ? personas.block_resident || DEFAULT_8_PERSONAS.block_resident
-                    : personas.balanced_resident || DEFAULT_8_PERSONAS.balanced_resident;
+    return isStrong ? (personas.city_funded_parker || personas.block_resident || DEFAULT_8_PERSONAS.city_funded_parker)
+                    : (personas.flexible_parker || personas.balanced_resident || DEFAULT_8_PERSONAS.flexible_parker);
   }
   
   // Quadrant 3: Taxpayer-Funded (X < 0) & Open Access (Y >= 0) - Bottom-Left
   if (totalX < 0 && totalY >= 0) {
     const isStrong = totalX <= -6 || totalY >= 6;
-    return isStrong ? personas.zen_neighbour || DEFAULT_8_PERSONAS.zen_neighbour
-                    : personas.chill_neighbour || DEFAULT_8_PERSONAS.chill_neighbour;
+    return isStrong ? (personas.chill_neighbour || personas.zen_neighbour || DEFAULT_8_PERSONAS.chill_neighbour)
+                    : (personas.balanced_resident || DEFAULT_8_PERSONAS.balanced_resident);
   }
   
   // Quadrant 4: User-Paid (X >= 0) & Open Access (Y >= 0) - Bottom-Right
   const isStrong = totalX >= 6 || totalY >= 6;
-  return isStrong ? personas.casual_cruiser || DEFAULT_8_PERSONAS.casual_cruiser
-                  : personas.simple_driver || DEFAULT_8_PERSONAS.simple_driver;
+  return isStrong ? (personas.casual_cruiser || DEFAULT_8_PERSONAS.casual_cruiser)
+                  : (personas.balanced_neighbour || personas.simple_driver || DEFAULT_8_PERSONAS.balanced_neighbour);
 }
 
 /**
@@ -303,13 +303,15 @@ export function classifyStances(regText: string, fundText: string, personaTitle:
   // Regulations axis: Negative = Strict / Restrictive / Regulated. Positive = Open / Few / Deregulated.
   const isStrict = regLower.includes('strict') || regLower.includes('tight') || regLower.includes('high') ||
                    regLower.includes('regulated') || regLower.includes('enforce') || regLower.includes('cap') ||
-                   regLower.includes('safety') || regLower.includes('block') || regLower.includes('rule');
+                   regLower.includes('safety') || regLower.includes('block') || regLower.includes('rule') ||
+                   regLower.includes('firm') || regLower.includes('more parking rules');
   
   const isMinimal = regLower.includes('no rule') || regLower.includes('free') || regLower.includes('unrestricted') ||
                     regLower.includes('zen') || regLower.includes('chill') || regLower.includes('open') ||
-                    regLower.includes('few') || regLower.includes('minimal') || regLower.includes('casual');
+                    regLower.includes('few') || regLower.includes('minimal') || regLower.includes('casual') ||
+                    regLower.includes('first-come');
 
-  // Funding axis: Negative = Taxpayer / Public / Shared. Positive = User-Fee / Direct / Permit / Driver pay.
+  // Funding axis: Negative = Taxpayer / Public / Shared / Property taxes. Positive = User-Fee / Direct / Permit / Driver pay / Fees.
   const isUserPay = fundLower.includes('user') || fundLower.includes('fee') || fundLower.includes('meter') ||
                     fundLower.includes('driver') || fundLower.includes('permit') || fundLower.includes('pay-per') ||
                     fundLower.includes('direct') || fundLower.includes('private');
@@ -317,7 +319,8 @@ export function classifyStances(regText: string, fundText: string, personaTitle:
   // Intensity determination
   const isStrong = regLower.includes('strict') || regLower.includes('strong') || regLower.includes('absolute') ||
                    regLower.includes('almost no') || fundLower.includes('strong') || fundLower.includes('100%') ||
-                   fundLower.includes('all residents') || regLower.includes('safety');
+                   fundLower.includes('all residents') || regLower.includes('safety') || regLower.includes('firm') ||
+                   regLower.includes('fewer parking rules');
 
   let quadrant: 'Q1' | 'Q2' | 'Q3' | 'Q4' = 'Q1';
 
@@ -338,7 +341,7 @@ export function classifyStances(regText: string, fundText: string, personaTitle:
 }
 
 /**
- * Ingests a 4-column CSV with headers (Persona, Stance on Regulations, Stance on Funding, Description)
+ * Ingests a CSV (supports both 4-column and 9-column formats)
  * and returns the 8 structured PersonaResult objects.
  */
 export function parsePersonasFromCsv(csvText: string): {
@@ -352,14 +355,19 @@ export function parsePersonasFromCsv(csvText: string): {
     return { success: false, error: 'CSV must contain at least a header row and data rows.' };
   }
 
-  // Find column indices
-  const header = rows[0].map(h => h.trim().toLowerCase());
-  let personaIdx = header.findIndex(h => h.includes('persona') || h.includes('title') || h.includes('name'));
+  // Find column indices with colon and space stripping
+  const header = rows[0].map(h => h.trim().toLowerCase().replace(/:/g, ''));
+  
+  const idIdx = header.findIndex(h => h === 'id' || h.startsWith('id'));
+  let personaIdx = header.findIndex(h => h === 'persona' || h.includes('title') || h.includes('name'));
   let regIdx = header.findIndex(h => h.includes('regulation') || h.includes('rules') || h.includes('regulatory'));
-  let fundIdx = header.findIndex(h => h.includes('funding') || h.includes('fiscal') || h.includes('cost'));
+  let fundIdx = header.findIndex(h => h.includes('funding') || h.includes('fiscal') || h.includes('cost') || h.includes('tax'));
   let descIdx = header.findIndex(h => h.includes('desc') || h.includes('summary') || h.includes('detail'));
+  const quadIdx = header.findIndex(h => h.includes('quadrant'));
+  const intIdx = header.findIndex(h => h.includes('intensity'));
 
   // Defaults if headers don't strictly match
+  if (personaIdx === -1 && idIdx !== -1) personaIdx = idIdx;
   if (personaIdx === -1) personaIdx = 0;
   if (regIdx === -1) regIdx = 1;
   if (fundIdx === -1) fundIdx = 2;
@@ -374,18 +382,41 @@ export function parsePersonasFromCsv(csvText: string): {
   const parsedList: ParsedCsvPersonaRow[] = [];
 
   dataRows.forEach((r) => {
-    const persona = r[personaIdx] || '';
+    const rawId = (idIdx !== -1 ? r[idIdx] : '') || '';
+    const persona = r[personaIdx] || rawId || '';
     const stanceOnRegulations = r[regIdx] || '';
     const stanceOnFunding = r[fundIdx] || '';
     const description = r[descIdx] || '';
+
+    let quad: 'Q1' | 'Q2' | 'Q3' | 'Q4' | undefined;
+    if (quadIdx !== -1 && r[quadIdx]) {
+      const qVal = r[quadIdx].trim().toUpperCase();
+      if (['Q1', 'Q2', 'Q3', 'Q4'].includes(qVal)) {
+        quad = qVal as 'Q1' | 'Q2' | 'Q3' | 'Q4';
+      }
+    }
+
+    let intensity: 'moderate' | 'strong' | undefined;
+    if (intIdx !== -1 && r[intIdx]) {
+      const iVal = r[intIdx].trim().toLowerCase();
+      if (iVal === 'strong' || iVal === 'moderate') {
+        intensity = iVal as 'moderate' | 'strong';
+      }
+    }
+
+    if (!quad || !intensity) {
+      const detected = classifyStances(stanceOnRegulations, stanceOnFunding, persona);
+      if (!quad) quad = detected.quadrant;
+      if (!intensity) intensity = detected.intensity;
+    }
+
     if (persona) {
-      const { quadrant, intensity } = classifyStances(stanceOnRegulations, stanceOnFunding, persona);
       parsedList.push({
         persona,
         stanceOnRegulations,
         stanceOnFunding,
         description,
-        detectedQuadrant: quadrant,
+        detectedQuadrant: quad,
         detectedIntensity: intensity
       });
     }
@@ -396,14 +427,14 @@ export function parsePersonasFromCsv(csvText: string): {
   
   // Mapping matrix
   const slotKeys: Record<string, string> = {
-    'Q1_strong': 'safety_parker',
-    'Q1_moderate': 'flexible_parker',
-    'Q2_strong': 'block_resident',
-    'Q2_moderate': 'balanced_resident',
-    'Q3_strong': 'zen_neighbour',
-    'Q3_moderate': 'chill_neighbour',
+    'Q1_strong': 'user_funded_parker',
+    'Q1_moderate': 'practical_parker',
+    'Q2_strong': 'city_funded_parker',
+    'Q2_moderate': 'flexible_parker',
+    'Q3_strong': 'chill_neighbour',
+    'Q3_moderate': 'balanced_resident',
     'Q4_strong': 'casual_cruiser',
-    'Q4_moderate': 'simple_driver'
+    'Q4_moderate': 'balanced_neighbour'
   };
 
   const assignedSlotKeys = new Set<string>();
@@ -451,18 +482,23 @@ export function parsePersonasFromCsv(csvText: string): {
 }
 
 /**
- * Format active 8 personas into a clean 4-column CSV string.
+ * Format active 8 personas into a clean 9-column CSV string.
  */
 export function exportPersonasToCsv(personas?: Record<string, PersonaResult>): string {
   const pMap = personas || getActive8Personas();
-  const headers = ['Persona', 'Stance on Regulations', 'Stance on Funding', 'Description'];
+  const headers = ['id', 'title', 'stanceOnRegulations', 'stanceOnFunding', 'Description', 'quadrant', 'xRange', 'yRange', 'intensity'];
   
   const rows = (Object.values(pMap) as PersonaResult[]).map((p: PersonaResult) => {
+    const cleanId = `"${(p.id || '').replace(/"/g, '""')}"`;
     const cleanTitle = `"${(p.title || '').replace(/"/g, '""')}"`;
     const cleanReg = `"${(p.stanceOnRegulations || '').replace(/"/g, '""')}"`;
     const cleanFund = `"${(p.stanceOnFunding || '').replace(/"/g, '""')}"`;
     const cleanDesc = `"${(p.description || '').replace(/"/g, '""')}"`;
-    return [cleanTitle, cleanReg, cleanFund, cleanDesc].join(',');
+    const cleanQuad = p.quadrant || 'Q1';
+    const cleanX = p.xRange || 'user';
+    const cleanY = p.yRange || 'restrictive';
+    const cleanIntensity = p.intensity || 'moderate';
+    return [cleanId, cleanTitle, cleanReg, cleanFund, cleanDesc, cleanQuad, cleanX, cleanY, cleanIntensity].join(',');
   });
 
   return [headers.join(','), ...rows].join('\n');

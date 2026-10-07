@@ -400,6 +400,14 @@ export function extractTextMapFromRows(rows: string[][]): Record<string, string>
 }
 
 const PERSONA_NAME_TO_KEY: Record<string, string> = {
+  'user-funded parker': 'user_funded_parker',
+  'user funded parker': 'user_funded_parker',
+  'practical parker': 'practical_parker',
+  'city-funded parker': 'city_funded_parker',
+  'city funded parker': 'city_funded_parker',
+  'flexible parker': 'flexible_parker',
+  'balanced neighbour': 'balanced_neighbour',
+  'balanced neighbor': 'balanced_neighbour',
   'block resident': 'block_resident',
   'tidy resident': 'tidy_resident',
   'easy resident': 'tidy_resident',
