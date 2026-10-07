@@ -26,6 +26,7 @@
   "drawer_gauge_close_aria": "Fermer la jauge de stationnement agrandie",
   "drawer_infill_label": "Densité résidentielle",
   "density_slider_subtitle": "Ajustez le nombre de lots multifamiliaux dans votre simulation de rue pour augmenter la densité",
+  "drawer_density_explainer": "Ajoute des logements multifamiliaux dans la rue.",
   "sim_density_explainer": "Chaque ajout densifie avec des logements collectifs (8 logements par lot de 15,6 m).",
   "drawer_police_test_btn": "Appeler l'EPS",
   "drawer_police_test_title": "Tester un blocage de voie de 20 secondes : envoie une autopatrouille de l'EPS avec gyrophares et sirènes pour dégager la circulation",

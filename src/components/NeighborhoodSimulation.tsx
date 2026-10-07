@@ -2044,70 +2044,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       ctx!.restore();
     }
 
-    function drawPoliceBubble(x: number, y: number, z: number, text: string) {
-      const pos = project(x + 7.5, y + 3.5, z + 9);
-      ctx!.save();
-
-      ctx!.font = 'bold 9.5px system-ui, -apple-system, sans-serif';
-      const textMetrics = ctx!.measureText(text);
-      const bubbleW = textMetrics.width + 24;
-      const bubbleH = 17;
-      const bubbleX = pos.x - bubbleW / 2;
-      const bubbleY = pos.y - bubbleH - 5;
-
-      // Shadow
-      ctx!.fillStyle = 'rgba(0, 0, 0, 0.4)';
-      ctx!.beginPath();
-      if (ctx!.roundRect) {
-        ctx!.roundRect(bubbleX + 1.5, bubbleY + 1.5, bubbleW, bubbleH, 4);
-      } else {
-        ctx!.rect(bubbleX + 1.5, bubbleY + 1.5, bubbleW, bubbleH);
-      }
-      ctx!.fill();
-
-      // Flashing alert border (Red / Blue alternating)
-      const strobePhase = Math.floor((Date.now() / 140) % 2);
-      const isRed = strobePhase === 0;
-      const borderColor = isRed ? '#EF4444' : '#3B82F6';
-
-      // Background Bubble
-      ctx!.fillStyle = '#002B49';
-      ctx!.strokeStyle = borderColor;
-      ctx!.lineWidth = 1.6;
-      ctx!.beginPath();
-      if (ctx!.roundRect) {
-        ctx!.roundRect(bubbleX, bubbleY, bubbleW, bubbleH, 4);
-      } else {
-        ctx!.rect(bubbleX, bubbleY, bubbleW, bubbleH);
-      }
-      ctx!.fill();
-      ctx!.stroke();
-
-      // Tail
-      ctx!.beginPath();
-      ctx!.moveTo(pos.x - 3, bubbleY + bubbleH);
-      ctx!.lineTo(pos.x, bubbleY + bubbleH + 4);
-      ctx!.lineTo(pos.x + 3, bubbleY + bubbleH);
-      ctx!.fillStyle = '#002B49';
-      ctx!.fill();
-      ctx!.strokeStyle = borderColor;
-      ctx!.lineWidth = 1.6;
-      ctx!.stroke();
-
-      // Strobe icon / beacon dot
-      ctx!.fillStyle = borderColor;
-      ctx!.beginPath();
-      ctx!.arc(bubbleX + 8, bubbleY + 8.5, 3.2, 0, Math.PI * 2);
-      ctx!.fill();
-
-      // Text label
-      ctx!.fillStyle = '#FFFFFF';
-      ctx!.textBaseline = 'middle';
-      ctx!.fillText(text, bubbleX + 15, bubbleY + 9);
-
-      ctx!.restore();
-    }
-
     function drawSpeechBubble(x: number, y: number, z: number) {
       const pos = project(x + 1, y - 1, z + 6);
       ctx!.save();
@@ -5466,9 +5402,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           } else {
             drawVehicle(item.x, item.y, 0, item.type, item.color, item.isFlipped, item.state);
 
-            if (item.policeBubbleText) {
-              drawPoliceBubble(item.x, item.y, 0, item.policeBubbleText);
-            } else if (item.honkBubbleTimer && item.honkBubbleTimer > 0) {
+            if (item.honkBubbleTimer && item.honkBubbleTimer > 0) {
               drawHonkBubble(item.x, item.y, 0);
             } else if (item.parkingBubbleText && item.parkingState !== 'parked') {
               const status = item.parkingState === 'giving_up' 

@@ -569,7 +569,7 @@ export function getQuestionTradeoffImpact(
         tradeoffRationale: 'Ensures program operating costs are paid directly by users rather than through property taxes',
         curbsideImpactSummary: 'Drivers who park on the street pay permit fees. This covers program costs and encourages people with driveways to park off the street.',
         benefitText: 'Costs are covered by people using the program, rather than through property taxes.',
-        costText: 'Fees add to users’ parking costs, including for people with no private parking.'
+        costText: 'Residents must pay for permits to park on the street.'
       };
     }
     if (selectedAnswerId === 'q1_b') {
@@ -582,7 +582,7 @@ export function getQuestionTradeoffImpact(
         deltaStallsValue: 1.5,
         tradeoffRationale: 'Reduces direct costs to users by funding the program through property taxes instead of separate fees',
         curbsideImpactSummary: 'Because street parking is free, more vehicles park on the street.',
-        benefitText: 'People can use the program without paying separate parking fees, reducing the direct cost of access.',
+        benefitText: 'People can use the program without paying separate parking fees, reducing the cost of access.',
         costText: 'Costs are covered by all residents through property taxes, including by people who do not use the program.'
       };
     }
@@ -728,8 +728,8 @@ export function getQuestionTradeoffImpact(
         deltaStallsValue: -2.5,
         tradeoffRationale: 'Expands parking options for patients, students, visitors, and event attendees near major destinations',
         curbsideImpactSummary: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
-        benefitText: 'Patients, visitors, students and event attendees have more parking options within a few blocks of their destination.',
-        costText: 'Residents and their guests may face more competition for spaces and need to park farther away.'
+        benefitText: 'Patients, students and event attendees have more parking options within a few blocks of their destination.',
+        costText: 'Residents and their visitors may face more competition for spaces and need to park farther away.'
       };
     }
     if (selectedAnswerId === 'q5_b') {
@@ -742,7 +742,7 @@ export function getQuestionTradeoffImpact(
         deltaStallsValue: 2.5,
         tradeoffRationale: 'Protects residential street parking from institutional and event venue visitor spillover',
         curbsideImpactSummary: 'Protects nearby residential street parking for residents and guests near major destinations.',
-        benefitText: 'Residents and their guests face less competition for nearby spaces from people visiting these destinations.',
+        benefitText: 'Residents and their visitors face less competition for nearby spaces from people visiting these destinations.',
         costText: 'People visiting nearby destinations have fewer street parking options and may need to park farther away, or use other parking facilities'
       };
     }
@@ -769,7 +769,7 @@ export function getQuestionTradeoffImpact(
         tradeoffRationale: 'Prioritizes street parking permits for households with no private off-street parking options',
         curbsideImpactSummary: 'Prioritizes street parking permits for households with fewer off-street parking alternatives.',
         benefitText: 'Prioritizes households with fewer alternatives to street parking, regardless of housing type.',
-        costText: 'Households with private parking may have less access to permits, even when the parking does not meet all their needs.'
+        costText: 'Households with private parking may have less access to permits, even when their private parking does not meet all their needs.'
       };
     }
     if (selectedAnswerId === 'q6_b') {

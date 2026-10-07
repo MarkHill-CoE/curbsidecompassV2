@@ -228,7 +228,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
             className="accent-[#009A44] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
           />
           <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
-            {t('drawer_density_explainer', 'Adds up to 7 8-plex multi-units (9.5m tall × 13m wide × 30m long) replacing houses on 15.6m lots.')}
+            {t('drawer_density_explainer', 'Adds multi-unit housing to the street.')}
           </p>
         </div>
 
