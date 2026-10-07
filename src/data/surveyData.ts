@@ -54,12 +54,12 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q1',
     number: 1,
-    category: 'Residential Parking Permit Program Funding',
+    category: 'Funding',
     text: 'Residential parking programs cost money to operate. Who should pay for them?',
     options: [
       {
         id: 'q1_a',
-        label: 'People who use parking through pay-per-use fees and parking permits.',
+        label: 'People who use parking through fees and parking permits',
         x: 4,
         y: 0,
         hint: 'Drivers who park on the street pay permit fees. This covers program costs and encourages people with driveways to park off the street.',
@@ -114,7 +114,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q3',
     number: 3,
-    category: 'Residential Parking Permit Limit',
+    category: 'Permit Limit',
     text: 'In neighbourhoods where street parking is in high demand, should there be a limit on parking permits per household?',
     options: [
       {
@@ -177,7 +177,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q5',
     number: 5,
     category: 'Parking Proximity to Destination',
-    text: 'When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking (within a few blocks)?',
+    text: 'When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking?',
     options: [
       {
         id: 'q5_a',
@@ -207,11 +207,11 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     id: 'q6',
     number: 6,
     category: 'Residential Parking Permit Eligibility',
-    text: 'Should access to private parking affect who can get a permit? Consider all households, including those in houses, townhomes and apartments. Private parking means a driveway, garage or other off-street parking space.',
+    text: 'Should access to private parking affect who can get a permit? Consider all housing types, including those in single-family homes, townhomes and apartments. Private parking can mean a driveway, garage or other off-street parking space.',
     options: [
       {
         id: 'q6_a',
-        label: 'Yes households with no private parking should get priority for permits',
+        label: 'Yes, housing types with no private parking should get priority for permits',
         x: 3,
         y: -3,
         hint: 'Prioritizes street parking permits for households with fewer off-street parking alternatives.',
@@ -222,7 +222,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'q6_b',
-        label: 'No, households should have the same eligibility, whether or not they have private parking.',
+        label: 'No, all housing types should have the same eligibility, whether or not they have private parking.',
         x: -3,
         y: 3,
         hint: 'Ensures equal permit eligibility for all households regardless of their private parking arrangements.',
@@ -238,9 +238,9 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     number: 7,
     category: 'Location' as any,
     type: 'text',
-    text: 'Choose your model neighbourhood.',
-    placeholder: 'e.g. T5J 2R7 or Strathcona',
-    helperText: 'Search your neighbourhood or enter a postal code to record your location:',
+    text: 'Enter your full postal code or first three characters of your postal code.',
+    placeholder: 'e.g. T5J 2R7 or T5J',
+    helperText: 'Enter your full postal code or first three characters of your postal code:',
     options: []
   }
 ];
@@ -563,7 +563,7 @@ export function getQuestionTradeoffImpact(
         questionNumber: 1,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'People who use parking through pay-per-use fees and parking permits.',
+        selectedOptionLabel: selectedOption?.label || 'People who use parking through fees and parking permits',
         deltaStallsText: '-1.5 stalls (-10%)',
         deltaStallsValue: -1.5,
         tradeoffRationale: 'Ensures program operating costs are paid directly by users rather than through property taxes',
@@ -583,7 +583,7 @@ export function getQuestionTradeoffImpact(
         tradeoffRationale: 'Reduces direct costs to users by funding the program through property taxes instead of separate fees',
         curbsideImpactSummary: 'Because street parking is free, more vehicles park on the street.',
         benefitText: 'People can use the program without paying separate parking fees, reducing the direct cost of access.',
-        costText: 'Program costs are shared through property taxes, including by people who do not use the parking.'
+        costText: 'Costs are covered by all residents through property taxes, including by people who do not use the program.'
       };
     }
     return {
@@ -647,8 +647,8 @@ export function getQuestionTradeoffImpact(
         deltaStallsText: '-2.0 stalls (-13%)',
         deltaStallsValue: -2.0,
         tradeoffRationale: 'Reduces competition for street parking to improve availability for other residents and visitors',
-        curbsideImpactSummary: 'Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.',
-        benefitText: 'Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.',
+        curbsideImpactSummary: 'Limiting permits can reduce competition for street parking, improving availability for other residents and visitors.',
+        benefitText: 'Limiting permits can reduce competition for street parking, improving availability for other residents and visitors.',
         costText: 'Households with more vehicles than permits would need other parking arrangements, which may be difficult if they have limited or no private parking'
       };
     }
@@ -763,7 +763,7 @@ export function getQuestionTradeoffImpact(
         questionNumber: 6,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Yes households with no private parking should get priority for permits',
+        selectedOptionLabel: selectedOption?.label || 'Yes, housing types with no private parking should get priority for permits',
         deltaStallsText: '-3.5 stalls (-22%)',
         deltaStallsValue: -3.5,
         tradeoffRationale: 'Prioritizes street parking permits for households with no private off-street parking options',
@@ -777,7 +777,7 @@ export function getQuestionTradeoffImpact(
         questionNumber: 6,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'No, households should have the same eligibility, whether or not they have private parking.',
+        selectedOptionLabel: selectedOption?.label || 'No, all housing types should have the same eligibility, whether or not they have private parking.',
         deltaStallsText: '+3.5 stalls (+22%)',
         deltaStallsValue: 3.5,
         tradeoffRationale: 'Ensures equal permit eligibility for all households regardless of private parking availability',

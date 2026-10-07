@@ -295,13 +295,13 @@ export default function App() {
       // Step 7: Location question (Postal code / neighbourhood / opt-out)
       else if (currentQuestion.type === 'text' || currentQuestion.id === 'q7') {
         if (!answer) {
-          setValidationErrorMsg('Please enter your postal code or neighbourhood.');
+          setValidationErrorMsg('Please enter your postal code or select the opt-out checkbox.');
           setShowValidationError(true);
           return;
         }
         const valResult = validatePostalCode(answer);
         if (!valResult.isValid) {
-          setValidationErrorMsg(valResult.message || 'Please enter a valid Edmonton postal code or neighbourhood.');
+          setValidationErrorMsg(valResult.message || 'Please enter your postal code or select the opt-out checkbox.');
           setShowValidationError(true);
           return;
         }

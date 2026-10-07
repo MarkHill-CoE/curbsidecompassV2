@@ -3416,7 +3416,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q1_category",
     "category": "Question 1 of 6",
     "container": "Policy Category Badge",
-    "defaultText": "Residential Parking Permit Program Funding",
+    "defaultText": "Funding",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3430,7 +3430,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q1_option_a",
     "category": "Question 1 of 6",
     "container": "Option A Choice",
-    "defaultText": "People who use parking through pay-per-use fees and parking permits.",
+    "defaultText": "People who use parking through fees and parking permits",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3514,7 +3514,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q3_category",
     "category": "Question 3 of 6",
     "container": "Policy Category Badge",
-    "defaultText": "Residential Parking Permit Limit",
+    "defaultText": "Permit Limit",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3619,7 +3619,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q5_question",
     "category": "Question 5 of 6",
     "container": "Question Card",
-    "defaultText": "When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking (within a few blocks)?",
+    "defaultText": "When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking?",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3668,21 +3668,21 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q6_question",
     "category": "Question 6 of 6",
     "container": "Question Card",
-    "defaultText": "Should access to private parking affect who can get a permit? Consider all households, including those in houses, townhomes and apartments. Private parking means a driveway, garage or other off-street parking space.",
+    "defaultText": "Should access to private parking affect who can get a permit? Consider all housing types, including those in single-family homes, townhomes and apartments. Private parking can mean a driveway, garage or other off-street parking space.",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q6_option_a",
     "category": "Question 6 of 6",
     "container": "Option A Choice",
-    "defaultText": "Yes households with no private parking should get priority for permits",
+    "defaultText": "Yes, housing types with no private parking should get priority for permits",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q6_option_b",
     "category": "Question 6 of 6",
     "container": "Option B Choice",
-    "defaultText": "No, households should have the same eligibility, whether or not they have private parking.",
+    "defaultText": "No, all housing types should have the same eligibility, whether or not they have private parking.",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3717,7 +3717,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q7_question",
     "category": "Question 7 of 9",
     "container": "Question Card",
-    "defaultText": "How would you manage accessible parking zones during events?",
+    "defaultText": "Enter your full postal code or first three characters of your postal code.",
     "guidance": "Survey policy tradeoff content"
   },
   {

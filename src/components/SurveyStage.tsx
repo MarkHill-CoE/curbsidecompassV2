@@ -130,7 +130,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       icon: '🏘️',
       title: 'Multiple Homes on Smaller Lots',
       era: 'Post-2015 Redeveloping',
-      tag: 'Subdivided lots • Narrow skinny duplexes & garden suites',
+      tag: 'More households sharing the block; private parking varies',
       stalls: getStreetLayoutInfo('infill_skinny').curbsideCapacity,
       desc: 'Garneau, Oliver (Wîhkwêntôwin), Downtown, Queen Alex, McKernan'
     },
@@ -139,7 +139,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       icon: '🚗',
       title: 'Homes with Front Driveways',
       era: '1980s–2000s Subdivisions',
-      tag: 'Attached garages • Unmarked road (35–55 km/h) • Driveways (10+ stalls)',
+      tag: 'Driveways cross the curb to reach private parking',
       stalls: getStreetLayoutInfo('suburban_front_driveway').curbsideCapacity,
       desc: 'Mill Woods, Callingwood, Riverbend, Castledowns, Blue Quill'
     },
@@ -148,7 +148,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       icon: '🏢',
       title: 'Townhomes',
       era: '2020s City Plan Developing',
-      tag: 'Dense townhomes • Rear garage lane • Pocket parking bays',
+      tag: 'Homes grouped together; private parking arrangements vary',
       stalls: getStreetLayoutInfo('contemporary_townhomes').curbsideCapacity,
       desc: 'Griesbach, Blatchford, Windermere, Chappelle, Laurel, Secord'
     }
@@ -298,7 +298,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
               {isModelStreetStep
                 ? t('q0_question', 'Choose an example street - select a layout you’d like to explore')
                 : isLocationStep
-                ? t('q7_question', 'Choose your model neighbourhood.')
+                ? t('q7_question', 'Enter your full postal code or first three characters of your postal code.')
                 : t(`q${currentQuestion.number}_question`, currentQuestion.text)}
             </h4>
 
@@ -367,7 +367,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             {isLocationStep && (
               <div className="w-full flex flex-col gap-2 pt-0.5">
                 <label htmlFor="location-smart-input" className="block text-xs sm:text-sm font-semibold text-[#193A5A] leading-snug">
-                  {t('q7_helper', 'Search your neighbourhood or enter a postal code to record your location:')}
+                  {t('q7_helper', 'Enter your full postal code or first three characters of your postal code:')}
                 </label>
 
                 {/* Single Smart Unified Search Input with explicit 48px touch target */}
@@ -409,7 +409,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       type="text"
                       id="location-smart-input"
                       disabled={currentAnswer === 'OPT_OUT'}
-                      placeholder={t('q7_placeholder', 'Postal code (e.g. T5J 2R7, T5A) or neighbourhood (e.g. Belvedere)...')}
+                      placeholder={currentAnswer === 'OPT_OUT' ? t('postal_opt_out_placeholder', 'Postal code opted out') : t('q7_placeholder', 'Postal code (e.g. T5J 2R7 or T5J)...')}
                       value={currentAnswer === 'OPT_OUT' ? '' : locationInput}
                       onChange={(e) => handleLocationInputChange(e.target.value)}
                       onFocus={() => {
@@ -425,14 +425,16 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                           onNavigate(1);
                         }
                       }}
-                      className={`w-full pl-3.5 sm:pl-4 pr-16 py-2 sm:py-2.5 bg-white border-2 rounded-lg text-sm sm:text-base font-semibold placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-all min-h-[46px] shadow-2xs ${
-                        inputIntent.type === 'fsa' && inputIntent.isValid
-                          ? 'border-emerald-500 text-emerald-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20'
+                      className={`w-full pl-3.5 sm:pl-4 pr-16 py-2 sm:py-2.5 border-2 rounded-lg text-sm sm:text-base font-semibold placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-all min-h-[46px] shadow-2xs ${
+                        currentAnswer === 'OPT_OUT'
+                          ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed'
+                          : inputIntent.type === 'fsa' && inputIntent.isValid
+                          ? 'bg-white border-emerald-500 text-emerald-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20'
                           : inputIntent.type === 'postal_code' && inputIntent.isValid
-                          ? 'border-[#004B8D] text-[#004B8D] focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20'
-                          : 'border-gray-300 text-gray-900 focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20'
+                          ? 'bg-white border-[#004B8D] text-[#004B8D] focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20'
+                          : 'bg-white border-gray-300 text-gray-900 focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20'
                       }`}
-                      aria-label={t('survey_location_input_aria', 'Edmonton postal code or neighbourhood')}
+                      aria-label={t('survey_location_input_aria', 'Edmonton postal code')}
                       aria-autocomplete="list"
                     />
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
@@ -479,6 +481,45 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     </div>
                   )}
                 </div>
+
+                {/* Postal Code Opt-Out Checkbox */}
+                <div className="pt-0.5 pb-0.5">
+                  <label
+                    htmlFor="postal-code-opt-out-checkbox"
+                    className="inline-flex items-center gap-2 cursor-pointer py-1 text-xs sm:text-sm font-medium text-gray-700 select-none hover:text-[#004B8D] transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      id="postal-code-opt-out-checkbox"
+                      name="postalCodeOptOut"
+                      checked={currentAnswer === 'OPT_OUT'}
+                      onChange={(e) => {
+                        triggerFeedback('button');
+                        if (e.target.checked) {
+                          setLocationInput('');
+                          setSelectedDisambiguation(null);
+                          setShowDropdown(false);
+                          onSelectOption(currentQuestion.id, 'OPT_OUT');
+                          onLayoutChange?.(currentStreetLayout, undefined, 'OPT_OUT');
+                        } else {
+                          onSelectOption(currentQuestion.id, '');
+                        }
+                      }}
+                      className="w-4 h-4 rounded border-gray-300 text-[#004B8D] focus:ring-[#004B8D] cursor-pointer accent-[#004B8D]"
+                    />
+                    <span>
+                      {t('postal_code_opt_out', 'I prefer not to provide my postal code')}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Opt-out confirmation banner when checked */}
+                {currentAnswer === 'OPT_OUT' && (
+                  <div className="flex items-center gap-2 p-2.5 rounded-lg bg-gray-50 border border-gray-200 text-xs text-gray-600 font-medium">
+                    <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+                    <span>Postal code opted out. You can proceed with the survey and all your responses will remain anonymous.</span>
+                  </div>
+                )}
 
                 {/* Multi-neighbourhood Disambiguation Follow-up (e.g. T5A 0B4 spans Industrial Heights & Kennedale Industrial) */}
                 {detectedLocation?.multipleNeighbourhoods && detectedLocation.multipleNeighbourhoods.length > 1 && currentAnswer !== 'OPT_OUT' && (
@@ -535,11 +576,6 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                           <span className="truncate">{selectedDisambiguation || detectedLocation.neighbourhood}</span>
                         </div>
                       )}
-
-                      {/* Postal Code or FSA Tag */}
-                      <span className="text-[10px] font-semibold text-[#004B8D] bg-[#004B8D]/10 px-1.5 py-0.5 rounded shrink-0">
-                        {detectedLocation.displayCode ? `Postal Code: ${detectedLocation.displayCode}` : `FSA: ${detectedLocation.postalFSA}`}
-                      </span>
 
                       {/* Ward */}
                       {detectedLocation.ward && (
@@ -664,7 +700,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     </div>
                     <div className="px-2 py-1.5">
                       <p className="text-[12pt] font-normal leading-tight text-emerald-950">
-                        {tradeoffOutcome?.benefitText || tradeoffOutcome?.curbsideImpactSummary}
+                        {currentAnswer ? t(`q${currentQuestion.number}_gain_${currentAnswer.slice(-1)}`, tradeoffOutcome?.benefitText || tradeoffOutcome?.curbsideImpactSummary || '') : (tradeoffOutcome?.benefitText || tradeoffOutcome?.curbsideImpactSummary || '')}
                       </p>
                     </div>
                   </div>
@@ -679,7 +715,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     </div>
                     <div className="px-2 py-1.5">
                       <p className="text-[12pt] font-normal leading-tight text-amber-950">
-                        {tradeoffOutcome?.costText || tradeoffOutcome?.tradeoffRationale}
+                        {currentAnswer ? t(`q${currentQuestion.number}_cost_${currentAnswer.slice(-1)}`, tradeoffOutcome?.costText || tradeoffOutcome?.tradeoffRationale || '') : (tradeoffOutcome?.costText || tradeoffOutcome?.tradeoffRationale || '')}
                       </p>
                     </div>
                   </div>
@@ -704,7 +740,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             className="text-xs sm:text-sm text-[#E8552D] bg-[#E8552D]/10 border border-[#E8552D]/30 px-3 py-1.5 rounded-md font-semibold flex items-center gap-2 animate-pulse"
           >
             <span className="w-2 h-2 rounded-full bg-[#E8552D] flex-shrink-0" aria-hidden="true" />
-            {validationErrorMsg || (isLocationStep ? t('nav_alert_postal_format', 'Please enter your postal code, neighbourhood, or select "Prefer not to share location".') : t('nav_alert_select_option', 'Please select an option to advance.'))}
+            {validationErrorMsg || (isLocationStep ? t('nav_alert_postal_format', 'Please enter your postal code or select the opt-out checkbox.') : t('nav_alert_select_option', 'Please select an option to advance.'))}
           </div>
         )}
 
