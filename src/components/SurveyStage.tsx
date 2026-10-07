@@ -9,7 +9,9 @@ import {
   Search,
   Check,
   Sparkles,
-  X
+  X,
+  AlertCircle,
+  Building2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { triggerFeedback } from '../utils/feedback';
@@ -21,7 +23,11 @@ import {
   searchNeighbourhoods,
   EdmontonNeighbourhood
 } from '../data/edmontonNeighbourhoods';
-import { resolveLocationOrPredictiveAddress } from '../data/edmontonPostalData';
+import { 
+  resolveLocationOrPredictiveAddress, 
+  classifyInputIntent, 
+  MultiNeighbourhoodOption 
+} from '../data/edmontonPostalData';
 
 interface SurveyStageProps {
   questions: SurveyQuestion[];
@@ -77,24 +83,30 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-2 gap-1 sm:gap-1.5 md:gap-2 w-full';
   }
 
-  const [neighbourhoodQuery, setNeighbourhoodQuery] = useState<string>(() => currentNeighbourhoodName || '');
-  const [postalInput, setPostalInput] = useState<string>(() => {
-    if (currentAnswer && currentAnswer !== 'OPT_OUT' && /^[A-Z0-9\s-]+$/i.test(currentAnswer) && currentAnswer.length <= 8 && /\d/.test(currentAnswer)) {
-      return currentAnswer;
-    }
+  const [locationInput, setLocationInput] = useState<string>(() => {
+    if (currentAnswer && currentAnswer !== 'OPT_OUT') return currentAnswer;
+    if (currentNeighbourhoodName) return currentNeighbourhoodName;
     return '';
   });
+  const [selectedDisambiguation, setSelectedDisambiguation] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const filteredNeighbourhoods = useMemo(() => {
-    return searchNeighbourhoods(neighbourhoodQuery, 8);
-  }, [neighbourhoodQuery]);
+  // Input Intent Recognition
+  const inputIntent = useMemo(() => {
+    return classifyInputIntent(locationInput);
+  }, [locationInput]);
 
+  // Autocomplete suggestions: SUPPRESSED if input is FSA or Full Postal Code
+  const filteredNeighbourhoods = useMemo(() => {
+    if (inputIntent.type !== 'neighbourhood') return [];
+    return searchNeighbourhoods(locationInput, 8);
+  }, [inputIntent.type, locationInput]);
+
+  // POSSE dataset location resolution
   const detectedLocation = useMemo(() => {
-    const input = postalInput || neighbourhoodQuery;
-    if (!input || input === 'OPT_OUT') return null;
-    return resolveLocationOrPredictiveAddress(input);
-  }, [postalInput, neighbourhoodQuery]);
+    if (!locationInput || locationInput === 'OPT_OUT') return null;
+    return resolveLocationOrPredictiveAddress(locationInput);
+  }, [locationInput]);
 
   const streetModelOptions: Array<{
     id: StreetLayoutTypology;
@@ -145,42 +157,66 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
 
   // Location input handlers - preserve user's chosen street model
   const handleLocationInputChange = (rawVal: string) => {
-    const trimmed = rawVal.trim();
-    const isPostalCandidate = /^[A-Z0-9\s-]+$/i.test(trimmed) && (/\d/.test(trimmed) || (trimmed.length <= 3 && /^T[0-9]?[A-Z]?$/i.test(trimmed)));
+    setLocationInput(rawVal);
+    setSelectedDisambiguation(null);
+    const intent = classifyInputIntent(rawVal);
 
-    if (isPostalCandidate) {
-      const sanitized = rawVal.toUpperCase().replace(/[^A-Z0-9\s-]/g, '').slice(0, 8);
-      setPostalInput(sanitized);
-      const detection = detectLayoutAndNeighbourhood(sanitized);
-      if (detection.neighbourhood) {
-        setNeighbourhoodQuery(detection.neighbourhood.name);
+    if (intent.type === 'fsa') {
+      // Pattern 1: FSA (3-Character Alpha-Numeric, e.g., T5A)
+      // Action: Validate against the FSA list. Suppress and hide the autocomplete dropdown (do NOT display neighbourhood suggestions).
+      // Store the value as a valid region-level FSA location.
+      setShowDropdown(false);
+      onSelectOption(currentQuestion.id, intent.fsa);
+      if (intent.isValid && intent.fsaData) {
+        onLayoutChange?.(intent.fsaData.typology, intent.fsaData.name, intent.fsa);
       }
-      onSelectOption(currentQuestion.id, sanitized);
+    } else if (intent.type === 'postal_code') {
+      // Pattern 2: Full Postal Code (6-Character Alpha-Numeric, e.g., T5A0A1 or T5A 0A1)
+      // Action: Query full postal code table. Instantly resolve and auto-select exact associated Neighbourhood Name, POSSE Ward, and Classification.
+      setShowDropdown(false);
+      onSelectOption(currentQuestion.id, intent.formatted);
+      const detection = resolveLocationOrPredictiveAddress(intent.code);
+      if (detection) {
+        onLayoutChange?.(detection.typology, detection.neighbourhood, intent.formatted);
+      }
     } else {
-      setNeighbourhoodQuery(rawVal);
-      setShowDropdown(true);
-      const detection = detectLayoutAndNeighbourhood(rawVal);
-      if (detection.neighbourhood?.postalFSA?.[0]) {
-        setPostalInput(`${detection.neighbourhood.postalFSA[0]} `);
+      // Pattern 3: Neighbourhood Name Search (Text Input, e.g., "Belv..." or "Downtown")
+      // Action: Display autocomplete dropdown menu listing matching neighbourhood names.
+      if (rawVal.trim().length > 0) {
+        setShowDropdown(true);
+      } else {
+        setShowDropdown(false);
       }
       onSelectOption(currentQuestion.id, rawVal);
+      const detection = resolveLocationOrPredictiveAddress(rawVal);
+      if (detection) {
+        onLayoutChange?.(detection.typology, detection.neighbourhood, detection.postalFSA);
+      }
     }
   };
 
   const handleSelectNeighbourhood = (n: EdmontonNeighbourhood) => {
     triggerFeedback('choice');
-    setNeighbourhoodQuery(n.name);
+    setLocationInput(n.name);
     setShowDropdown(false);
-    if (n.postalFSA?.[0] && !postalInput) {
-      setPostalInput(`${n.postalFSA[0]} `);
-    }
+    setSelectedDisambiguation(null);
     onSelectOption(currentQuestion.id, n.name);
+    onLayoutChange?.(n.typology, n.name, n.postalFSA?.[0]);
+  };
+
+  const handleSelectDisambiguation = (opt: MultiNeighbourhoodOption) => {
+    triggerFeedback('choice');
+    setSelectedDisambiguation(opt.name);
+    const detection = resolveLocationOrPredictiveAddress(opt.name);
+    if (detection) {
+      onLayoutChange?.(detection.typology, opt.name, detectedLocation?.postalFSA);
+    }
   };
 
   const handleSelectStreetModel = (layoutId: StreetLayoutTypology) => {
     triggerFeedback('choice');
     onSelectOption('q0', layoutId);
-    onLayoutChange?.(layoutId, neighbourhoodQuery, postalInput);
+    onLayoutChange?.(layoutId, detectedLocation?.neighbourhood || locationInput, detectedLocation?.postalFSA);
   };
 
   // Step header title and category
@@ -410,6 +446,38 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
 
                 {/* Single Smart Unified Search Input with explicit 48px touch target */}
                 <div className="relative flex flex-col gap-1 w-full">
+                  {/* Mode Indicator Pill when typing */}
+                  {locationInput && currentAnswer !== 'OPT_OUT' && (
+                    <div className="flex items-center justify-between text-[11px] font-semibold px-0.5">
+                      <div className="flex items-center gap-1.5">
+                        {inputIntent.type === 'fsa' && (
+                          <span className={`px-2 py-0.5 rounded-full flex items-center gap-1 ${inputIntent.isValid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                            <span>📮</span>
+                            <span>Forward Sortation Area (FSA)</span>
+                            <span className="font-normal opacity-75">• Dropdown suppressed</span>
+                          </span>
+                        )}
+                        {inputIntent.type === 'postal_code' && (
+                          <span className="px-2 py-0.5 rounded-full bg-blue-100 text-[#004B8D] flex items-center gap-1">
+                            <span>📮</span>
+                            <span>Exact 6-Character Postal Code</span>
+                          </span>
+                        )}
+                        {inputIntent.type === 'neighbourhood' && (
+                          <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-800 flex items-center gap-1">
+                            <span>📍</span>
+                            <span>Neighbourhood Text Search</span>
+                          </span>
+                        )}
+                      </div>
+                      {inputIntent.type === 'fsa' && inputIntent.isValid && (
+                        <span className="text-[10px] text-emerald-700 font-medium hidden xs:inline">
+                          ✓ Valid Edmonton FSA ({inputIntent.fsaData?.ward} Ward)
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   <div className="relative">
                     <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                       <Search className="w-5 h-5 text-[#004B8D]" />
@@ -418,10 +486,14 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       type="text"
                       id="location-smart-input"
                       disabled={currentAnswer === 'OPT_OUT'}
-                      placeholder={t('q7_placeholder', 'Postal code (e.g. T5J 2R7) or neighbourhood...')}
-                      value={currentAnswer === 'OPT_OUT' ? '' : (postalInput || neighbourhoodQuery)}
+                      placeholder={t('q7_placeholder', 'Postal code (e.g. T5J 2R7, T5A) or neighbourhood (e.g. Belvedere)...')}
+                      value={currentAnswer === 'OPT_OUT' ? '' : locationInput}
                       onChange={(e) => handleLocationInputChange(e.target.value)}
-                      onFocus={() => setShowDropdown(true)}
+                      onFocus={() => {
+                        if (inputIntent.type === 'neighbourhood' && locationInput.trim().length > 0) {
+                          setShowDropdown(true);
+                        }
+                      }}
                       onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
@@ -430,15 +502,23 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                           onNavigate(1);
                         }
                       }}
-                      className="w-full pl-10 pr-9 py-2 sm:py-2.5 bg-white border-2 border-gray-300 rounded-lg text-sm sm:text-base font-semibold text-[#004B8D] placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20 transition-all min-h-[44px] shadow-2xs"
+                      className={`w-full pl-10 pr-9 py-2 sm:py-2.5 bg-white border-2 rounded-lg text-sm sm:text-base font-semibold placeholder:text-gray-400 placeholder:font-normal focus:outline-none transition-all min-h-[46px] shadow-2xs ${
+                        inputIntent.type === 'fsa' && inputIntent.isValid
+                          ? 'border-emerald-500 text-emerald-900 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20'
+                          : inputIntent.type === 'postal_code' && inputIntent.isValid
+                          ? 'border-[#004B8D] text-[#004B8D] focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20'
+                          : 'border-gray-300 text-gray-900 focus:border-[#004B8D] focus:ring-2 focus:ring-[#004B8D]/20'
+                      }`}
                       aria-label={t('survey_location_input_aria', 'Edmonton postal code or neighbourhood')}
+                      aria-autocomplete="list"
                     />
-                    {(postalInput || neighbourhoodQuery) && currentAnswer !== 'OPT_OUT' && (
+                    {locationInput && currentAnswer !== 'OPT_OUT' && (
                       <button
                         type="button"
                         onClick={() => {
-                          setPostalInput('');
-                          setNeighbourhoodQuery('');
+                          setLocationInput('');
+                          setSelectedDisambiguation(null);
+                          setShowDropdown(false);
                           onSelectOption(currentQuestion.id, '');
                         }}
                         className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1.5 cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -449,19 +529,27 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     )}
                   </div>
 
-                  {/* Autocomplete Dropdown with first 3 characters of postal code (FSA) */}
-                  {showDropdown && filteredNeighbourhoods.length > 0 && currentAnswer !== 'OPT_OUT' && (
-                    <div className="absolute top-[44px] left-0 right-0 z-30 bg-white border border-[#004B8D]/40 rounded-lg shadow-xl overflow-hidden max-h-40 overflow-y-auto">
+                  {/* Autocomplete Dropdown: strictly for Neighbourhood search (Pattern 3), NEVER for FSA (Pattern 1) */}
+                  {showDropdown && filteredNeighbourhoods.length > 0 && currentAnswer !== 'OPT_OUT' && inputIntent.type === 'neighbourhood' && (
+                    <div className="absolute top-[48px] left-0 right-0 z-30 bg-white border border-[#004B8D]/40 rounded-lg shadow-xl overflow-hidden max-h-48 overflow-y-auto divide-y divide-gray-100">
                       {filteredNeighbourhoods.map((n) => (
                         <button
                           key={n.name}
                           type="button"
                           onMouseDown={() => handleSelectNeighbourhood(n)}
-                          className="w-full text-left px-3 py-1.5 hover:bg-[#004B8D]/10 flex items-center justify-between text-xs border-b border-gray-100 last:border-b-0 cursor-pointer"
+                          className="w-full text-left px-3 py-2 hover:bg-[#004B8D]/10 flex items-center justify-between text-xs cursor-pointer transition-colors"
                         >
-                          <span className="font-bold text-gray-800">{n.name}</span>
+                          <div className="flex items-center gap-1.5 truncate">
+                            <MapPin className="w-3.5 h-3.5 text-[#004B8D] shrink-0" />
+                            <span className="font-bold text-gray-800">{n.name}</span>
+                            {n.ward && (
+                              <span className="text-[10px] text-gray-500 font-medium">
+                                ({n.ward} Ward • {n.classification || 'Redeveloping'})
+                              </span>
+                            )}
+                          </div>
                           {n.postalFSA?.[0] && (
-                            <span className="text-[10px] text-[#004B8D] font-bold bg-[#004B8D]/10 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] text-[#004B8D] font-bold bg-[#004B8D]/10 px-1.5 py-0.5 rounded shrink-0 ml-1.5">
                               {n.postalFSA[0]}
                             </span>
                           )}
@@ -471,28 +559,106 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                   )}
                 </div>
 
-                {/* Identified Neighbourhood & Postal Code feedback */}
+                {/* Multi-neighbourhood Disambiguation Follow-up (e.g. T5A 0B4 spans Industrial Heights & Kennedale Industrial) */}
+                {detectedLocation?.multipleNeighbourhoods && detectedLocation.multipleNeighbourhoods.length > 1 && currentAnswer !== 'OPT_OUT' && (
+                  <div className="p-2.5 rounded-lg bg-amber-50/90 border border-amber-200 text-xs shadow-2xs">
+                    <div className="flex items-start gap-1.5 text-amber-900 font-semibold mb-1.5">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div>
+                        <span>Postal code {detectedLocation.displayCode || detectedLocation.postalFSA} spans multiple neighbourhoods.</span>
+                        <div className="text-[11px] font-normal text-amber-800">
+                          Please select your exact neighbourhood to ensure accurate local planning data:
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5 pl-5">
+                      {detectedLocation.multipleNeighbourhoods.map((opt) => {
+                        const isChosen = (selectedDisambiguation || detectedLocation.neighbourhood) === opt.name;
+                        return (
+                          <button
+                            key={opt.name}
+                            type="button"
+                            onClick={() => handleSelectDisambiguation(opt)}
+                            className={`px-2.5 py-1 rounded-md text-xs font-semibold cursor-pointer transition-all flex items-center gap-1.5 ${
+                              isChosen
+                                ? 'bg-[#004B8D] text-white shadow-xs'
+                                : 'bg-white text-gray-800 border border-amber-300 hover:bg-amber-100'
+                            }`}
+                          >
+                            <span>{opt.name}</span>
+                            <span className={`text-[10px] px-1 py-0.2 rounded ${isChosen ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-600'}`}>
+                              {opt.ward} Ward • {opt.classification}
+                            </span>
+                            {isChosen && <Check className="w-3 h-3 text-white ml-0.5" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Identified Neighbourhood & Postal Code feedback with POSSE Ward and Classification */}
                 {detectedLocation && currentAnswer !== 'OPT_OUT' && (
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-[#004B8D]/5 border border-[#004B8D]/20 text-xs shadow-2xs">
-                    <div className="flex items-center gap-1.5 truncate">
-                      <MapPin className="w-3.5 h-3.5 text-[#004B8D] shrink-0" />
-                      <span className="font-bold text-[#004B8D] truncate">
-                        {detectedLocation.neighbourhood}
-                      </span>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-2.5 rounded-lg bg-[#004B8D]/5 border border-[#004B8D]/20 text-xs shadow-2xs gap-1.5 sm:gap-2">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      {detectedLocation.isFsaOnly ? (
+                        <div className="flex items-center gap-1.5 font-bold text-[#004B8D]">
+                          <Building2 className="w-4 h-4 shrink-0 text-[#004B8D]" />
+                          <span>FSA Region: {detectedLocation.postalFSA}</span>
+                          <span className="text-gray-400 font-normal">|</span>
+                          <span className="text-gray-700 font-medium truncate">{detectedLocation.neighbourhood}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 font-bold text-[#004B8D]">
+                          <MapPin className="w-4 h-4 shrink-0 text-[#004B8D]" />
+                          <span className="truncate">{selectedDisambiguation || detectedLocation.neighbourhood}</span>
+                        </div>
+                      )}
+
+                      {/* Postal Code or FSA Tag */}
                       <span className="text-[10px] font-semibold text-[#004B8D] bg-[#004B8D]/10 px-1.5 py-0.5 rounded shrink-0">
-                        Postal Code: {detectedLocation.postalFSA}
+                        {detectedLocation.displayCode ? `Postal Code: ${detectedLocation.displayCode}` : `FSA: ${detectedLocation.postalFSA}`}
                       </span>
+
+                      {/* POSSE Ward */}
                       {detectedLocation.ward && (
-                        <span className="text-[10px] text-gray-500 truncate hidden xs:inline">
-                          • Ward {detectedLocation.ward}
+                        <span className="text-[10px] font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">
+                          Ward {detectedLocation.ward}
+                        </span>
+                      )}
+
+                      {/* POSSE Classification */}
+                      {detectedLocation.classification && (
+                        <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${
+                          detectedLocation.classification === 'Redeveloping'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : detectedLocation.classification === 'Developing'
+                            ? 'bg-blue-100 text-blue-800'
+                            : detectedLocation.classification === 'Industrial'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-teal-100 text-teal-800'
+                        }`}>
+                          POSSE: {detectedLocation.classification}
                         </span>
                       )}
                     </div>
-                    {detectedLocation.matchedBy === 'predictive_spelling' && (
-                      <span className="text-[10px] text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded font-medium shrink-0">
-                        Auto-corrected
-                      </span>
-                    )}
+
+                    <div className="flex items-center gap-1.5 shrink-0 text-[10px]">
+                      {detectedLocation.isFsaOnly ? (
+                        <span className="text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded font-medium">
+                          Region-level FSA Location
+                        </span>
+                      ) : detectedLocation.matchedBy === 'predictive_spelling' ? (
+                        <span className="text-amber-700 bg-amber-100/80 px-1.5 py-0.5 rounded font-medium">
+                          Auto-corrected
+                        </span>
+                      ) : (
+                        <span className="text-emerald-700 font-medium flex items-center gap-1">
+                          <Check className="w-3 h-3 text-emerald-600" />
+                          Resolved
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
 
@@ -506,8 +672,9 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                         triggerFeedback('choice');
                         const checked = e.target.checked;
                         if (checked) {
-                          setPostalInput('');
-                          setNeighbourhoodQuery('');
+                          setLocationInput('');
+                          setSelectedDisambiguation(null);
+                          setShowDropdown(false);
                           onSelectOption(currentQuestion.id, 'OPT_OUT');
                         } else {
                           onSelectOption(currentQuestion.id, '');

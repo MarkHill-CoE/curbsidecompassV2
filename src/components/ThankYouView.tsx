@@ -99,7 +99,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
 
   const curbsideSocialImg = '/CurbsideCompass_Social_Media_IMG.jpg';
 
-  const defaultAppUrl = 'https://ais-dev-j7ghsp42y77c6djfbgfkd5-460515158127.us-east1.run.app';
+  const defaultAppUrl = 'https://curbsidecompass-v-2.replit.app/';
   const shareUrl = typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null' 
     ? window.location.origin 
     : defaultAppUrl;

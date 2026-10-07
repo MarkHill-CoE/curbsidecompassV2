@@ -84,11 +84,41 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
   {
     id: 'q2',
     number: 2,
+    category: 'Parking Proximity to Home',
+    text: 'When parking on the street near your home, what would you consider reasonably close?',
+    options: [
+      {
+        id: 'q2_a',
+        label: 'On my block',
+        x: 4,
+        y: 0,
+        hint: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
+        simEffects: {
+          curbsideFeeModel: 'permit',
+          enforcementLevel: 'strict'
+        }
+      },
+      {
+        id: 'q2_b',
+        label: 'Within two or three blocks',
+        x: -4,
+        y: 0,
+        hint: 'Increases available parking options by extending acceptable parking distance into the wider neighbourhood.',
+        simEffects: {
+          curbsideFeeModel: 'free',
+          enforcementLevel: 'standard'
+        }
+      }
+    ]
+  },
+  {
+    id: 'q3',
+    number: 3,
     category: 'Residential Parking Permit Limit',
     text: 'In neighbourhoods where street parking is in high demand, should there be a limit on parking permits per household?',
     options: [
       {
-        id: 'q2_a',
+        id: 'q3_a',
         label: 'Yes',
         x: 0,
         y: -3,
@@ -99,7 +129,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         }
       },
       {
-        id: 'q2_b',
+        id: 'q3_b',
         label: 'No',
         x: 0,
         y: 3,
@@ -112,13 +142,13 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     ]
   },
   {
-    id: 'q3',
-    number: 3,
+    id: 'q4',
+    number: 4,
     category: 'Visitor Access',
     text: 'When street parking is in high demand, should visitors and service providers (e.g., cleaners and contractors) have the same opportunity as residents to park on the block they are visiting?',
     options: [
       {
-        id: 'q3_a',
+        id: 'q4_a',
         label: 'Yes',
         x: 2,
         y: -2,
@@ -129,7 +159,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         }
       },
       {
-        id: 'q3_b',
+        id: 'q4_b',
         label: 'No',
         x: -2,
         y: 2,
@@ -142,13 +172,13 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     ]
   },
   {
-    id: 'q4',
-    number: 4,
+    id: 'q5',
+    number: 5,
     category: 'Parking Proximity to Destination',
     text: 'When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking (within a few blocks)?',
     options: [
       {
-        id: 'q4_a',
+        id: 'q5_a',
         label: 'Yes',
         x: 3,
         y: -3,
@@ -159,7 +189,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         }
       },
       {
-        id: 'q4_b',
+        id: 'q5_b',
         label: 'No',
         x: -3,
         y: 3,
@@ -167,36 +197,6 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         simEffects: {
           visitorPassesPerHome: 0.75,
           enforcementLevel: 'lenient'
-        }
-      }
-    ]
-  },
-  {
-    id: 'q5',
-    number: 5,
-    category: 'Parking Proximity to Home',
-    text: 'When parking on the street near your home, what would you consider reasonably close?',
-    options: [
-      {
-        id: 'q5_a',
-        label: 'On my Block',
-        x: 4,
-        y: 0,
-        hint: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
-        simEffects: {
-          curbsideFeeModel: 'permit',
-          enforcementLevel: 'strict'
-        }
-      },
-      {
-        id: 'q5_b',
-        label: 'More possible spaces fall within the distance you consider acceptable.',
-        x: -4,
-        y: 0,
-        hint: 'Increases available parking options by extending acceptable parking distance into the wider neighbourhood.',
-        simEffects: {
-          curbsideFeeModel: 'free',
-          enforcementLevel: 'standard'
         }
       }
     ]
@@ -290,10 +290,10 @@ export function calculateSimulationMetricsFromAnswers(
   const curbsideStallsCapacity = hasProtectedBikeLane ? 0 : baseCurbsideCapacity;
 
   // Household Cars:
-  // Baseline cars per home (~2.0, modified by q2 unlimited permits)
+  // Baseline cars per home (~2.0, modified by q3 unlimited permits - formerly q2)
   let baseCarsPerHome = 2.0;
-  if (answers['q2'] === 'q2_b') baseCarsPerHome += 0.33;
-  if (answers['q2'] === 'q2_a') baseCarsPerHome -= 0.17;
+  if (answers['q3'] === 'q3_b') baseCarsPerHome += 0.33;
+  if (answers['q3'] === 'q3_a') baseCarsPerHome -= 0.17;
 
   const householdCarsPerHome = overrides.householdCarsPerHome !== undefined
     ? overrides.householdCarsPerHome
@@ -321,8 +321,8 @@ export function calculateSimulationMetricsFromAnswers(
   const residentCurbConvenience = drivewayCap === 0 ? 0 : Math.min(Math.round(householdCars * 0.08), Math.round(curbsideStallsCapacity * 0.25));
   const residentCurbsideDemand = residentCurbOverflow + residentCurbConvenience;
 
-  // Visitor passes and visitor cars:
-  const baseVisitorPasses = answers['q4'] === 'q4_b' ? (8 / 12) : (answers['q4'] === 'q4_a' ? (3 / 12) : (4 / 12));
+  // Visitor passes and visitor cars: (Q5 Parking Proximity to Destination - formerly q4)
+  const baseVisitorPasses = answers['q5'] === 'q5_b' ? (8 / 12) : (answers['q5'] === 'q5_a' ? (3 / 12) : (4 / 12));
   const visitorPassesPerHome = overrides.visitorPassesPerHome !== undefined
     ? overrides.visitorPassesPerHome
     : baseVisitorPasses;
@@ -331,11 +331,11 @@ export function calculateSimulationMetricsFromAnswers(
   // Visitors park on the street
   const visitorCurbsideDemand = visitorDemand;
 
-  // Deliveries: For every three 8-plexes, increase weekly deliveries to 2.0+
+  // Deliveries: (Q4 Visitor Access - formerly q3)
   const numThree8PlexTiers = Math.floor(num8Plex / 3);
   let baseDeliveriesPerWeek = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
-  if (answers['q3'] === 'q3_b') baseDeliveriesPerWeek += 1.5;
-  if (answers['q3'] === 'q3_a') baseDeliveriesPerWeek = 1.0;
+  if (answers['q4'] === 'q4_b') baseDeliveriesPerWeek += 1.5;
+  if (answers['q4'] === 'q4_a') baseDeliveriesPerWeek = 1.0;
   if (numThree8PlexTiers >= 1) {
     baseDeliveriesPerWeek = Math.max(baseDeliveriesPerWeek, 2.0 + (numThree8PlexTiers - 1) * 1.0);
   }
@@ -348,7 +348,7 @@ export function calculateSimulationMetricsFromAnswers(
   // Delivery vans active curb turnover impact
   const deliveryCurbsideDemand = totalWeeklyDeliveries / 16;
 
-  // Policy shifts from survey answers (Q1 to Q8)
+  // Policy shifts from survey answers (Q1 to Q6)
   let policyDemandShift = 0;
   let feeModel: 'free' | 'permit' = 'free';
   let enforcement: 'strict' | 'standard' | 'lenient' = 'standard';
@@ -363,40 +363,40 @@ export function calculateSimulationMetricsFromAnswers(
     feeModel = 'free';
   }
 
-  // Q2: Limit on on-street permits per household
+  // Q2: Parking Proximity to Home (formerly Q5)
   if (answers['q2'] === 'q2_a') {
-    policyDemandShift -= 2.0;
-  } else if (answers['q2'] === 'q2_b') {
-    policyDemandShift += 2.0;
-  }
-
-  // Q3: Restrictions on commercial and trade vehicles
-  if (answers['q3'] === 'q3_a') {
-    policyDemandShift -= 1.5;
-    enforcement = 'strict';
-  } else if (answers['q3'] === 'q3_b') {
-    policyDemandShift += 1.5;
-    enforcement = 'lenient';
-  }
-
-  // Q4: Management of visitor parking
-  if (answers['q4'] === 'q4_a') {
-    policyDemandShift -= 2.0;
-    enforcement = 'strict';
-  } else if (answers['q4'] === 'q4_b') {
-    policyDemandShift += 2.0;
-    enforcement = 'lenient';
-  }
-
-  // Q5: Funding for residential parking enforcement
-  if (answers['q5'] === 'q5_a') {
     policyDemandShift -= 1.5;
     feeModel = 'permit';
-  } else if (answers['q5'] === 'q5_b') {
+  } else if (answers['q2'] === 'q2_b') {
     policyDemandShift += 1.5;
   }
 
-  // Q6: Parking near major traffic generators (institutions & hospitals)
+  // Q3: Residential Parking Permit Limit (formerly Q2)
+  if (answers['q3'] === 'q3_a') {
+    policyDemandShift -= 2.0;
+  } else if (answers['q3'] === 'q3_b') {
+    policyDemandShift += 2.0;
+  }
+
+  // Q4: Visitor Access (formerly Q3)
+  if (answers['q4'] === 'q4_a') {
+    policyDemandShift -= 1.5;
+    enforcement = 'strict';
+  } else if (answers['q4'] === 'q4_b') {
+    policyDemandShift += 1.5;
+    enforcement = 'lenient';
+  }
+
+  // Q5: Parking Proximity to Destination (formerly Q4)
+  if (answers['q5'] === 'q5_a') {
+    policyDemandShift -= 2.0;
+    enforcement = 'strict';
+  } else if (answers['q5'] === 'q5_b') {
+    policyDemandShift += 2.0;
+    enforcement = 'lenient';
+  }
+
+  // Q6: Residential Parking Permit Eligibility (private parking)
   if (answers['q6'] === 'q6_a') {
     policyDemandShift -= 2.5;
     cruisingLevel = 'low';
@@ -596,13 +596,13 @@ export function getQuestionTradeoffImpact(
         questionNumber: 2,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'Yes',
+        selectedOptionLabel: selectedOption?.label || 'On my block',
         deltaStallsText: '-2.0 stalls (-13%)',
         deltaStallsValue: -2.0,
-        tradeoffRationale: 'Reduces competition for street parking to improve availability for other residents and visitors',
-        curbsideImpactSummary: 'Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.',
-        benefitText: 'Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.',
-        costText: 'Households with more vehicles than permits would need other parking arrangements, which may be difficult if they have limited or no private parking'
+        tradeoffRationale: 'Limits acceptable parking distance to the immediate block to keep vehicles close to home',
+        curbsideImpactSummary: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
+        benefitText: 'A short distance between your vehicle and home',
+        costText: 'Fewer spaces meet your preferences and your block may be full even when parking is available nearby.'
       };
     }
     if (selectedAnswerId === 'q2_b') {
@@ -610,20 +610,20 @@ export function getQuestionTradeoffImpact(
         questionNumber: 2,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'No',
+        selectedOptionLabel: selectedOption?.label || 'Within two or three blocks',
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: 2.0,
-        tradeoffRationale: 'Accommodates households with multiple drivers by allowing permits for all eligible vehicles',
-        curbsideImpactSummary: 'Homes can get permits for 3 or more vehicles, so more cars end up parked along the curb.',
-        benefitText: 'Households can obtain permits for all eligible vehicles, accommodating households with multiple drivers.',
-        costText: 'More vehicles may compete for the same spaces, making parking near home harder to find.'
+        tradeoffRationale: 'Expands acceptable parking distance to the wider neighbourhood to increase available parking options',
+        curbsideImpactSummary: 'Increases available parking options by extending acceptable parking distance into the wider neighbourhood.',
+        benefitText: 'More possible spaces fall within the distance you consider acceptable.',
+        costText: 'You may have a longer walk between your vehicle and home.'
       };
     }
     return {
       questionNumber: 2,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Decide whether there should be a household permit limit in high demand neighbourhoods.',
+      tradeoffRationale: 'When parking on the street near your home, what would you consider reasonably close?',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
       benefitText: 'Select an option to see the gain.',
       costText: 'Select an option to see the cost.'
@@ -639,10 +639,10 @@ export function getQuestionTradeoffImpact(
         selectedOptionLabel: selectedOption?.label || 'Yes',
         deltaStallsText: '-2.0 stalls (-13%)',
         deltaStallsValue: -2.0,
-        tradeoffRationale: 'Allows family, friends, and service providers to park conveniently close to the homes they visit',
-        curbsideImpactSummary: 'Allows visitors, family, and service providers equal access to park near the home they are visiting.',
-        benefitText: 'Family, friends and people providing services can use available spaces close to the home they’re visiting.',
-        costText: 'Residents face more competition for those spaces and may need to park farther from home.'
+        tradeoffRationale: 'Reduces competition for street parking to improve availability for other residents and visitors',
+        curbsideImpactSummary: 'Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.',
+        benefitText: 'Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.',
+        costText: 'Households with more vehicles than permits would need other parking arrangements, which may be difficult if they have limited or no private parking'
       };
     }
     if (selectedAnswerId === 'q3_b') {
@@ -653,17 +653,17 @@ export function getQuestionTradeoffImpact(
         selectedOptionLabel: selectedOption?.label || 'No',
         deltaStallsText: '+2.0 stalls (+13%)',
         deltaStallsValue: 2.0,
-        tradeoffRationale: 'Prioritizes residents for nearby spaces by reducing competition from visitor vehicles',
-        curbsideImpactSummary: 'Prioritizes street parking for residents, reducing competition from visitor and service vehicles.',
-        benefitText: 'Residents have priority for nearby spaces, reducing competition from visitor vehicles.',
-        costText: 'Visitors and service providers may need to park farther away, making visits less convenient.'
+        tradeoffRationale: 'Accommodates households with multiple drivers by allowing permits for all eligible vehicles',
+        curbsideImpactSummary: 'Homes can get permits for 3 or more vehicles, so more cars end up parked along the curb.',
+        benefitText: 'Households can obtain permits for all eligible vehicles, accommodating households with multiple drivers.',
+        costText: 'More vehicles may compete for the same spaces, making parking near home harder to find.'
       };
     }
     return {
       questionNumber: 3,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Decide whether visitors and service providers should have equal parking opportunities.',
+      tradeoffRationale: 'Decide whether there should be a household permit limit in high demand neighbourhoods.',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
       benefitText: 'Select an option to see the gain.',
       costText: 'Select an option to see the cost.'
@@ -677,12 +677,12 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'Yes',
-        deltaStallsText: '-2.5 stalls (-16%)',
-        deltaStallsValue: -2.5,
-        tradeoffRationale: 'Expands parking options for patients, students, visitors, and event attendees near major destinations',
-        curbsideImpactSummary: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
-        benefitText: 'Patients, visitors, students and event attendees have more parking options within a few blocks of their destination.',
-        costText: 'Residents and their guests may face more competition for spaces and need to park farther away.'
+        deltaStallsText: '-2.0 stalls (-13%)',
+        deltaStallsValue: -2.0,
+        tradeoffRationale: 'Allows family, friends, and service providers to park conveniently close to the homes they visit',
+        curbsideImpactSummary: 'Allows visitors, family, and service providers equal access to park near the home they are visiting.',
+        benefitText: 'Family, friends and people providing services can use available spaces close to the home they’re visiting.',
+        costText: 'Residents face more competition for those spaces and may need to park farther from home.'
       };
     }
     if (selectedAnswerId === 'q4_b') {
@@ -691,19 +691,19 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'No',
-        deltaStallsText: '+2.5 stalls (+16%)',
-        deltaStallsValue: 2.5,
-        tradeoffRationale: 'Protects residential street parking from institutional and event venue visitor spillover',
-        curbsideImpactSummary: 'Protects nearby residential street parking for residents and guests near major destinations.',
-        benefitText: 'Residents and their guests face less competition for nearby spaces from people visiting these destinations.',
-        costText: 'People visiting nearby destinations have fewer street parking options and may need to park farther away, or use other parking facilities'
+        deltaStallsText: '+2.0 stalls (+13%)',
+        deltaStallsValue: 2.0,
+        tradeoffRationale: 'Prioritizes residents for nearby spaces by reducing competition from visitor vehicles',
+        curbsideImpactSummary: 'Prioritizes street parking for residents, reducing competition from visitor and service vehicles.',
+        benefitText: 'Residents have priority for nearby spaces, reducing competition from visitor vehicles.',
+        costText: 'Visitors and service providers may need to park farther away, making visits less convenient.'
       };
     }
     return {
       questionNumber: 4,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'Decide whether visitors to hospitals, institutions and venues can use nearby residential streets.',
+      tradeoffRationale: 'Decide whether visitors and service providers should have equal parking opportunities.',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
       benefitText: 'Select an option to see the gain.',
       costText: 'Select an option to see the cost.'
@@ -716,13 +716,13 @@ export function getQuestionTradeoffImpact(
         questionNumber: 5,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'On my Block',
-        deltaStallsText: '-2.0 stalls (-13%)',
-        deltaStallsValue: -2.0,
-        tradeoffRationale: 'Limits acceptable parking distance to the immediate block to keep vehicles close to home',
-        curbsideImpactSummary: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
-        benefitText: 'A short distance between your vehicle and home',
-        costText: 'Fewer spaces meet your preferences and your block may be full even when parking is available nearby.'
+        selectedOptionLabel: selectedOption?.label || 'Yes',
+        deltaStallsText: '-2.5 stalls (-16%)',
+        deltaStallsValue: -2.5,
+        tradeoffRationale: 'Expands parking options for patients, students, visitors, and event attendees near major destinations',
+        curbsideImpactSummary: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
+        benefitText: 'Patients, visitors, students and event attendees have more parking options within a few blocks of their destination.',
+        costText: 'Residents and their guests may face more competition for spaces and need to park farther away.'
       };
     }
     if (selectedAnswerId === 'q5_b') {
@@ -730,20 +730,20 @@ export function getQuestionTradeoffImpact(
         questionNumber: 5,
         questionTitle: question.text,
         hasAnswer: true,
-        selectedOptionLabel: selectedOption?.label || 'More possible spaces fall within the distance you consider acceptable.',
-        deltaStallsText: '+2.0 stalls (+13%)',
-        deltaStallsValue: 2.0,
-        tradeoffRationale: 'Expands acceptable parking distance to the wider neighbourhood to increase available parking options',
-        curbsideImpactSummary: 'Increases available parking options by extending acceptable parking distance into the wider neighbourhood.',
-        benefitText: 'More possible spaces fall within the distance you consider acceptable.',
-        costText: 'You may have a longer walk between your vehicle and home.'
+        selectedOptionLabel: selectedOption?.label || 'No',
+        deltaStallsText: '+2.5 stalls (+16%)',
+        deltaStallsValue: 2.5,
+        tradeoffRationale: 'Protects residential street parking from institutional and event venue visitor spillover',
+        curbsideImpactSummary: 'Protects nearby residential street parking for residents and guests near major destinations.',
+        benefitText: 'Residents and their guests face less competition for nearby spaces from people visiting these destinations.',
+        costText: 'People visiting nearby destinations have fewer street parking options and may need to park farther away, or use other parking facilities'
       };
     }
     return {
       questionNumber: 5,
       questionTitle: question.text,
       hasAnswer: false,
-      tradeoffRationale: 'When parking on the street near your home, what would you consider reasonably close?',
+      tradeoffRationale: 'Decide whether visitors to hospitals, institutions and venues can use nearby residential streets.',
       curbsideImpactSummary: 'Select an option to evaluate curbside stall impact.',
       benefitText: 'Select an option to see the gain.',
       costText: 'Select an option to see the cost.'

@@ -991,61 +991,21 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         // Pavement stall limit ticks for newly restored curbside stalls from removed 8-plex driveways
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
-          if (isEightPlexLot(h) && h !== 10) {
+          if (isEightPlexLot(h)) {
             const startX = 8 + h * lotWidth;
             drawFlatRect(startX + 13.0, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
             drawFlatRect(startX + 27.0, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
           }
         }
 
-        // When an 8-plex is built on Lot 10 (the transit stop lot), activate the designated 30m ETS Bus Stop yellow zone along Lot 10
-        if (isEightPlexLot(10)) {
-          // Top curb surface painted traffic safety yellow (#FBBF24)
-          drawFlatRect(313.0, 92.4, 30.5, 1.2, '#FBBF24', bgGroundCtx);
-          // Curb face painted traffic safety yellow (#FBBF24)
-          drawFlatRect(313.0, 93.3, 30.5, 0.6, '#FBBF24', bgGroundCtx);
-
-          // Yellow diagonal pavement clearance hatch lines along road edge
-          for (let bx = 315; bx <= 341; bx += 4.5) {
-            drawFlatRect(bx, 94.0, 1.0, 3.5, 'rgba(251, 191, 36, 0.85)', bgGroundCtx);
-          }
-
-          // White boundary limit lines marking the 30m zone ends
-          drawFlatRect(312.8, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
-          drawFlatRect(343.5, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
-
-          // Roadway stencil marking
-          const busLabelPos = project(328, 96, 0);
-          bgGroundCtx.save();
-          bgGroundCtx.fillStyle = '#FBBF24';
-          bgGroundCtx.font = 'bold 7px "Open Sans", system-ui, sans-serif';
-          bgGroundCtx.textAlign = 'center';
-          bgGroundCtx.fillText('BUS STOP - NO PARKING', busLabelPos.x, busLabelPos.y);
-          bgGroundCtx.restore();
+        // 7. Fire Hydrant safety zone at x = 11 (positioned on grass boulevard, off the driveway)
+        drawFlatRect(6.0, 92.4, 10.0, 1.2, '#FBBF24', bgGroundCtx);
+        drawFlatRect(6.0, 93.3, 10.0, 0.4, '#F59E0B', bgGroundCtx);
+        for (let hx = 7.5; hx <= 14.5; hx += 3.5) {
+          drawFlatRect(hx, 94.3, 0.9, 2.5, 'rgba(251, 191, 36, 0.75)', bgGroundCtx);
         }
-
-        // Roadway stencil marking along the suburban curb reminding of 1.5m driveway setback
-        const suburbanStencilHomes = [1, 3, 7];
-        for (const sh of suburbanStencilHomes) {
-          if (isEightPlexLot(sh)) continue;
-          const sX = 8 + sh * lotWidth + 20.25;
-          const labelPos = project(sX, 96.0, 0);
-          bgGroundCtx.save();
-          bgGroundCtx.fillStyle = '#FBBF24';
-          bgGroundCtx.font = 'bold 6.5px "Open Sans", system-ui, sans-serif';
-          bgGroundCtx.textAlign = 'center';
-          bgGroundCtx.fillText('DRIVEWAY 1.5m NO PARKING', labelPos.x, labelPos.y);
-          bgGroundCtx.restore();
-        }
-
-        // 7. Fire Hydrant safety zone at x = 27
-        drawFlatRect(10.5, 92.5, 33, 1.2, '#FBBF24', bgGroundCtx);
-        drawFlatRect(10.5, 93.7, 33, 0.6, '#FBBF24', bgGroundCtx);
-        for (let hx = 12; hx <= 42; hx += 3.5) {
-          drawFlatRect(hx, 94.3, 0.9, 3.2, 'rgba(251, 191, 36, 0.75)', bgGroundCtx);
-        }
-        drawFlatRect(10.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
-        drawFlatRect(43.2, 91.5, 0.8, 6.0, '#FFFFFF', bgGroundCtx);
+        drawFlatRect(5.8, 91.8, 0.3, 3.5, '#FFFFFF', bgGroundCtx);
+        drawFlatRect(16.0, 91.8, 0.3, 3.5, '#FFFFFF', bgGroundCtx);
 
         // (No on-street ETS bus stop in suburban front driveway layout)
 
@@ -1618,9 +1578,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
       }
 
-      // Fire Hydrant at x = 27
-      drawFireHydrant(27, 85.5, 0, bgHousesCtx);
-      drawHydrantSign(30.5, 84, 0, bgHousesCtx);
+      // Fire Hydrant (placed on the grass boulevard, off the driveway)
+      const hydrantX = layout === 'suburban_front_driveway' ? 11 : 27;
+      drawFireHydrant(hydrantX, 85.5, 0, bgHousesCtx);
+      drawHydrantSign(hydrantX + 3.0, 84, 0, bgHousesCtx);
     }
 
     renderGroundBackground();
@@ -1771,9 +1732,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         // Each 8-plex removes a driveway and the driveway's necessary 1.5m clearance,
         // creating curbside space for an additional street parking stall.
-        // Add those parking spaces back for every 8-plex built, except where there is an ETS bus stop (Lot 10).
+        // Add those parking spaces back for every 8-plex built.
         for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
-          if (isEightPlexLot(h) && h !== 10) {
+          if (isEightPlexLot(h)) {
             const startX = 8 + h * lotWidth;
             assignments.push({
               type: typesX[(h + 1) % 3],
@@ -2253,29 +2214,36 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       const glass = type.includes('suv') ? '#81a3ba' : '#a2c8e0';
       const tire = '#1f1f1f';
 
-      const zOffset = isFlipped ? z + 3 : z;
-      const drawTopC = isFlipped ? '#222222' : topC;
-      const drawLeftC = isFlipped ? '#111111' : leftC;
-      const drawRightC = isFlipped ? '#000000' : rightC;
+      const zOffset = z;
+      const drawTopC = topC;
+      const drawLeftC = leftC;
+      const drawRightC = rightC;
 
       if (type === 'deliveryVan') {
-        const orangeBase = isFlipped ? '#442200' : '#FF5500';
-        const orangeLeft = isFlipped ? '#331100' : '#E54D00';
-        const orangeRight = isFlipped ? '#220000' : '#CC4300';
+        const orangeBase = '#FF5500';
+        const orangeLeft = '#E54D00';
+        const orangeRight = '#CC4300';
         const greenStripe = '#009A44';
+        const hubcap = '#9ca3af';
 
         drawFlatRect(x - 1, y - 0.5, 24, 9, 'rgba(0,0,0,0.3)');
-        drawBlock(x, y, zOffset, 15, 8, 9.5, orangeBase, orangeLeft, orangeRight);
-        drawBlock(x + 15, y + 0.5, zOffset, 6, 7, 7, orangeBase, orangeLeft, orangeRight);
-        drawBlock(x + 17, y + 0.8, zOffset + 3.5, 3.5, 6.4, 2.8, orangeBase, '#81a3ba', '#81a3ba');
 
         if (!isFlipped) {
+          // Facing +x (Down the road): Cargo Box at rear (x..x+14.5), Cab in front (x+14.5..x+21)
+          // 1. Far wheels (background at y - 0.5)
+          drawBlock(x + 2.5, y - 0.5, zOffset, 4, 1.2, 2.2, tire, tire, tire);
+          drawBlock(x + 15.5, y - 0.5, zOffset, 3.5, 1.2, 2.2, tire, tire, tire);
+
+          // 2. Cargo Box at rear (lower X is drawn first in isometric painter's algorithm)
+          drawBlock(x, y, zOffset + 1.4, 14.5, 8, 9.2, orangeBase, orangeLeft, orangeRight);
+
+          // 3. Green courier stripes on Cargo Box side panel (facing street at y + 8)
           for (let s = 0; s < 3; s++) {
-            const sx = x + 2 + s * 4.5;
-            const p1 = project(sx, y + 8, zOffset + 1);
-            const p2 = project(sx + 2, y + 8, zOffset + 1);
-            const p3 = project(sx + 4.5, y + 8, zOffset + 8.5);
-            const p4 = project(sx + 2.5, y + 8, zOffset + 8.5);
+            const sx = x + 2.5 + s * 3.6;
+            const p1 = project(sx, y + 8, zOffset + 2.2);
+            const p2 = project(sx + 1.8, y + 8, zOffset + 2.2);
+            const p3 = project(sx + 3.4, y + 8, zOffset + 9.0);
+            const p4 = project(sx + 1.6, y + 8, zOffset + 9.0);
 
             ctx!.fillStyle = greenStripe;
             ctx!.beginPath();
@@ -2287,28 +2255,99 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             ctx!.fill();
           }
 
-          // Flashing hazard lights when delivery van is stopped for delivery
+          // 4. Cab in front (higher X drawn after cargo box so it properly sits in front)
+          drawBlock(x + 14.5, y + 0.4, zOffset + 1.2, 6.5, 7.2, 5.8, orangeBase, orangeLeft, orangeRight);
+          // Front bumper & grille
+          drawBlock(x + 20.4, y + 0.8, zOffset + 1.2, 0.7, 6.4, 1.8, '#2b2b2b', '#222222', '#1a1a1a');
+          // Front headlights
+          drawBlock(x + 20.5, y + 6.0, zOffset + 2.2, 0.5, 1.2, 0.8, '#FFFFFF', '#FFF59D', '#FFF59D');
+          // Cab windshield & upper cabin
+          drawBlock(x + 15.2, y + 0.6, zOffset + 4.2, 5.5, 6.8, 2.8, orangeBase, glass, glass);
+
+          // 5. Near wheels (foreground at y + 7.2, drawn after body so they are fully visible)
+          drawBlock(x + 2.5, y + 7.2, zOffset, 4, 1.2, 2.2, tire, tire, tire);
+          drawBlock(x + 3.3, y + 7.8, zOffset + 0.4, 2.2, 0.4, 1.4, hubcap, hubcap, hubcap);
+          drawBlock(x + 15.5, y + 7.2, zOffset, 3.5, 1.2, 2.2, tire, tire, tire);
+          drawBlock(x + 16.3, y + 7.8, zOffset + 0.4, 1.8, 0.4, 1.4, hubcap, hubcap, hubcap);
+
+          // 6. Hazard blinkers
           const isVanStopped = vehicleState === 'STOPPED' || vehicleState === 'AT_DOOR' || vehicleState === 'RETURNING';
           if (isVanStopped) {
             const isBlinkerOn = Math.floor(Date.now() / 260) % 2 === 0;
             if (isBlinkerOn) {
               const amber = '#ffb300';
               const amberGlow = '#ff8800';
-              // Front hazard lights
               drawBlock(x + 20.3, y + 0.5, zOffset + 1.8, 0.7, 0.9, 0.8, amber, amberGlow, amberGlow);
               drawBlock(x + 20.3, y + 6.3, zOffset + 1.8, 0.7, 0.9, 0.8, amber, amberGlow, amberGlow);
-              // Rear hazard lights
               drawBlock(x - 0.4, y + 0.5, zOffset + 1.8, 0.7, 0.9, 0.8, amber, amberGlow, amberGlow);
               drawBlock(x - 0.4, y + 6.3, zOffset + 1.8, 0.7, 0.9, 0.8, amber, amberGlow, amberGlow);
             }
           }
         } else {
-          drawBlock(x + 3, y - 1, zOffset + 9.5, 3, 1, 2, tire, tire, tire);
-          drawBlock(x + 11, y - 1, zOffset + 9.5, 3, 1, 2, tire, tire, tire);
+          // Facing -x (Up the road): Cab in front at x (x..x+6.5), Cargo Box at rear (x+6.5..x+21)
+          // In isometric painter's algorithm:
+          // Lower X is farther from camera and MUST BE DRAWN FIRST!
+          // Higher X is closer to camera and MUST BE DRAWN AFTERWARDS!
+          // 1. Far wheels (background at y - 0.5)
+          drawBlock(x + 2, y - 0.5, zOffset, 3.5, 1.2, 2.2, tire, tire, tire);
+          drawBlock(x + 14.5, y - 0.5, zOffset, 4, 1.2, 2.2, tire, tire, tire);
+
+          // 2. Cab at x (lower X, background — drawn BEFORE cargo box so cargo box seamlessly connects and overlaps)
+          drawBlock(x, y + 0.4, zOffset + 1.2, 6.5, 7.2, 5.8, orangeBase, orangeLeft, orangeRight);
+          // Front bumper & grille at x
+          drawBlock(x - 0.5, y + 0.8, zOffset + 1.2, 0.7, 6.4, 1.8, '#2b2b2b', '#222222', '#1a1a1a');
+          // Front headlight
+          drawBlock(x - 0.4, y + 6.0, zOffset + 2.2, 0.5, 1.2, 0.8, '#FFFFFF', '#FFF59D', '#FFF59D');
+          // Cab windshield & upper cabin
+          drawBlock(x + 0.8, y + 0.6, zOffset + 4.2, 5.4, 6.8, 2.8, orangeBase, glass, orangeRight);
+
+          // 3. Cargo Box at rear (higher X, foreground — drawn AFTER cab so it cleanly sits in front)
+          drawBlock(x + 6.5, y, zOffset + 1.4, 14.5, 8, 9.2, orangeBase, orangeLeft, orangeRight);
+          // Rear cargo roll-up doors on the visible rear face (Right face at x + 21)
+          drawBlock(x + 20.8, y + 0.8, zOffset + 1.8, 0.3, 6.4, 7.6, '#e2e8f0', '#cbd5e1', '#94a3b8');
+
+          // 4. Green courier stripes on Cargo Box side panel (facing street at y + 8)
+          for (let s = 0; s < 3; s++) {
+            const sx = x + 8.5 + s * 3.6;
+            const p1 = project(sx, y + 8, zOffset + 2.2);
+            const p2 = project(sx + 1.8, y + 8, zOffset + 2.2);
+            const p3 = project(sx + 3.4, y + 8, zOffset + 9.0);
+            const p4 = project(sx + 1.6, y + 8, zOffset + 9.0);
+
+            ctx!.fillStyle = greenStripe;
+            ctx!.beginPath();
+            ctx!.moveTo(p1.x, p1.y);
+            ctx!.lineTo(p2.x, p2.y);
+            ctx!.lineTo(p3.x, p3.y);
+            ctx!.lineTo(p4.x, p4.y);
+            ctx!.closePath();
+            ctx!.fill();
+          }
+
+          // 5. Near wheels (foreground at y + 7.2, drawn after body so they are fully visible)
+          drawBlock(x + 2, y + 7.2, zOffset, 3.5, 1.2, 2.2, tire, tire, tire);
+          drawBlock(x + 2.8, y + 7.8, zOffset + 0.4, 1.8, 0.4, 1.4, hubcap, hubcap, hubcap);
+          drawBlock(x + 14.5, y + 7.2, zOffset, 4, 1.2, 2.2, tire, tire, tire);
+          drawBlock(x + 15.3, y + 7.8, zOffset + 0.4, 2.2, 0.4, 1.4, hubcap, hubcap, hubcap);
+
+          // 6. Hazard blinkers
+          const isVanStopped = vehicleState === 'STOPPED' || vehicleState === 'AT_DOOR' || vehicleState === 'RETURNING';
+          if (isVanStopped) {
+            const isBlinkerOn = Math.floor(Date.now() / 260) % 2 === 0;
+            if (isBlinkerOn) {
+              const amber = '#ffb300';
+              const amberGlow = '#ff8800';
+              drawBlock(x - 0.4, y + 0.5, zOffset + 1.8, 0.7, 0.9, 0.8, amber, amberGlow, amberGlow);
+              drawBlock(x - 0.4, y + 6.3, zOffset + 1.8, 0.7, 0.9, 0.8, amber, amberGlow, amberGlow);
+              drawBlock(x + 20.3, y + 0.5, zOffset + 1.8, 0.7, 0.9, 0.8, amber, amberGlow, amberGlow);
+              drawBlock(x + 20.3, y + 6.3, zOffset + 1.8, 0.7, 0.9, 0.8, amber, amberGlow, amberGlow);
+            }
+          }
         }
       } else if (type === 'sedan') {
         drawFlatRect(x - 1, y - 0.5, 17, 8, 'rgba(0,0,0,0.25)');
         if (!isFlipped) {
+          // Facing +x (Down the road)
           drawBlock(x + 2, y - 0.5, zOffset, 3, 1, 1.5, tire, tire, tire);
           drawBlock(x + 11, y - 0.5, zOffset, 3, 1, 1.5, tire, tire, tire);
           drawBlock(x + 2, y + 6.5, zOffset, 3, 1, 1.5, tire, tire, tire);
@@ -2316,76 +2355,75 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawBlock(x, y, zOffset + 0.8, 15, 7, 2.5, drawTopC, drawLeftC, drawRightC);
           drawBlock(x + 3, y + 0.5, zOffset + 3.3, 8, 6, 2.2, drawTopC, glass, glass);
         } else {
-          drawBlock(x + 3, y + 0.5, zOffset, 8, 6, 2.2, drawTopC, '#111', '#111');
-          drawBlock(x, y, zOffset + 2.2, 15, 7, 2.5, drawTopC, drawLeftC, drawRightC);
-          drawBlock(x + 2, y - 1, zOffset + 4.7, 3, 1, 2, tire, tire, tire);
-          drawBlock(x + 11, y - 1, zOffset + 4.7, 3, 1, 2, tire, tire, tire);
+          // Facing -x (Up the road)
+          drawBlock(x + 1, y - 0.5, zOffset, 3, 1, 1.5, tire, tire, tire);
+          drawBlock(x + 10, y - 0.5, zOffset, 3, 1, 1.5, tire, tire, tire);
+          drawBlock(x + 1, y + 6.5, zOffset, 3, 1, 1.5, tire, tire, tire);
+          drawBlock(x + 10, y + 6.5, zOffset, 3, 1, 1.5, tire, tire, tire);
+          drawBlock(x, y, zOffset + 0.8, 15, 7, 2.5, drawTopC, drawLeftC, drawRightC);
+          drawBlock(x + 4, y + 0.5, zOffset + 3.3, 8, 6, 2.2, drawTopC, glass, glass);
         }
       } else if (type === 'sedanY') {
         drawFlatRect(x - 0.5, y - 1, 8, 17, 'rgba(0,0,0,0.25)');
-        if (!isFlipped) {
-          drawBlock(x - 0.5, y + 2, zOffset, 1, 3, 1.5, tire, tire, tire);
-          drawBlock(x - 0.5, y + 11, zOffset, 1, 3, 1.5, tire, tire, tire);
-          drawBlock(x + 6.5, y + 2, zOffset, 1, 3, 1.5, tire, tire, tire);
-          drawBlock(x + 6.5, y + 11, zOffset, 1, 3, 1.5, tire, tire, tire);
-          drawBlock(x, y, zOffset + 0.8, 7, 15, 2.5, drawTopC, drawLeftC, drawRightC);
-          drawBlock(x + 0.5, y + 3, zOffset + 3.3, 6, 8, 2.2, drawTopC, glass, glass);
-        } else {
-          drawBlock(x + 0.5, y + 3, zOffset, 6, 8, 2.2, drawTopC, '#111', '#111');
-          drawBlock(x, y, zOffset + 2.2, 7, 15, 2.5, drawTopC, drawLeftC, drawRightC);
-          drawBlock(x - 1, y + 2, zOffset + 4.7, 1, 3, 2, tire, tire, tire);
-          drawBlock(x - 1, y + 11, zOffset + 4.7, 1, 3, 2, tire, tire, tire);
-        }
+        drawBlock(x - 0.5, y + 2, zOffset, 1, 3, 1.5, tire, tire, tire);
+        drawBlock(x - 0.5, y + 11, zOffset, 1, 3, 1.5, tire, tire, tire);
+        drawBlock(x + 6.5, y + 2, zOffset, 1, 3, 1.5, tire, tire, tire);
+        drawBlock(x + 6.5, y + 11, zOffset, 1, 3, 1.5, tire, tire, tire);
+        drawBlock(x, y, zOffset + 0.8, 7, 15, 2.5, drawTopC, drawLeftC, drawRightC);
+        drawBlock(x + 0.5, y + 3, zOffset + 3.3, 6, 8, 2.2, drawTopC, glass, glass);
       } else if (type === 'police') {
         const white = '#ffffff';
         const epsNavy = '#002B49';
         drawFlatRect(x - 1, y - 0.5, 17, 8, 'rgba(0,0,0,0.25)');
 
-        // Emergency light reflections on asphalt when lights are active
         const strobePhase = Math.floor((Date.now() / 90) % 4);
         const redActive = strobePhase === 0 || strobePhase === 1;
         const blueActive = strobePhase === 2 || strobePhase === 3;
 
-        if (!isFlipped) {
-          drawFlatRect(
-            x - 5,
-            y - 4,
-            26,
-            16,
-            redActive ? 'rgba(239, 68, 68, 0.14)' : 'rgba(59, 130, 246, 0.14)'
-          );
+        drawFlatRect(
+          x - 5,
+          y - 4,
+          26,
+          16,
+          redActive ? 'rgba(239, 68, 68, 0.14)' : 'rgba(59, 130, 246, 0.14)'
+        );
 
+        if (!isFlipped) {
+          // Facing +x (Down the road)
           drawBlock(x + 2, y - 0.5, zOffset, 3, 1, 1.5, tire, tire, tire);
           drawBlock(x + 11, y - 0.5, zOffset, 3, 1, 1.5, tire, tire, tire);
           drawBlock(x + 2, y + 6.5, zOffset, 3, 1, 1.5, tire, tire, tire);
           drawBlock(x + 11, y + 6.5, zOffset, 3, 1, 1.5, tire, tire, tire);
-          // White cruiser body
           drawBlock(x, y, zOffset + 0.8, 15, 7, 2.5, white, '#dddddd', '#cccccc');
-          // EPS Dark Blue side doors
           drawBlock(x + 3, y - 0.2, zOffset + 1, 7, 7.4, 2.3, epsNavy, epsNavy, epsNavy);
-          // Gold EPS star crest on door
           drawBlock(x + 6, y - 0.25, zOffset + 1.8, 1.5, 7.5, 0.8, '#FFC72C', '#E5B224', '#C99816');
-          // Cabin & windows
           drawBlock(x + 3, y + 0.5, zOffset + 3.3, 8, 6, 2.2, white, glass, glass);
 
-          // EPS Modern Aerodynamic Emergency Light Bar
-          // Roof rack mounting bracket
           drawBlock(x + 5.5, y + 1.0, zOffset + 5.5, 2.4, 5.0, 0.3, '#333333', '#222222', '#111111');
-          // Left strobe (Red)
           const leftColor = redActive ? '#FF1E1E' : '#550000';
           drawBlock(x + 5.7, y + 1.2, zOffset + 5.8, 1.8, 1.8, 0.85, leftColor, leftColor, leftColor);
-          // Center white strobe
           const centerColor = (strobePhase === 1 || strobePhase === 3) ? '#FFFFFF' : '#444444';
           drawBlock(x + 5.7, y + 3.1, zOffset + 5.8, 1.8, 0.8, 0.85, centerColor, centerColor, centerColor);
-          // Right strobe (Blue)
           const rightColor = blueActive ? '#1E6BFF' : '#001155';
           drawBlock(x + 5.7, y + 4.0, zOffset + 5.8, 1.8, 1.8, 0.85, rightColor, rightColor, rightColor);
         } else {
-          drawBlock(x + 3, y + 0.5, zOffset, 8, 6, 2.2, white, '#111', '#111');
-          drawBlock(x, y, zOffset + 2.2, 15, 7, 2.5, white, '#dddddd', '#cccccc');
-          drawBlock(x + 3, y - 0.2, zOffset + 2.4, 7, 7.4, 2.3, epsNavy, epsNavy, epsNavy);
-          drawBlock(x + 2, y - 1, zOffset + 4.7, 3, 1, 2, tire, tire, tire);
-          drawBlock(x + 11, y - 1, zOffset + 4.7, 3, 1, 2, tire, tire, tire);
+          // Facing -x (Up the road)
+          drawBlock(x + 1, y - 0.5, zOffset, 3, 1, 1.5, tire, tire, tire);
+          drawBlock(x + 10, y - 0.5, zOffset, 3, 1, 1.5, tire, tire, tire);
+          drawBlock(x + 1, y + 6.5, zOffset, 3, 1, 1.5, tire, tire, tire);
+          drawBlock(x + 10, y + 6.5, zOffset, 3, 1, 1.5, tire, tire, tire);
+          drawBlock(x, y, zOffset + 0.8, 15, 7, 2.5, white, '#dddddd', '#cccccc');
+          drawBlock(x + 5, y - 0.2, zOffset + 1, 7, 7.4, 2.3, epsNavy, epsNavy, epsNavy);
+          drawBlock(x + 7.5, y - 0.25, zOffset + 1.8, 1.5, 7.5, 0.8, '#FFC72C', '#E5B224', '#C99816');
+          drawBlock(x + 4, y + 0.5, zOffset + 3.3, 8, 6, 2.2, white, glass, glass);
+
+          drawBlock(x + 6.5, y + 1.0, zOffset + 5.5, 2.4, 5.0, 0.3, '#333333', '#222222', '#111111');
+          const leftColor = redActive ? '#FF1E1E' : '#550000';
+          drawBlock(x + 6.7, y + 1.2, zOffset + 5.8, 1.8, 1.8, 0.85, leftColor, leftColor, leftColor);
+          const centerColor = (strobePhase === 1 || strobePhase === 3) ? '#FFFFFF' : '#444444';
+          drawBlock(x + 6.7, y + 3.1, zOffset + 5.8, 1.8, 0.8, 0.85, centerColor, centerColor, centerColor);
+          const rightColor = blueActive ? '#1E6BFF' : '#001155';
+          drawBlock(x + 6.7, y + 4.0, zOffset + 5.8, 1.8, 1.8, 0.85, rightColor, rightColor, rightColor);
         }
       } else if (type === 'firetruck') {
         const red = '#cc0000';
@@ -2393,6 +2431,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const chrome = '#eeeeee';
         drawFlatRect(x - 1, y - 0.5, 26, 10, 'rgba(0,0,0,0.3)');
         if (!isFlipped) {
+          // Facing +x (Down the road)
           drawBlock(x + 2, y - 0.5, zOffset, 4, 1.5, 2.5, tire, tire, tire);
           drawBlock(x + 16, y - 0.5, zOffset, 4, 1.5, 2.5, tire, tire, tire);
           drawBlock(x + 2, y + 8, zOffset, 4, 1.5, 2.5, tire, tire, tire);
@@ -2401,17 +2440,25 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawBlock(x + 18, y + 0.5, zOffset + 4.2, 6, 8, 4.8, red, glass, glass); // cab
           drawBlock(x + 24, y + 1.5, zOffset + 2, 0.5, 6, 2, chrome, chrome, chrome); // grill
           
-          // flashing lights
           const lightColor = (Date.now() % 300 > 150) ? '#ff0000' : '#ffffff';
           drawBlock(x + 19, y + 1, zOffset + 9, 3, 7, 1.0, lightColor, lightColor, lightColor);
         } else {
-          drawBlock(x, y, zOffset + 2, 24, 9, 7.5, red, redDark, redDark);
-          drawBlock(x + 2, y - 1, zOffset + 9.7, 4, 1.5, 2.5, tire, tire, tire);
-          drawBlock(x + 16, y - 1, zOffset + 9.7, 4, 1.5, 2.5, tire, tire, tire);
+          // Facing -x (Up the road): Cab is at x + 0
+          drawBlock(x + 4, y - 0.5, zOffset, 4, 1.5, 2.5, tire, tire, tire);
+          drawBlock(x + 18, y - 0.5, zOffset, 4, 1.5, 2.5, tire, tire, tire);
+          drawBlock(x + 4, y + 8, zOffset, 4, 1.5, 2.5, tire, tire, tire);
+          drawBlock(x + 18, y + 8, zOffset, 4, 1.5, 2.5, tire, tire, tire);
+          drawBlock(x, y, zOffset + 1.2, 24, 9, 7.5, red, redDark, redDark);
+          drawBlock(x, y + 0.5, zOffset + 4.2, 6, 8, 4.8, red, glass, glass); // cab
+          drawBlock(x - 0.5, y + 1.5, zOffset + 2, 0.5, 6, 2, chrome, chrome, chrome); // grill
+          
+          const lightColor = (Date.now() % 300 > 150) ? '#ff0000' : '#ffffff';
+          drawBlock(x + 2, y + 1, zOffset + 9, 3, 7, 1.0, lightColor, lightColor, lightColor);
         }
       } else if (type === 'suv') {
         drawFlatRect(x - 1, y - 0.5, 18, 8.5, 'rgba(0,0,0,0.25)');
         if (!isFlipped) {
+          // Facing +x (Down the road)
           drawBlock(x + 2, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
           drawBlock(x + 11, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
           drawBlock(x + 2, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
@@ -2419,83 +2466,73 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawBlock(x, y, zOffset + 1, 16, 7.5, 3.2, drawTopC, drawLeftC, drawRightC);
           drawBlock(x + 2, y + 0.5, zOffset + 4.2, 11, 6.5, 2.8, drawTopC, glass, glass);
         } else {
-          drawBlock(x + 2, y + 0.5, zOffset, 11, 6.5, 2.8, drawTopC, '#111', '#111');
-          drawBlock(x, y, zOffset + 2.8, 16, 7.5, 3.2, drawTopC, drawLeftC, drawRightC);
-          drawBlock(x + 2, y - 1, zOffset + 6.0, 3.5, 1, 2, tire, tire, tire);
-          drawBlock(x + 11, y - 1, zOffset + 6.0, 3.5, 1, 2, tire, tire, tire);
+          // Facing -x (Up the road)
+          drawBlock(x + 1.5, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
+          drawBlock(x + 10.5, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
+          drawBlock(x + 1.5, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
+          drawBlock(x + 10.5, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
+          drawBlock(x, y, zOffset + 1, 16, 7.5, 3.2, drawTopC, drawLeftC, drawRightC);
+          drawBlock(x + 3, y + 0.5, zOffset + 4.2, 11, 6.5, 2.8, drawTopC, glass, glass);
         }
       } else if (type === 'suvY') {
         drawFlatRect(x - 0.5, y - 1, 8.5, 18, 'rgba(0,0,0,0.25)');
-        if (!isFlipped) {
-          drawBlock(x - 0.5, y + 2, zOffset, 1, 3.5, 2, tire, tire, tire);
-          drawBlock(x - 0.5, y + 11, zOffset, 1, 3.5, 2, tire, tire, tire);
-          drawBlock(x + 7, y + 2, zOffset, 1, 3.5, 2, tire, tire, tire);
-          drawBlock(x + 7, y + 11, zOffset, 1, 3.5, 2, tire, tire, tire);
-          drawBlock(x, y, zOffset + 1, 7.5, 16, 3.2, drawTopC, drawLeftC, drawRightC);
-          drawBlock(x + 0.5, y + 2, zOffset + 4.2, 6.5, 11, 2.8, drawTopC, glass, glass);
-        } else {
-          drawBlock(x + 0.5, y + 2, zOffset, 6.5, 11, 2.8, drawTopC, '#111', '#111');
-          drawBlock(x, y, zOffset + 2.8, 7.5, 16, 3.2, drawTopC, drawLeftC, drawRightC);
-          drawBlock(x - 1, y + 2, zOffset + 6.0, 1, 3.5, 2, tire, tire, tire);
-          drawBlock(x - 1, y + 11, zOffset + 6.0, 1, 3.5, 2, tire, tire, tire);
-        }
+        drawBlock(x - 0.5, y + 2, zOffset, 1, 3.5, 2, tire, tire, tire);
+        drawBlock(x - 0.5, y + 11, zOffset, 1, 3.5, 2, tire, tire, tire);
+        drawBlock(x + 7, y + 2, zOffset, 1, 3.5, 2, tire, tire, tire);
+        drawBlock(x + 7, y + 11, zOffset, 1, 3.5, 2, tire, tire, tire);
+        drawBlock(x, y, zOffset + 1, 7.5, 16, 3.2, drawTopC, drawLeftC, drawRightC);
+        drawBlock(x + 0.5, y + 2, zOffset + 4.2, 6.5, 11, 2.8, drawTopC, glass, glass);
       } else if (type === 'pickup') {
         drawFlatRect(x - 1, y - 0.5, 20, 8.5, 'rgba(0,0,0,0.25)');
         if (!isFlipped) {
+          // Facing +x (Down the road): Bed is at rear (x), Cab is in front (x + 7)
           drawBlock(x + 2, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
           drawBlock(x + 13, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
           drawBlock(x + 2, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
           drawBlock(x + 13, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
-          // Bed (Drawn first)
           drawBlock(x, y, zOffset + 1, 7, 7.5, 3.2, drawTopC, drawLeftC, drawRightC);
-          // Cab (Drawn next so it overlaps the bed slightly if needed)
           drawBlock(x + 7, y, zOffset + 1, 11, 7.5, 3.2, drawTopC, drawLeftC, drawRightC);
-          // Windshield/Roof
           drawBlock(x + 8, y + 0.5, zOffset + 4.2, 7, 6.5, 3, drawTopC, glass, glass);
         } else {
-          drawBlock(x + 2, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
-          drawBlock(x + 13, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
-          drawBlock(x + 2, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
-          drawBlock(x + 13, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
-          // Bed (Drawn first since cab overlaps it from the front)
+          // Facing -x (Up the road): Cab is in front (x), Bed is at rear (x + 11)
+          drawBlock(x + 1.5, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
+          drawBlock(x + 12.5, y - 0.5, zOffset, 3.5, 1, 2, tire, tire, tire);
+          drawBlock(x + 1.5, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
+          drawBlock(x + 12.5, y + 7, zOffset, 3.5, 1, 2, tire, tire, tire);
+          drawBlock(x, y, zOffset + 1, 11, 7.5, 3.2, drawTopC, drawLeftC, drawRightC);
           drawBlock(x + 11, y, zOffset + 1, 7, 7.5, 3.2, drawTopC, drawLeftC, drawRightC);
-          // Cab 
-          drawBlock(x + 1, y, zOffset + 1, 11, 7.5, 3.2, drawTopC, '#111', '#111');
-          // Windshield/Roof
           drawBlock(x + 3, y + 0.5, zOffset + 4.2, 7, 6.5, 3, drawTopC, glass, glass);
         }
       } else if (type === 'boxTruck') {
         drawFlatRect(x - 1, y - 0.5, 25, 9, 'rgba(0,0,0,0.3)');
         if (!isFlipped) {
-          // Tires
+          // Facing +x (Down the road): Box at rear (x), Cab in front (x + 16)
+          // 1. Far wheels
           drawBlock(x + 2, y - 0.5, zOffset, 4, 1, 2, tire, tire, tire);
           drawBlock(x + 19, y - 0.5, zOffset, 3, 1, 2, tire, tire, tire);
+          // 2. Box at rear (lower X drawn first)
+          drawBlock(x, y, zOffset + 1.5, 17, 8, 9.5, '#f0f2f5', '#dcdfe3', '#c8cbcf');
+          // 3. Cab in front (higher X drawn after box)
+          drawBlock(x + 16, y + 0.5, zOffset + 1, 7, 7, 5, '#d94136', adjustColor('#d94136', -15), adjustColor('#d94136', -30));
+          drawBlock(x + 20, y + 1, zOffset + 3.5, 3, 6, 2.5, '#d94136', glass, glass);
+          // 4. Near wheels
           drawBlock(x + 2, y + 7.5, zOffset, 4, 1, 2, tire, tire, tire);
           drawBlock(x + 19, y + 7.5, zOffset, 3, 1, 2, tire, tire, tire);
-          // Box (White) with slight overhang over the cab
-          drawBlock(x, y, zOffset + 1.5, 17, 8, 9.5, '#f0f2f5', '#dcdfe3', '#c8cbcf');
-          // Cab (Red) (Drawn after Box to appear in front)
-          drawBlock(x + 16, y + 0.5, zOffset + 1, 7, 7, 5, '#d94136', adjustColor('#d94136', -15), adjustColor('#d94136', -30));
-          // Windshield
-          drawBlock(x + 20, y + 1, zOffset + 3.5, 3, 6, 2.5, '#d94136', glass, glass);
         } else {
-          // Tires
+          // Facing -x (Up the road): Cab in front (x), Box at rear (x + 7)
+          // 1. Far wheels
           drawBlock(x + 2, y - 0.5, zOffset, 3, 1, 2, tire, tire, tire);
           drawBlock(x + 18, y - 0.5, zOffset, 4, 1, 2, tire, tire, tire);
+          // 2. Cab in front (lower X drawn first in painter's algorithm)
+          drawBlock(x + 1, y + 0.5, zOffset + 1, 7, 7, 5, '#d94136', adjustColor('#d94136', -15), adjustColor('#d94136', -30));
+          drawBlock(x + 1, y + 1, zOffset + 3.5, 3, 6, 2.5, '#d94136', glass, glass);
+          // 3. Box at rear (higher X drawn after cab)
+          drawBlock(x + 7, y, zOffset + 1.5, 17, 8, 9.5, '#f0f2f5', '#dcdfe3', '#c8cbcf');
+          // 4. Near wheels
           drawBlock(x + 2, y + 7.5, zOffset, 3, 1, 2, tire, tire, tire);
           drawBlock(x + 18, y + 7.5, zOffset, 4, 1, 2, tire, tire, tire);
-          // Cab (Red) (Drawn before Box because Box has higher X and is closer in projection)
-          drawBlock(x + 1, y + 0.5, zOffset + 1, 7, 7, 5, '#d94136', '#111', '#111');
-          // Windshield
-          drawBlock(x + 1, y + 1, zOffset + 3.5, 3, 6, 2.5, '#d94136', glass, glass);
-          // Box (White)
-          drawBlock(x + 7, y, zOffset + 1.5, 17, 8, 9.5, '#f0f2f5', '#dcdfe3', '#c8cbcf');
         }
       } else if (type === 'etsBus') {
-        // Edmonton Transit Service (ETS) Transit Bus
-        // Blue upper crown & roof: #005087 / #0081BC / #004070
-        // Light silver/white lower body: #d9dfe5 / #cbd2d9 / #b8c1cb
-        // Dark bumper / front bike rack / window glazing
         const etsBlue = '#005087';
         const etsBlueLight = '#0066aa';
         const etsBlueDark = '#003a63';
@@ -2508,38 +2545,39 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         drawFlatRect(x - 1, y - 0.5, 36, 10, 'rgba(0,0,0,0.32)');
 
         if (!isFlipped) {
-          // Tires (Front + Dual Rear)
+          // Facing +x (Down the road)
           drawBlock(x + 5, y - 0.5, zOffset, 4, 1.2, 2.5, tire, tire, tire);
           drawBlock(x + 24, y - 0.5, zOffset, 5, 1.2, 2.5, tire, tire, tire);
           drawBlock(x + 5, y + 8.2, zOffset, 4, 1.2, 2.5, tire, tire, tire);
           drawBlock(x + 24, y + 8.2, zOffset, 5, 1.2, 2.5, tire, tire, tire);
 
-          // Lower body (Silver/Grey)
           drawBlock(x, y, zOffset + 1.2, 33, 9, 3.8, etsSilver, etsSilverDark, etsSilverDark);
-
-          // Dark front bumper
           drawBlock(x + 32, y + 0.5, zOffset + 0.8, 1.5, 8, 2.0, '#1a1a1a', '#111111', '#111111');
-
-          // Bike rack on front bumper
           drawBlock(x + 33.5, y + 2, zOffset + 1.2, 2.0, 5, 1.4, bikeRack, bikeRack, bikeRack);
-
-          // Passenger window ribbon (Dark tinted glass with slim pillars)
           drawBlock(x + 1, y + 0.4, zOffset + 5.0, 31, 8.2, 3.2, etsGlass, etsGlass, etsGlass);
-
-          // Upper body & Aerodynamic Roof Pod (ETS Edmonton Blue)
           drawBlock(x, y, zOffset + 8.2, 33, 9, 2.4, etsBlue, etsBlueLight, etsBlueDark);
-          // Streamlined AC / HVAC roof hump
           drawBlock(x + 6, y + 1.2, zOffset + 10.6, 18, 6.6, 1.6, etsBlue, etsBlueLight, etsBlueDark);
-
-          // Front LED Destination Sign: "126 Westmount / ETS" (Amber LED)
           drawBlock(x + 32, y + 2, zOffset + 8.6, 0.8, 5, 1.4, amberLed, amberLed, amberLed);
-
-          // Windshield with subtle reflection
           drawBlock(x + 31.5, y + 0.8, zOffset + 5.0, 1.2, 7.4, 3.4, '#81a3ba', etsGlass, etsGlass);
-
-          // Headlights
           drawBlock(x + 32.8, y + 1, zOffset + 2.4, 0.4, 1.8, 1.0, '#ffffff', '#ffffff', '#ffffff');
           drawBlock(x + 32.8, y + 6.2, zOffset + 2.4, 0.4, 1.8, 1.0, '#ffffff', '#ffffff', '#ffffff');
+        } else {
+          // Facing -x (Up the road): Front bumper, bike rack, headlights, and destination sign are near x
+          drawBlock(x + 5, y - 0.5, zOffset, 5, 1.2, 2.5, tire, tire, tire);
+          drawBlock(x + 24, y - 0.5, zOffset, 4, 1.2, 2.5, tire, tire, tire);
+          drawBlock(x + 5, y + 8.2, zOffset, 5, 1.2, 2.5, tire, tire, tire);
+          drawBlock(x + 24, y + 8.2, zOffset, 4, 1.2, 2.5, tire, tire, tire);
+
+          drawBlock(x, y, zOffset + 1.2, 33, 9, 3.8, etsSilver, etsSilverDark, etsSilverDark);
+          drawBlock(x - 0.5, y + 0.5, zOffset + 0.8, 1.5, 8, 2.0, '#1a1a1a', '#111111', '#111111');
+          drawBlock(x - 2.0, y + 2, zOffset + 1.2, 2.0, 5, 1.4, bikeRack, bikeRack, bikeRack);
+          drawBlock(x + 1, y + 0.4, zOffset + 5.0, 31, 8.2, 3.2, etsGlass, etsGlass, etsGlass);
+          drawBlock(x, y, zOffset + 8.2, 33, 9, 2.4, etsBlue, etsBlueLight, etsBlueDark);
+          drawBlock(x + 9, y + 1.2, zOffset + 10.6, 18, 6.6, 1.6, etsBlue, etsBlueLight, etsBlueDark);
+          drawBlock(x + 0.2, y + 2, zOffset + 8.6, 0.8, 5, 1.4, amberLed, amberLed, amberLed);
+          drawBlock(x + 0.3, y + 0.8, zOffset + 5.0, 1.2, 7.4, 3.4, '#81a3ba', etsGlass, etsGlass);
+          drawBlock(x - 0.2, y + 1, zOffset + 2.4, 0.4, 1.8, 1.0, '#ffffff', '#ffffff', '#ffffff');
+          drawBlock(x - 0.2, y + 6.2, zOffset + 2.4, 0.4, 1.8, 1.0, '#ffffff', '#ffffff', '#ffffff');
         }
       }
     }
@@ -2645,17 +2683,30 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       ctx!.restore();
     }
 
-    function drawCyclist(x: number, y: number, z: number, bikeColor: string) {
-      drawBlock(x, y, z, 3, 0.5, 2, '#333', '#222', '#111');
-      drawBlock(x + 6, y, z, 3, 0.5, 2, '#333', '#222', '#111');
-      drawBlock(x + 2, y, z + 1.5, 5, 0.5, 1.5, bikeColor, bikeColor, bikeColor);
-      drawPedestrian(x + 3, y, z + 2, '#ffffff');
+    function drawCyclist(x: number, y: number, z: number, bikeColor: string, isFlipped = false) {
+      if (!isFlipped) {
+        drawBlock(x, y, z, 3, 0.5, 2, '#333', '#222', '#111');
+        drawBlock(x + 6, y, z, 3, 0.5, 2, '#333', '#222', '#111');
+        drawBlock(x + 2, y, z + 1.5, 5, 0.5, 1.5, bikeColor, bikeColor, bikeColor);
+        drawPedestrian(x + 3, y, z + 2, '#ffffff');
+      } else {
+        drawBlock(x + 6, y, z, 3, 0.5, 2, '#333', '#222', '#111');
+        drawBlock(x, y, z, 3, 0.5, 2, '#333', '#222', '#111');
+        drawBlock(x + 2, y, z + 1.5, 5, 0.5, 1.5, bikeColor, bikeColor, bikeColor);
+        drawPedestrian(x + 4, y, z + 2, '#ffffff');
+      }
     }
 
-    function drawScooter(x: number, y: number, z: number, scooterColor: string) {
-      drawBlock(x, y, z, 7, 1, 0.6, scooterColor, scooterColor, scooterColor);
-      drawBlock(x + 6, y + 0.2, z + 0.6, 0.5, 0.6, 4, '#333', '#222', '#111');
-      drawPedestrian(x + 2, y, z + 0.6, '#0081BC');
+    function drawScooter(x: number, y: number, z: number, scooterColor: string, isFlipped = false) {
+      if (!isFlipped) {
+        drawBlock(x, y, z, 7, 1, 0.6, scooterColor, scooterColor, scooterColor);
+        drawBlock(x + 6, y + 0.2, z + 0.6, 0.5, 0.6, 4, '#333', '#222', '#111');
+        drawPedestrian(x + 2, y, z + 0.6, '#0081BC');
+      } else {
+        drawBlock(x, y, z, 7, 1, 0.6, scooterColor, scooterColor, scooterColor);
+        drawBlock(x + 0.5, y + 0.2, z + 0.6, 0.5, 0.6, 4, '#333', '#222', '#111');
+        drawPedestrian(x + 4.5, y, z + 0.6, '#0081BC');
+      }
     }
 
     const BASE_CAR_SPEED = 1.15;
@@ -2692,18 +2743,24 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       };
     });
 
-    const microMobility = Array.from({ length: 24 }, (_, i) => ({
-      type: i % 2 === 0 ? 'bike' : 'scooter',
-      x: -50 - i * 42,
-      y: i % 2 === 0 ? 110 : 124,
-      baseY: i % 2 === 0 ? 110 : 124,
-      targetY: i % 2 === 0 ? 110 : 124,
-      w: i % 2 === 0 ? 8 : 7,
-      d: 4,
-      baseSpeed: MICRO_SPEED,
-      speed: MICRO_SPEED,
-      color: edmontonPalette[i % edmontonPalette.length].hex
-    }));
+    const microMobility = Array.from({ length: 24 }, (_, i) => {
+      const isInnerLane = i % 2 === 0;
+      const dir = isInnerLane ? -1 : 1;
+      return {
+        type: i % 2 === 0 ? 'bike' : 'scooter',
+        x: dir === -1 ? blockLength + 40 + i * 35 : -50 - i * 42,
+        y: isInnerLane ? 110 : 124,
+        baseY: isInnerLane ? 110 : 124,
+        targetY: isInnerLane ? 110 : 124,
+        w: i % 2 === 0 ? 8 : 7,
+        d: 4,
+        direction: dir,
+        isFlipped: dir === -1,
+        baseSpeed: MICRO_SPEED,
+        speed: MICRO_SPEED,
+        color: edmontonPalette[i % edmontonPalette.length].hex
+      };
+    });
 
     interface RoadObstacle {
       x: number;
@@ -2740,16 +2797,19 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       policeBubbleText?: string;
       isFlipped?: boolean;
       speedKmH?: number;
+      direction?: number;
     }
 
-    // Baseline through-traffic vehicles (constant through flow across the neighborhood)
+    // Baseline through-traffic vehicles: Two-way North American traffic
+    // Inner lane (y = 110, beside curb): drives UP the road (direction = -1, towards top-left)
+    // Outer lane (y = 124): drives DOWN the road (direction = 1, towards bottom-right)
     const initialLayoutType = configRef.current.streetLayout || 'mature_laned';
     const isSuburbanInit = initialLayoutType === 'suburban_front_driveway';
     const throughVehicles: RoadObstacle[] = [
-      { type: 'sedan', x: -40, y: 110, baseY: 110, targetY: 110, w: 15, d: 7, baseSpeed: 1.25, speed: 1.25, color: edmontonPalette[0].hex, stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false },
+      { type: 'sedan', x: 280, y: 110, baseY: 110, targetY: 110, w: 15, d: 7, baseSpeed: 1.25, speed: 1.25, direction: -1, isFlipped: true, color: edmontonPalette[0].hex, stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false },
       {
         type: 'etsBus',
-        x: -220,
+        x: 480,
         y: 110,
         baseY: 110,
         targetY: 110,
@@ -2757,6 +2817,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         d: 9,
         baseSpeed: 0.95,
         speed: 0.95,
+        direction: -1,
+        isFlipped: true,
         color: '#005087',
         stuckTimer: 0,
         honkCooldown: 0,
@@ -2765,14 +2827,16 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         busStopState: 'approaching',
         searchingBubbleTimer: 0
       },
-      { type: 'boxTruck', x: -420, y: 124, baseY: 124, targetY: 124, w: 24, d: 8.5, baseSpeed: 0.85, speed: 0.85, color: '', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false }
+      { type: 'boxTruck', x: -40, y: 124, baseY: 124, targetY: 124, w: 24, d: 8.5, baseSpeed: 0.85, speed: 0.85, direction: 1, isFlipped: false, color: '', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false },
+      { type: 'suv', x: -220, y: 124, baseY: 124, targetY: 124, w: 16, d: 7.5, baseSpeed: 1.1, speed: 1.1, direction: 1, isFlipped: false, color: '#2563EB', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: false }
     ];
 
     // In Suburban Front Driveway neighbourhood, reduce two-way traffic and space vehicles with wide speed standard deviation
     if (isSuburbanInit) {
-      throughVehicles[0].x = -60;
-      throughVehicles[1].x = -2600; // Minimal ETS bus frequency
-      throughVehicles[2].x = -520;  // Long headway interval
+      throughVehicles[0].x = 320;
+      throughVehicles[1].x = 3200; // Minimal ETS bus frequency
+      throughVehicles[2].x = -240;  // Long headway interval
+      throughVehicles[3].x = -650;  // Long headway interval
       const s0 = getSuburbanVehicleSpeed();
       throughVehicles[0].baseSpeed = s0.simSpeed;
       throughVehicles[0].speed = s0.simSpeed;
@@ -2782,13 +2846,18 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       throughVehicles[2].baseSpeed = s2.simSpeed;
       throughVehicles[2].speed = s2.simSpeed;
       throughVehicles[2].speedKmH = s2.speedKmH;
+
+      const s3 = getSuburbanVehicleSpeed();
+      throughVehicles[3].baseSpeed = s3.simSpeed;
+      throughVehicles[3].speed = s3.simSpeed;
+      throughVehicles[3].speedKmH = s3.speedKmH;
     }
 
     // Additional ETS Buses pool (injected for every three 8-plexes on the road)
     const extraEtsBuses: RoadObstacle[] = [
       {
         type: 'etsBus',
-        x: -360,
+        x: 720,
         y: 110,
         baseY: 110,
         targetY: 110,
@@ -2796,6 +2865,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         d: 9,
         baseSpeed: 0.95,
         speed: 0.95,
+        direction: -1,
+        isFlipped: true,
         color: '#005087',
         stuckTimer: 0,
         honkCooldown: 0,
@@ -2806,7 +2877,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       },
       {
         type: 'etsBus',
-        x: -600,
+        x: 1040,
         y: 110,
         baseY: 110,
         targetY: 110,
@@ -2814,6 +2885,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         d: 9,
         baseSpeed: 0.95,
         speed: 0.95,
+        direction: -1,
+        isFlipped: true,
         color: '#005087',
         stuckTimer: 0,
         honkCooldown: 0,
@@ -2824,13 +2897,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       }
     ];
 
-    // Cruising / Circling vehicle pool: activates as street parking fills up, creating realistic traffic searching for spots
+    // Cruising / Circling vehicle pool: circling cars drive UP the road (direction -1, y = 110) scanning for curbside parking on their right
     const cruisingVehiclePool: RoadObstacle[] = [
-      { type: 'suv', x: -140, y: 124, baseY: 124, targetY: 124, w: 16, d: 7.5, baseSpeed: 0.72, speed: 0.72, color: edmontonPalette[3].hex, stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 },
-      { type: 'pickup', x: -240, y: 110, baseY: 110, targetY: 110, w: 18, d: 7.5, baseSpeed: 0.75, speed: 0.75, color: edmontonPalette[2].hex, stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 },
-      { type: 'sedan', x: -340, y: 124, baseY: 124, targetY: 124, w: 15, d: 7, baseSpeed: 0.68, speed: 0.68, color: '#C0392B', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 },
-      { type: 'suv', x: -440, y: 110, baseY: 110, targetY: 110, w: 16, d: 7.5, baseSpeed: 0.7, speed: 0.7, color: '#27AE60', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 },
-      { type: 'sedan', x: -540, y: 124, baseY: 124, targetY: 124, w: 15, d: 7, baseSpeed: 0.65, speed: 0.65, color: '#8E44AD', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 }
+      { type: 'suv', x: 500, y: 110, baseY: 110, targetY: 110, w: 16, d: 7.5, baseSpeed: 0.72, speed: 0.72, direction: -1, isFlipped: true, color: edmontonPalette[3].hex, stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 },
+      { type: 'pickup', x: 620, y: 110, baseY: 110, targetY: 110, w: 18, d: 7.5, baseSpeed: 0.75, speed: 0.75, direction: -1, isFlipped: true, color: edmontonPalette[2].hex, stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 },
+      { type: 'sedan', x: -180, y: 124, baseY: 124, targetY: 124, w: 15, d: 7, baseSpeed: 0.68, speed: 0.68, direction: 1, isFlipped: false, color: '#C0392B', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 },
+      { type: 'suv', x: 760, y: 110, baseY: 110, targetY: 110, w: 16, d: 7.5, baseSpeed: 0.7, speed: 0.7, direction: -1, isFlipped: true, color: '#27AE60', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 },
+      { type: 'sedan', x: -320, y: 124, baseY: 124, targetY: 124, w: 15, d: 7, baseSpeed: 0.65, speed: 0.65, direction: 1, isFlipped: false, color: '#8E44AD', stuckTimer: 0, honkCooldown: 0, honkBubbleTimer: 0, isCircling: true, circlingLap: 1, searchingBubbleTimer: 0, searchScanTimer: 0 }
     ];
 
     const activeVehicles: RoadObstacle[] = [...throughVehicles];
@@ -2979,12 +3052,14 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       return {
         id,
         type: 'deliveryVan',
-        x: -120 - id * 120,
+        x: blockLength + 100 + id * 120,
         y: 104,
         baseY: 104,
         targetY: 104,
         w: 21,
         d: 8,
+        direction: -1,
+        isFlipped: true,
         baseSpeed: 0.9,
         speed: 0.9,
         color: '#FF5500',
@@ -3016,15 +3091,17 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     }
 
     function isCurbsideSpotOccupied(targetStopX: number, obstacles: RoadObstacle[] = []): boolean {
-      // Zone checks: 30m ETS bus stop zone (x: 295 - 375 for standard layouts, x: 312 - 344 for suburban front driveway Lot 10)
+      // Zone checks: 30m ETS bus stop zone (standard layouts only) and hydrant clearance
       const currentLayoutForSpots = configRef.current.streetLayout || 'mature_laned';
       const isSuburban = currentLayoutForSpots === 'suburban_front_driveway';
       if (isSuburban) {
-        if (targetStopX + 21 >= 312 && targetStopX <= 344) return true;
+        // In suburban front driveway layout, no ETS bus stop; fire hydrant 5m clearance at x = 11 (x: 6 to 16)
+        if (targetStopX + 21 >= 6 && targetStopX <= 16) return true;
       } else {
+        // Standard layouts: 30m ETS bus stop zone (x: 295 to 375) and hydrant clearance at x = 27 (x: 10 to 45)
         if (targetStopX + 21 >= 295 && targetStopX <= 375) return true;
+        if (targetStopX + 21 >= 10 && targetStopX <= 45) return true;
       }
-      if (targetStopX + 21 >= 10 && targetStopX <= 45) return true;
 
       // In suburban front driveway layout, vehicles cannot park in front of driveways and must not park within 1.5m of either side
       if ((configRef.current.streetLayout || 'mature_laned') === 'suburban_front_driveway') {
@@ -3259,14 +3336,15 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       return true;
     }
 
-    // Unified forward obstacle detection & non-penetration clamping across all road entities
+    // Unified forward obstacle detection & non-penetration clamping across all road entities (Bidirectional)
     function checkForwardObstacle(
       A: RoadObstacle,
       proposedSpeed: number,
       obstacles: RoadObstacle[],
       protesters: { x: number; y: number }[] = []
     ): { safeSpeed: number; targetX: number; blocking: RoadObstacle | null } {
-      let targetX = A.x + proposedSpeed;
+      const dir = A.direction !== undefined ? A.direction : 1;
+      let targetX = A.x + proposedSpeed * dir;
       let safeSpeed = proposedSpeed;
       let blocking: RoadObstacle | null = null;
       const aWidth = A.w || 15;
@@ -3292,33 +3370,55 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         const bWidth = B.w || 15;
 
-        // If B is completely behind A's rear bumper, B cannot block A
-        if (B.x + bWidth <= A.x) continue;
+        if (dir === 1) {
+          // Down the road (+x): front is at A.x + aWidth
+          // If B is completely behind A's rear bumper, B cannot block A
+          if (B.x + bWidth <= A.x) continue;
+          if (A.x + aWidth >= B.x + bWidth && A.x > B.x) continue;
 
-        // If A is already further ahead of B (A's front is ahead of B's front, and B's rear is behind A's rear),
-        // then B is trailing A, not blocking A
-        if (A.x + aWidth >= B.x + bWidth && A.x > B.x) continue;
+          const { minStopGap, followBuffer } = getSafetyBuffer(A, B);
+          const gap = B.x - (A.x + aWidth);
+          const maxAllowedX = B.x - aWidth - minStopGap;
 
-        const { minStopGap, followBuffer } = getSafetyBuffer(A, B);
-        const gap = B.x - (A.x + aWidth);
-        const maxAllowedX = B.x - aWidth - minStopGap;
+          if (targetX > maxAllowedX || gap < followBuffer) {
+            targetX = Math.min(targetX, maxAllowedX);
 
-        if (targetX > maxAllowedX || gap < followBuffer) {
-          targetX = Math.min(targetX, maxAllowedX);
-
-          if (gap <= minStopGap + 0.1 || targetX <= A.x + 0.02) {
-            safeSpeed = 0;
-            // Prevent forward penetration, clamp strictly to not exceed maxAllowedX or current A.x
-            targetX = Math.min(A.x, maxAllowedX);
-          } else {
-            // Smooth progressive deceleration as vehicle approaches follow buffer
-            const ratio = Math.max(0, Math.min(1, (gap - minStopGap) / Math.max(1, followBuffer - minStopGap)));
-            const leadSpeed = Math.max(0, B.speed || 0);
-            const matchedSpeed = leadSpeed * 0.8 + proposedSpeed * ratio * 0.2;
-            safeSpeed = Math.min(safeSpeed, Math.max(0, matchedSpeed), Math.max(0, targetX - A.x));
+            if (gap <= minStopGap + 0.1 || targetX <= A.x + 0.02) {
+              safeSpeed = 0;
+              targetX = Math.min(A.x, maxAllowedX);
+            } else {
+              const ratio = Math.max(0, Math.min(1, (gap - minStopGap) / Math.max(1, followBuffer - minStopGap)));
+              const leadSpeed = Math.max(0, B.speed || 0);
+              const matchedSpeed = leadSpeed * 0.8 + proposedSpeed * ratio * 0.2;
+              safeSpeed = Math.min(safeSpeed, Math.max(0, matchedSpeed), Math.max(0, targetX - A.x));
+            }
+            blocking = B;
           }
+        } else {
+          // Up the road (-x): front is at A.x, rear is at A.x + aWidth
+          // Ahead of A means smaller x (x < A.x)
+          // If B is completely behind A's rear bumper (B.x >= A.x + aWidth), B cannot block A
+          if (B.x >= A.x + aWidth) continue;
+          if (A.x <= B.x && A.x + aWidth < B.x + bWidth) continue;
 
-          blocking = B;
+          const { minStopGap, followBuffer } = getSafetyBuffer(A, B);
+          const gap = A.x - (B.x + bWidth);
+          const minAllowedX = B.x + bWidth + minStopGap;
+
+          if (targetX < minAllowedX || gap < followBuffer) {
+            targetX = Math.max(targetX, minAllowedX);
+
+            if (gap <= minStopGap + 0.1 || targetX >= A.x - 0.02) {
+              safeSpeed = 0;
+              targetX = Math.max(A.x, minAllowedX);
+            } else {
+              const ratio = Math.max(0, Math.min(1, (gap - minStopGap) / Math.max(1, followBuffer - minStopGap)));
+              const leadSpeed = Math.max(0, B.speed || 0);
+              const matchedSpeed = leadSpeed * 0.8 + proposedSpeed * ratio * 0.2;
+              safeSpeed = Math.min(safeSpeed, Math.max(0, matchedSpeed), Math.max(0, A.x - targetX));
+            }
+            blocking = B;
+          }
         }
       }
 
@@ -3328,19 +3428,34 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         if (Math.abs(A.y - ped.y) < 8.5) {
           const minStopGap = 5.0;
           const followBuffer = 14.0;
-          const gap = ped.x - (A.x + aWidth);
-
-          if (ped.x + 2 > A.x && gap < followBuffer) {
-            const maxAllowedX = ped.x - aWidth - minStopGap;
-            targetX = Math.min(targetX, maxAllowedX);
-            if (gap <= minStopGap + 0.2 || targetX <= A.x + 0.05) {
-              targetX = Math.min(A.x, maxAllowedX);
-              safeSpeed = 0;
-            } else {
-              safeSpeed = Math.min(safeSpeed, proposedSpeed * (gap / followBuffer) * 0.5);
+          if (dir === 1) {
+            const gap = ped.x - (A.x + aWidth);
+            if (ped.x + 2 > A.x && gap < followBuffer) {
+              const maxAllowedX = ped.x - aWidth - minStopGap;
+              targetX = Math.min(targetX, maxAllowedX);
+              if (gap <= minStopGap + 0.2 || targetX <= A.x + 0.05) {
+                targetX = Math.min(A.x, maxAllowedX);
+                safeSpeed = 0;
+              } else {
+                safeSpeed = Math.min(safeSpeed, proposedSpeed * (gap / followBuffer) * 0.5);
+              }
+              blocking = { x: ped.x, y: ped.y, w: 2, d: 2, type: 'protester' };
+              break;
             }
-            blocking = { x: ped.x, y: ped.y, w: 2, d: 2, type: 'protester' };
-            break;
+          } else {
+            const gap = A.x - (ped.x + 2);
+            if (ped.x < A.x + aWidth && gap < followBuffer) {
+              const minAllowedX = ped.x + 2 + minStopGap;
+              targetX = Math.max(targetX, minAllowedX);
+              if (gap <= minStopGap + 0.2 || targetX >= A.x - 0.05) {
+                targetX = Math.max(A.x, minAllowedX);
+                safeSpeed = 0;
+              } else {
+                safeSpeed = Math.min(safeSpeed, proposedSpeed * (gap / followBuffer) * 0.5);
+              }
+              blocking = { x: ped.x, y: ped.y, w: 2, d: 2, type: 'protester' };
+              break;
+            }
           }
         }
       }
@@ -3355,7 +3470,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       allObstacles: RoadObstacle[] = []
     ) {
       if (van.state === 'APPROACHING') {
-        if (van.x > van.targetStopX - 60) {
+        if (van.x < van.targetStopX + 60) {
           const active8PlexVan = getEightPlexCount();
           const currentDwellingsVan = 12 + active8PlexVan * 7;
           const occupied = currentDwellingsVan > 60 || isCurbsideSpotOccupied(van.targetStopX, allObstacles);
@@ -3381,9 +3496,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         van.speed = safeSpeed;
 
-        const distToStop = van.targetStopX - van.x;
+        const distToStop = van.x - van.targetStopX;
         if (distToStop <= 1.0 || (distToStop <= 8.0 && safeSpeed < 0.08)) {
-          van.x = Math.min(targetX, van.targetStopX);
+          van.x = Math.max(targetX, van.targetStopX);
           van.speed = 0;
           van.state = 'STOPPED';
           van.stopTimer = 0;
@@ -3395,8 +3510,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const doorY = is8Plex ? 70.8 : 44;
           const walkwayX = houseBaseX + 11.5;
 
-          // Left side of van (driver cab door facing curb/travel lane edge)
-          const cabX = van.x + 14;
+          // Driver cab door facing curb (for isFlipped: true, cab is in front at x..x+6)
+          const cabX = van.x + 3;
           const cabY = van.y >= 100 ? 102.5 : 92.5;
 
           van.driver.active = true;
@@ -3491,7 +3606,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const doorY = van.driver.targetDoorY;
           const walkwayX = houseBaseX + 11.5;
 
-          const cabX = van.x + 14;
+          const cabX = van.x + 3;
           const cabY = van.y >= 100 ? 102.5 : 92.5;
 
           if (is8Plex) {
@@ -3557,7 +3672,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         van.speed = safeSpeed;
         van.x = targetX;
 
-        if (van.x > blockLength + 120) {
+        if (van.x < -80) {
           van.state = 'COOLDOWN';
           van.stopTimer = 0;
         }
@@ -3575,13 +3690,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           van.driver.targetDoorX = nextDoorX;
           van.driver.targetDoorY = nextDoorY;
 
-          let spawnX = -140 - Math.random() * 80;
+          let spawnX = blockLength + 100 + Math.random() * 80;
           for (let j = 0; j < allObstacles.length; j++) {
             const obs = allObstacles[j];
             if (obs === van) continue;
-            if (obs.x < 0 && Math.abs(obs.y - 104) < 10) {
+            if (obs.x > blockLength && Math.abs(obs.y - 104) < 10) {
               if (obs.x > spawnX - van.w - 20 && obs.x < spawnX + van.w + 20) {
-                spawnX = Math.min(spawnX, obs.x - van.w - 25);
+                spawnX = Math.max(spawnX, obs.x + (obs.w || 21) + 25);
               }
             }
           }
@@ -3591,6 +3706,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           van.baseY = 104;
           van.targetY = 104;
           van.speed = van.baseSpeed;
+          van.direction = -1;
+          van.isFlipped = true;
           van.state = 'APPROACHING';
         }
       }
@@ -3662,6 +3779,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             if (v.type === 'sedan') v.baseSpeed = 1.25;
             else if (v.type === 'boxTruck') v.baseSpeed = 0.85;
             else if (v.type === 'etsBus') v.baseSpeed = 0.95;
+            else if (v.type === 'suv') v.baseSpeed = 1.1;
             else if (v.isCircling) v.baseSpeed = 0.7;
             else v.baseSpeed = BASE_CAR_SPEED;
           }
@@ -3764,15 +3882,24 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       if (currentCirclingCount < targetCirclingCount) {
         const candidate = cruisingVehiclePool.find(p => !activeVehicles.includes(p));
         if (candidate) {
-          let spawnX = -80 - Math.random() * 50;
+          const candidateDir = candidate.direction !== undefined ? candidate.direction : -1;
+          let spawnX = candidateDir === -1 ? blockLength + 60 + Math.random() * 50 : -80 - Math.random() * 50;
           for (const v of activeVehicles) {
-            if (Math.abs(v.y - (candidate.baseY || 110)) < 8 && v.x < 0 && v.x > spawnX - candidate.w - 18) {
-              spawnX = Math.min(spawnX, v.x - candidate.w - 18);
+            if (Math.abs(v.y - (candidate.baseY || (candidateDir === -1 ? 110 : 124))) < 8) {
+              if (candidateDir === -1) {
+                if (v.x > blockLength && v.x < spawnX + candidate.w + 18) {
+                  spawnX = Math.max(spawnX, v.x + candidate.w + 18);
+                }
+              } else {
+                if (v.x < 0 && v.x > spawnX - candidate.w - 18) {
+                  spawnX = Math.min(spawnX, v.x - candidate.w - 18);
+                }
+              }
             }
           }
           candidate.x = spawnX;
-          candidate.y = candidate.baseY || 110;
-          candidate.targetY = candidate.baseY || 110;
+          candidate.y = candidate.baseY || (candidateDir === -1 ? 110 : 124);
+          candidate.targetY = candidate.baseY || (candidateDir === -1 ? 110 : 124);
           if (currentLayout === 'suburban_front_driveway') {
             const { simSpeed, speedKmH } = getSuburbanVehicleSpeed();
             candidate.baseSpeed = simSpeed;
@@ -3982,9 +4109,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         if (A.isCircling && !A.isBurning) {
           if (!A.parkingState || A.parkingState === 'cruising') {
             A.parkingState = 'cruising';
-            // Only search while in the curbside lane and along the curbside block
+            // Only search while in the curbside lane and along the curbside block (driving UP the road with curb on driver's right)
             const maxCurbsideSearchX = ((configRef.current.streetLayout || 'mature_laned') === 'suburban_front_driveway') ? 355 : 270;
-            if (A.x > 35 && A.x < maxCurbsideSearchX) {
+            if (A.direction === -1 && A.x > 35 && A.x < maxCurbsideSearchX) {
               // Find all curbside parking stalls that are currently vacant
               const curbsideStalls = houseCarAssignments.filter(s => s.y >= 92 && s.y <= 96);
               const occupiedStalls = houseCarAssignments.slice(0, totalToRender);
@@ -4005,8 +4132,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 if (isOccupied || isTargeted) continue;
 
                 // Stall is open! Check if car is approaching alongside it (car front near stall front)
-                const distToStall = (stall.x + stall.w) - A.x;
-                if (distToStall > 0 && distToStall < 12) {
+                const dir = A.direction !== undefined ? A.direction : 1;
+                const distToStall = dir === -1 
+                  ? A.x - stall.x
+                  : (stall.x + stall.w) - A.x;
+                if (distToStall > 0 && distToStall < 14) {
                   // Evaluate spot size relative to car size
                   // Alternate between a tight 80% spot attempt (fails & gives up) and an ample >= 150% spot (succeeds)
                   const carWidth = A.w || 15;
@@ -4115,8 +4245,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           targetLane = (A.baseY || 110) < 118 ? 108 : 126;
           isPullingOver = true;
         } else if (A.type === 'etsBus' && !A.isBurning) {
-          if (hasProtectedBikeLane) {
-            // When protected bike lane is present (>60 dwellings), ETS bus halts in-lane (y = 110) at floating platform
+          const isSuburbanSim = (configRef.current.streetLayout || 'mature_laned') === 'suburban_front_driveway';
+          if (hasProtectedBikeLane || isSuburbanSim) {
+            // When protected bike lane is present (>60 dwellings) or in suburban front driveway layout (no on-street bus stop), ETS bus stays in standard travel lane
             targetLane = A.baseY || 110;
           } else {
             const anotherBusDwelling = activeVehicles.some(v => v !== A && v.type === 'etsBus' && v.busStopState === 'dwelling');
@@ -4131,12 +4262,23 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           }
         } else if (!A.parkingState || A.parkingState === 'cruising') {
           let isBlockedInLane = false;
+          const aDir = A.direction !== undefined ? A.direction : 1;
+          const aWidth = A.w || 15;
           for (let j = 0; j < roadObstacleCount; j++) {
             const B = allRoadObstacles[j];
             if (A === B || (B.speed || 0) > 0.3) continue;
-            if (hasLateralOverlap(A.y, A.d, B.y, B.d, 1.2) && B.x > A.x && B.x - (A.x + (A.w || 15)) < 45) {
-              isBlockedInLane = true;
-              break;
+            if (hasLateralOverlap(A.y, A.d, B.y, B.d, 1.2)) {
+              if (aDir === -1) {
+                if (B.x < A.x && A.x - (B.x + (B.w || 15)) < 45 && A.x - (B.x + (B.w || 15)) > -5) {
+                  isBlockedInLane = true;
+                  break;
+                }
+              } else {
+                if (B.x > A.x && B.x - (A.x + aWidth) < 45 && B.x - (A.x + aWidth) > -5) {
+                  isBlockedInLane = true;
+                  break;
+                }
+              }
             }
           }
 
@@ -4194,21 +4336,34 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           ? Math.max(0.38, (A.baseSpeed || 0.7) * 0.65)
           : (A.baseSpeed || BASE_CAR_SPEED);
 
-        // ETS Bus Stop Dwelling & Curbside Loading/Unloading at designated 30m yellow curb
+        // ETS Bus Stop Dwelling & Curbside Loading/Unloading at designated 30m yellow curb (standard layouts only)
         if (A.type === 'etsBus') {
+          const isSuburbanSim = (configRef.current.streetLayout || 'mature_laned') === 'suburban_front_driveway';
           const stopTargetX = 312;
-          if (A.busStopState === 'approaching' || !A.busStopState) {
+          const busDir = A.direction !== undefined ? A.direction : 1;
+          if (!isSuburbanSim && (A.busStopState === 'approaching' || !A.busStopState)) {
               // Only initiate curbside pull-over stop if passengers are waiting
               if (busStopPassengerCount > 0) {
-                if (A.x >= 260 && A.x < stopTargetX) {
-                  // Decelerate smoothly as bus steers over to the curb
-                  const distToStop = stopTargetX - A.x;
-                  assignedBaseSpeed = Math.max(0.18, (distToStop / 48) * (A.baseSpeed || 0.95));
-                } else if (A.x >= stopTargetX && A.x < stopTargetX + 8) {
-                  // Curbside reached: initiate dwelling for boarding and alighting
-                  A.busStopState = 'dwelling';
-                  A.busDwellTimer = 180; // ~3 seconds dwell time
-                  assignedBaseSpeed = 0;
+                if (busDir === -1) {
+                  // Heading up the road (towards x=0): approaching stop from right (x > stopTargetX)
+                  if (A.x <= 360 && A.x > stopTargetX) {
+                    const distToStop = A.x - stopTargetX;
+                    assignedBaseSpeed = Math.max(0.18, (distToStop / 48) * (A.baseSpeed || 0.95));
+                  } else if (A.x <= stopTargetX && A.x > stopTargetX - 8) {
+                    A.busStopState = 'dwelling';
+                    A.busDwellTimer = 180;
+                    assignedBaseSpeed = 0;
+                  }
+                } else {
+                  // Heading down the road (towards blockLength): approaching from left (x < stopTargetX)
+                  if (A.x >= 260 && A.x < stopTargetX) {
+                    const distToStop = stopTargetX - A.x;
+                    assignedBaseSpeed = Math.max(0.18, (distToStop / 48) * (A.baseSpeed || 0.95));
+                  } else if (A.x >= stopTargetX && A.x < stopTargetX + 8) {
+                    A.busStopState = 'dwelling';
+                    A.busDwellTimer = 180;
+                    assignedBaseSpeed = 0;
+                  }
                 }
               }
             } else if (A.busStopState === 'dwelling') {
@@ -4281,7 +4436,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if ((A.honkBubbleTimer || 0) > 0) A.honkBubbleTimer!--;
         }
 
-        if (A.x > blockLength + 80) {
+        const vehicleDir = A.direction !== undefined ? A.direction : 1;
+        const reachedBoundary = vehicleDir === 1 
+          ? A.x > blockLength + 80 
+          : A.x < -80;
+
+        if (reachedBoundary) {
           if (A.isEmergency) {
             A.x = -800;
             continue;
@@ -4305,29 +4465,31 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             A.parkingState = 'cruising';
             A.parkingTargetSlot = null;
             A.parkingBubbleText = undefined;
-            // Switch lane between laps to search both sides of the street
-            A.baseY = A.baseY === 110 ? 124 : 110;
           }
 
-          let respawnX = -70;
+          let respawnX = vehicleDir === 1 ? -70 : blockLength + 70;
           for (let j = 0; j < roadObstacleCount; j++) {
             const B = allRoadObstacles[j];
             if (A === B) continue;
             if (hasLateralOverlap(A.y, A.d, B.y, B.d, 1.2)) {
-              if (B.x <= 35 && B.x >= respawnX - (A.w || 15) - 20) {
-                respawnX = Math.min(respawnX, B.x - (A.w || 15) - 25);
+              if (vehicleDir === 1) {
+                if (B.x <= 35 && B.x >= respawnX - (A.w || 15) - 20) {
+                  respawnX = Math.min(respawnX, B.x - (A.w || 15) - 25);
+                }
+              } else {
+                if (B.x >= blockLength - 35 && B.x <= respawnX + (A.w || 15) + 20) {
+                  respawnX = Math.max(respawnX, B.x + (B.w || 15) + 25);
+                }
               }
             }
           }
           if (currentLayout === 'suburban_front_driveway') {
             if (A.type === 'etsBus') {
               // Minimal ETS Service on suburban front driveway blocks (long headway interval)
-              respawnX = -2600 - Math.random() * 600;
+              respawnX = vehicleDir === 1 ? -2600 - Math.random() * 600 : blockLength + 2600 + Math.random() * 600;
             } else {
               // Reduced two-way traffic on suburban front driveway blocks (long headway intervals between vehicles)
-              respawnX = -450 - Math.random() * 400;
-              // Alternate lane (110 vs 124) for balanced light two-way flow
-              A.baseY = A.baseY === 110 ? 124 : 110;
+              respawnX = vehicleDir === 1 ? -450 - Math.random() * 400 : blockLength + 450 + Math.random() * 400;
             }
             // Assign vehicle speed with larger standard deviation: 35 km/h to 55 km/h (-5 km/h to +15 km/h from 40 km/h limit)
             if (A.type !== 'etsBus') {
@@ -4337,9 +4499,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             }
           }
           A.x = respawnX;
-          A.y = A.baseY || 110;
-          A.targetY = A.baseY || 110;
+          A.y = A.baseY || (vehicleDir === -1 ? 110 : 124);
+          A.targetY = A.baseY || (vehicleDir === -1 ? 110 : 124);
           A.speed = A.baseSpeed || BASE_CAR_SPEED;
+          A.isFlipped = vehicleDir === -1;
           if (A.type === 'etsBus') {
             A.busStopState = 'approaching';
             A.busDwellTimer = 0;
@@ -4380,7 +4543,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         if (v.x >= 15 && v.x <= blockLength - 10 && (v.state === 'STOPPED' || v.state === 'AT_DOOR' || v.state === 'RETURNING') && (v.speed || 0) < 0.2) {
           if (v.y < 118) {
             lane1Stopped = true;
-            if (!leadStopped1 || v.x > leadStopped1.x) leadStopped1 = v;
+            if (!leadStopped1 || v.x < leadStopped1.x) leadStopped1 = v;
           } else {
             lane2Stopped = true;
             if (!leadStopped2 || v.x > leadStopped2.x) leadStopped2 = v;
@@ -4401,7 +4564,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if ((v.speed || 0) < 0.2) {
             if (v.y < 118) {
               lane1Stopped = true;
-              if (!leadStopped1 || v.x > leadStopped1.x) leadStopped1 = v;
+              if (!leadStopped1 || v.x < leadStopped1.x) leadStopped1 = v;
             } else {
               lane2Stopped = true;
               if (!leadStopped2 || v.x > leadStopped2.x) leadStopped2 = v;
@@ -4906,7 +5069,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         renderQueue.push({
           ...van,
           color: van.color || '#FF5500',
-          isFlipped: false,
+          isFlipped: van.isFlipped !== undefined ? van.isFlipped : true,
           isAnimatedTraffic: true,
           w: 21,
           d: 8,
@@ -4973,10 +5136,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const v = activeVehicles[i];
         const w = v.w || 15;
         const d = v.d || 7;
+        const isFlipped = v.isFlipped !== undefined ? v.isFlipped : (v.direction === -1);
         renderQueue.push({
           ...v,
           color: v.color || '#0081BC',
-          isFlipped: false,
+          isFlipped,
           isAnimatedTraffic: true,
           w,
           d,
@@ -4997,8 +5161,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const mm = microMobility[i];
         const w = mm.w || (mm.type === 'bike' ? 8 : 7);
         const d = mm.d || 4;
+        const isFlipped = mm.isFlipped !== undefined ? mm.isFlipped : (mm.direction === -1);
         renderQueue.push({
           ...mm,
+          isFlipped,
           isAnimatedTraffic: true,
           w,
           d,
@@ -5024,8 +5190,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       }
 
       // 9. ETS Bus Stop Shelter & Waiting/Boarding Passengers
-      // Designated ETS bus stop at Lot 10
-      const hasEtsBusStop = true;
+      // Designated ETS bus stop at Lot 10 (not present in suburban front driveway layout)
+      const hasEtsBusStop = (configRef.current.streetLayout || 'mature_laned') !== 'suburban_front_driveway';
       if (hasEtsBusStop) {
         if (busStopPassengerRespawnTimer > 0) {
           busStopPassengerRespawnTimer--;
@@ -5194,11 +5360,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           ctx!.clip();
 
           if (item.type === 'bike') {
-            drawCyclist(item.x, item.y, 0, item.color);
+            drawCyclist(item.x, item.y, 0, item.color, item.isFlipped);
           } else if (item.type === 'scooter') {
-            drawScooter(item.x, item.y, 0, item.color);
+            drawScooter(item.x, item.y, 0, item.color, item.isFlipped);
           } else {
-            drawVehicle(item.x, item.y, 0, item.type, item.color, false, item.state);
+            drawVehicle(item.x, item.y, 0, item.type, item.color, item.isFlipped, item.state);
 
             if (item.policeBubbleText) {
               drawPoliceBubble(item.x, item.y, 0, item.policeBubbleText);
@@ -5226,12 +5392,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           }
           ctx!.restore();
         } else if (item.type === 'bike') {
-          drawCyclist(item.x, item.y, 0, item.color);
+          drawCyclist(item.x, item.y, 0, item.color, item.isFlipped);
         } else if (item.type === 'scooter') {
-          drawScooter(item.x, item.y, 0, item.color);
+          drawScooter(item.x, item.y, 0, item.color, item.isFlipped);
         } else {
           // Parked household cars (curbside stalls and driveway pads)
-          drawVehicle(item.x, item.y, 0, item.type, item.color, false, item.state);
+          drawVehicle(item.x, item.y, 0, item.type, item.color, item.isFlipped || false, item.state);
         }
       }
 

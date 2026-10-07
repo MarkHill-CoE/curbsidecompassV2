@@ -19,14 +19,163 @@ export interface PostalLookupResult {
   typology: StreetLayoutTypology;
 }
 
+export interface MultiNeighbourhoodOption {
+  name: string;
+  ward: string;
+  classification: string;
+}
+
 export interface PredictiveMatchResult {
   neighbourhood: string;
   postalFSA: string;
   ward: string;
+  classification: string; // POSSE Classification (e.g. Redeveloping, Developing, Industrial, River Valley)
   typology: StreetLayoutTypology;
   confidence: number;
   matchedBy: 'exact_code' | 'fsa' | 'exact_neighbourhood' | 'predictive_spelling' | 'address_street';
   highlightText?: string;
+  displayCode?: string;
+  isFsaOnly?: boolean;
+  multipleNeighbourhoods?: MultiNeighbourhoodOption[];
+  fsaNeighbourhoodCount?: number;
+}
+
+// Multi-neighbourhood postal code mapping from City of Edmonton POSSE dataset
+export const EDMONTON_MULTI_NEIGHBOURHOOD_POSTAL_CODES: Record<string, MultiNeighbourhoodOption[]> = {
+  "T5A0B4": [{"name": "Kennedale Industrial", "ward": "Dene", "classification": "Industrial"}, {"name": "Industrial Heights", "ward": "Métis", "classification": "Industrial"}],
+  "T5A0E2": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A0E4": [{"name": "Kennedale Industrial", "ward": "Dene", "classification": "Industrial"}, {"name": "Belvedere", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A0E9": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A0P8": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A0R2": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A0W8": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A1J7": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A1N7": [{"name": "Casselman", "ward": "Dene", "classification": "Redeveloping"}, {"name": "McLeod", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A2M6": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A2N4": [{"name": "Casselman", "ward": "Dene", "classification": "Redeveloping"}, {"name": "McLeod", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A2S5": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A2S6": [{"name": "Sifton Park", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A2X5": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A2Y1": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "Overlanders", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3A6": [{"name": "Sifton Park", "ward": "Dene", "classification": "Redeveloping"}, {"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3A9": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Belmont", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A3B4": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Belmont", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A3G7": [{"name": "Sifton Park", "ward": "Dene", "classification": "Redeveloping"}, {"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3G8": [{"name": "Sifton Park", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3H5": [{"name": "Sifton Park", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3K8": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3K9": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3L1": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3L5": [{"name": "Sifton Park", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3M1": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Belmont", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A3R5": [{"name": "Sifton Park", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A3X5": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A3Y4": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A3Y6": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A3Z6": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A3Z7": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4A2": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4B9": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4H1": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4H7": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A4H8": [{"name": "Homesteader", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A4K7": [{"name": "Overlanders", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A4K8": [{"name": "Overlanders", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A4L3": [{"name": "Kennedale Industrial", "ward": "Dene", "classification": "Industrial"}, {"name": "Industrial Heights", "ward": "Métis", "classification": "Industrial"}],
+  "T5A4S1": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A4X4": [{"name": "Casselman", "ward": "Dene", "classification": "Redeveloping"}, {"name": "McLeod", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4X5": [{"name": "Casselman", "ward": "Dene", "classification": "Redeveloping"}, {"name": "McLeod", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4X7": [{"name": "Casselman", "ward": "Dene", "classification": "Redeveloping"}, {"name": "McLeod", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4Y5": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4Y6": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Belmont", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A4Z9": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A5A3": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Belmont", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A5A5": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Kernohan", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A5B3": [{"name": "Overlanders", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A5G1": [{"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}, {"name": "Belmont", "ward": "Dene", "classification": "Redeveloping"}],
+  "T5A5H2": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A5H4": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A5H5": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}],
+  "T5A5J5": [{"name": "Canon Ridge", "ward": "Dene", "classification": "Redeveloping"}, {"name": "River Valley Hermitage", "ward": "Dene", "classification": "River Valley"}]
+};
+
+/**
+ * Returns City of Edmonton POSSE Classification
+ */
+export function getPosseClassification(neighbourhoodName: string, typology?: StreetLayoutTypology): string {
+  if (!neighbourhoodName) return 'Redeveloping';
+  const lower = neighbourhoodName.toLowerCase();
+  if (lower.includes('industrial') || lower.includes('coronet') || lower.includes('davies industrial') || lower.includes('mistatim') || lower.includes('rampart') || lower.includes('pylypow')) {
+    return 'Industrial';
+  }
+  if (lower.includes('river valley') || lower.includes('ravine')) {
+    return 'River Valley';
+  }
+  if (
+    lower.includes('clareview town centre') ||
+    lower.includes('windermere') ||
+    lower.includes('chappelle') ||
+    lower.includes('allard') ||
+    lower.includes('keswick') ||
+    lower.includes('laurel') ||
+    lower.includes('tamarack') ||
+    lower.includes('secord') ||
+    lower.includes('rosenthal') ||
+    lower.includes('granville') ||
+    lower.includes('mcconachie') ||
+    lower.includes('cy becker') ||
+    lower.includes('cavanagh') ||
+    lower.includes('aster') ||
+    lower.includes('crystallina') ||
+    lower.includes('blatchford') ||
+    typology === 'contemporary_townhomes'
+  ) {
+    return 'Developing';
+  }
+  return 'Redeveloping';
+}
+
+/**
+ * Input Intent Recognition
+ */
+export type InputIntent =
+  | { type: 'fsa'; fsa: string; isValid: boolean; fsaData?: (typeof EDMONTON_FSA_DATA)[string] }
+  | { type: 'postal_code'; code: string; fsa: string; formatted: string; isValid: boolean }
+  | { type: 'neighbourhood'; query: string };
+
+export function classifyInputIntent(query: string): InputIntent {
+  const clean = query.trim().toUpperCase().replace(/\s+/g, '');
+  
+  // Pattern 1: FSA (3-Character Alpha-Numeric, e.g., T5A)
+  if (/^[A-Z]\d[A-Z]$/.test(clean)) {
+    const fsaData = EDMONTON_FSA_DATA[clean];
+    return {
+      type: 'fsa',
+      fsa: clean,
+      isValid: Boolean(fsaData),
+      fsaData
+    };
+  }
+
+  // Pattern 2: Full Postal Code (6-Character Alpha-Numeric, e.g., T5A0A1 or T5A 0A1)
+  if (/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(clean)) {
+    const fsa = clean.slice(0, 3);
+    const formatted = `${clean.slice(0, 3)} ${clean.slice(3)}`;
+    const isValid = Boolean(EDMONTON_EXACT_POSTAL_CODES[clean] || EDMONTON_FSA_DATA[fsa]);
+    return {
+      type: 'postal_code',
+      code: clean,
+      fsa,
+      formatted,
+      isValid
+    };
+  }
+
+  // Pattern 3: Neighbourhood Name Search (Text Input)
+  return {
+    type: 'neighbourhood',
+    query: query.trim()
+  };
 }
 
 // 1. Mapping of 3-character Forward Sortation Areas (FSAs) to their primary neighbourhoods, wards, and typologies
@@ -551,37 +700,77 @@ export function resolveLocationOrPredictiveAddress(query: string): PredictiveMat
   const normalized = raw.toUpperCase().replace(/[\s-]/g, '');
 
   // 1A. Exact 6-Character Postal Code Match from official City dataset
-  if (normalized.length === 6 && EDMONTON_EXACT_POSTAL_CODES[normalized]) {
-    const exact = EDMONTON_EXACT_POSTAL_CODES[normalized];
-    const nMeta = ALL_EDMONTON_NEIGHBOURHOODS.find(n => n.name.toLowerCase() === exact.name.toLowerCase());
-    const typology = nMeta?.typology || EDMONTON_FSA_DATA[exact.fsa]?.typology || 'mature_laned';
-    return {
-      neighbourhood: exact.name,
-      postalFSA: exact.fsa,
-      ward: exact.ward,
-      typology,
-      confidence: 1.0,
-      matchedBy: 'exact_code',
-      highlightText: `${exact.name} (${exact.fsa}) • Ward ${exact.ward}`
-    };
+  if (normalized.length === 6 && (EDMONTON_EXACT_POSTAL_CODES[normalized] || EDMONTON_MULTI_NEIGHBOURHOOD_POSTAL_CODES[normalized])) {
+    const multiMatches = EDMONTON_MULTI_NEIGHBOURHOOD_POSTAL_CODES[normalized];
+    const exact = EDMONTON_EXACT_POSTAL_CODES[normalized] || (multiMatches ? {
+      name: multiMatches[0].name,
+      ward: multiMatches[0].ward,
+      fsa: normalized.slice(0, 3)
+    } : null);
+
+    if (exact) {
+      const nMeta = ALL_EDMONTON_NEIGHBOURHOODS.find(n => n.name.toLowerCase() === exact.name.toLowerCase());
+      const typology = nMeta?.typology || EDMONTON_FSA_DATA[exact.fsa]?.typology || 'mature_laned';
+      const classification = multiMatches?.[0]?.classification || getPosseClassification(exact.name, typology);
+      const displayCode = `${normalized.slice(0, 3)} ${normalized.slice(3)}`;
+
+      return {
+        neighbourhood: exact.name,
+        postalFSA: exact.fsa,
+        ward: exact.ward,
+        classification,
+        typology,
+        confidence: 1.0,
+        matchedBy: 'exact_code',
+        displayCode,
+        isFsaOnly: false,
+        multipleNeighbourhoods: multiMatches,
+        highlightText: `${exact.name} (${displayCode}) • Ward ${exact.ward} • ${classification}`
+      };
+    }
   }
 
-  // 1B. Direct Postal Code FSA or Prefix Match (e.g. T5A, T6E, T5K)
-  const isPostalPattern = /^T[0-9][A-Z][0-9]?[A-Z]?[0-9]?$/i.test(normalized) || (normalized.length <= 3 && /^T[0-9]?[A-Z]?$/i.test(normalized));
+  // 1B. Direct Postal Code FSA (e.g. T5A, T6E, T5K)
+  const isExactFsa = /^[A-Z]\d[A-Z]$/.test(normalized);
+  if (isExactFsa) {
+    const fsaInfo = EDMONTON_FSA_DATA[normalized];
+    if (fsaInfo) {
+      const classification = fsaInfo.typology === 'contemporary_townhomes' ? 'Developing' : 'Redeveloping';
+      return {
+        neighbourhood: fsaInfo.name,
+        postalFSA: normalized,
+        ward: fsaInfo.ward,
+        classification,
+        typology: fsaInfo.typology,
+        confidence: 1.0,
+        matchedBy: 'fsa',
+        displayCode: normalized,
+        isFsaOnly: true,
+        fsaNeighbourhoodCount: fsaInfo.neighbourhoods.length,
+        highlightText: `FSA ${normalized} (${fsaInfo.name}) • Ward ${fsaInfo.ward} • ${classification}`
+      };
+    }
+  }
 
+  // 1C. Other Postal Prefix or 6-char fallback
+  const isPostalPattern = /^T[0-9][A-Z][0-9]?[A-Z]?[0-9]?$/i.test(normalized) || (normalized.length <= 3 && /^T[0-9]?[A-Z]?$/i.test(normalized));
   if (isPostalPattern && normalized.length >= 3) {
     const fsaCandidate = normalized.slice(0, 3).toUpperCase();
     const fsaInfo = EDMONTON_FSA_DATA[fsaCandidate];
 
     if (fsaInfo) {
       const primaryNeighbourhood = fsaInfo.neighbourhoods[0];
+      const classification = getPosseClassification(primaryNeighbourhood, fsaInfo.typology);
       return {
         neighbourhood: primaryNeighbourhood,
         postalFSA: fsaCandidate,
         ward: fsaInfo.ward,
+        classification,
         typology: fsaInfo.typology,
         confidence: normalized.length === 6 ? 0.95 : 0.9,
         matchedBy: normalized.length === 6 ? 'exact_code' : 'fsa',
+        displayCode: normalized.length === 6 ? `${normalized.slice(0, 3)} ${normalized.slice(3)}` : fsaCandidate,
+        isFsaOnly: normalized.length === 3,
         highlightText: `${primaryNeighbourhood} (${fsaCandidate}) • Ward ${fsaInfo.ward}`
       };
     }
@@ -590,10 +779,12 @@ export function resolveLocationOrPredictiveAddress(query: string): PredictiveMat
   // 2. Address Street Pattern Matching (e.g. user typed "Whyte Ave", "104 St", "Jasper Ave", "Ellerslie Rd")
   for (const landmark of EDMONTON_ADDRESS_LANDMARKS) {
     if (landmark.pattern.test(raw)) {
+      const classification = getPosseClassification(landmark.neighbourhood, landmark.typology);
       return {
         neighbourhood: landmark.neighbourhood,
         postalFSA: landmark.fsa,
         ward: landmark.ward,
+        classification,
         typology: landmark.typology,
         confidence: 0.95,
         matchedBy: 'address_street',
@@ -608,14 +799,16 @@ export function resolveLocationOrPredictiveAddress(query: string): PredictiveMat
   // 3A. Exact Name Match
   const exactName = ALL_EDMONTON_NEIGHBOURHOODS.find(n => n.name.toLowerCase() === queryLower);
   if (exactName) {
+    const classification = getPosseClassification(exactName.name, exactName.typology);
     return {
       neighbourhood: exactName.name,
       postalFSA: exactName.fsa,
       ward: exactName.ward,
+      classification,
       typology: exactName.typology,
       confidence: 1.0,
       matchedBy: 'exact_neighbourhood',
-      highlightText: `${exactName.name} (${exactName.fsa}) • Ward ${exactName.ward}`
+      highlightText: `${exactName.name} (${exactName.fsa}) • Ward ${exactName.ward} • ${classification}`
     };
   }
 
@@ -624,10 +817,12 @@ export function resolveLocationOrPredictiveAddress(query: string): PredictiveMat
     n.aliases.some(a => a.toLowerCase() === queryLower)
   );
   if (aliasMatch) {
+    const classification = getPosseClassification(aliasMatch.name, aliasMatch.typology);
     return {
       neighbourhood: aliasMatch.name,
       postalFSA: aliasMatch.fsa,
       ward: aliasMatch.ward,
+      classification,
       typology: aliasMatch.typology,
       confidence: 0.95,
       matchedBy: 'exact_neighbourhood',
@@ -641,10 +836,12 @@ export function resolveLocationOrPredictiveAddress(query: string): PredictiveMat
     n.aliases.some(a => a.toLowerCase().startsWith(queryLower))
   );
   if (startsWithMatch && queryLower.length >= 3) {
+    const classification = getPosseClassification(startsWithMatch.name, startsWithMatch.typology);
     return {
       neighbourhood: startsWithMatch.name,
       postalFSA: startsWithMatch.fsa,
       ward: startsWithMatch.ward,
+      classification,
       typology: startsWithMatch.typology,
       confidence: 0.88,
       matchedBy: 'predictive_spelling',
@@ -678,10 +875,12 @@ export function resolveLocationOrPredictiveAddress(query: string): PredictiveMat
     // Accept fuzzy match if distance is within tolerance (up to 2 character typos)
     const threshold = queryLower.length <= 5 ? 1 : 2;
     if (closestMatch && minDistance <= threshold) {
+      const classification = getPosseClassification(closestMatch.name, closestMatch.typology);
       return {
         neighbourhood: closestMatch.name,
         postalFSA: closestMatch.fsa,
         ward: closestMatch.ward,
+        classification,
         typology: closestMatch.typology,
         confidence: 0.82 - (minDistance * 0.1),
         matchedBy: 'predictive_spelling',

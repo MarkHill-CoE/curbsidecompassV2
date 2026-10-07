@@ -3465,42 +3465,42 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q2_category",
     "category": "Question 2 of 6",
     "container": "Policy Category Badge",
-    "defaultText": "Residential Parking Permit Limit",
+    "defaultText": "Parking Proximity to Home",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q2_question",
     "category": "Question 2 of 6",
     "container": "Question Card",
-    "defaultText": "In neighbourhoods where street parking is in high demand, should there be a limit on parking permits per household?",
+    "defaultText": "When parking on the street near your home, what would you consider reasonably close?",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q2_option_a",
     "category": "Question 2 of 6",
     "container": "Option A Choice",
-    "defaultText": "Yes",
+    "defaultText": "On my block",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q2_option_b",
     "category": "Question 2 of 6",
     "container": "Option B Choice",
-    "defaultText": "No",
+    "defaultText": "Within two or three blocks",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q2_hint_a",
     "category": "Question 2 of 6",
     "container": "Simulation Hint A",
-    "defaultText": "Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.",
+    "defaultText": "Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q2_hint_b",
     "category": "Question 2 of 6",
     "container": "Simulation Hint B",
-    "defaultText": "Homes can get permits for 3 or more vehicles, so more cars end up parked along the curb.",
+    "defaultText": "Increases available parking options by extending acceptable parking distance into the wider neighbourhood.",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3514,14 +3514,14 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q3_category",
     "category": "Question 3 of 6",
     "container": "Policy Category Badge",
-    "defaultText": "Visitor Access",
+    "defaultText": "Residential Parking Permit Limit",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q3_question",
     "category": "Question 3 of 6",
     "container": "Question Card",
-    "defaultText": "When street parking is in high demand, should visitors and service providers (e.g., cleaners and contractors) have the same opportunity as residents to park on the block they are visiting?",
+    "defaultText": "In neighbourhoods where street parking is in high demand, should there be a limit on parking permits per household?",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3542,14 +3542,14 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q3_hint_a",
     "category": "Question 3 of 6",
     "container": "Simulation Hint A",
-    "defaultText": "Allows visitors, family, and service providers equal access to park near the home they are visiting.",
+    "defaultText": "Homes can only get permits for up to two street-parked cars. Extra vehicles must park in private driveways or garages.",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q3_hint_b",
     "category": "Question 3 of 6",
     "container": "Simulation Hint B",
-    "defaultText": "Prioritizes street parking for residents, reducing competition from visitor and service vehicles.",
+    "defaultText": "Homes can get permits for 3 or more vehicles, so more cars end up parked along the curb.",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3563,14 +3563,14 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q4_category",
     "category": "Question 4 of 6",
     "container": "Policy Category Badge",
-    "defaultText": "Parking Proximity to Destination",
+    "defaultText": "Visitor Access",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q4_question",
     "category": "Question 4 of 6",
     "container": "Question Card",
-    "defaultText": "When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking (within a few blocks)?",
+    "defaultText": "When street parking is in high demand, should visitors and service providers (e.g., cleaners and contractors) have the same opportunity as residents to park on the block they are visiting?",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3591,14 +3591,14 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q4_hint_a",
     "category": "Question 4 of 6",
     "container": "Simulation Hint A",
-    "defaultText": "Expands parking choices on nearby residential streets for patients, students, and event attendees.",
+    "defaultText": "Allows visitors, family, and service providers equal access to park near the home they are visiting.",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q4_hint_b",
     "category": "Question 4 of 6",
     "container": "Simulation Hint B",
-    "defaultText": "Protects nearby residential street parking for residents and guests near major destinations.",
+    "defaultText": "Prioritizes street parking for residents, reducing competition from visitor and service vehicles.",
     "guidance": "Survey policy tradeoff content"
   },
   {
@@ -3612,42 +3612,42 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "q5_category",
     "category": "Question 5 of 6",
     "container": "Policy Category Badge",
-    "defaultText": "Parking Proximity to Home",
+    "defaultText": "Parking Proximity to Destination",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q5_question",
     "category": "Question 5 of 6",
     "container": "Question Card",
-    "defaultText": "When parking on the street near your home, what would you consider reasonably close?",
+    "defaultText": "When people visit hospitals, post-secondary institutions and event venues, should they be able to use nearby residential streets for parking (within a few blocks)?",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q5_option_a",
     "category": "Question 5 of 6",
     "container": "Option A Choice",
-    "defaultText": "On my Block",
+    "defaultText": "Yes",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q5_option_b",
     "category": "Question 5 of 6",
     "container": "Option B Choice",
-    "defaultText": "More possible spaces fall within the distance you consider acceptable.",
+    "defaultText": "No",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q5_hint_a",
     "category": "Question 5 of 6",
     "container": "Simulation Hint A",
-    "defaultText": "Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.",
+    "defaultText": "Expands parking choices on nearby residential streets for patients, students, and event attendees.",
     "guidance": "Survey policy tradeoff content"
   },
   {
     "key": "q5_hint_b",
     "category": "Question 5 of 6",
     "container": "Simulation Hint B",
-    "defaultText": "Increases available parking options by extending acceptable parking distance into the wider neighbourhood.",
+    "defaultText": "Protects nearby residential street parking for residents and guests near major destinations.",
     "guidance": "Survey policy tradeoff content"
   },
   {

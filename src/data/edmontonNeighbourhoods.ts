@@ -156,6 +156,8 @@ export interface EdmontonNeighbourhood {
   typology: StreetLayoutTypology;
   sector: 'Central' | 'South' | 'North' | 'West' | 'East' | 'Southwest';
   postalFSA?: string[]; // Forward Sortation Area prefix (e.g. T5J, T6E)
+  ward?: string;
+  classification?: string; // POSSE Classification (e.g. Redeveloping, Developing, Industrial, River Valley)
 }
 
 export const EDMONTON_NEIGHBOURHOODS: EdmontonNeighbourhood[] = [
@@ -305,7 +307,8 @@ export const POPULAR_EDMONTON_NEIGHBOURHOODS = [
 import { 
   ALL_EDMONTON_NEIGHBOURHOODS, 
   resolveLocationOrPredictiveAddress, 
-  EDMONTON_FSA_DATA 
+  EDMONTON_FSA_DATA,
+  getPosseClassification
 } from './edmontonPostalData';
 
 /**
@@ -449,23 +452,51 @@ export function findNeighbourhood(nameOrQuery: string): EdmontonNeighbourhood | 
 }
 
 /**
- * Searches neighbourhoods for autocomplete with predictive aliases
+ * Searches neighbourhoods for autocomplete with predictive aliases.
+ * CRITICAL RULE: If the user enters just an FSA (3-char alphanumeric) or full postal code,
+ * suppress suggestions and return empty list.
  */
 export function searchNeighbourhoods(query: string, limit = 8): EdmontonNeighbourhood[] {
-  if (!query || !query.trim()) return EDMONTON_NEIGHBOURHOODS.slice(0, limit);
-  const q = query.toLowerCase().trim();
+  if (!query || !query.trim()) return [];
   
+  const raw = query.trim();
+  const cleanUpper = raw.toUpperCase().replace(/[\s-]/g, '');
+
+  // Rule 1: FSA (3-character alpha-numeric, e.g. T5A, T6E, T5J) -> SUPPRESS autocomplete dropdown!
+  if (/^[A-Z]\d[A-Z]$/.test(cleanUpper)) {
+    return [];
+  }
+
+  // Rule 2: Full Postal Code (6-character alpha-numeric, e.g. T5A0A1) -> Direct match, suppress dropdown!
+  if (/^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(cleanUpper)) {
+    return [];
+  }
+
+  const q = raw.toLowerCase();
   const results: EdmontonNeighbourhood[] = [];
   const addedNames = new Set<string>();
+
+  // Helper to find ward for a neighbourhood name
+  const findWard = (name: string, fsa?: string): string => {
+    const meta = ALL_EDMONTON_NEIGHBOURHOODS.find(m => m.name.toLowerCase() === name.toLowerCase());
+    if (meta?.ward) return meta.ward;
+    if (fsa && EDMONTON_FSA_DATA[fsa]?.ward) return EDMONTON_FSA_DATA[fsa].ward;
+    return 'Edmonton';
+  };
 
   // 1. Matches in primary list
   for (const n of EDMONTON_NEIGHBOURHOODS) {
     if (
       n.name.toLowerCase().includes(q) ||
-      n.sector.toLowerCase().includes(q) ||
-      n.postalFSA?.some(f => f.toLowerCase().includes(q))
+      n.sector.toLowerCase().includes(q)
     ) {
-      results.push(n);
+      const ward = n.ward || findWard(n.name, n.postalFSA?.[0]);
+      const classification = n.classification || getPosseClassification(n.name, n.typology);
+      results.push({
+        ...n,
+        ward,
+        classification
+      });
       addedNames.add(n.name.toLowerCase());
       if (results.length >= limit) return results;
     }
@@ -476,14 +507,15 @@ export function searchNeighbourhoods(query: string, limit = 8): EdmontonNeighbou
     if (!addedNames.has(ext.name.toLowerCase())) {
       if (
         ext.name.toLowerCase().includes(q) ||
-        ext.fsa.toLowerCase().includes(q) ||
         ext.aliases.some(a => a.toLowerCase().includes(q))
       ) {
         results.push({
           name: ext.name,
           typology: ext.typology,
           sector: 'Central',
-          postalFSA: [ext.fsa]
+          postalFSA: [ext.fsa],
+          ward: ext.ward,
+          classification: getPosseClassification(ext.name, ext.typology)
         });
         addedNames.add(ext.name.toLowerCase());
         if (results.length >= limit) return results;
