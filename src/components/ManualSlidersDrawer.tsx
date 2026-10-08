@@ -43,6 +43,10 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showControls, onClose]);
 
+  const effectiveDeliveries = Math.floor(Math.min(3, Math.max(0, config.splitInfillLots ?? 0)) / 3) >= 1
+    ? Math.max(2.0, config.deliveriesPerHomePerWeek)
+    : config.deliveriesPerHomePerWeek;
+
   if (!showControls) return null;
 
   return (
@@ -93,7 +97,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
 
         {/* Instructions right above Street Layout Typology */}
         <p className="text-xs text-blue-100/90 leading-snug">
-          {t('drawer_sliders_instruction', 'Move the sliders to change the impacting variables to stress test your neighbourhood.')}
+          {t('drawer_sliders_instruction', 'Move the sliders to simulate parking impacts on your neighbourhood.')}
         </p>
 
         {/* Edmonton Street Layout Typologies Dropdown Selection */}
@@ -135,29 +139,44 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
         </div>
 
         {/* Cars per household */}
-        <div className="flex flex-col gap-0.5">
-          <div className="flex justify-between">
-            <span className="text-gray-300 font-medium">{t('sim_cars_home_label', 'Average Vehicles Per Home')}</span>
-            <span className="font-bold text-[#FFC72C]">
-              {config.householdCarsPerHome.toFixed(1)} ({activeHouseholdCars})
+        <div className="flex flex-col gap-1 bg-black/20 p-2.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+          <div className="flex justify-between items-baseline gap-2">
+            <span className="text-gray-200 font-medium">{t('sim_cars_home_label', 'Average Number of Vehicles Per Home:')}</span>
+            <span 
+              className="font-bold text-[#FFC72C] text-right"
+              title={`Average Number of Vehicles Per Home: ${Math.min(4, config.householdCarsPerHome).toFixed(1)} | Total Vehicles Per Block: ${activeHouseholdCars}`}
+            >
+              {Math.min(4, config.householdCarsPerHome).toFixed(1)} <span className="text-gray-300 font-normal text-[11px]">(Total Vehicles Per Block: {activeHouseholdCars})</span>
             </span>
           </div>
           <input
             type="range"
-            aria-label={t('drawer_sliders_veh_per_home_aria', 'Average vehicles per home')}
+            aria-label={t('drawer_sliders_veh_per_home_aria', 'Average Number of Vehicles Per Home')}
             min="0"
-            max="5"
+            max="4"
             step="0.25"
-            value={config.householdCarsPerHome}
+            value={Math.min(4, config.householdCarsPerHome)}
             onChange={(e) =>
-              onConfigChange?.({ householdCarsPerHome: parseFloat(e.target.value) })
+              onConfigChange?.({ householdCarsPerHome: Math.min(4, parseFloat(e.target.value)) })
             }
             className="accent-[#0081BC] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
           />
+          <div className="flex justify-between text-[10px] text-gray-400 font-medium px-0.5">
+            <span>0</span>
+            <span>1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4 vehicles max</span>
+          </div>
+          <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
+            {t('sim_cars_home_desc', 'Average Number of Vehicles Per Home translates to {total} Total Vehicles Per Block across the {dwellings} homes on this street.')
+              .replace('{total}', String(activeHouseholdCars))
+              .replace('{dwellings}', String(totalDwellings))}
+          </p>
         </div>
 
         {/* Private Off-Street Parking (Driveway / Rear Garage Capacity) */}
-        <div className="flex flex-col gap-0.5 bg-black/25 p-2 rounded-lg border border-white/10">
+        <div className="flex flex-col gap-1 bg-black/20 p-2.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
           <div className="flex justify-between">
             <span className="text-gray-200 font-bold flex items-center gap-1.5">
               <span>🏠</span>
@@ -184,42 +203,63 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </p>
         </div>
 
-        {/* Visitor parking passes */}
-        <div className="flex flex-col gap-0.5">
-          <div className="flex justify-between">
-            <span className="text-gray-300 font-medium">{t('sim_visitor_passes_label', 'Visitor Passes Per Home')}</span>
-            <span className="font-bold text-white">
-              {config.visitorPassesPerHome.toFixed(1)} ({activeVisitorCars})
+        {/* Visitor parking passes - Whole numbers only (0, 1, 2) */}
+        <div className="flex flex-col gap-1 bg-black/20 p-2.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+          <div className="flex justify-between items-baseline gap-2">
+            <span className="text-gray-200 font-medium">{t('sim_visitor_passes_label', 'Visitor Passes Per Home:')}</span>
+            <span 
+              className="font-bold text-white text-right"
+              title={`Visitor Passes Per Home: ${Math.min(2, Math.max(0, Math.round(config.visitorPassesPerHome)))} | Total Active Visitor Cars: ${activeVisitorCars}`}
+            >
+              {Math.min(2, Math.max(0, Math.round(config.visitorPassesPerHome)))} <span className="text-gray-300 font-normal text-[11px]">(Total Visitor Cars: {activeVisitorCars})</span>
             </span>
           </div>
           <input
             type="range"
             aria-label={t('drawer_sliders_visitor_passes_aria', 'Visitor passes per home')}
             min="0"
-            max="5"
-            step="0.25"
-            value={config.visitorPassesPerHome}
+            max="2"
+            step="1"
+            value={Math.min(2, Math.max(0, Math.round(config.visitorPassesPerHome)))}
             onChange={(e) =>
-              onConfigChange?.({ visitorPassesPerHome: parseFloat(e.target.value) })
+              onConfigChange?.({ visitorPassesPerHome: Math.min(2, Math.max(0, parseInt(e.target.value, 10))) })
             }
             className="accent-[#0081BC] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
           />
+          <div className="flex justify-between text-[10px] text-gray-400 font-medium px-0.5">
+            <span>0</span>
+            <span>1</span>
+            <span>2 passes max</span>
+          </div>
+          <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
+            {t('sim_visitor_passes_explainer', 'At {passes} passes per home, visitors generate {active} total parked vehicles on this block.')
+              .replace('{passes}', String(Math.min(2, Math.max(0, Math.round(config.visitorPassesPerHome)))))
+              .replace('{active}', String(activeVisitorCars))}
+          </p>
         </div>
 
         {/* Home Density */}
-        <div className="flex flex-col gap-0.5">
-          <div className="flex justify-between">
-            <span className="text-gray-300 font-medium">{t('drawer_infill_label', 'Home Density')}</span>
+        <div className="flex flex-col gap-1 bg-black/20 p-2.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+          <div className="flex justify-between items-center">
+            <span className="text-gray-200 font-medium">{t('drawer_infill_label', 'Home Density')}</span>
+            <span className="font-bold text-[#009A44]">
+              {(() => {
+                const lots = Math.min(3, Math.max(0, config.splitInfillLots ?? 0));
+                if (lots === 0) return 'Baseline (0)';
+                if (lots === 1) return '+1 additional multi-unit';
+                return `+${lots} additional multi-units`;
+              })()}
+            </span>
           </div>
           <input
             type="range"
             aria-label={t('drawer_sliders_density_aria', 'Home density')}
             min="0"
-            max="7"
+            max="3"
             step="1"
-            value={Math.min(7, Math.max(0, config.splitInfillLots ?? 0))}
+            value={Math.min(3, Math.max(0, config.splitInfillLots ?? 0))}
             onChange={(e) => {
-              const new8Plex = parseInt(e.target.value, 10);
+              const new8Plex = Math.min(3, Math.max(0, parseInt(e.target.value, 10)));
               const tiers = Math.floor(new8Plex / 3);
               onConfigChange?.({
                 splitInfillLots: new8Plex,
@@ -228,44 +268,65 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
             }}
             className="accent-[#009A44] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
           />
+          <div className="flex justify-between text-[10px] text-gray-400 font-medium px-0.5">
+            <span>0</span>
+            <span>+1</span>
+            <span>+2</span>
+            <span>3 additional multi-unit</span>
+          </div>
           <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
             {t('drawer_density_explainer', 'Adds multi-unit housing to the street.')}
           </p>
         </div>
 
         {/* Deliveries Per Home */}
-        <div className="flex flex-col gap-0.5">
-          <div className="flex justify-between">
-            <span className="text-gray-300 font-medium">{t('sim_deliveries_label', 'Weekly Deliveries')}</span>
-            <span className="font-bold text-[#FF5500]">
-              {(Math.floor(Math.min(7, Math.max(0, config.splitInfillLots ?? 0)) / 3) >= 1 ? Math.max(2.0, config.deliveriesPerHomePerWeek) : config.deliveriesPerHomePerWeek).toFixed(1)} ({totalWeeklyDeliveries}/wk)
+        <div className="flex flex-col gap-1 bg-black/20 p-2.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+          <div className="flex justify-between items-baseline gap-2">
+            <span className="text-gray-200 font-medium">
+              {t('sim_deliveries_label', 'Average Number of Weekly Deliveries Per Home:')}
+            </span>
+            <span 
+              className="font-bold text-[#FF5500] text-right"
+              title={`Average Number of Weekly Deliveries Per Home: ${effectiveDeliveries.toFixed(1)} | Total Weekly Deliveries: ${totalWeeklyDeliveries}/wk`}
+            >
+              {effectiveDeliveries.toFixed(1)} <span className="text-gray-300 font-normal text-[11px]">(Total Weekly Deliveries: {totalWeeklyDeliveries}/wk)</span>
             </span>
           </div>
           <input
             type="range"
-            aria-label={t('drawer_sliders_deliveries_aria', 'Weekly deliveries per home')}
+            aria-label={t('drawer_sliders_deliveries_aria', 'Average Number of Weekly Deliveries Per Home')}
             min="1"
             max="4"
             step="0.25"
-            value={Math.floor(Math.min(7, Math.max(0, config.splitInfillLots ?? 0)) / 3) >= 1 ? Math.max(2.0, config.deliveriesPerHomePerWeek) : config.deliveriesPerHomePerWeek}
+            value={effectiveDeliveries}
             onChange={(e) =>
               onConfigChange?.({ deliveriesPerHomePerWeek: parseFloat(e.target.value) })
             }
             className="accent-[#FF5500] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
           />
+          <div className="flex justify-between text-[10px] text-gray-400 font-medium px-0.5">
+            <span>1/wk</span>
+            <span>2/wk</span>
+            <span>3/wk</span>
+            <span>4/wk max</span>
+          </div>
+          <p className="text-[10px] text-gray-300 leading-snug mt-0.5">
+            {t('sim_deliveries_desc', 'Average Number of Weekly Deliveries Per Home translates to {total} Total Weekly Deliveries across the {dwellings} homes on this street.')
+              .replace('{total}', String(totalWeeklyDeliveries))
+              .replace('{dwellings}', String(totalDwellings))}
+          </p>
         </div>
 
         {/* Circling Traffic */}
-        <div className="flex justify-between items-center text-xs py-1.5 border-t border-white/10">
-          <span className="text-gray-300">{t('drawer_circling_label', 'Circling Traffic')}</span>
+        <div className="flex justify-between items-center text-xs py-2 px-2.5 rounded-lg bg-black/20 border border-white/10">
+          <span className="text-gray-200 font-medium">{t('drawer_circling_label', 'Circling Traffic')}</span>
           <span className={`font-bold ${circlingCarCount > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
             {circlingCarCount > 0 ? `${circlingCarCount} ${t('drawer_circling_text', 'Circling for Parking')}` : t('drawer_smooth_flow', 'Smooth Flow')}
           </span>
         </div>
 
-
-        {/* Bottom Action Buttons: Replaced enforcement level and reshuffle */}
-        <div className="flex gap-2 pt-2 border-t border-white/10">
+        {/* Bottom Action Buttons */}
+        <div className="flex gap-2 pt-2 border-t border-white/10 shrink-0">
           {onOpenGauge && (
             <button
               type="button"

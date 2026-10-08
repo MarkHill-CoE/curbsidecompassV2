@@ -25,10 +25,10 @@ export type StreetLayoutTypology =
   | 'contemporary_townhomes';
 
 export interface SimulationConfig {
-  householdCarsPerHome: number; // 0 - 5 (default 2.5)
-  visitorPassesPerHome: number; // 0 - 5 (default 0.5)
+  householdCarsPerHome: number; // 0 - 4 (default 2.0)
+  visitorPassesPerHome: number; // 0 - 2 (whole numbers: 0, 1, 2, default 0)
   drivewayCapacity: number; // 1 - 2 (single-car wide: 1 or 2 tandem)
-  splitInfillLots?: number; // 0 - 7 (number of 8-plex multi-unit infill buildings replacing houses, default 0)
+  splitInfillLots?: number; // 0 - 3 (number of 8-plex multi-unit infill buildings replacing houses, default 0)
   deliveriesPerHomePerWeek: number; // 1 - 4 (default 1.0)
   enforcementLevel: 'strict' | 'standard' | 'lenient';
   cruisingTrafficLevel: 'low' | 'moderate' | 'high';

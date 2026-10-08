@@ -4,7 +4,7 @@ import { getTypologyFromPostalCode, getStreetLayoutInfo } from './edmontonNeighb
 export const INITIAL_SIM_CONFIG: SimulationConfig = {
   drivewayCapacity: 2,
   householdCarsPerHome: 2.0,
-  visitorPassesPerHome: 0.3333, // Calibrated to 60% default starting curbside occupancy across all neighbourhood typologies
+  visitorPassesPerHome: 0, // Calibrated to 0% default starting curbside occupancy across all neighbourhood typologies
   splitInfillLots: 0,
   deliveriesPerHomePerWeek: 1.0,
   enforcementLevel: 'standard',
@@ -186,7 +186,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         y: -3,
         hint: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
         simEffects: {
-          visitorPassesPerHome: 0.67,
+          visitorPassesPerHome: 1,
           enforcementLevel: 'lenient'
         }
       },
@@ -197,7 +197,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         y: 3,
         hint: 'Protects nearby residential street parking for residents and guests near major destinations.',
         simEffects: {
-          visitorPassesPerHome: 0.25,
+          visitorPassesPerHome: 0,
           enforcementLevel: 'strict'
         }
       }
@@ -275,8 +275,8 @@ export function calculateSimulationMetricsFromAnswers(
     'mature_laned';
 
   // Dwellings (Home Density):
-  // splitInfillLots range 0 to 7 (adds up to 7 8-plex multi-unit infill buildings replacing houses on 15.6m lots)
-  const num8Plex = Math.min(7, Math.max(0, overrides.splitInfillLots ?? (activeLayout === 'infill_skinny' ? 2 : 0)));
+  // splitInfillLots range 0 to 3 (adds up to 3 additional 8-plex multi-unit infill buildings replacing houses on 15.6m lots)
+  const num8Plex = Math.min(3, Math.max(0, overrides.splitInfillLots ?? 0));
   const totalDwellings = 12 + num8Plex * 7;
   const layoutInfo = getStreetLayoutInfo(activeLayout);
   let baseCurbsideCapacity = layoutInfo.curbsideCapacity;
@@ -321,9 +321,9 @@ export function calculateSimulationMetricsFromAnswers(
   const residentCurbsideDemand = residentCurbOverflow + residentCurbConvenience;
 
   // Visitor passes and visitor cars: (Q5 Parking Proximity to Destination - formerly q4)
-  const baseVisitorPasses = answers['q5'] === 'q5_a' ? (8 / 12) : (answers['q5'] === 'q5_b' ? (3 / 12) : (4 / 12));
+  const baseVisitorPasses = answers['q5'] === 'q5_a' ? 2 : (answers['q5'] === 'q5_b' ? 1 : 0);
   const visitorPassesPerHome = overrides.visitorPassesPerHome !== undefined
-    ? overrides.visitorPassesPerHome
+    ? Math.min(2, Math.max(0, Math.round(overrides.visitorPassesPerHome)))
     : baseVisitorPasses;
 
   const visitorDemand = Math.round(visitorPassesPerHome * totalDwellings);
@@ -332,7 +332,7 @@ export function calculateSimulationMetricsFromAnswers(
 
   // Deliveries: (Q4 Visitor Access - formerly q3)
   const numThree8PlexTiers = Math.floor(num8Plex / 3);
-  let baseDeliveriesPerWeek = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
+  let baseDeliveriesPerWeek = 1.0;
   if (answers['q4'] === 'q4_a') baseDeliveriesPerWeek += 1.5;
   if (answers['q4'] === 'q4_b') baseDeliveriesPerWeek = 1.0;
   if (numThree8PlexTiers >= 1) {
@@ -424,22 +424,23 @@ export function calculateSimulationMetricsFromAnswers(
     policyDemandShift += 1.5;
   }
 
-  // Baseline calibration: The default parking occupancy to start is strictly 60% regardless of neighbourhood type
-  const baselineCurbsideDemand = curbsideStallsCapacity * 0.60;
+  // Baseline calibration: The default parking occupancy on street stalls to start is strictly zero percent (0%)
+  const baselineCurbsideDemand = 0;
 
-  // Compute the baseline unadjusted demand for this typology at its default parameters
-  const defaultSplit = activeLayout === 'infill_skinny' ? 6 : 2;
-  const defaultDwellings = 10 + defaultSplit;
+  // Compute the baseline unadjusted demand for this typology at its default starting parameters
+  const defaultNum8Plex = 0;
+  const defaultDwellings = 12 + defaultNum8Plex * 7;
   const defaultCarsPerHome = 2.0;
   const defaultDrivewayCap = activeLayout === 'suburban_front_driveway' ? 2 : (activeLayout === 'contemporary_townhomes' ? 1 : 2);
-  const defaultTotalOffStreet = defaultDrivewayCap * defaultDwellings;
+  const defaultSingleFamilyHomes = Math.max(0, 12 - defaultNum8Plex);
+  const defaultTotalOffStreet = defaultDrivewayCap * defaultSingleFamilyHomes;
   const defaultHouseholdCars = Math.round(defaultCarsPerHome * defaultDwellings);
   const defaultOccupiedGarages = Math.min(defaultHouseholdCars, Math.round(defaultTotalOffStreet * 0.85));
   const defaultResidentOverflow = Math.max(0, defaultHouseholdCars - defaultOccupiedGarages);
   const defaultConvenience = Math.min(Math.round(defaultHouseholdCars * 0.08), Math.round(curbsideStallsCapacity * 0.25));
   const defaultResidentDemand = defaultResidentOverflow + defaultConvenience;
-  const defaultVisitorDemand = Math.round((4 / 12) * defaultDwellings);
-  const defaultDeliveries = activeLayout === 'infill_skinny' ? 2.0 : 1.0;
+  const defaultVisitorDemand = 0;
+  const defaultDeliveries = 1.0;
   const defaultDeliveryDemand = Math.round(defaultDeliveries * defaultDwellings) / 16;
   const defaultRawDemand = defaultResidentDemand + defaultVisitorDemand + defaultDeliveryDemand;
 
@@ -447,14 +448,14 @@ export function calculateSimulationMetricsFromAnswers(
   const currentRawDemand = residentCurbsideDemand + visitorCurbsideDemand + deliveryCurbsideDemand;
   const sliderDemandDelta = currentRawDemand - defaultRawDemand;
 
-  // Total curbside demand: starts at exactly 60% baseline capacity, shifting with policy and slider choices
+  // Total curbside demand: starts at exactly 0% baseline capacity, shifting with policy and slider choices
   const totalCalculatedDemand = overrides.curbsideDemandOverride !== undefined
     ? overrides.curbsideDemandOverride
     : (baselineCurbsideDemand + sliderDemandDelta + policyDemandShift);
 
   // Clamp demand between 0 and realistic upper bound
   const roundedDemand = Math.max(0, Math.min(36, Math.round(totalCalculatedDemand)));
-  // Calculate percentage: exactly 60% at start, scaling smoothly with demand shifts (0% when stalls converted to bike lane)
+  // Calculate percentage: exactly 0% at start, scaling smoothly with demand shifts (0% when stalls converted to bike lane)
   const curbsidePct = curbsideStallsCapacity > 0
     ? Math.max(0, Math.round((totalCalculatedDemand / curbsideStallsCapacity) * 100))
     : 0;

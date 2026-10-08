@@ -25,7 +25,10 @@ import {
 import { 
   resolveLocationOrPredictiveAddress, 
   classifyInputIntent, 
-  MultiNeighbourhoodOption 
+  MultiNeighbourhoodOption,
+  shouldShowLocationDropdown,
+  searchPostalCodeHints,
+  EDMONTON_FSA_DATA
 } from '../data/edmontonPostalData';
 
 interface SurveyStageProps {
@@ -95,9 +98,52 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
     return classifyInputIntent(locationInput);
   }, [locationInput]);
 
-  // Autocomplete suggestions: SUPPRESSED if input is FSA or Full Postal Code
+  // Unified Location Hints: Postal Code hints (Pattern 1/2) and Neighbourhood hints (Pattern 3)
+  // Strictly respects:
+  // - after the first three characters if the first letter is not a 't'
+  // - after the first four characters for postal codes that start with a 't'
+  const locationHints = useMemo(() => {
+    if (!locationInput || currentAnswer === 'OPT_OUT') return [];
+    if (!shouldShowLocationDropdown(locationInput)) return [];
+
+    const trimmed = locationInput.trim();
+    const firstChar = trimmed.charAt(0).toLowerCase();
+    const clean = trimmed.toUpperCase().replace(/[\s-]/g, '');
+
+    const isPostalCodeWithT = firstChar === 't' && (
+      clean.length === 1 ||
+      /^[A-Z]\d/.test(clean) ||
+      /^[A-Z]\d[A-Z]/.test(clean)
+    );
+
+    if (isPostalCodeWithT) {
+      const postalHints = searchPostalCodeHints(locationInput, 8);
+      if (postalHints.length > 0) {
+        return postalHints.map((p) => ({
+          type: 'postal' as const,
+          code: p.code,
+          rawCode: p.rawCode,
+          name: p.neighbourhood,
+          ward: p.ward,
+          fsa: p.fsa
+        }));
+      }
+    }
+
+    // Neighbourhood name suggestions
+    const nResults = searchNeighbourhoods(locationInput, 8);
+    return nResults.map((n) => ({
+      type: 'neighbourhood' as const,
+      name: n.name,
+      ward: n.ward,
+      typology: n.typology,
+      fsa: n.postalFSA?.[0]
+    }));
+  }, [locationInput, currentAnswer]);
+
   const filteredNeighbourhoods = useMemo(() => {
     if (inputIntent.type !== 'neighbourhood') return [];
+    if (!shouldShowLocationDropdown(locationInput)) return [];
     return searchNeighbourhoods(locationInput, 8);
   }, [inputIntent.type, locationInput]);
 
@@ -179,9 +225,11 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
         onLayoutChange?.(detection.typology, detection.neighbourhood, intent.formatted);
       }
     } else {
-      // Pattern 3: Neighbourhood Name Search (Text Input, e.g., "Belv..." or "Downtown")
-      // Action: Display autocomplete dropdown menu listing matching neighbourhood names.
-      if (rawVal.trim().length > 0) {
+      // Pattern 3: Neighbourhood Name Search or Postal Code Hint Search
+      // Only show the postal code or neighbourhood hint dropdown:
+      // - after the first three characters if the first letter is not a 't'
+      // - after the first four characters for postal codes that start with a 't'
+      if (shouldShowLocationDropdown(rawVal)) {
         setShowDropdown(true);
       } else {
         setShowDropdown(false);
@@ -191,6 +239,21 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       if (detection) {
         onLayoutChange?.(detection.typology, detection.neighbourhood, detection.postalFSA);
       }
+    }
+  };
+
+  const handleSelectPostalHint = (hint: { code: string; rawCode: string; name: string; ward: string; fsa: string }) => {
+    triggerFeedback('choice');
+    setLocationInput(hint.code);
+    setShowDropdown(false);
+    setSelectedDisambiguation(null);
+    onSelectOption(currentQuestion.id, hint.code);
+    const detection = resolveLocationOrPredictiveAddress(hint.rawCode);
+    if (detection) {
+      onLayoutChange?.(detection.typology, detection.neighbourhood, hint.code);
+    } else {
+      const fsaData = EDMONTON_FSA_DATA[hint.fsa];
+      onLayoutChange?.(fsaData?.typology || 'mature_laned', hint.name, hint.code);
     }
   };
 
@@ -387,14 +450,14 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     <div className="flex items-center gap-1.5 shrink-0 text-right">
                       <span className="text-xs font-bold text-[#004B8D] bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-full">
                         {(() => {
-                          const lots = Math.min(7, Math.max(0, config?.splitInfillLots ?? 0));
+                          const lots = Math.min(3, Math.max(0, config?.splitInfillLots ?? 0));
                           if (lots === 0) return 'Baseline (0 lots)';
                           if (lots === 1) return '+1 Multi-unit lot';
                           return `+${lots} Multi-unit lots`;
                         })()}
                       </span>
                       <span className="text-[11px] font-bold text-gray-700 bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-2xs">
-                        {(totalDwellings ?? (12 + Math.min(7, Math.max(0, config?.splitInfillLots ?? 0)) * 7))} {t('drawer_dwellings_unit', 'Dwellings')}
+                        {(totalDwellings ?? (12 + Math.min(3, Math.max(0, config?.splitInfillLots ?? 0)) * 7))} {t('drawer_dwellings_unit', 'Dwellings')}
                       </span>
                     </div>
                   </div>
@@ -405,11 +468,11 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       type="range"
                       aria-label={t('drawer_sliders_density_aria', 'Home density')}
                       min="0"
-                      max="7"
+                      max="3"
                       step="1"
-                      value={Math.min(7, Math.max(0, config?.splitInfillLots ?? 0))}
+                      value={Math.min(3, Math.max(0, config?.splitInfillLots ?? 0))}
                       onChange={(e) => {
-                        const new8Plex = parseInt(e.target.value, 10);
+                        const new8Plex = Math.min(3, Math.max(0, parseInt(e.target.value, 10)));
                         const tiers = Math.floor(new8Plex / 3);
                         onConfigChange?.({
                           splitInfillLots: new8Plex,
@@ -419,9 +482,10 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       className="accent-[#009A44] cursor-pointer h-2 bg-gray-200 rounded-lg w-full"
                     />
                     <div className="flex justify-between text-[10px] text-gray-500 font-medium px-0.5">
-                      <span>Low Density (0)</span>
-                      <span>Moderate (+3 lots)</span>
-                      <span>High Density (+7 lots)</span>
+                      <span>Baseline (0)</span>
+                      <span>+1 lot</span>
+                      <span>+2 lots</span>
+                      <span>3 additional multi-unit</span>
                     </div>
                   </div>
                 </div>
@@ -478,7 +542,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                       value={currentAnswer === 'OPT_OUT' ? '' : locationInput}
                       onChange={(e) => handleLocationInputChange(e.target.value)}
                       onFocus={() => {
-                        if (inputIntent.type === 'neighbourhood' && locationInput.trim().length > 0) {
+                        if (shouldShowLocationDropdown(locationInput)) {
                           setShowDropdown(true);
                         }
                       }}
@@ -524,25 +588,55 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                     </div>
                   </div>
 
-                  {/* Autocomplete Dropdown: strictly for Neighbourhood search (Pattern 3), NEVER for FSA (Pattern 1) */}
-                  {showDropdown && filteredNeighbourhoods.length > 0 && currentAnswer !== 'OPT_OUT' && inputIntent.type === 'neighbourhood' && (
-                    <div className="absolute top-[48px] left-0 right-0 z-30 bg-white border border-[#004B8D]/40 rounded-lg shadow-xl overflow-hidden max-h-48 overflow-y-auto divide-y divide-gray-100">
-                      {filteredNeighbourhoods.map((n) => (
-                        <button
-                          key={n.name}
-                          type="button"
-                          onMouseDown={() => handleSelectNeighbourhood(n)}
-                          className="w-full text-left px-3 py-2.5 hover:bg-[#004B8D]/10 flex items-center gap-1.5 text-xs cursor-pointer transition-colors"
-                        >
-                          <MapPin className="w-3.5 h-3.5 text-[#004B8D] shrink-0" />
-                          <span className="font-bold text-gray-800">{n.name}</span>
-                          {n.ward && (
-                            <span className="text-[11px] text-gray-500 font-medium">
-                              ({n.ward.toLowerCase().includes('ward') ? n.ward : `${n.ward} Ward`})
-                            </span>
-                          )}
-                        </button>
-                      ))}
+                  {/* Postal code or Neighbourhood Hint Dropdown */}
+                  {showDropdown && locationHints.length > 0 && currentAnswer !== 'OPT_OUT' && (
+                    <div 
+                      id="location-hints-dropdown"
+                      className="absolute top-[48px] left-0 right-0 z-30 bg-white border border-[#004B8D]/40 rounded-lg shadow-xl overflow-hidden max-h-56 overflow-y-auto divide-y divide-gray-100"
+                      role="listbox"
+                    >
+                      {locationHints.map((hint, idx) => {
+                        if (hint.type === 'postal') {
+                          return (
+                            <button
+                              key={`postal-${hint.rawCode}-${idx}`}
+                              type="button"
+                              onMouseDown={() => handleSelectPostalHint(hint)}
+                              className="w-full text-left px-3 sm:px-3.5 py-2 sm:py-2.5 hover:bg-[#004B8D]/10 flex items-center justify-between gap-2 text-xs cursor-pointer transition-colors"
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <span className="text-sm shrink-0">📮</span>
+                                <span className="font-bold text-[#004B8D] font-mono tracking-wide">{hint.code}</span>
+                                <span className="text-gray-700 truncate font-medium">— {hint.name}</span>
+                              </div>
+                              {hint.ward && (
+                                <span className="text-[11px] text-gray-500 font-medium shrink-0">
+                                  ({hint.ward.toLowerCase().includes('ward') ? hint.ward : `${hint.ward} Ward`})
+                                </span>
+                              )}
+                            </button>
+                          );
+                        }
+
+                        return (
+                          <button
+                            key={`neigh-${hint.name}-${idx}`}
+                            type="button"
+                            onMouseDown={() => handleSelectNeighbourhood(hint as unknown as EdmontonNeighbourhood)}
+                            className="w-full text-left px-3 sm:px-3.5 py-2 sm:py-2.5 hover:bg-[#004B8D]/10 flex items-center justify-between gap-2 text-xs cursor-pointer transition-colors"
+                          >
+                            <div className="flex items-center gap-1.5 min-w-0">
+                              <MapPin className="w-3.5 h-3.5 text-[#004B8D] shrink-0" />
+                              <span className="font-bold text-gray-800">{hint.name}</span>
+                            </div>
+                            {hint.ward && (
+                              <span className="text-[11px] text-gray-500 font-medium shrink-0">
+                                ({hint.ward.toLowerCase().includes('ward') ? hint.ward : `${hint.ward} Ward`})
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

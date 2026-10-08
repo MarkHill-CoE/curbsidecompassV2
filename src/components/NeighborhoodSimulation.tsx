@@ -102,12 +102,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       setInternalShowControls(valOrFn);
     }
   }, [onToggleControls]);
-  const [curbsideDemandCount, setCurbsideDemandCount] = useState<number>(() => propCurbsideDemandCount ?? 10);
+  const [curbsideDemandCount, setCurbsideDemandCount] = useState<number>(() => propCurbsideDemandCount ?? 0);
   const [curbsideStallsCapacity, setCurbsideStallsCapacity] = useState<number>(() => {
     if (propCurbsideStallsCapacity !== undefined) return propCurbsideStallsCapacity;
     return getStreetLayoutInfo(config.streetLayout).curbsideCapacity;
   });
-  const [curbsidePct, setCurbsidePct] = useState<number>(() => propCurbsidePct ?? 60);
+  const [curbsidePct, setCurbsidePct] = useState<number>(() => propCurbsidePct ?? 0);
   const [circlingCarCount, setCirclingCarCount] = useState<number>(() => propCirclingCarCount ?? 0);
   const [isPoliceTrafficActive, setIsPoliceTrafficActive] = useState<boolean>(false);
   const [laneStuckSeconds, setLaneStuckSeconds] = useState<number>(0);
@@ -528,7 +528,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     const getEightPlexCount = () => {
       const raw = configRef.current.splitInfillLots;
       const count = typeof raw === 'number' ? raw : 0;
-      return Math.min(7, Math.max(0, count));
+      return Math.min(3, Math.max(0, count));
     };
 
     const isEightPlexLot = (lotIndex: number, count = getEightPlexCount()) => {
@@ -5876,7 +5876,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     };
   }, [playHonk, playCriticalAlarm]);
 
-  const num8PlexCount = Math.min(7, Math.max(0, config.splitInfillLots ?? 0));
+  const num8PlexCount = Math.min(3, Math.max(0, config.splitInfillLots ?? 0));
   const totalDwellings = 12 + num8PlexCount * 7;
   let layoutStallsCapacity = getStreetLayoutInfo(config.streetLayout).curbsideCapacity;
   if ((config.streetLayout || 'mature_laned') === 'suburban_front_driveway') {

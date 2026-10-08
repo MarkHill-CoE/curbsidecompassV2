@@ -245,7 +245,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "drawer_sliders_instruction",
     "category": "Manual Sliders Drawer",
     "container": "Policy Sliders Drawer",
-    "defaultText": "Move the sliders to change the impacting variables to stress test your neighbourhood.",
+    "defaultText": "Move the sliders to simulate parking impacts on your neighbourhood.",
     "guidance": "Instructions right above Street Layout Typology in Manual Sliders Drawer"
   },
   {
@@ -924,7 +924,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "intro_s4_switch_note",
     "category": "Civic Onboarding",
     "container": "3-Step Walkthrough Modal",
-    "defaultText": "You can switch views anytime during the survey!",
+    "defaultText": "You can switch views anytime!",
     "guidance": "Onboarding walkthrough card, title, bullet, or button"
   },
   {
@@ -2009,7 +2009,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "results_you_believe_title",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "You Believe",
+    "defaultText": "You Prioritize",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {

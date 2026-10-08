@@ -891,3 +891,73 @@ export function resolveLocationOrPredictiveAddress(query: string): PredictiveMat
 
   return null;
 }
+
+export interface PostalCodeHint {
+  type: 'postal';
+  code: string;
+  rawCode: string;
+  neighbourhood: string;
+  ward: string;
+  fsa: string;
+}
+
+/**
+ * Searches exact postal codes in Edmonton matching a partial postal code query.
+ */
+export function searchPostalCodeHints(query: string, limit = 8): PostalCodeHint[] {
+  if (!query) return [];
+  const cleanQ = query.toUpperCase().replace(/[\s-]/g, '');
+  if (cleanQ.length < 3) return [];
+
+  const results: PostalCodeHint[] = [];
+  for (const [rawCode, data] of Object.entries(EDMONTON_EXACT_POSTAL_CODES)) {
+    if (rawCode.startsWith(cleanQ)) {
+      const formatted = `${rawCode.slice(0, 3)} ${rawCode.slice(3)}`;
+      results.push({
+        type: 'postal',
+        code: formatted,
+        rawCode,
+        neighbourhood: data.name,
+        ward: data.ward,
+        fsa: data.fsa
+      });
+      if (results.length >= limit) break;
+    }
+  }
+  return results;
+}
+
+/**
+ * Determines whether the postal code or neighbourhood hint dropdown should be shown.
+ * Rule:
+ * - If the first letter is not a 't': only show after the first three characters (e.g. at 4 or more characters).
+ * - For postal codes that start with a 't': only show after the first four characters (e.g. at 5 or more characters, or after 4 postal characters).
+ */
+export function shouldShowLocationDropdown(query: string): boolean {
+  if (!query) return false;
+  const trimmed = query.trim();
+  if (!trimmed) return false;
+
+  const firstChar = trimmed.charAt(0).toLowerCase();
+  const clean = trimmed.toUpperCase().replace(/[\s-]/g, '');
+
+  // Is this a postal code starting with 't'?
+  // Edmonton postal codes start with 'T' followed by a digit (e.g. T5..., T6...)
+  // or is a single 'T' representing the beginning of a postal code.
+  const isPostalCodeStartingWithT = firstChar === 't' && (
+    clean.length === 1 ||
+    /^[A-Z]\d/.test(clean) ||
+    /^[A-Z]\d[A-Z]/.test(clean)
+  );
+
+  if (isPostalCodeStartingWithT) {
+    // Only show after the first four characters for postal codes that start with a t:
+    // Suppresses 1 char ('T'), 2 chars ('T5'), 3 chars ('T5A' FSA), 4 chars ('T5A ' or 'T5A0').
+    // Only shows after the first four characters (i.e. trimmed.length > 4 or clean.length > 4):
+    return trimmed.length > 4 || clean.length > 4;
+  }
+
+  // If the first letter is not a 't' (e.g., neighbourhood text search like "Downtown", "Oliver", "Glenora"):
+  // Only show after the first three characters (i.e. trimmed.length > 3):
+  return trimmed.length > 3;
+}

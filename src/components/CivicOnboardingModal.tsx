@@ -392,16 +392,17 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                   type="range"
                   aria-label={t('drawer_sliders_density_aria', 'Home density')}
                   min="0"
-                  max="7"
+                  max="3"
                   step="1"
-                  value={activeLots}
-                  onChange={(e) => handleDensityChange(parseInt(e.target.value, 10))}
+                  value={Math.min(3, Math.max(0, activeLots))}
+                  onChange={(e) => handleDensityChange(Math.min(3, Math.max(0, parseInt(e.target.value, 10))))}
                   className="accent-[#009A44] cursor-pointer h-2 bg-gray-200 rounded-lg w-full"
                 />
                 <div className="flex justify-between text-[10px] text-gray-500 font-medium px-0.5">
-                  <span>Low Density (0)</span>
-                  <span>Moderate (+3 lots)</span>
-                  <span>High Density (+7 lots)</span>
+                  <span>Baseline (0)</span>
+                  <span>+1 lot</span>
+                  <span>+2 lots</span>
+                  <span>3 additional multi-unit</span>
                 </div>
               </div>
             </div>
@@ -508,7 +509,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             </div>
 
             <p className="text-sm sm:text-base text-gray-600 italic">
-              {t('intro_s4_switch_note', 'You can switch views anytime during the survey!')}
+              {t('intro_s4_switch_note', 'You can switch views anytime!')}
             </p>
           </section>
 

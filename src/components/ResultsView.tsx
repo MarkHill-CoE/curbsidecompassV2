@@ -137,10 +137,10 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
 
         {/* Two Column Priorities & Parking Program Trade-off Outcomes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 items-stretch">
-          {/* Left Column: You Believe */}
+          {/* Left Column: You Prioritize */}
           <div className="bg-slate-50 border border-slate-200/80 rounded-lg p-3 flex flex-col justify-center">
             <h4 className="text-[10pt] font-bold uppercase tracking-wider text-gray-600 mb-1.5">
-              {t('results_you_believe_title', 'You Believe')}
+              {t('results_you_believe_title', 'You Prioritize')}
             </h4>
             <ul className="space-y-1.5 text-[11pt] text-gray-800 w-full px-0.5">
               {persona.keyPriorities.map((priority, idx) => (

@@ -308,7 +308,8 @@ import {
   ALL_EDMONTON_NEIGHBOURHOODS, 
   resolveLocationOrPredictiveAddress, 
   EDMONTON_FSA_DATA,
-  getPosseClassification
+  getPosseClassification,
+  shouldShowLocationDropdown
 } from './edmontonPostalData';
 
 /**
@@ -458,6 +459,7 @@ export function findNeighbourhood(nameOrQuery: string): EdmontonNeighbourhood | 
  */
 export function searchNeighbourhoods(query: string, limit = 8): EdmontonNeighbourhood[] {
   if (!query || !query.trim()) return [];
+  if (!shouldShowLocationDropdown(query)) return [];
   
   const raw = query.trim();
   const cleanUpper = raw.toUpperCase().replace(/[\s-]/g, '');
