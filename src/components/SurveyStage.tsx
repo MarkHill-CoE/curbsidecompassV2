@@ -619,33 +619,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                   </div>
                 )}
 
-                {/* Identified Neighbourhood & Postal Code feedback with Ward */}
-                {detectedLocation && currentAnswer !== 'OPT_OUT' && (
-                  <div className="flex items-center p-2.5 rounded-lg bg-[#004B8D]/5 border border-[#004B8D]/20 text-xs shadow-2xs gap-1.5 sm:gap-2">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      {detectedLocation.isFsaOnly ? (
-                        <div className="flex items-center gap-1.5 font-bold text-[#004B8D]">
-                          <Building2 className="w-4 h-4 shrink-0 text-[#004B8D]" />
-                          <span>FSA Region: {detectedLocation.postalFSA}</span>
-                          <span className="text-gray-400 font-normal">|</span>
-                          <span className="text-gray-700 font-medium truncate">{detectedLocation.neighbourhood}</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1.5 font-bold text-[#004B8D]">
-                          <MapPin className="w-4 h-4 shrink-0 text-[#004B8D]" />
-                          <span className="truncate">{selectedDisambiguation || detectedLocation.neighbourhood}</span>
-                        </div>
-                      )}
 
-                      {/* Ward */}
-                      {detectedLocation.ward && (
-                        <span className="text-[10px] font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded shrink-0">
-                          Ward {detectedLocation.ward}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                )}
 
 
                 {/* City of Edmonton Statutory Collection Notice in 10pt font */}

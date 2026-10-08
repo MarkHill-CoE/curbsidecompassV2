@@ -364,10 +364,10 @@ export function calculateSimulationMetricsFromAnswers(
 
   // Q2: Parking Proximity to Home (formerly Q5)
   if (answers['q2'] === 'q2_a') {
-    policyDemandShift -= 1.5;
+    policyDemandShift += 1.5;
     feeModel = 'permit';
   } else if (answers['q2'] === 'q2_b') {
-    policyDemandShift += 1.5;
+    policyDemandShift -= 1.5;
   }
 
   // Q3: Residential Parking Permit Limit (formerly Q2)
@@ -390,10 +390,10 @@ export function calculateSimulationMetricsFromAnswers(
 
   // Q5: Parking Proximity to Destination (formerly Q4)
   if (answers['q5'] === 'q5_a') {
-    policyDemandShift -= 2.0;
+    policyDemandShift += 2.0;
     enforcement = 'strict';
   } else if (answers['q5'] === 'q5_b') {
-    policyDemandShift += 2.0;
+    policyDemandShift -= 2.0;
     enforcement = 'lenient';
   }
 

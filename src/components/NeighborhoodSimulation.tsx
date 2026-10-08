@@ -1059,11 +1059,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         // 7b. 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
         drawEtsBusStopCurbZone();
 
-        // 8. Asphalt roadway
+        // 8. Asphalt roadway with solid yellow center line
         drawFlatRect(0, 93, blockLength, 45, '#45484C', bgGroundCtx);
-        for (let i = 10; i < blockLength; i += 25) {
-          drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
-        }
+        drawFlatRect(0, 116, blockLength, 1.8, '#FFC72C', bgGroundCtx);
       } else if (layout === 'infill_skinny') {
         // Paved rear alley with smooth asphalt
         drawFlatRect(0, -24, blockLength, 18, '#585C60', bgGroundCtx);
@@ -1104,11 +1102,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawFlatRect(sx + 16, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
         }
 
-        // Asphalt roadway
+        // Asphalt roadway with solid yellow center line
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
-        for (let i = 10; i < blockLength; i += 25) {
-          drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
-        }
+        drawFlatRect(0, 116, blockLength, 1.8, '#FFC72C', bgGroundCtx);
       } else {
         // Mature Laned (Authentic Heritage Mid-Century Layout)
         drawFlatRect(0, -24, blockLength, 18, '#B2AA9D', bgGroundCtx);
@@ -1171,9 +1167,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
 
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
-        for (let i = 10; i < blockLength; i += 25) {
-          drawFlatRect(i, 116, 12, 2, '#e0e0e0', bgGroundCtx);
-        }
+        drawFlatRect(0, 116, blockLength, 1.8, '#FFC72C', bgGroundCtx);
       }
     }
 
@@ -2541,11 +2535,15 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       y: number,
       z: number,
       shirtColor: string,
-      pose: 'normal' | 'bystander' | 'protester' | 'officer' = 'normal'
+      pose: 'normal' | 'bystander' | 'protester' | 'officer' = 'normal',
+      skinColor = '#f0c8a0',
+      hairColor = '#2c3e50',
+      mobilityAid?: 'walker' | 'mobility_scooter' | 'wheelchair',
+      direction = 1,
+      isRecording = false
     ) {
-      const skin = '#f0c8a0';
+      const skin = skinColor;
       const pants = pose === 'officer' ? '#002B49' : '#2c3e50';
-      drawBlock(x, y, z, 1, 1, 2.5, pants, pants, pants);
 
       if (pose === 'officer') {
         // EPS Police Officer in uniform with high-vis yellow vest, peaked cap, and gold crest
@@ -2554,6 +2552,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const vestDark = '#CA8A04';
         const silver = '#E2E8F0';
 
+        drawBlock(x, y, z, 1, 1, 2.5, pants, pants, pants);
         // Navy base shirt with high-visibility fluorescent vest
         drawBlock(x - 0.25, y - 0.25, z + 2.5, 1.5, 1.5, 3.1, vestYellow, vestDark, vestDark);
         // Silver reflective stripes
@@ -2577,13 +2576,137 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         return;
       }
 
+      // 1. Mobility Aid: 4-Wheeled Walker / Rollator (moves slower)
+      if (mobilityAid === 'walker') {
+        const wx = direction === 1 ? x + 1.5 : x - 1.5;
+        const wy = y;
+        const frameColor = '#E2E8F0';
+        const frameDark = '#94A3B8';
+
+        // 4 small rubber wheels at the ground
+        drawBlock(wx + 0.8, wy - 0.4, z, 0.5, 0.4, 0.8, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(wx + 0.8, wy + 1.0, z, 0.5, 0.4, 0.8, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(wx - 0.6, wy - 0.4, z, 0.5, 0.4, 0.8, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(wx - 0.6, wy + 1.0, z, 0.5, 0.4, 0.8, '#1E293B', '#0F172A', '#0F172A');
+
+        // Tubular legs rising from wheels
+        drawBlock(wx - 0.5, wy - 0.3, z + 0.6, 0.3, 0.3, 2.8, frameColor, frameDark, frameDark);
+        drawBlock(wx - 0.5, wy + 1.0, z + 0.6, 0.3, 0.3, 2.8, frameColor, frameDark, frameDark);
+        drawBlock(wx + 0.7, wy - 0.3, z + 0.6, 0.3, 0.3, 2.8, frameColor, frameDark, frameDark);
+        drawBlock(wx + 0.7, wy + 1.0, z + 0.6, 0.3, 0.3, 2.8, frameColor, frameDark, frameDark);
+
+        // Padded rest seat & tote basket
+        drawBlock(wx - 0.5, wy - 0.2, z + 1.8, 1.4, 1.4, 0.4, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(wx + 0.1, wy - 0.2, z + 1.3, 0.8, 1.4, 1.0, '#475569', '#334155', '#1E293B');
+
+        // Ergonomic push handles curving up with soft rubber hand-grips
+        drawBlock(wx - 0.6, wy - 0.4, z + 3.4, 0.7, 0.4, 0.3, '#0F172A', '#0F172A', '#0F172A');
+        drawBlock(wx - 0.6, wy + 1.0, z + 3.4, 0.7, 0.4, 0.3, '#0F172A', '#0F172A', '#0F172A');
+
+        // Pedestrian walking carefully behind walker
+        drawBlock(x, y, z, 1, 1, 2.5, pants, pants, pants);
+        drawBlock(x - 0.2, y - 0.2, z + 2.4, 1.4, 1.4, 2.8, shirtColor, adjustColor(shirtColor, -15), adjustColor(shirtColor, -30));
+        // Arms extended forward gripping walker handles
+        drawBlock(direction === 1 ? x + 0.5 : x - 0.9, y - 0.3, z + 3.1, 0.9, 0.4, 0.4, shirtColor, shirtColor, shirtColor);
+        drawBlock(direction === 1 ? x + 0.5 : x - 0.9, y + 0.9, z + 3.1, 0.9, 0.4, 0.4, shirtColor, shirtColor, shirtColor);
+        drawBlock(x + 0.1, y + 0.1, z + 5.2, 1.2, 1.2, 1.4, skin, skin, skin);
+        drawBlock(x - 0.1, y - 0.1, z + 6.1, 1.4, 1.4, 0.7, hairColor, hairColor, hairColor);
+        return;
+      }
+
+      // 2. Mobility Aid: Motorized Mobility Scooter (moves faster)
+      if (mobilityAid === 'mobility_scooter') {
+        const sx = x;
+        const sy = y;
+        const scooterColor = '#0284C7';
+        const scooterDark = '#0369A1';
+
+        // 4 small wide scooter tires
+        drawBlock(sx + 2.0, sy - 0.8, z, 0.9, 0.5, 1.0, '#1F2937', '#111827', '#111827');
+        drawBlock(sx + 2.0, sy + 1.3, z, 0.9, 0.5, 1.0, '#1F2937', '#111827', '#111827');
+        drawBlock(sx - 1.1, sy - 0.8, z, 0.9, 0.5, 1.0, '#1F2937', '#111827', '#111827');
+        drawBlock(sx - 1.1, sy + 1.3, z, 0.9, 0.5, 1.0, '#1F2937', '#111827', '#111827');
+
+        // Scooter chassis / floorboard platform
+        drawBlock(sx - 1.2, sy - 0.7, z + 0.4, 4.0, 2.4, 0.6, scooterColor, scooterDark, scooterDark);
+
+        // Front steering tiller with handlebars, basket & headlight
+        drawBlock(direction === 1 ? sx + 2.2 : sx - 0.5, sy + 0.2, z + 0.9, 0.4, 0.5, 2.6, '#334155', '#1E293B', '#0F172A');
+        drawBlock(direction === 1 ? sx + 2.1 : sx - 0.6, sy - 0.4, z + 3.4, 0.5, 1.8, 0.35, '#0F172A', '#0F172A', '#0F172A');
+        drawBlock(direction === 1 ? sx + 2.5 : sx - 1.0, sy - 0.2, z + 1.9, 0.7, 1.4, 1.1, '#64748B', '#475569', '#334155');
+        drawBlock(direction === 1 ? sx + 2.7 : sx - 1.2, sy + 0.2, z + 2.9, 0.3, 0.5, 0.4, '#FACC15', '#FACC15', '#FACC15');
+
+        // Comfortable padded captain's chair with armrests
+        drawBlock(sx - 0.3, sy - 0.4, z + 1.0, 1.8, 1.8, 0.8, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(direction === 1 ? sx - 0.4 : sx + 1.0, sy - 0.4, z + 1.8, 0.5, 1.8, 2.8, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(sx - 0.1, sy - 0.6, z + 2.4, 1.4, 0.25, 0.25, '#475569', '#334155', '#1E293B');
+        drawBlock(sx - 0.1, sy + 1.35, z + 2.4, 1.4, 0.25, 0.25, '#475569', '#334155', '#1E293B');
+
+        // Seated rider in captain's chair
+        drawBlock(sx - 0.2, sy - 0.2, z + 1.6, 1.5, 1.4, 1.1, pants, pants, pants);
+        drawBlock(sx - 0.1, sy - 0.2, z + 2.5, 1.3, 1.4, 2.4, shirtColor, adjustColor(shirtColor, -15), adjustColor(shirtColor, -30));
+        drawBlock(direction === 1 ? sx + 0.7 : sx - 0.5, sy - 0.1, z + 3.1, 1.1, 1.2, 0.4, shirtColor, shirtColor, shirtColor);
+        drawBlock(sx, sy + 0.1, z + 4.9, 1.2, 1.2, 1.4, skin, skin, skin);
+        drawBlock(sx - 0.2, sy - 0.1, z + 5.8, 1.4, 1.4, 0.7, hairColor, hairColor, hairColor);
+        return;
+      }
+
+      // 3. Mobility Aid: Manual Wheelchair Pushed by Companion (needs someone else to push)
+      if (mobilityAid === 'wheelchair') {
+        const wx = x;
+        const wy = y;
+
+        // Two large 24" rear spoked wheels on sides with silver push-rims
+        drawBlock(wx - 0.6, wy - 0.5, z, 2.4, 0.25, 2.6, '#475569', '#334155', '#1E293B');
+        drawBlock(wx - 0.4, wy - 0.65, z + 0.2, 2.0, 0.12, 2.2, '#E2E8F0', '#CBD5E1', '#94A3B8');
+        drawBlock(wx - 0.6, wy + 1.25, z, 2.4, 0.25, 2.6, '#475569', '#334155', '#1E293B');
+        drawBlock(wx - 0.4, wy + 1.5, z + 0.2, 2.0, 0.12, 2.2, '#E2E8F0', '#CBD5E1', '#94A3B8');
+
+        // Front small caster wheels
+        drawBlock(wx + 1.4, wy - 0.4, z, 0.4, 0.25, 0.6, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(wx + 1.4, wy + 1.15, z, 0.4, 0.25, 0.6, '#1E293B', '#0F172A', '#0F172A');
+
+        // Seat, backrest & footrests
+        drawBlock(wx - 0.3, wy - 0.25, z + 1.3, 1.6, 1.5, 0.4, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(direction === 1 ? wx - 0.4 : wx + 1.2, wy - 0.25, z + 1.7, 0.4, 1.5, 2.4, '#1E293B', '#0F172A', '#0F172A');
+        drawBlock(direction === 1 ? wx + 1.3 : wx - 0.6, wy - 0.15, z + 0.4, 0.7, 1.3, 0.2, '#94A3B8', '#64748B', '#475569');
+
+        // Rear push handles for companion
+        drawBlock(direction === 1 ? wx - 0.7 : wx + 1.4, wy - 0.15, z + 3.6, 0.6, 0.3, 0.3, '#0F172A', '#0F172A', '#0F172A');
+        drawBlock(direction === 1 ? wx - 0.7 : wx + 1.4, wy + 0.85, z + 3.6, 0.6, 0.3, 0.3, '#0F172A', '#0F172A', '#0F172A');
+
+        // Seated Wheelchair Occupant
+        drawBlock(wx - 0.1, wy - 0.15, z + 1.5, 1.4, 1.3, 0.9, pants, pants, pants);
+        drawBlock(wx, wy - 0.1, z + 2.3, 1.2, 1.2, 2.2, shirtColor, adjustColor(shirtColor, -15), adjustColor(shirtColor, -30));
+        drawBlock(wx + 0.1, wy + 0.1, z + 4.5, 1.1, 1.1, 1.3, skin, skin, skin);
+        drawBlock(wx - 0.1, wy - 0.1, z + 5.3, 1.3, 1.3, 0.6, hairColor, hairColor, hairColor);
+
+        // Companion Pusher walking directly behind the wheelchair pushing it
+        const px = direction === 1 ? wx - 2.5 : wx + 2.5;
+        const py = wy;
+        const compShirt = '#059669';
+        const compSkin = skinColor === '#f0c8a0' ? '#c68a4c' : '#f0c8a0'; // Diverse pairings
+        drawBlock(px, py, z, 1.0, 1.0, 2.5, '#334155', '#1E293B', '#1E293B');
+        drawBlock(px - 0.2, py - 0.2, z + 2.5, 1.4, 1.4, 2.9, compShirt, adjustColor(compShirt, -15), adjustColor(compShirt, -30));
+        // Companion arms reaching forward holding push handles
+        drawBlock(direction === 1 ? px + 0.7 : px - 1.1, py - 0.15, z + 3.4, 1.1, 0.35, 0.35, compShirt, compShirt, compShirt);
+        drawBlock(direction === 1 ? px + 0.7 : px - 1.1, py + 0.8, z + 3.4, 1.1, 0.35, 0.35, compShirt, compShirt, compShirt);
+        drawBlock(px + 0.1, py + 0.1, z + 5.4, 1.2, 1.2, 1.4, compSkin, compSkin, compSkin);
+        drawBlock(px - 0.1, py - 0.1, z + 6.3, 1.4, 1.4, 0.7, '#1E1B18', '#1E1B18', '#1E1B18');
+        return;
+      }
+
+      // Default walking or bystander
+      drawBlock(x, y, z, 1, 1, 2.5, pants, pants, pants);
+
       if (pose === 'bystander') {
         // Bystander facing the street observing police blockage
         drawBlock(x - 0.2, y - 0.2, z + 2.5, 1.4, 1.4, 3, shirtColor, adjustColor(shirtColor, -15), adjustColor(shirtColor, -30));
         drawBlock(x + 0.1, y + 0.1, z + 5.5, 1.2, 1.2, 1.4, skin, skin, skin);
+        drawBlock(x - 0.1, y - 0.1, z + 6.4, 1.4, 1.4, 0.7, hairColor, hairColor, hairColor);
 
         // Every other bystander holds up a smartphone recording the scene
-        const hasPhone = Math.abs(Math.sin(x * 12.3)) > 0.45;
+        const hasPhone = isRecording;
         if (hasPhone) {
           drawBlock(x + 0.2, y + 0.9, z + 3.8, 0.7, 0.9, 0.5, '#1E293B', '#0F172A', '#0F172A');
           drawBlock(x + 0.3, y + 1.1, z + 4.1, 0.5, 0.5, 0.2, '#38BDF8', '#0284C7', '#0284C7');
@@ -2596,6 +2719,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
       drawBlock(x - 0.2, y - 0.2, z + 2.5, 1.4, 1.4, 3, shirtColor, adjustColor(shirtColor, -15), adjustColor(shirtColor, -30));
       drawBlock(x + 0.1, y + 0.1, z + 5.5, 1.2, 1.2, 1.4, skin, skin, skin);
+      drawBlock(x - 0.1, y - 0.1, z + 6.4, 1.4, 1.4, 0.7, hairColor, hairColor, hairColor);
     }
 
     function drawBusStopShelter(x: number, y: number, hasFullShelter: boolean = true) {
@@ -2699,18 +2823,96 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     }
 
     const pedColors = ['#E8552D', '#0081BC', '#FFC72C', '#ffffff', '#68217A', '#009A44', '#0284C7', '#EC4899', '#10B981'];
-    const pedestrians = Array.from({ length: 56 }, (_, i) => {
+
+    const minoritySkins = [
+      '#4d2d18', // Deep espresso (Black / African-Canadian)
+      '#5c381e', // Rich chestnut (Black / African-Canadian)
+      '#6b4423', // Warm dark brown (Black / African-Canadian)
+      '#a26c3f', // Medium bronze (South Asian / Indigenous)
+      '#b87333', // Warm copper-bronze (South Asian)
+      '#c68a4c', // Warm caramel (South Asian / Latino)
+      '#995d28', // Golden brown (Indigenous / Latino)
+      '#dfb17b', // Warm almond / olive (East Asian / Southeast Asian)
+      '#e8be91', // Golden ivory (East Asian)
+      '#f2cf9e'  // Warm peach (East Asian / Southeast Asian)
+    ];
+
+    const nonMinoritySkins = [
+      '#f5d3b8',
+      '#f0c8a0',
+      '#ebd0bc',
+      '#f7dec9',
+      '#fae3d2',
+      '#edd5c0'
+    ];
+
+    const darkHairs = ['#171717', '#26201b', '#33271f', '#1c1917'];
+    const generalHairs = ['#3b2219', '#b08d57', '#8b4513', '#5a3d28', '#9ca3af', '#171717'];
+
+    // 40% of pedestrians are visible minorities (24 out of 60 indices)
+    const minorityIndices = new Set([
+      1, 3, 6, 8, 11, 13, 16, 18, 20, 23, 26, 28, 31, 33, 36, 38, 41, 43, 46, 48, 50, 53, 56, 58
+    ]);
+
+    // 10% of pedestrians use a mobility aid of some type (walker, mobility scooter, wheelchair)
+    // Speed characteristics:
+    // - Walker: moves slower (0.45 * PED_SPEED)
+    // - Mobility scooter: moves faster (1.85 * PED_SPEED)
+    // - Wheelchair: needs companion pusher (0.95 * PED_SPEED)
+    const pedestrians = Array.from({ length: 60 }, (_, i) => {
       const dir = i % 2 === 0 ? 1 : -1;
+      const isMinority = minorityIndices.has(i);
+      const skinColor = isMinority
+        ? minoritySkins[i % minoritySkins.length]
+        : nonMinoritySkins[i % nonMinoritySkins.length];
+      const hairColor = isMinority
+        ? darkHairs[i % darkHairs.length]
+        : generalHairs[i % generalHairs.length];
+
+      let mobilityAid: 'walker' | 'mobility_scooter' | 'wheelchair' | undefined = undefined;
+      let speedMult = 1.0;
+
+      if (i % 10 === 0) {
+        // Exactly 10% of pedestrians
+        if (i % 30 === 0) {
+          mobilityAid = 'walker';
+          speedMult = 0.45; // someone using a walker is slower
+        } else if (i % 30 === 10) {
+          mobilityAid = 'mobility_scooter';
+          speedMult = 1.85; // someone in mobility scooter is faster
+        } else {
+          mobilityAid = 'wheelchair';
+          speedMult = 0.95; // wheelchair needs someone else to push them
+        }
+      }
+
+      // Sidewalk lanes:
+      // Eastbound (dir = 1): travels on street-side of sidewalk (y ~ 74.8 - 75.8)
+      // Westbound (dir = -1): travels on house-side of sidewalk (y ~ 72.0 - 73.0)
+      const laneOffset = ((i * 7) % 3) * 0.4;
+      const baseLaneY = dir === 1 ? 75.0 + laneOffset : 72.2 + laneOffset;
+      const startX = ((i + 0.5) / 60) * blockLength;
+
       return {
         id: i,
-        x: Math.random() * blockLength,
-        y: 73 + (i % 3) * 1.5,
+        x: startX,
+        y: baseLaneY,
+        targetY: baseLaneY,
+        baseLaneY,
         roadY: 98 + (i % 5) * 6,
-        w: 2,
+        w: mobilityAid === 'wheelchair' ? 4 : (mobilityAid ? 3 : 2),
         d: 2,
-        baseSpeed: PED_SPEED * dir,
-        speed: PED_SPEED * dir,
+        dir: dir as (1 | -1),
+        direction: dir as (1 | -1),
+        speedMult,
+        baseSpeed: PED_SPEED * speedMult,
+        currentSpeed: PED_SPEED * speedMult,
+        speed: PED_SPEED * speedMult * dir,
         color: pedColors[i % pedColors.length],
+        skinColor,
+        hairColor,
+        isMinority,
+        mobilityAid,
         isBystander: false,
         pose: 'normal' as 'normal' | 'bystander' | 'officer'
       };
@@ -2989,6 +3191,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         flashIntensity?: number;
         path?: {x: number; y: number}[];
         pathIdx?: number;
+        direction?: number;
       };
     }
 
@@ -3568,6 +3771,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if (dist > 0.8) {
             d.x += (dx / dist) * 0.45;
             d.y += (dy / dist) * 0.45;
+            if (Math.abs(dx) > 0.1) d.direction = dx >= 0 ? 1 : -1;
           } else {
             d.x = target.x;
             d.y = target.y;
@@ -3698,6 +3902,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if (dist > 0.8) {
             d.x += (dx / dist) * 0.45;
             d.y += (dy / dist) * 0.45;
+            if (Math.abs(dx) > 0.1) d.direction = dx >= 0 ? 1 : -1;
           } else {
             d.x = target.x;
             d.y = target.y;
@@ -4057,7 +4262,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
       // Check whether EPS police is on the street and stopped
       const isBlockagePoliceStopped = policeBlockageUnit.active && (policeBlockageUnit.state === 'investigating' || policeBlockageUnit.state === 'clearing');
-      const stoppedEmergencyPolice = emergencyVehicles.find(v => v.type === 'police' && (v.speed || 0) < 0.2 && v.x >= 20 && v.x <= blockLength - 20);
+      const stoppedEmergencyPolice = emergencyVehicles.find(v => v.type === 'police' && (v.speed || 0) < 0.05 && v.x >= 20 && v.x <= blockLength - 20);
       const isPoliceStoppedOnStreet = isBlockagePoliceStopped || Boolean(stoppedEmergencyPolice);
       const stoppedPoliceX = isBlockagePoliceStopped 
         ? (policeOfficerPed.active ? policeOfficerPed.x : policeTrafficCar.x)
@@ -4068,44 +4273,80 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         if (isPoliceStoppedOnStreet && stoppedPoliceX !== null) {
           // Whenever EPS are stopped on the street, nearby pedestrians gather along the sidewalk as bystanders
-          const bystanderSpotX = stoppedPoliceX - 22 + (i % 8) * 5.6 + ((i % 3) * 1.5);
-          const bystanderSpotY = 75.0 + (i % 3) * 1.5; // Sidewalk edge facing the road
+          const bystanderSpotX = Math.min(blockLength - 10, Math.max(10, stoppedPoliceX - 22 + (i % 8) * 5.6 + ((i % 3) * 1.5)));
+          const bystanderSpotY = 75.2 + ((i % 3) * 0.5); // Sidewalk edge facing the road
           const dx = bystanderSpotX - p1.x;
           const dy = bystanderSpotY - p1.y;
           const dist = Math.hypot(dx, dy);
 
-          if (dist > 1.5) {
-            p1.x += (dx / dist) * Math.min(dist, PED_SPEED * 1.35);
-            p1.y += (dy / dist) * Math.min(dist, PED_SPEED * 1.35);
+          if (dist > 0.5) {
+            const step = Math.min(dist, p1.baseSpeed * 1.25);
+            p1.x += (dx / dist) * step;
+            p1.y += (dy / dist) * Math.min(dist, 0.12);
             p1.pose = 'normal';
+            if (Math.abs(dx) > 0.1) p1.direction = dx >= 0 ? 1 : -1;
           } else {
             p1.x = bystanderSpotX;
             p1.y = bystanderSpotY;
             p1.pose = 'bystander'; // Bystander pose watching police or recording on phone
+            p1.direction = 1;
           }
         } else {
-          // Normal peaceful sidewalk stroll
+          // Normal peaceful sidewalk stroll (smooth, lane-based, no collision oscillation or jitter)
           p1.pose = 'normal';
-          if (p1.y < 71.5 || p1.y > 76.5) {
-            p1.y += (73.5 - p1.y) * 0.1;
-          }
-          const nextX = p1.x + p1.speed;
-          let collision = false;
+          p1.direction = p1.dir;
+
+          // Default designated lateral sidewalk lane (Eastbound on street side, Westbound on house side)
+          let targetY = p1.baseLaneY;
+          let targetSpeed = p1.baseSpeed;
+
+          // Same-direction courtesy and smooth overtaking
           for (let j = 0; j < activePedCount; j++) {
             if (i === j) continue;
             const p2 = pedestrians[j];
-            if (Math.abs(p1.y - p2.y) < 2) {
-              if (nextX < p2.x + p2.w + 1 && nextX + p1.w + 1 > p2.x) {
-                collision = true;
-                break;
+
+            if (p2.dir === p1.dir) {
+              // Pedestrian in front in the same travel direction
+              const gap = p1.dir === 1 ? (p2.x - p1.x) : (p1.x - p2.x);
+              if (gap > 0 && gap < 7.5) {
+                const latDiff = Math.abs(p1.y - p2.y);
+                if (latDiff < 1.4) {
+                  // In the same lane. If faster, steer smoothly laterally to overtake
+                  if (p1.baseSpeed > p2.currentSpeed) {
+                    targetY = p1.dir === 1 ? 73.4 : 74.2;
+                  }
+                  // If close before passing lane is clear, smoothly match speed with polite buffer
+                  if (gap < 3.2 && latDiff < 1.0) {
+                    targetSpeed = Math.min(targetSpeed, Math.max(0.04, p2.currentSpeed * 0.9));
+                  }
+                }
+              }
+            } else {
+              // Oncoming pedestrian in opposite direction:
+              // Natural pedestrian courtesy: maintain safe designated side of the sidewalk
+              const distToOncoming = Math.abs(p1.x - p2.x);
+              if (distToOncoming < 5.0 && Math.abs(p1.y - p2.y) < 1.4) {
+                targetY = p1.baseLaneY;
               }
             }
           }
-          if (collision) p1.speed = -p1.speed;
-          else p1.x = nextX;
 
-          if (p1.x > blockLength + 10) p1.x = -10;
-          if (p1.x < -10) p1.x = blockLength + 10;
+          // Buttery smooth lateral steering (interpolated, never teleports)
+          p1.y += (targetY - p1.y) * 0.05;
+
+          // Buttery smooth speed acceleration/deceleration
+          p1.currentSpeed += (targetSpeed - p1.currentSpeed) * 0.1;
+
+          // Move along sidewalk in travel direction
+          p1.x += p1.currentSpeed * p1.dir;
+          p1.speed = p1.currentSpeed * p1.dir;
+
+          // Seamless edge wrapping
+          if (p1.dir === 1 && p1.x > blockLength + 15) {
+            p1.x = -15;
+          } else if (p1.dir === -1 && p1.x < -15) {
+            p1.x = blockLength + 15;
+          }
         }
       }
 
@@ -5231,6 +5472,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             w: 2,
             d: 2,
             hasPackage: van.driver.hasPackage,
+            direction: van.driver.direction || 1,
             photoState: van.driver.photoState,
             flashIntensity: van.driver.flashIntensity,
             depthKey: getIsometricDepthKey(van.driver.x, van.driver.y, 2, 2)
@@ -5324,17 +5566,22 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       // 8. Public pedestrians walking along the sidewalk
       for (let i = 0; i < activePedCount; i++) {
         const p = pedestrians[i];
+        const pedW = p.mobilityAid === 'wheelchair' ? 4 : (p.mobilityAid ? 3 : 2);
         renderQueue.push({
           type: 'pedestrian',
           x: p.x,
           y: p.y,
-          w: 2,
+          w: pedW,
           d: 2,
           color: p.color,
-          pose: 'normal',
-          isRecording: false,
+          skinColor: p.skinColor,
+          hairColor: p.hairColor,
+          pose: p.pose,
+          mobilityAid: p.mobilityAid,
+          direction: p.direction || (p.dir ?? (p.speed >= 0 ? 1 : -1)),
+          isRecording: p.id % 2 === 0,
           id: p.id,
-          depthKey: getIsometricDepthKey(p.x, p.y, 2, 2)
+          depthKey: getIsometricDepthKey(p.x, p.y, pedW, 2)
         });
       }
 
@@ -5472,11 +5719,22 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         } else if (item.type === 'policeOfficer') {
           drawPedestrian(item.x, item.y, 0, '#002B49', 'officer');
         } else if (item.type === 'pedestrian') {
-          drawPedestrian(item.x, item.y, 0, item.color, item.pose);
+          drawPedestrian(
+            item.x,
+            item.y,
+            0,
+            item.color,
+            item.pose,
+            item.skinColor,
+            item.hairColor,
+            item.mobilityAid,
+            item.direction,
+            item.isRecording
+          );
         } else if (item.type === 'parkedWalker' || item.type === 'busPassenger') {
-          drawPedestrian(item.x, item.y, 0, item.color, 'normal');
+          drawPedestrian(item.x, item.y, 0, item.color, 'normal', item.skinColor, item.hairColor);
         } else if (item.type === 'deliveryDriver') {
-          drawPedestrian(item.x, item.y, 0, '#009A44');
+          drawPedestrian(item.x, item.y, 0, '#009A44', 'normal', '#f0c8a0', '#2c3e50', undefined, item.direction || 1);
           if (item.hasPackage) {
             drawBlock(item.x - 0.4, item.y - 0.8, 2.6, 2.0, 1.6, 1.4, '#d2b48c', '#b89768', '#9e7a4a');
             drawBlock(item.x + 0.2, item.y - 0.8, 4.0, 0.5, 1.6, 0.04, '#c29b68', '#b08a56', '#9f7845');

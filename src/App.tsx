@@ -22,7 +22,6 @@ import {
 import { SimulationConfig, StreetLayoutTypology } from './types';
 import { getStreetLayoutInfo, detectLayoutAndNeighbourhood } from './data/edmontonNeighbourhoods';
 import {
-  Compass,
   RotateCcw,
   HelpCircle,
   ZapOff,
@@ -438,16 +437,7 @@ export default function App() {
             )}
           </button>
 
-          {/* Leaning Persona Pill */}
-          <div className="hidden xl:flex items-center gap-1.5 text-[0.6875rem] bg-black/25 px-2.5 py-1 rounded-full border border-white/15">
-            <Compass className="w-3.5 h-3.5 text-[#FFC72C]" />
-            <span className="text-gray-300">
-              {isCompleted ? t('header_final_persona', 'Final Persona:') : t('header_live_trend', 'Live Trend:')}
-            </span>
-            <span className="font-bold text-white truncate max-w-[170px]">
-              {currentPersona.title.replace('The ', '').replace(' Profile', '')}
-            </span>
-          </div>
+
 
           {isCompleted ? (
             <button
