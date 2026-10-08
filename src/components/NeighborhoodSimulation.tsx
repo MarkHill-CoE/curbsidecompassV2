@@ -408,6 +408,31 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
   const playPoliceSirenSoundRef = useRef(playPoliceSirenSound);
   playPoliceSirenSoundRef.current = playPoliceSirenSound;
 
+  const playCameraFlashSound = useCallback(() => {
+    if (!soundEnabledRef.current) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    try {
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1450, now);
+      osc.frequency.exponentialRampToValueAtTime(340, now + 0.04);
+      gain.gain.setValueAtTime(0.08, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.045);
+    } catch {
+      // Audio safety fallback
+    }
+  }, [getAudioContext]);
+
+  const playCameraFlashSoundRef = useRef(playCameraFlashSound);
+  playCameraFlashSoundRef.current = playCameraFlashSound;
+
   // Reshuffle signal
   const reshuffleTriggerRef = useRef<number>(0);
   const handleReshuffle = () => {
@@ -1926,124 +1951,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       ctx!.restore();
     }
 
-    function drawBusBubble(x: number, y: number, z: number, text: string) {
-      const pos = project(x + 16, y, z + 12);
-      ctx!.save();
-
-      ctx!.font = 'bold 8.5px system-ui, -apple-system, sans-serif';
-      const textMetrics = ctx!.measureText(text);
-      const bubbleW = textMetrics.width + 16;
-      const bubbleH = 15;
-      const bubbleX = pos.x - bubbleW / 2;
-      const bubbleY = pos.y - bubbleH - 3;
-
-      // Soft shadow
-      ctx!.fillStyle = 'rgba(0, 0, 0, 0.28)';
-      ctx!.beginPath();
-      if (ctx!.roundRect) {
-        ctx!.roundRect(bubbleX + 1, bubbleY + 1, bubbleW, bubbleH, 4);
-      } else {
-        ctx!.rect(bubbleX + 1, bubbleY + 1, bubbleW, bubbleH);
-      }
-      ctx!.fill();
-
-      // Background Bubble (ETS Blue border)
-      ctx!.fillStyle = '#FFFFFF';
-      ctx!.strokeStyle = '#005087';
-      ctx!.lineWidth = 1.3;
-      ctx!.beginPath();
-      if (ctx!.roundRect) {
-        ctx!.roundRect(bubbleX, bubbleY, bubbleW, bubbleH, 4);
-      } else {
-        ctx!.rect(bubbleX, bubbleY, bubbleW, bubbleH);
-      }
-      ctx!.fill();
-      ctx!.stroke();
-
-      // Pointer triangle
-      ctx!.beginPath();
-      ctx!.moveTo(pos.x - 3, bubbleY + bubbleH);
-      ctx!.lineTo(pos.x, bubbleY + bubbleH + 4);
-      ctx!.lineTo(pos.x + 3, bubbleY + bubbleH);
-      ctx!.fillStyle = '#FFFFFF';
-      ctx!.fill();
-      ctx!.beginPath();
-      ctx!.moveTo(pos.x - 3, bubbleY + bubbleH);
-      ctx!.lineTo(pos.x, bubbleY + bubbleH + 4);
-      ctx!.lineTo(pos.x + 3, bubbleY + bubbleH);
-      ctx!.strokeStyle = '#005087';
-      ctx!.lineWidth = 1.3;
-      ctx!.stroke();
-
-      // Bus icon or bullet
-      ctx!.fillStyle = '#005087';
-      ctx!.beginPath();
-      ctx!.arc(bubbleX + 6.5, bubbleY + 7.5, 2.5, 0, Math.PI * 2);
-      ctx!.fill();
-
-      // Text label
-      ctx!.fillStyle = '#002B49';
-      ctx!.textBaseline = 'middle';
-      ctx!.fillText(text, bubbleX + 12, bubbleY + 8);
-
-      ctx!.restore();
-    }
-
-    function drawSpeedBadge(x: number, y: number, z: number, speedKmH: number) {
-      const pos = project(x + 7.5, y, z + 8);
-      ctx!.save();
-      const diff = speedKmH - 40;
-      const diffStr = diff > 0 ? `+${diff}` : diff < 0 ? `${diff}` : 'limit';
-      const label = `${speedKmH} km/h (${diffStr})`;
-      ctx!.font = 'bold 7.5px system-ui, -apple-system, sans-serif';
-      const textMetrics = ctx!.measureText(label);
-      const bubbleW = textMetrics.width + 10;
-      const bubbleH = 13;
-      const bubbleX = pos.x - bubbleW / 2;
-      const bubbleY = pos.y - bubbleH - 2;
-
-      // Soft shadow
-      ctx!.fillStyle = 'rgba(0, 0, 0, 0.25)';
-      ctx!.beginPath();
-      if (ctx!.roundRect) {
-        ctx!.roundRect(bubbleX + 1, bubbleY + 1, bubbleW, bubbleH, 3);
-      } else {
-        ctx!.rect(bubbleX + 1, bubbleY + 1, bubbleW, bubbleH);
-      }
-      ctx!.fill();
-
-      // Background color: amber if > 40 km/h, sky-blue if < 40 km/h, emerald if == 40 km/h
-      const bgCol = diff > 0 ? '#B45309' : diff < 0 ? '#0284C7' : '#047857';
-      const borderCol = diff > 0 ? '#FBBF24' : diff < 0 ? '#38BDF8' : '#34D399';
-
-      ctx!.fillStyle = bgCol;
-      ctx!.strokeStyle = borderCol;
-      ctx!.lineWidth = 1;
-      ctx!.beginPath();
-      if (ctx!.roundRect) {
-        ctx!.roundRect(bubbleX, bubbleY, bubbleW, bubbleH, 3);
-      } else {
-        ctx!.rect(bubbleX, bubbleY, bubbleW, bubbleH);
-      }
-      ctx!.fill();
-      ctx!.stroke();
-
-      // Small pointer down to vehicle roof
-      ctx!.beginPath();
-      ctx!.moveTo(pos.x - 2.5, bubbleY + bubbleH);
-      ctx!.lineTo(pos.x, bubbleY + bubbleH + 3);
-      ctx!.lineTo(pos.x + 2.5, bubbleY + bubbleH);
-      ctx!.fillStyle = bgCol;
-      ctx!.fill();
-
-      // Text label
-      ctx!.fillStyle = '#FFFFFF';
-      ctx!.textAlign = 'center';
-      ctx!.textBaseline = 'middle';
-      ctx!.fillText(label, pos.x, bubbleY + bubbleH / 2);
-      ctx!.restore();
-    }
-
     function drawSpeechBubble(x: number, y: number, z: number) {
       const pos = project(x + 1, y - 1, z + 6);
       ctx!.save();
@@ -2670,6 +2577,23 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         return;
       }
 
+      if (pose === 'bystander') {
+        // Bystander facing the street observing police blockage
+        drawBlock(x - 0.2, y - 0.2, z + 2.5, 1.4, 1.4, 3, shirtColor, adjustColor(shirtColor, -15), adjustColor(shirtColor, -30));
+        drawBlock(x + 0.1, y + 0.1, z + 5.5, 1.2, 1.2, 1.4, skin, skin, skin);
+
+        // Every other bystander holds up a smartphone recording the scene
+        const hasPhone = Math.abs(Math.sin(x * 12.3)) > 0.45;
+        if (hasPhone) {
+          drawBlock(x + 0.2, y + 0.9, z + 3.8, 0.7, 0.9, 0.5, '#1E293B', '#0F172A', '#0F172A');
+          drawBlock(x + 0.3, y + 1.1, z + 4.1, 0.5, 0.5, 0.2, '#38BDF8', '#0284C7', '#0284C7');
+        } else {
+          // Arms folded across chest watching attentively
+          drawBlock(x - 0.3, y + 0.5, z + 3.3, 1.6, 0.6, 0.6, shirtColor, adjustColor(shirtColor, -15), adjustColor(shirtColor, -30));
+        }
+        return;
+      }
+
       drawBlock(x - 0.2, y - 0.2, z + 2.5, 1.4, 1.4, 3, shirtColor, adjustColor(shirtColor, -15), adjustColor(shirtColor, -30));
       drawBlock(x + 0.1, y + 0.1, z + 5.5, 1.2, 1.2, 1.4, skin, skin, skin);
     }
@@ -2774,8 +2698,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       return { simSpeed, speedKmH };
     }
 
-    const pedColors = ['#E8552D', '#0081BC', '#FFC72C', '#ffffff', '#68217A', '#009A44'];
-    const pedestrians = Array.from({ length: 24 }, (_, i) => {
+    const pedColors = ['#E8552D', '#0081BC', '#FFC72C', '#ffffff', '#68217A', '#009A44', '#0284C7', '#EC4899', '#10B981'];
+    const pedestrians = Array.from({ length: 56 }, (_, i) => {
       const dir = i % 2 === 0 ? 1 : -1;
       return {
         id: i,
@@ -2786,7 +2710,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         d: 2,
         baseSpeed: PED_SPEED * dir,
         speed: PED_SPEED * dir,
-        color: pedColors[i % pedColors.length]
+        color: pedColors[i % pedColors.length],
+        isBystander: false,
+        pose: 'normal' as 'normal' | 'bystander' | 'officer'
       };
     });
 
@@ -3059,6 +2985,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         targetDoorY: number;
         hasPackage: boolean;
         active: boolean;
+        photoState?: 'none' | 'dropping_package' | 'backing_up' | 'aiming_camera' | 'flash' | 'lowering_camera';
+        flashIntensity?: number;
         path?: {x: number; y: number}[];
         pathIdx?: number;
       };
@@ -3120,7 +3048,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           targetDoorX: doorX,
           targetDoorY: doorY,
           hasPackage: true,
-          active: false
+          active: false,
+          photoState: 'none',
+          flashIntensity: 0
         }
       };
     }
@@ -3373,6 +3303,16 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         if (B.parkingState === 'parked' && A.parkingTargetSlot === B) continue;
         if (B.isStatic && A.parkingTargetSlot && Math.abs(A.parkingTargetSlot.x - B.x) < 4 && Math.abs(A.parkingTargetSlot.y - B.y) < 2) continue;
 
+        // ETS Bus lane adjustments: Parked static cars along curb never prevent bus lane changes
+        if (A.type === 'etsBus') {
+          if (B.isStatic) continue;
+          if (B.type === 'bike' || B.type === 'scooter') continue;
+          // In direction -1, trailing vehicles behind or alongside the bus yield (Alberta Yield to Bus Law)
+          if (B.direction === -1 && B.x >= A.x - 5) continue;
+          // Delivery vans or cars parked at curb (y <= 96) do not block bus lane transitions
+          if (B.type === 'deliveryVan' && B.y <= 96) continue;
+        }
+
         if (hasLateralOverlap(candidateY, A.d, B.y, B.d, 1.2)) {
           // Check longitudinal proximity
           if (B.x < maxX && B.x + (B.w || 15) > minX) {
@@ -3400,9 +3340,16 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const B = obstacles[j];
         if (A === B) continue;
 
-        // When ETS Bus is pulling into/dwelling at bus stop (x: 250-345), ignore static parked stalls outside the stop
-        if (A.type === 'etsBus' && B.isStatic && (A.busStopState === 'approaching' || A.busStopState === 'dwelling')) {
-          if (B.x < 240 || B.x > 350) continue;
+        // ETS Buses run along transit routes and designated bus stop bays: static parked stalls never block transit vehicles
+        if (A.type === 'etsBus') {
+          if (B.isStatic) continue;
+          if (B.type === 'deliveryVan' && B.y <= 96 && A.y >= 104) continue;
+          if (B.direction === -1 && B.x >= A.x - 2) continue;
+        }
+
+        // Passing traffic in standard travel lane (y >= 106) does not stop behind an ETS bus that is dwelling at the curb
+        if (B.type === 'etsBus' && B.busStopState === 'dwelling' && A.y >= 106) {
+          continue;
         }
 
         // When a car is parallel parking, ignore its targeted empty stall
@@ -3551,9 +3498,25 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const targetHouse = van.targetHouse % TOTAL_MIDCENTURY_HOMES;
           const houseBaseX = 8 + targetHouse * 30.5;
           const is8Plex = isEightPlexLot(targetHouse);
-          const doorX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 13;
-          const doorY = is8Plex ? 70.8 : 44;
-          const walkwayX = houseBaseX + 11.5;
+          const currentLayout = configRef.current.streetLayout || 'mature_laned';
+
+          let doorX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 10.5;
+          let doorY = is8Plex ? 70.8 : 46.0;
+          let walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 9.3;
+
+          if (currentLayout === 'suburban_front_driveway') {
+            doorX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.25;
+            doorY = is8Plex ? 70.8 : 48.0;
+            walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.25;
+          } else if (currentLayout === 'contemporary_townhomes') {
+            doorX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.5;
+            doorY = is8Plex ? 70.8 : 48.0;
+            walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.5;
+          } else if (currentLayout === 'infill_skinny') {
+            doorX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.0;
+            doorY = is8Plex ? 70.8 : 46.0;
+            walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.0;
+          }
 
           // Driver cab door facing curb (for isFlipped: true, cab is in front at x..x+6)
           const cabX = van.x + 3;
@@ -3563,26 +3526,31 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           van.driver.x = cabX;
           van.driver.y = cabY;
           van.driver.hasPackage = true;
+          van.driver.photoState = 'none';
+          van.driver.flashIntensity = 0;
           van.driver.targetDoorX = doorX;
           van.driver.targetDoorY = doorY;
 
           // Pedestrian courier path:
-          // For 8-plex: follow sidewalk directly to front stoop (never walk on/through building or roof!)
-          // For houses: cab -> curb -> boulevard -> sidewalk -> walkway -> porch
+          // Delivery drivers always walk strictly on the sidewalk and front pathways to the door:
+          // 1. Step across curb to the continuous sidewalk (y = 74.0)
+          // 2. Walk along sidewalk to the front pathway entrance (x = walkwayX)
+          // 3. Walk up the paved pathway to the porch/entrance
+          // 4. Step up to front door
           if (is8Plex) {
             van.driver.path = [
               { x: cabX, y: cabY },
               { x: cabX, y: 74.0 },     // step onto sidewalk
-              { x: doorX, y: 74.0 },    // follow sidewalk laterally to 8-plex front entrance
+              { x: doorX, y: 74.0 },    // follow sidewalk laterally to 8-plex entrance
               { x: doorX, y: doorY }    // step up to front stoop (y = 70.8)
             ];
           } else {
             van.driver.path = [
               { x: cabX, y: cabY },
-              { x: cabX, y: 78 },
-              { x: walkwayX, y: 74 },
-              { x: walkwayX, y: 51 },
-              { x: doorX, y: doorY }
+              { x: cabX, y: 74.0 },     // step onto sidewalk
+              { x: walkwayX, y: 74.0 }, // follow sidewalk laterally to front pathway
+              { x: walkwayX, y: 50.0 }, // walk straight up the front pathway
+              { x: doorX, y: doorY }    // step to front door on porch
             ];
           }
           van.driver.pathIdx = 1;
@@ -3612,13 +3580,28 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       } else if (van.state === 'AT_DOOR') {
         van.speed = 0;
         van.stopTimer++;
-        
-        // Delivery driver places parcel down at front door on veranda
-        if (van.stopTimer === 25) {
-          van.driver.hasPackage = false;
+        const d = van.driver;
+        const targetHouse = van.targetHouse % TOTAL_MIDCENTURY_HOMES;
+        const houseBaseX = 8 + targetHouse * 30.5;
+        const is8Plex = isEightPlexLot(targetHouse);
+        const doorX = d.targetDoorX;
+        const doorY = d.targetDoorY;
 
-          const is8Plex = isEightPlexLot(van.targetHouse % TOTAL_MIDCENTURY_HOMES);
-          const doorX = van.driver.targetDoorX;
+        let walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 9.3;
+        const currentLayout = configRef.current.streetLayout || 'mature_laned';
+        if (currentLayout === 'suburban_front_driveway') {
+          walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.25;
+        } else if (currentLayout === 'contemporary_townhomes') {
+          walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.5;
+        } else if (currentLayout === 'infill_skinny') {
+          walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.0;
+        }
+
+        // 1. Delivery driver drops the package down at the door
+        if (van.stopTimer === 18) {
+          d.hasPackage = false;
+          d.photoState = 'dropping_package';
+
           const existingParcelsAtHouse = deliveredParcels.filter(p => p.houseIndex === van.targetHouse).length;
           const pOffsetX = (existingParcelsAtHouse % 3) * 2.2 - 1.1;
           const pOffsetY = Math.floor(existingParcelsAtHouse / 3) * 1.2;
@@ -3627,7 +3610,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             id: `parcel_${Date.now()}_${Math.random()}`,
             houseIndex: van.targetHouse,
             x: doorX + pOffsetX,
-            y: (is8Plex ? 71.0 : 44.5) + pOffsetY,
+            y: (is8Plex ? 71.0 : doorY + 0.5) + pOffsetY,
             z: is8Plex ? 0.8 : 2.2,
             w: 2.4,
             d: 2.0,
@@ -3641,37 +3624,68 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           }
         }
 
-        // Driver pauses briefly after leaving parcel, then heads back to the delivery van
-        if (van.stopTimer > 55) {
+        // 2. Driver backs up away from the door onto the pathway/porch
+        if (van.stopTimer > 18 && van.stopTimer <= 42) {
+          d.photoState = 'backing_up';
+          const backupFactor = (van.stopTimer - 18) / 24;
+          if (is8Plex) {
+            d.y = doorY + backupFactor * 2.6; // Back up down the stoop toward sidewalk
+          } else {
+            d.y = doorY + backupFactor * 4.2; // Back up down the front porch towards pathway
+            d.x = doorX + (walkwayX - doorX) * (backupFactor * 0.4);
+          }
+        }
+
+        // 3. Driver raises phone aiming camera at the package by the door
+        if (van.stopTimer > 42 && van.stopTimer < 54) {
+          d.photoState = 'aiming_camera';
+          d.flashIntensity = 0;
+        }
+
+        // 4. FLASH! Camera flash photo of the delivered package
+        if (van.stopTimer === 54) {
+          d.photoState = 'flash';
+          d.flashIntensity = 1.0;
+          playCameraFlashSoundRef.current();
+        }
+
+        // 5. Flash decay & review photo on phone
+        if (van.stopTimer > 54 && van.stopTimer <= 66) {
+          d.photoState = 'flash';
+          d.flashIntensity = Math.max(0, 1.0 - (van.stopTimer - 54) / 8);
+        } else if (van.stopTimer > 66 && van.stopTimer <= 80) {
+          d.photoState = 'lowering_camera';
+          d.flashIntensity = 0;
+        }
+
+        // 6. Photo complete: Driver turns and walks back strictly along pathway and sidewalk to van
+        if (van.stopTimer > 80) {
+          d.photoState = 'none';
+          d.flashIntensity = 0;
           van.state = 'RETURNING';
-          const targetHouse = van.targetHouse % TOTAL_MIDCENTURY_HOMES;
-          const houseBaseX = 8 + targetHouse * 30.5;
-          const is8Plex = isEightPlexLot(targetHouse);
-          const doorX = van.driver.targetDoorX;
-          const doorY = van.driver.targetDoorY;
-          const walkwayX = houseBaseX + 11.5;
 
           const cabX = van.x + 3;
           const cabY = van.y >= 100 ? 102.5 : 92.5;
 
           if (is8Plex) {
-            // For 8-plex: step from front stoop back to sidewalk and follow sidewalk to van cab
-            van.driver.path = [
-              { x: doorX, y: doorY },
+            // For 8-plex: stoop -> sidewalk -> van cab
+            d.path = [
+              { x: d.x, y: d.y },
               { x: doorX, y: 74.0 },
               { x: cabX, y: 74.0 },
               { x: cabX, y: cabY }
             ];
           } else {
-            van.driver.path = [
-              { x: doorX, y: doorY },
-              { x: walkwayX, y: 51 },
-              { x: walkwayX, y: 74 },
-              { x: cabX, y: 78 },
+            // For houses: porch -> pathway -> sidewalk -> van cab
+            d.path = [
+              { x: d.x, y: d.y },
+              { x: walkwayX, y: 50.0 },
+              { x: walkwayX, y: 74.0 },
+              { x: cabX, y: 74.0 },
               { x: cabX, y: cabY }
             ];
           }
-          van.driver.pathIdx = 1;
+          d.pathIdx = 1;
         }
       } else if (van.state === 'RETURNING') {
         van.speed = 0;
@@ -3988,7 +4002,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const shouldBeActive = b < additionalEtsBusesNeeded;
 
         if (shouldBeActive && !isActive) {
-          extraBus.x = -360 - b * 240 - Math.random() * 60;
+          extraBus.x = blockLength + 100 + b * 240 + Math.random() * 60;
           extraBus.y = 110;
           extraBus.baseY = 110;
           extraBus.targetY = 110;
@@ -3996,7 +4010,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           extraBus.isBurning = false;
           extraBus.busStopState = 'approaching';
           extraBus.busDwellTimer = 0;
-          extraBus.searchingBubbleTimer = 90;
+          extraBus.searchingBubbleTimer = 0;
+          extraBus.stuckTimer = 0;
           activeVehicles.push(extraBus);
         } else if (!shouldBeActive && isActive) {
           const extraIdx = activeVehicles.indexOf(extraBus);
@@ -4013,7 +4028,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       // Layer 1: Ground, Road, Sidewalks, Driveways
       ctx!.drawImage(bgGroundCanvas, 0, 0);
 
-      const activePedCount = Math.min(pedestrians.length, Math.floor(2 + totalParkedCars * 0.45));
+      // Pedestrian volume scales directly with home density (more dwellings = more pedestrians out walking)
+      const basePedCount = 5;
+      const densityPedBonus = Math.floor((simTotalDwellings - 12) * 0.65);
+      const parkedPedBonus = Math.floor(totalParkedCars * 0.2);
+      const activePedCount = Math.min(pedestrians.length, Math.max(5, basePedCount + densityPedBonus + parkedPedBonus));
+
       // Micro-mobility: For every three 8-plexes, double the bikes and scooters on the road
       const microMultiplier = Math.pow(2, numThree8PlexTiers);
       const baseMicroCount = Math.max(3, Math.floor(totalParkedCars * 0.35));
@@ -4032,31 +4052,61 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
       }
 
-      // 1. Pedestrian Movement: Peaceful Sidewalk Stroll
+      // 1. Pedestrian Movement: Peaceful Sidewalk Stroll & EPS Bystander Gathering
       const activeRoadProtesters: { x: number; y: number }[] = [];
+
+      // Check whether EPS police is on the street and stopped
+      const isBlockagePoliceStopped = policeBlockageUnit.active && (policeBlockageUnit.state === 'investigating' || policeBlockageUnit.state === 'clearing');
+      const stoppedEmergencyPolice = emergencyVehicles.find(v => v.type === 'police' && (v.speed || 0) < 0.2 && v.x >= 20 && v.x <= blockLength - 20);
+      const isPoliceStoppedOnStreet = isBlockagePoliceStopped || Boolean(stoppedEmergencyPolice);
+      const stoppedPoliceX = isBlockagePoliceStopped 
+        ? (policeOfficerPed.active ? policeOfficerPed.x : policeTrafficCar.x)
+        : (stoppedEmergencyPolice ? stoppedEmergencyPolice.x : null);
 
       for (let i = 0; i < activePedCount; i++) {
         const p1 = pedestrians[i];
-        if (p1.y < 71.5 || p1.y > 76.5) {
-          p1.y += (73.5 - p1.y) * 0.1;
-        }
-        const nextX = p1.x + p1.speed;
-        let collision = false;
-        for (let j = 0; j < activePedCount; j++) {
-          if (i === j) continue;
-          const p2 = pedestrians[j];
-          if (Math.abs(p1.y - p2.y) < 2) {
-            if (nextX < p2.x + p2.w + 1 && nextX + p1.w + 1 > p2.x) {
-              collision = true;
-              break;
+
+        if (isPoliceStoppedOnStreet && stoppedPoliceX !== null) {
+          // Whenever EPS are stopped on the street, nearby pedestrians gather along the sidewalk as bystanders
+          const bystanderSpotX = stoppedPoliceX - 22 + (i % 8) * 5.6 + ((i % 3) * 1.5);
+          const bystanderSpotY = 75.0 + (i % 3) * 1.5; // Sidewalk edge facing the road
+          const dx = bystanderSpotX - p1.x;
+          const dy = bystanderSpotY - p1.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist > 1.5) {
+            p1.x += (dx / dist) * Math.min(dist, PED_SPEED * 1.35);
+            p1.y += (dy / dist) * Math.min(dist, PED_SPEED * 1.35);
+            p1.pose = 'normal';
+          } else {
+            p1.x = bystanderSpotX;
+            p1.y = bystanderSpotY;
+            p1.pose = 'bystander'; // Bystander pose watching police or recording on phone
+          }
+        } else {
+          // Normal peaceful sidewalk stroll
+          p1.pose = 'normal';
+          if (p1.y < 71.5 || p1.y > 76.5) {
+            p1.y += (73.5 - p1.y) * 0.1;
+          }
+          const nextX = p1.x + p1.speed;
+          let collision = false;
+          for (let j = 0; j < activePedCount; j++) {
+            if (i === j) continue;
+            const p2 = pedestrians[j];
+            if (Math.abs(p1.y - p2.y) < 2) {
+              if (nextX < p2.x + p2.w + 1 && nextX + p1.w + 1 > p2.x) {
+                collision = true;
+                break;
+              }
             }
           }
-        }
-        if (collision) p1.speed = -p1.speed;
-        else p1.x = nextX;
+          if (collision) p1.speed = -p1.speed;
+          else p1.x = nextX;
 
-        if (p1.x > blockLength + 10) p1.x = -10;
-        if (p1.x < -10) p1.x = blockLength + 10;
+          if (p1.x > blockLength + 10) p1.x = -10;
+          if (p1.x < -10) p1.x = blockLength + 10;
+        }
       }
 
       // Collect obstacles
@@ -4289,11 +4339,14 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             const anotherBusDwelling = activeVehicles.some(v => v !== A && v.type === 'etsBus' && v.busStopState === 'dwelling');
             const isAtStopZone = A.x >= 250 && A.x <= 335;
             if (!anotherBusDwelling && ((A.busStopState === 'approaching' && isAtStopZone && busStopPassengerCount > 0) || A.busStopState === 'dwelling')) {
-              targetLane = 94.5;
+              targetLane = 96.0;
               isPullingOver = true;
-            } else if (A.busStopState === 'departing' || A.x > 335 || anotherBusDwelling) {
-              // Once passengers have boarded/alighted or if another bus is dwelling, merge back out into the standard roadway lane
+            } else {
+              // Once passengers have boarded, past the stop zone, or if another bus is dwelling, merge back into the standard roadway lane
               targetLane = A.baseY || 110;
+              if (A.x < 250 && A.busStopState === 'approaching') {
+                A.busStopState = 'departing';
+              }
             }
           }
         } else if (!A.parkingState || A.parkingState === 'cruising') {
@@ -4344,9 +4397,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
         const isChangingLanes = Math.abs(A.y - targetLane) > 0.05;
         if (isChangingLanes) {
-          const step = A.type === 'etsBus' ? Math.min(0.28, Math.abs(targetLane - A.y)) : Math.min(0.36, Math.abs(targetLane - A.y));
+          const step = A.type === 'etsBus' ? Math.min(0.55, Math.abs(targetLane - A.y)) : Math.min(0.36, Math.abs(targetLane - A.y));
           const nextY = A.y + (targetLane > A.y ? 1 : -1) * step;
           if (canChangeLane(A, nextY, allRoadObstacles)) {
+            A.y = nextY;
+          } else if (A.type === 'etsBus') {
+            // Bus has right-of-way to smoothly merge back to travel lane or pull into transit bay
             A.y = nextY;
           }
         } else {
@@ -4385,21 +4441,29 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                   if (A.x <= 360 && A.x > stopTargetX) {
                     const distToStop = A.x - stopTargetX;
                     assignedBaseSpeed = Math.max(0.18, (distToStop / 48) * (A.baseSpeed || 0.95));
-                  } else if (A.x <= stopTargetX && A.x > stopTargetX - 8) {
+                  } else if (A.x <= stopTargetX && A.x > stopTargetX - 12) {
                     A.busStopState = 'dwelling';
                     A.busDwellTimer = 180;
                     assignedBaseSpeed = 0;
+                  } else if (A.x <= stopTargetX - 12) {
+                    A.busStopState = 'departing';
                   }
                 } else {
                   // Heading down the road (towards blockLength): approaching from left (x < stopTargetX)
                   if (A.x >= 260 && A.x < stopTargetX) {
                     const distToStop = stopTargetX - A.x;
                     assignedBaseSpeed = Math.max(0.18, (distToStop / 48) * (A.baseSpeed || 0.95));
-                  } else if (A.x >= stopTargetX && A.x < stopTargetX + 8) {
+                  } else if (A.x >= stopTargetX && A.x < stopTargetX + 12) {
                     A.busStopState = 'dwelling';
                     A.busDwellTimer = 180;
                     assignedBaseSpeed = 0;
+                  } else if (A.x >= stopTargetX + 12) {
+                    A.busStopState = 'departing';
                   }
+                }
+              } else {
+                if (A.x <= stopTargetX) {
+                  A.busStopState = 'departing';
                 }
               }
             } else if (A.busStopState === 'dwelling') {
@@ -4413,11 +4477,23 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 }
                 if (A.busDwellTimer! <= 0) {
                   A.busStopState = 'departing';
+                  A.busDwellTimer = 0;
                 }
+              } else {
+                A.busStopState = 'departing';
+                A.busDwellTimer = 0;
               }
             } else if (A.busStopState === 'departing') {
               // Accelerate and merge back out into street traffic
-              assignedBaseSpeed = (A.baseSpeed || 0.95) * 0.85;
+              assignedBaseSpeed = (A.baseSpeed || 0.95);
+              if (A.x <= 295) {
+                // Guaranteed return to travel lane before the 30m bus stop clearance zone ends
+                A.y = 110;
+                A.targetY = 110;
+              }
+              if (A.x < 240) {
+                A.busStopState = 'approaching';
+              }
             }
           }
 
@@ -4444,6 +4520,41 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         A.speed = safeSpeed;
         A.x = targetX;
         const blockingObstacle: RoadObstacle | null = blocking;
+
+        // ETS Bus Anti-Stuck Watchdog & Active Gridlock Clearance
+        if (A.type === 'etsBus') {
+          if (A.busStopState === 'dwelling') {
+            A.stuckTimer = 0;
+            if (!A.busDwellTimer || A.busDwellTimer <= 0) {
+              A.busStopState = 'departing';
+              A.busDwellTimer = 0;
+              busStopPassengerCount = 0;
+            }
+          } else {
+            if ((A.speed || 0) < 0.2) {
+              A.stuckTimer = (A.stuckTimer || 0) + 1 / 60;
+              if (A.stuckTimer > 0.7) {
+                // Bus is held up; ensure it targets the travel lane and begins merging
+                if (A.busStopState === 'approaching' && A.x <= 325) {
+                  A.busStopState = 'departing';
+                  busStopPassengerCount = 0;
+                }
+                targetLane = A.baseY || 110;
+                A.y += (110 - A.y) * 0.25;
+              }
+              if (A.stuckTimer > 1.6) {
+                // Break deadlock: snap directly to travel lane and restore cruising speed
+                A.y = A.baseY || 110;
+                A.targetY = A.baseY || 110;
+                A.speed = A.baseSpeed || 0.95;
+                A.x += (A.direction !== undefined ? A.direction : -1) * 0.8;
+                A.stuckTimer = 0;
+              }
+            } else {
+              A.stuckTimer = 0;
+            }
+          }
+        }
 
         // Honk and stuck logic
         if (isCar_A && A.stuckTimer !== undefined && (!A.parkingState || A.parkingState === 'cruising')) {
@@ -5120,6 +5231,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             w: 2,
             d: 2,
             hasPackage: van.driver.hasPackage,
+            photoState: van.driver.photoState,
+            flashIntensity: van.driver.flashIntensity,
             depthKey: getIsometricDepthKey(van.driver.x, van.driver.y, 2, 2)
           });
         }
@@ -5368,6 +5481,37 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             drawBlock(item.x - 0.4, item.y - 0.8, 2.6, 2.0, 1.6, 1.4, '#d2b48c', '#b89768', '#9e7a4a');
             drawBlock(item.x + 0.2, item.y - 0.8, 4.0, 0.5, 1.6, 0.04, '#c29b68', '#b08a56', '#9f7845');
             drawBlock(item.x - 0.2, item.y - 0.6, 4.0, 0.7, 0.7, 0.05, '#ffffff', '#e8e8e8', '#d0d0d0');
+          } else if (item.photoState === 'aiming_camera' || item.photoState === 'flash' || item.photoState === 'lowering_camera') {
+            // Driver holds smartphone extended in both hands aiming at package by the front door
+            drawBlock(item.x - 0.2, item.y - 0.8, 3.6, 1.4, 0.8, 0.6, '#009A44', '#007A34', '#005A24');
+            drawBlock(item.x + 0.1, item.y - 1.2, 3.8, 0.8, 0.5, 0.8, '#0F172A', '#0F172A', '#0F172A');
+            drawBlock(item.x + 0.2, item.y - 1.0, 4.0, 0.6, 0.3, 0.6, '#38BDF8', '#0284C7', '#0284C7');
+
+            if (item.flashIntensity && item.flashIntensity > 0) {
+              const flashPos = project(item.x + 0.4, item.y - 1.3, 4.2);
+              ctx!.save();
+              const flashRadius = 32 * item.flashIntensity;
+              const grad = ctx!.createRadialGradient(flashPos.x, flashPos.y, 0, flashPos.x, flashPos.y, flashRadius);
+              grad.addColorStop(0, `rgba(255, 255, 255, ${0.98 * item.flashIntensity})`);
+              grad.addColorStop(0.35, `rgba(224, 242, 254, ${0.75 * item.flashIntensity})`);
+              grad.addColorStop(0.7, `rgba(186, 230, 253, ${0.35 * item.flashIntensity})`);
+              grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+              ctx!.fillStyle = grad;
+              ctx!.beginPath();
+              ctx!.arc(flashPos.x, flashPos.y, flashRadius, 0, Math.PI * 2);
+              ctx!.fill();
+
+              // 4-point camera flash sparkle flare
+              ctx!.strokeStyle = `rgba(255, 255, 255, ${0.9 * item.flashIntensity})`;
+              ctx!.lineWidth = 1.8;
+              ctx!.beginPath();
+              ctx!.moveTo(flashPos.x - flashRadius * 0.9, flashPos.y);
+              ctx!.lineTo(flashPos.x + flashRadius * 0.9, flashPos.y);
+              ctx!.moveTo(flashPos.x, flashPos.y - flashRadius * 0.9);
+              ctx!.lineTo(flashPos.x, flashPos.y + flashRadius * 0.9);
+              ctx!.stroke();
+              ctx!.restore();
+            }
           }
         } else if (item.isAnimatedTraffic) {
           // Mask all animated traffic to appear strictly on the roadway and not off the roadway
@@ -5402,26 +5546,20 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           } else {
             drawVehicle(item.x, item.y, 0, item.type, item.color, item.isFlipped, item.state);
 
-            if (item.honkBubbleTimer && item.honkBubbleTimer > 0) {
-              drawHonkBubble(item.x, item.y, 0);
-            } else if (item.parkingBubbleText && item.parkingState !== 'parked') {
-              const status = item.parkingState === 'giving_up' 
-                ? 'giveup' 
-                : item.parkingState === 'docking' 
-                  ? 'success' 
-                  : 'attempt';
-              drawParkingAttemptBubble(item.x, item.y, 0, item.parkingBubbleText, status);
-            } else if (item.isCircling && item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
-              drawCirclingBubble(item.x, item.y, 0, item.circlingLap || 1, curbsideDemand >= currentLegalCurbsideStalls);
-            } else if (item.type === 'etsBus') {
-              if (item.busStopState === 'dwelling') {
-                drawBusBubble(item.x, item.y, 0, 'ETS Bus Stop - Boarding');
-              } else if (item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
-                item.searchingBubbleTimer--;
-                drawBusBubble(item.x, item.y, 0, item.isExtraBus ? 'Frequent ETS Service (10+ homes)' : 'ETS Transit Route');
+            // ETS buses and speed badges do not show text bubbles
+            if (item.type !== 'etsBus') {
+              if (item.honkBubbleTimer && item.honkBubbleTimer > 0) {
+                drawHonkBubble(item.x, item.y, 0);
+              } else if (item.parkingBubbleText && item.parkingState !== 'parked') {
+                const status = item.parkingState === 'giving_up' 
+                  ? 'giveup' 
+                  : item.parkingState === 'docking' 
+                    ? 'success' 
+                    : 'attempt';
+                drawParkingAttemptBubble(item.x, item.y, 0, item.parkingBubbleText, status);
+              } else if (item.isCircling && item.searchingBubbleTimer && item.searchingBubbleTimer > 0) {
+                drawCirclingBubble(item.x, item.y, 0, item.circlingLap || 1, curbsideDemand >= currentLegalCurbsideStalls);
               }
-            } else if (currentLayout === 'suburban_front_driveway' && item.speedKmH && item.isAnimatedTraffic) {
-              drawSpeedBadge(item.x, item.y, 0, item.speedKmH);
             }
           }
           ctx!.restore();

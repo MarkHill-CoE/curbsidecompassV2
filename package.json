@@ -10,7 +10,7 @@
     "clean": "rm -rf dist server.js",
     "test:qa": "tsx scripts/qa_audit_256.ts",
     "scrub:postal": "tsx scripts/scrub_postal_codes.ts",
-    "lint": "NODE_OPTIONS='--max-old-space-size=4096' tsc --noEmit"
+    "lint": "node --max-old-space-size=4096 ./node_modules/typescript/bin/tsc --noEmit"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
