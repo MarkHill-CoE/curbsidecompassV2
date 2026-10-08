@@ -186,8 +186,8 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         y: -3,
         hint: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
         simEffects: {
-          visitorPassesPerHome: 0.33,
-          enforcementLevel: 'strict'
+          visitorPassesPerHome: 0.67,
+          enforcementLevel: 'lenient'
         }
       },
       {
@@ -197,8 +197,8 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         y: 3,
         hint: 'Protects nearby residential street parking for residents and guests near major destinations.',
         simEffects: {
-          visitorPassesPerHome: 0.75,
-          enforcementLevel: 'lenient'
+          visitorPassesPerHome: 0.25,
+          enforcementLevel: 'strict'
         }
       }
     ]
@@ -321,7 +321,7 @@ export function calculateSimulationMetricsFromAnswers(
   const residentCurbsideDemand = residentCurbOverflow + residentCurbConvenience;
 
   // Visitor passes and visitor cars: (Q5 Parking Proximity to Destination - formerly q4)
-  const baseVisitorPasses = answers['q5'] === 'q5_b' ? (8 / 12) : (answers['q5'] === 'q5_a' ? (3 / 12) : (4 / 12));
+  const baseVisitorPasses = answers['q5'] === 'q5_a' ? (8 / 12) : (answers['q5'] === 'q5_b' ? (3 / 12) : (4 / 12));
   const visitorPassesPerHome = overrides.visitorPassesPerHome !== undefined
     ? overrides.visitorPassesPerHome
     : baseVisitorPasses;
@@ -364,10 +364,10 @@ export function calculateSimulationMetricsFromAnswers(
 
   // Q2: Parking Proximity to Home (formerly Q5)
   if (answers['q2'] === 'q2_a') {
-    policyDemandShift += 1.5;
+    policyDemandShift += 2.0;
     feeModel = 'permit';
   } else if (answers['q2'] === 'q2_b') {
-    policyDemandShift -= 1.5;
+    policyDemandShift -= 2.0;
   }
 
   // Q3: Residential Parking Permit Limit (formerly Q2)
@@ -391,10 +391,10 @@ export function calculateSimulationMetricsFromAnswers(
   // Q5: Parking Proximity to Destination (formerly Q4)
   if (answers['q5'] === 'q5_a') {
     policyDemandShift += 2.0;
-    enforcement = 'strict';
+    enforcement = 'lenient';
   } else if (answers['q5'] === 'q5_b') {
     policyDemandShift -= 2.0;
-    enforcement = 'lenient';
+    enforcement = 'strict';
   }
 
   // Q6: Residential Parking Permit Eligibility (private parking)
@@ -604,8 +604,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'On my block',
-        deltaStallsText: '-2.0 stalls (-13%)',
-        deltaStallsValue: -2.0,
+        deltaStallsText: '+2.0 stalls (+13%)',
+        deltaStallsValue: 2.0,
         tradeoffRationale: 'Limits acceptable parking distance to the immediate block to keep vehicles close to home',
         curbsideImpactSummary: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
         benefitText: 'A short distance between your vehicle and home',
@@ -618,8 +618,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'Within two or three blocks',
-        deltaStallsText: '+2.0 stalls (+13%)',
-        deltaStallsValue: 2.0,
+        deltaStallsText: '-2.0 stalls (-13%)',
+        deltaStallsValue: -2.0,
         tradeoffRationale: 'Expands acceptable parking distance to the wider neighbourhood to increase available parking options',
         curbsideImpactSummary: 'Increases available parking options by extending acceptable parking distance into the wider neighbourhood.',
         benefitText: 'More possible spaces fall within the distance you consider acceptable.',
@@ -724,8 +724,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'Yes',
-        deltaStallsText: '-2.5 stalls (-16%)',
-        deltaStallsValue: -2.5,
+        deltaStallsText: '+2.5 stalls (+16%)',
+        deltaStallsValue: 2.5,
         tradeoffRationale: 'Expands parking options for patients, students, visitors, and event attendees near major destinations',
         curbsideImpactSummary: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
         benefitText: 'Patients, students and event attendees have more parking options within a few blocks of their destination.',
@@ -738,8 +738,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'No',
-        deltaStallsText: '+2.5 stalls (+16%)',
-        deltaStallsValue: 2.5,
+        deltaStallsText: '-2.5 stalls (-16%)',
+        deltaStallsValue: -2.5,
         tradeoffRationale: 'Protects residential street parking from institutional and event venue visitor spillover',
         curbsideImpactSummary: 'Protects nearby residential street parking for residents and guests near major destinations.',
         benefitText: 'Residents and their visitors face less competition for nearby spaces from people visiting these destinations.',

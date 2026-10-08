@@ -242,6 +242,13 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "guidance": "Direct policy slider label, description, or reset action"
   },
   {
+    "key": "drawer_sliders_instruction",
+    "category": "Manual Sliders Drawer",
+    "container": "Policy Sliders Drawer",
+    "defaultText": "Move the sliders to change the impacting variables to stress test your neighbourhood.",
+    "guidance": "Instructions right above Street Layout Typology in Manual Sliders Drawer"
+  },
+  {
     "key": "drawer_sliders_typology_label",
     "category": "Manual Sliders Drawer",
     "container": "Policy Sliders Drawer",

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   Compass, 
   CheckCircle2, 
+  Check,
+  Building2,
   Eye, 
   Car, 
   Home, 
@@ -13,6 +15,8 @@ import {
 } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
+import { StreetLayoutTypology, SimulationConfig } from '../types';
+import { getStreetLayoutInfo } from '../data/edmontonNeighbourhoods';
 
 interface CivicOnboardingModalProps {
   isOpen: boolean;
@@ -20,6 +24,10 @@ interface CivicOnboardingModalProps {
   isSimplifiedMode: boolean;
   onToggleSimplifiedMode: (simplified: boolean) => void;
   onStartSurvey?: () => void;
+  currentStreetLayout?: StreetLayoutTypology;
+  onLayoutChange?: (layout: StreetLayoutTypology, neighbourhoodName?: string, postalCode?: string) => void;
+  config?: SimulationConfig;
+  onConfigChange?: (updated: Partial<SimulationConfig>) => void;
 }
 
 export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
@@ -28,6 +36,10 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
   isSimplifiedMode,
   onToggleSimplifiedMode,
   onStartSurvey,
+  currentStreetLayout,
+  onLayoutChange,
+  config,
+  onConfigChange,
 }) => {
   const { t } = useAppText();
   const [activeSection, setActiveSection] = useState<number>(1);
@@ -35,12 +47,86 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const startButtonRef = useRef<HTMLButtonElement>(null);
 
+  const [internalLayout, setInternalLayout] = useState<StreetLayoutTypology>(currentStreetLayout || 'mature_laned');
+  const [internalLots, setInternalLots] = useState<number>(config?.splitInfillLots ?? 0);
+
+  useEffect(() => {
+    if (currentStreetLayout) {
+      setInternalLayout(currentStreetLayout);
+    }
+  }, [currentStreetLayout]);
+
+  useEffect(() => {
+    if (config?.splitInfillLots !== undefined) {
+      setInternalLots(config.splitInfillLots);
+    }
+  }, [config?.splitInfillLots]);
+
+  const activeLayout = currentStreetLayout || internalLayout;
+  const activeLots = config?.splitInfillLots !== undefined ? config.splitInfillLots : internalLots;
+  const activeDwellings = 12 + activeLots * 7;
+
+  const streetModelOptions: Array<{
+    id: StreetLayoutTypology;
+    title: string;
+    tag: string;
+    stalls: number;
+    icon: string;
+    desc: string;
+  }> = [
+    {
+      id: 'mature_laned',
+      title: 'Homes with Rear-lane Access',
+      tag: 'Garages or parking areas accessed from a rear lane or alley.',
+      stalls: getStreetLayoutInfo('mature_laned').curbsideCapacity,
+      icon: '🏡',
+      desc: 'Strathcona, Westmount, Glenora, Highlands, Bonnie Doon'
+    },
+    {
+      id: 'infill_skinny',
+      title: 'Multiple Homes on Smaller Lots',
+      tag: 'More households sharing the block; private parking varies',
+      stalls: getStreetLayoutInfo('infill_skinny').curbsideCapacity,
+      icon: '🏘️',
+      desc: 'Garneau, Oliver (Wîhkwêntôwin), Downtown, Queen Alex, McKernan'
+    },
+    {
+      id: 'suburban_front_driveway',
+      title: 'Homes with Front Driveways',
+      tag: 'Driveways cross the curb to reach private parking',
+      stalls: getStreetLayoutInfo('suburban_front_driveway').curbsideCapacity,
+      icon: '🚗',
+      desc: 'Mill Woods, Callingwood, Riverbend, Castledowns, Blue Quill'
+    },
+    {
+      id: 'contemporary_townhomes',
+      title: 'Townhomes',
+      tag: 'Homes grouped together; private parking arrangements vary',
+      stalls: getStreetLayoutInfo('contemporary_townhomes').curbsideCapacity,
+      icon: '🏢',
+      desc: 'Griesbach, Blatchford, Windermere, Chappelle, Laurel, Secord'
+    }
+  ];
+
+  const handleSelectLayout = (layoutId: StreetLayoutTypology) => {
+    triggerFeedback('button');
+    setInternalLayout(layoutId);
+    onLayoutChange?.(layoutId);
+  };
+
+  const handleDensityChange = (newLots: number) => {
+    setInternalLots(newLots);
+    const tiers = Math.floor(newLots / 3);
+    onConfigChange?.({
+      splitInfillLots: newLots,
+      deliveriesPerHomePerWeek: tiers >= 1 && (config?.deliveriesPerHomePerWeek ?? 1.5) < 2.0 ? 2.0 : (config?.deliveriesPerHomePerWeek ?? 1.5)
+    });
+  };
+
   // Focus start button when opened
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => {
-        startButtonRef.current?.focus();
-      }, 50);
+      startButtonRef.current?.focus();
     }
   }, [isOpen]);
 
@@ -211,34 +297,111 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Private Parking */}
-              <div className="bg-white/95 border-2 border-blue-200/90 rounded-xl p-3.5 sm:p-4 flex items-start gap-3 shadow-2xs">
-                <div className="w-10 h-10 rounded-lg bg-[#004B8D] text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <Home className="w-5 h-5 sm:w-6 sm:h-6" />
+            {/* 4 Clickable Neighbourhood Choices */}
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3"
+              role="radiogroup"
+              aria-label="Edmonton Street Style Choices"
+            >
+              {streetModelOptions.map((layout) => {
+                const isSelected = activeLayout === layout.id;
+                return (
+                  <button
+                    key={layout.id}
+                    type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    onClick={() => handleSelectLayout(layout.id)}
+                    className={`text-left p-3.5 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-1.5 relative active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
+                      isSelected
+                        ? 'border-[#004B8D] bg-white shadow-md ring-2 ring-[#004B8D]/30'
+                        : 'border-amber-200/90 bg-white/95 hover:border-[#004B8D]/50 hover:bg-white shadow-2xs'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-2xl leading-none shrink-0" role="img" aria-label={layout.title}>
+                          {layout.icon}
+                        </span>
+                        <div className="min-w-0">
+                          <h4 className={`font-bold text-sm sm:text-base leading-tight truncate ${isSelected ? 'text-[#004B8D]' : 'text-gray-900'}`}>
+                            {layout.title}
+                          </h4>
+                        </div>
+                      </div>
+                      <div className="shrink-0 pt-0.5 flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold bg-[#004B8D]/10 text-[#004B8D] px-2 py-0.5 rounded-full">
+                          {layout.stalls} Stalls
+                        </span>
+                        {isSelected ? (
+                          <span className="w-5 h-5 rounded-full bg-[#004B8D] text-white flex items-center justify-center shadow-xs">
+                            <Check className="w-3 h-3 stroke-[3]" />
+                          </span>
+                        ) : (
+                          <div className="w-5 h-5 rounded-full border-2 border-gray-300 bg-white" />
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-gray-700 leading-snug">
+                      {layout.tag}
+                    </p>
+                    {layout.desc && (
+                      <p className="text-[11px] text-gray-500 font-medium leading-tight">
+                        <span className="font-semibold text-gray-600">Examples:</span> {layout.desc}
+                      </p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Home Density Slider Control */}
+            <div className="mt-1 p-3.5 sm:p-4 bg-white/95 border-2 border-amber-200/90 rounded-xl flex flex-col gap-2.5 shadow-2xs">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="p-1.5 rounded-lg bg-[#004B8D]/10 text-[#004B8D] shrink-0">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <label htmlFor="modal-density-slider" className="text-xs sm:text-sm font-bold text-[#193A5A] block leading-tight cursor-pointer">
+                      {t('drawer_infill_label', 'Home Density')}
+                    </label>
+                    <p className="text-[11px] sm:text-xs text-gray-600 leading-tight mt-0.5">
+                      {t('drawer_density_explainer', 'Adds multi-unit housing to the street.')}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h4 className="text-base sm:text-lg font-black text-[#004B8D]">
-                    {t('intro_s2_private_title', 'Private Parking')}
-                  </h4>
-                  <p className="text-sm sm:text-base text-gray-900 leading-snug mt-1">
-                    {t('intro_s2_private_desc', 'Some homes have parking in a garage, driveway or parking lot. Others have limited or no private parking.')}
-                  </p>
+                <div className="flex items-center gap-1.5 shrink-0 text-right">
+                  <span className="text-xs font-bold text-[#004B8D] bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-full">
+                    {(() => {
+                      if (activeLots === 0) return 'Baseline (0 lots)';
+                      if (activeLots === 1) return '+1 Multi-unit lot';
+                      return `+${activeLots} Multi-unit lots`;
+                    })()}
+                  </span>
+                  <span className="text-[11px] font-bold text-gray-700 bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-2xs">
+                    {activeDwellings} {t('drawer_dwellings_unit', 'Dwellings')}
+                  </span>
                 </div>
               </div>
 
-              {/* Street Parking */}
-              <div className="bg-white/95 border-2 border-amber-200/90 rounded-xl p-3.5 sm:p-4 flex items-start gap-3 shadow-2xs">
-                <div className="w-10 h-10 rounded-lg bg-[#D97706] text-white flex items-center justify-center shrink-0 mt-0.5">
-                  <Car className="w-5 h-5 sm:w-6 sm:h-6" />
-                </div>
-                <div>
-                  <h4 className="text-base sm:text-lg font-black text-amber-900">
-                    {t('intro_s2_street_title', 'Street Parking')}
-                  </h4>
-                  <p className="text-sm sm:text-base text-gray-900 leading-snug mt-1">
-                    {t('intro_s2_street_desc', 'Residents, visitors and service providers share the available street parking.')}
-                  </p>
+              <div className="flex flex-col gap-1 pt-0.5">
+                <input
+                  id="modal-density-slider"
+                  type="range"
+                  aria-label={t('drawer_sliders_density_aria', 'Home density')}
+                  min="0"
+                  max="7"
+                  step="1"
+                  value={activeLots}
+                  onChange={(e) => handleDensityChange(parseInt(e.target.value, 10))}
+                  className="accent-[#009A44] cursor-pointer h-2 bg-gray-200 rounded-lg w-full"
+                />
+                <div className="flex justify-between text-[10px] text-gray-500 font-medium px-0.5">
+                  <span>Low Density (0)</span>
+                  <span>Moderate (+3 lots)</span>
+                  <span>High Density (+7 lots)</span>
                 </div>
               </div>
             </div>

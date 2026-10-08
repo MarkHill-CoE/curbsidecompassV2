@@ -688,6 +688,10 @@ export default function App() {
         onClose={() => setShowOnboarding(false)}
         isSimplifiedMode={isSimplifiedMode}
         onToggleSimplifiedMode={handleToggleSimplifiedMode}
+        currentStreetLayout={simConfig.streetLayout || 'mature_laned'}
+        onLayoutChange={handleLayoutChange}
+        config={simConfig}
+        onConfigChange={handleConfigChange}
       />
 
       {/* 16 -> 8 Persona Streamlining & CSV Importer Modal */}

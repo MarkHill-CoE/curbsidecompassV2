@@ -3,7 +3,6 @@ import { Sliders, Gauge, CheckCircle, X, ChevronDown } from 'lucide-react';
 import { SimulationConfig } from '../types';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
-import { getStreetLayoutInfo } from '../data/edmontonNeighbourhoods';
 
 interface ManualSlidersDrawerProps {
   showControls: boolean;
@@ -92,16 +91,18 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
           </button>
         </div>
 
+        {/* Instructions right above Street Layout Typology */}
+        <p className="text-xs text-blue-100/90 leading-snug">
+          {t('drawer_sliders_instruction', 'Move the sliders to change the impacting variables to stress test your neighbourhood.')}
+        </p>
+
         {/* Edmonton Street Layout Typologies Dropdown Selection */}
         <div className="flex flex-col gap-1 pb-1.5 border-b border-white/10">
           <label 
             htmlFor="street-typology-select" 
-            className="flex justify-between items-center text-[11px] font-bold text-gray-200 cursor-pointer"
+            className="flex items-center text-[11px] font-bold text-gray-200 cursor-pointer"
           >
             <span className="uppercase tracking-wider text-gray-300">{t('drawer_sliders_typology_label', 'Street Layout Typology:')}</span>
-            <span className="text-[#FFC72C] font-semibold text-[11px]">
-              {getStreetLayoutInfo(config.streetLayout).shortTitle}
-            </span>
           </label>
           <div className="relative">
             <select

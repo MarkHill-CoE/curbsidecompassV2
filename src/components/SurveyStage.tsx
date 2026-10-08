@@ -356,6 +356,11 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                         <p className="text-[10.5px] sm:text-[11px] text-gray-600 leading-tight">
                           {layout.tag}
                         </p>
+                        {layout.desc && (
+                          <p className="text-[9.5px] sm:text-[10px] text-gray-500 font-medium leading-tight">
+                            <span className="font-semibold text-gray-600">Examples:</span> {layout.desc}
+                          </p>
+                        )}
                       </button>
                     );
                   })}
