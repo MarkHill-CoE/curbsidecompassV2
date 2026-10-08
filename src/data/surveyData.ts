@@ -608,7 +608,7 @@ export function getQuestionTradeoffImpact(
         deltaStallsValue: 2.0,
         tradeoffRationale: 'Limits acceptable parking distance to the immediate block to keep vehicles close to home',
         curbsideImpactSummary: 'Limits acceptable parking to your immediate block to keep vehicles within a short walking distance.',
-        benefitText: 'A short distance between your vehicle and home',
+        benefitText: 'A short distance between your vehicle and home.',
         costText: 'Parking on your block may be full even when parking is available nearby.'
       };
     }
@@ -649,7 +649,7 @@ export function getQuestionTradeoffImpact(
         tradeoffRationale: 'Reduces competition for street parking to improve availability for other residents and visitors',
         curbsideImpactSummary: 'Limiting permits can reduce competition for street parking, improving availability for other residents and visitors.',
         benefitText: 'Limiting permits can reduce competition for street parking, improving availability for other residents and visitors.',
-        costText: 'Households with more vehicles than permits would need other parking arrangements, which may be difficult if they have limited or no private parking'
+        costText: 'Households with more vehicles than permits would need other parking arrangements, which may be difficult if they have limited or no private parking.'
       };
     }
     if (selectedAnswerId === 'q3_b') {
@@ -743,7 +743,7 @@ export function getQuestionTradeoffImpact(
         tradeoffRationale: 'Protects residential street parking from institutional and event venue visitor spillover',
         curbsideImpactSummary: 'Protects nearby residential street parking for residents and guests near major destinations.',
         benefitText: 'Residents and their visitors face less competition for nearby spaces from people visiting these destinations.',
-        costText: 'People visiting nearby destinations have fewer street parking options and may need to park farther away, or use other parking facilities'
+        costText: 'People visiting nearby destinations have fewer street parking options and may need to park farther away, or use other parking facilities.'
       };
     }
     return {

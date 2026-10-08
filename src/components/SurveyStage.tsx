@@ -330,11 +330,11 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                             : 'border-gray-200 bg-white hover:border-[#004B8D]/50 hover:bg-gray-50'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-1">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-2xl leading-none shrink-0" role="img" aria-label={layout.title}>{layout.icon}</span>
-                            <div className="min-w-0">
-                              <h4 className={`font-bold text-xs sm:text-sm leading-tight truncate ${isSelected ? 'text-[#004B8D]' : 'text-black'}`}>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-start gap-2 min-w-0 flex-1">
+                            <span className="text-2xl leading-none shrink-0 mt-0.5" role="img" aria-label={layout.title}>{layout.icon}</span>
+                            <div className="min-w-0 flex-1">
+                              <h4 className={`font-bold text-xs sm:text-sm leading-snug whitespace-normal break-words ${isSelected ? 'text-[#004B8D]' : 'text-black'}`}>
                                 {layout.title}
                               </h4>
                             </div>

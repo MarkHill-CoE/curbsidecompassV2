@@ -318,13 +318,13 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                         : 'border-amber-200/90 bg-white/95 hover:border-[#004B8D]/50 hover:bg-white shadow-2xs'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-1">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-2xl leading-none shrink-0" role="img" aria-label={layout.title}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-2 min-w-0 flex-1">
+                        <span className="text-2xl leading-none shrink-0 mt-0.5" role="img" aria-label={layout.title}>
                           {layout.icon}
                         </span>
-                        <div className="min-w-0">
-                          <h4 className={`font-bold text-sm sm:text-base leading-tight truncate ${isSelected ? 'text-[#004B8D]' : 'text-gray-900'}`}>
+                        <div className="min-w-0 flex-1">
+                          <h4 className={`font-bold text-sm sm:text-base leading-snug whitespace-normal break-words ${isSelected ? 'text-[#004B8D]' : 'text-gray-900'}`}>
                             {layout.title}
                           </h4>
                         </div>
