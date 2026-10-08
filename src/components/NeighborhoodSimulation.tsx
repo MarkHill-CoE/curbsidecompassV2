@@ -1059,9 +1059,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         // 7b. 30m ETS Bus Stop yellow painted curb & safety zone (x = 295 to 375)
         drawEtsBusStopCurbZone();
 
-        // 8. Asphalt roadway with solid yellow center line
+        // 8. Asphalt roadway (unmarked residential roadway - no painted centreline)
         drawFlatRect(0, 93, blockLength, 45, '#45484C', bgGroundCtx);
-        drawFlatRect(0, 116, blockLength, 1.8, '#FFC72C', bgGroundCtx);
       } else if (layout === 'infill_skinny') {
         // Paved rear alley with smooth asphalt
         drawFlatRect(0, -24, blockLength, 18, '#585C60', bgGroundCtx);
@@ -1102,9 +1101,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawFlatRect(sx + 16, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
         }
 
-        // Asphalt roadway with solid yellow center line
+        // Asphalt roadway (unmarked residential roadway - no painted centreline)
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
-        drawFlatRect(0, 116, blockLength, 1.8, '#FFC72C', bgGroundCtx);
       } else {
         // Mature Laned (Authentic Heritage Mid-Century Layout)
         drawFlatRect(0, -24, blockLength, 18, '#B2AA9D', bgGroundCtx);
@@ -1166,8 +1164,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           drawFlatRect(sx + 16, 93.0, 0.4, 7.5, 'rgba(255, 255, 255, 0.85)', bgGroundCtx);
         }
 
+        // Asphalt roadway (unmarked residential roadway - no painted centreline)
         drawFlatRect(0, 93, blockLength, 45, '#505357', bgGroundCtx);
-        drawFlatRect(0, 116, blockLength, 1.8, '#FFC72C', bgGroundCtx);
       }
     }
 
