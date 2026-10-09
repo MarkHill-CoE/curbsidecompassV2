@@ -266,7 +266,7 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
             </div>
           ) : (
             <p className="text-[10pt] sm:text-xs text-gray-500 mt-1">
-              {t('results_privacy_hint', 'Feedback is collected for planning research. Please do not include personal contact details, phone numbers, or full names.')}
+              {t('results_privacy_hint', 'Feedback is collected for the purpose of redesigning the Residential Parking Program and managing parking and curbside space.')}
             </p>
           )}
         </div>

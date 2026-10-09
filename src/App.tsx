@@ -400,12 +400,12 @@ export default function App() {
               setShowOnboarding(true);
             }}
             title={t('header_how_it_works_title', 'About the Street Model & Consultation Guide')}
-            aria-label={t('header_how_it_works_aria', 'How This Works')}
+            aria-label={t('header_how_it_works_aria', 'How To Use')}
             className="text-[0.6875rem] sm:text-xs flex items-center justify-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded transition-all min-h-[44px] min-w-[44px] cursor-pointer bg-white/10 hover:bg-white/20 text-gray-200 hover:text-white border border-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
           >
             <HelpCircle className="w-4 h-4 text-[#FFC72C]" />
             <span className="hidden sm:inline font-bold">
-              {t('header_how_it_works', 'Help')}
+              {t('header_how_it_works', 'How To Use')}
             </span>
           </button>
 

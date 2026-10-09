@@ -560,14 +560,14 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "header_how_it_works",
     "category": "Global Header",
     "container": "Navigation Bar",
-    "defaultText": "How It Works",
+    "defaultText": "How To Use",
     "guidance": "Header navigation item or branding badge"
   },
   {
     "key": "header_how_it_works_aria",
     "category": "Global Header",
     "container": "Navigation Bar",
-    "defaultText": "How This Works",
+    "defaultText": "How To Use",
     "guidance": "Header navigation item or branding badge"
   },
   {
@@ -1946,7 +1946,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "results_privacy_hint",
     "category": "Results & Sharing",
     "container": "Results Summary View",
-    "defaultText": "Feedback is collected for planning research. Please do not include personal contact details, phone numbers, or full names.",
+    "defaultText": "Feedback is collected for the purpose of redesigning the Residential Parking Program and managing parking and curbside space.",
     "guidance": "Civic results summary, chart legends, and sharing"
   },
   {
