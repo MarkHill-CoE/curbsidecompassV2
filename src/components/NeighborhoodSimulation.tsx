@@ -6088,7 +6088,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                 triggerFeedback('button');
                 setHudGaugeMode('led');
               }}
-              title="Switch to LED Bar Space Availability Gauge"
+              title="Switch to LED Bar Parking Occupancy Gauge"
               className={`px-1.5 py-0.5 text-[8px] font-bold rounded transition-colors cursor-pointer ${
                 hudGaugeMode === 'led'
                   ? 'bg-cyan-600 text-white shadow-xs'

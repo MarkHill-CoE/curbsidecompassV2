@@ -287,7 +287,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
               <div className="flex items-center justify-between pb-1">
                 <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-300 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                  Space Availability
+                  Parking Occupancy
                 </span>
                 <div className="flex items-center gap-0.5 bg-[#071524] p-0.5 rounded-md border border-white/10">
                   <button

@@ -15,18 +15,19 @@ export interface LedBarIndicatorGaugeProps {
   showTitle?: boolean;
 }
 
-// 10 Segment LED Color Scale from bottom (index 0 = low reserve) to top (index 9 = abundant space)
+// 10 Segment LED Color Scale: bottom (index 0 = low occupancy / green) to top (index 9 = full capacity / red)
+// Inverted per user specification: more occupied = more LEDs illuminated
 const LED_SEGMENTS = [
-  { level: '10%',  color: '#ef4444', glow: 'rgba(239, 68, 68, 0.85)' },    // Segment 0: 10% (Low)
-  { level: '20%',  color: '#f43f5e', glow: 'rgba(244, 63, 94, 0.85)' },   // Segment 1: 20%
-  { level: '30%',  color: '#f97316', glow: 'rgba(249, 115, 22, 0.85)' },  // Segment 2: 30%
-  { level: '40%',  color: '#fb923c', glow: 'rgba(251, 146, 60, 0.85)' },  // Segment 3: 40%
-  { level: '50%',  color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.85)' },  // Segment 4: 50% (Mid)
+  { level: '10%',  color: '#10b981', glow: 'rgba(16, 185, 129, 0.85)' },  // Segment 0: 10% Occupied (Low / Clear)
+  { level: '20%',  color: '#22c55e', glow: 'rgba(34, 197, 94, 0.85)' },   // Segment 1: 20%
+  { level: '30%',  color: '#34d399', glow: 'rgba(52, 211, 153, 0.85)' },  // Segment 2: 30%
+  { level: '40%',  color: '#84cc16', glow: 'rgba(132, 204, 22, 0.85)' },  // Segment 3: 40% (Light)
+  { level: '50%',  color: '#a3e635', glow: 'rgba(163, 230, 53, 0.85)' },  // Segment 4: 50% (Moderate)
   { level: '60%',  color: '#eab308', glow: 'rgba(234, 179, 8, 0.85)' },   // Segment 5: 60%
-  { level: '70%',  color: '#84cc16', glow: 'rgba(132, 204, 22, 0.85)' },  // Segment 6: 70%
-  { level: '80%',  color: '#22c55e', glow: 'rgba(34, 197, 94, 0.85)' },   // Segment 7: 80% (Ample)
-  { level: '90%',  color: '#10b981', glow: 'rgba(16, 185, 129, 0.85)' },  // Segment 8: 90%
-  { level: '100%', color: '#06b6d4', glow: 'rgba(6, 182, 212, 0.95)' },   // Segment 9: 100% (Full availability)
+  { level: '70%',  color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.85)' },  // Segment 6: 70% (Busy)
+  { level: '80%',  color: '#fb923c', glow: 'rgba(251, 146, 60, 0.85)' },  // Segment 7: 80% (High Occupancy)
+  { level: '90%',  color: '#f97316', glow: 'rgba(249, 115, 22, 0.85)' },  // Segment 8: 90% (Near Capacity)
+  { level: '100%', color: '#ef4444', glow: 'rgba(239, 68, 68, 0.95)' },   // Segment 9: 100% (Full / Alert)
 ];
 
 export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
@@ -42,21 +43,21 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
 }) => {
   const { t } = useAppText();
 
-  // Street parking calculations
+  // Street parking calculations (Inverted: more occupied = more LEDs illuminated)
   const streetCap = Math.max(1, curbsideStallsCapacity);
   const streetUsed = curbsideDemandCount;
   const streetAvail = Math.max(0, streetCap - streetUsed);
-  const streetRatio = Math.min(1, Math.max(0, streetAvail / streetCap));
-  const streetLitCount = streetAvail === 0 ? 0 : Math.max(1, Math.min(10, Math.round(streetRatio * 10)));
-  const streetAvailPct = Math.round(streetRatio * 100);
+  const streetOccupiedRatio = Math.min(1, Math.max(0, streetUsed / streetCap));
+  const streetLitCount = streetUsed === 0 ? 0 : Math.max(1, Math.min(10, Math.round(streetOccupiedRatio * 10)));
+  const streetOccupiedPct = Math.round((streetUsed / streetCap) * 100);
 
-  // Private / Garage parking calculations
+  // Private / Garage parking calculations (Inverted: more occupied = more LEDs illuminated)
   const garageCap = Math.max(1, totalGarageSpacesCapacity || 12);
   const garageUsed = occupiedGaragesCount;
   const garageAvail = Math.max(0, garageCap - garageUsed);
-  const garageRatio = Math.min(1, Math.max(0, garageAvail / garageCap));
-  const garageLitCount = garageAvail === 0 ? 0 : Math.max(1, Math.min(10, Math.round(garageRatio * 10)));
-  const garageAvailPct = Math.round(garageRatio * 100);
+  const garageOccupiedRatio = Math.min(1, Math.max(0, garageUsed / garageCap));
+  const garageLitCount = garageUsed === 0 ? 0 : Math.max(1, Math.min(10, Math.round(garageOccupiedRatio * 10)));
+  const garageOccupiedPct = Math.round((garageUsed / garageCap) * 100);
 
   const handleClick = () => {
     if (onOpenMagnified) {
@@ -82,18 +83,22 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
         tabIndex={0}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
-        title={t('led_gauge_tooltip', 'LED Availability Gauge: Click for magnified parking analysis')}
-        aria-label={t('led_gauge_aria', 'LED Parking Gauge: Street {sAvail} available, Garage {gAvail} available').replace('{sAvail}', String(streetAvail)).replace('{gAvail}', String(garageAvail))}
+        title={t('led_gauge_tooltip', 'LED Occupancy Gauge: More LEDs illuminated = more parking spaces occupied. Click for details')}
+        aria-label={t('led_gauge_aria', 'LED Parking Gauge: Street {sUsed}/{sCap} occupied, Garage {gUsed}/{gCap} occupied')
+          .replace('{sUsed}', String(streetUsed))
+          .replace('{sCap}', String(streetCap))
+          .replace('{gUsed}', String(garageUsed))
+          .replace('{gCap}', String(garageCap))}
         className={`bg-[#0d2135]/95 backdrop-blur-md border border-[#0081BC]/50 hover:border-[#FFC72C]/80 hover:bg-[#132c45]/95 p-1.5 sm:p-2 rounded-lg shadow-xl flex flex-col items-center gap-1.5 cursor-pointer select-none active:scale-95 transition-all w-[116px] sm:w-[130px] group ${className}`}
       >
         {/* Header */}
         <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200 border-b border-white/10 pb-0.5">
           <span className="flex items-center gap-1 truncate text-white">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            LED Space
+            LED Bar
           </span>
-          <span className="text-[8px] text-cyan-300 font-mono font-black">
-            Avail
+          <span className="text-[8px] text-amber-300 font-mono font-black">
+            Occupancy
           </span>
         </div>
 
@@ -109,7 +114,7 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
             {/* LED Ladder Stack (Top to Bottom: index 9 down to 0) */}
             <div className="flex flex-col gap-[2px] w-full p-1 bg-[#07131f] border border-white/10 rounded-[4px] shadow-inner">
               {Array.from({ length: 10 }).map((_, idx) => {
-                const segIdx = 9 - idx; // 9 at top, 0 at bottom
+                const segIdx = 9 - idx; // 9 at top (100%), 0 at bottom (10%)
                 const isLit = segIdx < streetLitCount;
                 const seg = LED_SEGMENTS[segIdx];
                 return (
@@ -129,11 +134,11 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
 
             {/* Readout */}
             <div className="flex flex-col items-center leading-none mt-0.5">
-              <span className={`text-[9px] font-black ${streetAvail > 0 ? 'text-[#34d399]' : 'text-rose-400'}`}>
-                {streetAvail} Open
+              <span className={`text-[9px] font-black ${streetUsed >= streetCap ? 'text-rose-400' : 'text-[#FFC72C]'}`}>
+                {streetUsed}/{streetCap} Used
               </span>
               <span className="text-[7.5px] text-gray-400 font-medium">
-                {streetUsed}/{streetCap} Used
+                {streetAvail} Open
               </span>
             </div>
           </div>
@@ -148,7 +153,7 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
             {/* LED Ladder Stack (Top to Bottom: index 9 down to 0) */}
             <div className="flex flex-col gap-[2px] w-full p-1 bg-[#07131f] border border-white/10 rounded-[4px] shadow-inner">
               {Array.from({ length: 10 }).map((_, idx) => {
-                const segIdx = 9 - idx; // 9 at top, 0 at bottom
+                const segIdx = 9 - idx; // 9 at top (100%), 0 at bottom (10%)
                 const isLit = segIdx < garageLitCount;
                 const seg = LED_SEGMENTS[segIdx];
                 return (
@@ -168,11 +173,11 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
 
             {/* Readout */}
             <div className="flex flex-col items-center leading-none mt-0.5">
-              <span className={`text-[9px] font-black ${garageAvail > 0 ? 'text-[#34d399]' : 'text-rose-400'}`}>
-                {garageAvail} Open
+              <span className={`text-[9px] font-black ${garageUsed >= garageCap ? 'text-rose-400' : 'text-[#4ade80]'}`}>
+                {garageUsed}/{garageCap} Used
               </span>
               <span className="text-[7.5px] text-gray-400 font-medium">
-                {garageUsed}/{garageCap} Used
+                {garageAvail} Open
               </span>
             </div>
           </div>
@@ -208,11 +213,11 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
             </div>
             <div>
               <h4 className="text-xs sm:text-sm font-bold text-white leading-tight flex items-center gap-1.5">
-                <span>LED Space Availability Gauge</span>
+                <span>LED Parking Occupancy Gauge</span>
                 <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
               </h4>
               <p className="text-[10px] text-gray-300">
-                Live side-by-side indicator: bars illuminate upward as space becomes available
+                Live side-by-side indicator: more LEDs illuminated = more parking spaces occupied
               </p>
             </div>
           </div>
@@ -251,7 +256,7 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
             {/* LED Segment Bar */}
             <div className="flex flex-col gap-[3px] p-1.5 bg-[#050e18] border border-cyan-500/30 rounded-md shadow-2xl w-[50px] sm:w-[60px] h-[120px] justify-between">
               {Array.from({ length: 10 }).map((_, idx) => {
-                const segIdx = 9 - idx; // Top = 9, Bottom = 0
+                const segIdx = 9 - idx; // Top = 9 (100%), Bottom = 0 (10%)
                 const isLit = segIdx < streetLitCount;
                 const seg = LED_SEGMENTS[segIdx];
                 return (
@@ -266,31 +271,32 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
                     className={`h-[8px] w-full rounded-[2px] transition-all duration-200 border ${
                       isLit ? 'border-white/30 opacity-100' : 'border-white/5 opacity-20'
                     }`}
-                    title={`Street Space Level: ${seg.level} Available`}
+                    title={`Street Occupancy: ${seg.level} (${streetUsed}/${streetCap} parked)`}
                   />
                 );
               })}
             </div>
           </div>
 
-          {/* Readout & Availability Status */}
+          {/* Readout & Occupancy Status */}
           <div className="w-full mt-2 pt-2 border-t border-white/10 flex flex-col gap-0.5 text-center">
             <div className="flex items-baseline justify-center gap-1.5">
-              <span className={`text-base sm:text-lg font-black ${streetAvail > 0 ? 'text-[#34d399]' : 'text-rose-400'}`}>
-                {streetAvail}
+              <span className={`text-base sm:text-lg font-black ${streetUsed >= streetCap ? 'text-rose-400' : streetUsed > 0 ? 'text-[#FFC72C]' : 'text-[#34d399]'}`}>
+                {streetUsed}
               </span>
               <span className="text-[11px] font-bold text-gray-200">
-                Spaces Available
+                Vehicles Parked
               </span>
             </div>
             <div className="text-[10px] text-gray-300 font-medium">
-              <span className="text-amber-300 font-bold">{streetUsed}</span> used of{' '}
-              <span className="text-white font-bold">{streetCap}</span> legal stalls ({streetAvailPct}% free)
+              <span className="text-white font-bold">{streetUsed}</span> of{' '}
+              <span className="text-white font-bold">{streetCap}</span> stalls occupied ({streetOccupiedPct}%) &bull;{' '}
+              <span className="text-[#34d399] font-semibold">{streetAvail} free</span>
             </div>
             {streetAvail === 0 && (
               <span className="mt-1 inline-flex items-center justify-center gap-1 text-[9px] font-black text-rose-300 bg-rose-950/80 border border-rose-500/40 rounded py-0.5 px-1.5 animate-pulse">
                 <AlertCircle className="w-3 h-3" />
-                STREET AT CAPACITY
+                STREET AT CAPACITY (100% OCCUPIED)
               </span>
             )}
           </div>
@@ -323,7 +329,7 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
             {/* LED Segment Bar */}
             <div className="flex flex-col gap-[3px] p-1.5 bg-[#050e18] border border-amber-500/30 rounded-md shadow-2xl w-[50px] sm:w-[60px] h-[120px] justify-between">
               {Array.from({ length: 10 }).map((_, idx) => {
-                const segIdx = 9 - idx; // Top = 9, Bottom = 0
+                const segIdx = 9 - idx; // Top = 9 (100%), Bottom = 0 (10%)
                 const isLit = segIdx < garageLitCount;
                 const seg = LED_SEGMENTS[segIdx];
                 return (
@@ -338,31 +344,32 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
                     className={`h-[8px] w-full rounded-[2px] transition-all duration-200 border ${
                       isLit ? 'border-white/30 opacity-100' : 'border-white/5 opacity-20'
                     }`}
-                    title={`Garage Space Level: ${seg.level} Available`}
+                    title={`Garage Occupancy: ${seg.level} (${garageUsed}/${garageCap} parked)`}
                   />
                 );
               })}
             </div>
           </div>
 
-          {/* Readout & Availability Status */}
+          {/* Readout & Occupancy Status */}
           <div className="w-full mt-2 pt-2 border-t border-white/10 flex flex-col gap-0.5 text-center">
             <div className="flex items-baseline justify-center gap-1.5">
-              <span className={`text-base sm:text-lg font-black ${garageAvail > 0 ? 'text-[#34d399]' : 'text-rose-400'}`}>
-                {garageAvail}
+              <span className={`text-base sm:text-lg font-black ${garageUsed >= garageCap ? 'text-rose-400' : garageUsed > 0 ? 'text-[#4ade80]' : 'text-gray-400'}`}>
+                {garageUsed}
               </span>
               <span className="text-[11px] font-bold text-gray-200">
-                Spaces Available
+                Vehicles Parked
               </span>
             </div>
             <div className="text-[10px] text-gray-300 font-medium">
-              <span className="text-[#4ade80] font-bold">{garageUsed}</span> used of{' '}
-              <span className="text-white font-bold">{garageCap}</span> private stalls ({garageAvailPct}% free)
+              <span className="text-white font-bold">{garageUsed}</span> of{' '}
+              <span className="text-white font-bold">{garageCap}</span> private stalls occupied ({garageOccupiedPct}%) &bull;{' '}
+              <span className="text-[#34d399] font-semibold">{garageAvail} free</span>
             </div>
             {garageAvail === 0 && (
               <span className="mt-1 inline-flex items-center justify-center gap-1 text-[9px] font-black text-rose-300 bg-rose-950/80 border border-rose-500/40 rounded py-0.5 px-1.5 animate-pulse">
                 <AlertCircle className="w-3 h-3" />
-                GARAGES FULL
+                GARAGES FULL (100% OCCUPIED)
               </span>
             )}
           </div>
@@ -372,11 +379,11 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
       {/* Narrative Footer */}
       <div className="flex items-center justify-between text-[11px] text-gray-300 bg-[#0e2439] p-2 rounded-lg border border-white/10">
         <span className="flex items-center gap-1.5 font-medium">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-sm" />
-          <span>More LEDs illuminated = greater parking space available</span>
+          <span className="w-2 h-2 rounded-full bg-cyan-400 shadow-sm animate-pulse" />
+          <span>More LEDs illuminated = more parking spaces occupied</span>
         </span>
         <span className="font-mono text-cyan-300 text-[10px] font-semibold">
-          Total: {streetAvail + garageAvail} Free Stalls
+          Total: {streetUsed + garageUsed} Parked / {streetAvail + garageAvail} Free Stalls
         </span>
       </div>
     </div>
