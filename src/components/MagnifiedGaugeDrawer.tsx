@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Gauge, Sliders, Car, AlertTriangle, CheckCircle, Info, X, Home, Warehouse, Users } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
 import { GarageUsageHintBox } from './GarageUsageHintBox';
+import { LedBarIndicatorGauge } from './LedBarIndicatorGauge';
 
 interface MagnifiedGaugeDrawerProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
   onOpenManualSliders
 }) => {
   const { t } = useAppText();
+  const [meterDisplayMode, setMeterDisplayMode] = useState<'led' | 'linear'>('led');
   // Listen for Escape key to close the drawer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -280,67 +282,117 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
               </div>
             </div>
 
-            {/* Visual Space Allocation Meters (Curbside vs Garage) */}
+            {/* Visual Space Allocation: Switcher between LED Bars and Linear Meters */}
             <div className="flex flex-col gap-2 pt-2 border-t border-white/10">
-              {/* Row 1: Legal Curbside Stalls */}
-              <div className="bg-[#0d2135]/95 rounded-lg p-2 sm:p-2.5 border border-white/10 flex flex-col gap-1 shadow-inner">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-gray-300 font-semibold flex items-center gap-1.5">
-                    <Car className="w-3.5 h-3.5 text-[#38bdf8] shrink-0" />
-                    {t('gauge_occupied_suffix', 'Legal Curbside Stalls Occupied')}
-                  </span>
-                  <span className="font-black text-white text-xs">
-                    <span className="text-[#FFC72C]">{curbsideDemandCount}</span> / {curbsideStallsCapacity}
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className={`h-full transition-all duration-300 rounded-full ${
-                      curbsidePct >= 130 ? 'bg-[#ff7043]' : curbsidePct >= 80 ? 'bg-[#FFC72C]' : 'bg-[#4ade80]'
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-cyan-300 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                  Space Availability
+                </span>
+                <div className="flex items-center gap-0.5 bg-[#071524] p-0.5 rounded-md border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerFeedback('button');
+                      setMeterDisplayMode('led');
+                    }}
+                    className={`px-2 py-0.5 text-[9px] font-bold rounded transition-colors cursor-pointer ${
+                      meterDisplayMode === 'led'
+                        ? 'bg-cyan-600 text-white shadow-xs'
+                        : 'text-gray-400 hover:text-white'
                     }`}
-                    style={{ width: `${Math.min(100, (curbsideDemandCount / Math.max(1, curbsideStallsCapacity)) * 100)}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-gray-300">
-                  <span>{availableStalls > 0 ? `${availableStalls} ${t('gauge_stalls_free', 'Stalls Free')}` : `0 ${t('gauge_stalls_free', 'Stalls Free')}`}</span>
-                  <span className={deficitStalls > 0 ? 'text-[#ff7043] font-bold' : 'text-[#4ade80] font-semibold'}>
-                    {deficitStalls > 0 ? `${t('gauge_deficit_prefix', 'Deficit:')} ${deficitStalls} ${t('gauge_deficit_suffix', 'Cars')}` : t('gauge_smooth_label', 'Balanced Supply')}
-                  </span>
-                </div>
-              </div>
-
-              {/* Row 2: Garage Parking Spaces */}
-              <div className="bg-[#0d2135]/95 rounded-lg p-2 sm:p-2.5 border border-white/10 flex flex-col gap-1 shadow-inner">
-                <div className="flex items-center justify-between text-[11px]">
-                  <span className="text-gray-300 font-semibold flex items-center gap-1.5">
-                    <Warehouse className="w-3.5 h-3.5 text-[#fbbf24] shrink-0" />
-                    {t('sim_garage_use_label', 'Private/Garage Use')}
-                  </span>
-                  <span className="font-black text-white text-xs" title="Vehicles parked / spaces available">
-                    <span className="text-[#4ade80]">{occupiedGaragesCount}</span> / {totalGarageSpacesCapacity}
-                  </span>
-                </div>
-                <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-[#4ade80] transition-all duration-300 rounded-full"
-                    style={{ width: `${Math.min(100, (occupiedGaragesCount / Math.max(1, totalGarageSpacesCapacity)) * 100)}%` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-gray-300">
-                  <span>{Math.max(0, totalGarageSpacesCapacity - occupiedGaragesCount)} Free Garage Spaces</span>
-                  <span className="text-gray-400">Off-Street Private</span>
+                  >
+                    LED Bars
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      triggerFeedback('button');
+                      setMeterDisplayMode('linear');
+                    }}
+                    className={`px-2 py-0.5 text-[9px] font-bold rounded transition-colors cursor-pointer ${
+                      meterDisplayMode === 'linear'
+                        ? 'bg-[#004B8D] text-white shadow-xs'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    Linear Meters
+                  </button>
                 </div>
               </div>
 
-              {/* Circling Cars Alert */}
-              {circlingCarCount > 0 && (
-                <div className="px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-400/30 flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-[#FFC72C]">
-                  <span className="flex items-center gap-1.5">
-                    <AlertTriangle className="w-3.5 h-3.5 text-[#FFC72C] shrink-0" />
-                    {t('gauge_circling_cars_label', 'Circling Traffic')}
-                  </span>
-                  <span>{circlingCarCount} {t('gauge_cruising_label', 'Cruising Vehicles')}</span>
-                </div>
+              {meterDisplayMode === 'led' ? (
+                <LedBarIndicatorGauge
+                  curbsideDemandCount={curbsideDemandCount}
+                  curbsideStallsCapacity={curbsideStallsCapacity}
+                  occupiedGaragesCount={occupiedGaragesCount}
+                  totalGarageSpacesCapacity={totalGarageSpacesCapacity}
+                  circlingCarCount={circlingCarCount}
+                  showTitle={false}
+                />
+              ) : (
+                <>
+                  {/* Row 1: Legal Curbside Stalls */}
+                  <div className="bg-[#0d2135]/95 rounded-lg p-2 sm:p-2.5 border border-white/10 flex flex-col gap-1 shadow-inner">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-gray-300 font-semibold flex items-center gap-1.5">
+                        <Car className="w-3.5 h-3.5 text-[#38bdf8] shrink-0" />
+                        {t('gauge_occupied_suffix', 'Legal Curbside Stalls Occupied')}
+                      </span>
+                      <span className="font-black text-white text-xs">
+                        <span className="text-[#FFC72C]">{curbsideDemandCount}</span> / {curbsideStallsCapacity}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-300 rounded-full ${
+                          curbsidePct >= 130 ? 'bg-[#ff7043]' : curbsidePct >= 80 ? 'bg-[#FFC72C]' : 'bg-[#4ade80]'
+                        }`}
+                        style={{ width: `${Math.min(100, (curbsideDemandCount / Math.max(1, curbsideStallsCapacity)) * 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-gray-300">
+                      <span>{availableStalls > 0 ? `${availableStalls} ${t('gauge_stalls_free', 'Stalls Free')}` : `0 ${t('gauge_stalls_free', 'Stalls Free')}`}</span>
+                      <span className={deficitStalls > 0 ? 'text-[#ff7043] font-bold' : 'text-[#4ade80] font-semibold'}>
+                        {deficitStalls > 0 ? `${t('gauge_deficit_prefix', 'Deficit:')} ${deficitStalls} ${t('gauge_deficit_suffix', 'Cars')}` : t('gauge_smooth_label', 'Balanced Supply')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Garage Parking Spaces */}
+                  <div className="bg-[#0d2135]/95 rounded-lg p-2 sm:p-2.5 border border-white/10 flex flex-col gap-1 shadow-inner">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-gray-300 font-semibold flex items-center gap-1.5">
+                        <Warehouse className="w-3.5 h-3.5 text-[#fbbf24] shrink-0" />
+                        {t('sim_garage_use_label', 'Private/Garage Use')}
+                      </span>
+                      <span className="font-black text-white text-xs" title="Vehicles parked / spaces available">
+                        <span className="text-[#4ade80]">{occupiedGaragesCount}</span> / {totalGarageSpacesCapacity}
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#4ade80] transition-all duration-300 rounded-full"
+                        style={{ width: `${Math.min(100, (occupiedGaragesCount / Math.max(1, totalGarageSpacesCapacity)) * 100)}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[9px] sm:text-[10px] text-gray-300">
+                      <span>{Math.max(0, totalGarageSpacesCapacity - occupiedGaragesCount)} Free Garage Spaces</span>
+                      <span className="text-gray-400">Off-Street Private</span>
+                    </div>
+                  </div>
+
+                  {/* Circling Cars Alert */}
+                  {circlingCarCount > 0 && (
+                    <div className="px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-400/30 flex items-center justify-between text-[10px] sm:text-[11px] font-semibold text-[#FFC72C]">
+                      <span className="flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5 text-[#FFC72C] shrink-0" />
+                        {t('gauge_circling_cars_label', 'Circling Traffic')}
+                      </span>
+                      <span>{circlingCarCount} {t('gauge_cruising_label', 'Cruising Vehicles')}</span>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>

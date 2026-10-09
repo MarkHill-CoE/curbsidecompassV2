@@ -5,6 +5,7 @@ import { Volume2, VolumeX, Sliders, RefreshCw, RotateCcw, ZapOff } from 'lucide-
 import { feedback, triggerFeedback } from '../utils/feedback';
 import { ambientAudio } from '../utils/ambientAudio';
 import { useAppText } from '../context/TextContentContext';
+import { LedBarIndicatorGauge } from './LedBarIndicatorGauge';
 
 interface NeighborhoodSimulationProps {
   config: SimulationConfig;
@@ -114,6 +115,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
   const [zoomScale, setZoomScale] = useState<number>(1.33);
   const [showGarageIndicators, setShowGarageIndicators] = useState<boolean>(true);
   const [occupiedGaragesCount, setOccupiedGaragesCount] = useState<number>(() => propOccupiedGaragesCount ?? 10);
+  const [hudGaugeMode, setHudGaugeMode] = useState<'led' | 'dial'>('led');
   const showGarageIndicatorsRef = useRef<boolean>(true);
   showGarageIndicatorsRef.current = showGarageIndicators;
 
@@ -6077,107 +6079,158 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             )}
           </div>
 
-          {/* Compact Curbside Dial Gauge - with clear legible typography and interactive magnified gauge toggle */}
-          <div
-            id="hud-gauge-widget"
-            role="button"
-            tabIndex={0}
-            onClick={() => {
-              triggerFeedback('button');
-              if (onToggleMagnifiedGauge) {
-                onToggleMagnifiedGauge();
-              } else {
-                setShowControls((prev) => !prev);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
+          {/* Gauge View Mode Switcher: LED Bars vs Dial */}
+          <div className="flex items-center gap-0.5 bg-[#0d2135]/95 backdrop-blur-md border border-[#0081BC]/40 p-0.5 rounded-md shadow-sm self-end">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
                 triggerFeedback('button');
-                if (onToggleMagnifiedGauge) {
-                  onToggleMagnifiedGauge();
-                } else {
-                  setShowControls((prev) => !prev);
-                }
-              }
-            }}
-            title={t('sim_curb_gauge_title', 'Curbside Parking Gauge: Click to view magnified gauge analysis')}
-            aria-label={t('sim_curb_gauge_title', 'Curbside Parking Gauge: Click to view magnified gauge analysis')}
-            aria-haspopup="dialog"
-            className={`bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-1.5 rounded-md sm:rounded-lg shadow-md flex flex-col items-center transition-all self-end w-[82px] sm:w-[94px] cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] group ${
-              curbsidePct >= 150 ? 'animate-bounce border-[#E8552D]' : ''
-            }`}
-          >
-            <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200 mb-0.5 gap-0.5">
-              <span className="truncate">{t('sim_curb_label', 'Curb')}</span>
-              <span className={`px-1 py-0.2 rounded border text-[8px] sm:text-[9px] font-bold leading-none ${getGaugeStatusColor()}`}>
-                {curbsidePct}%
-              </span>
-            </div>
-            <canvas ref={gaugeCanvasRef} width={84} height={44} className="w-full h-auto block" />
-            <span className="text-[8.5px] sm:text-[9.5px] font-semibold text-gray-200 mt-0.5 whitespace-nowrap leading-tight">
-              {curbsideDemandCount}/{curbsideStallsCapacity || totalLegalCurbsideStalls} {t('sim_cars_unit', 'Cars')}
-            </span>
-
-            {/* Circling / Cruising Traffic Indicator */}
-            {circlingCarCount > 0 ? (
-              <div 
-                id="hud-circling-traffic-indicator"
-                className="w-full mt-0.5 pt-0.5 border-t border-white/10 flex items-center justify-center gap-0.5 text-[8px] sm:text-[8.5px] font-semibold text-amber-300 leading-tight"
-                title={`${circlingCarCount} vehicles circling looking for parking as curbside fills up`}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block flex-shrink-0" />
-                <span className="truncate">{circlingCarCount} {circlingCarCount === 1 ? t('sim_car_unit_singular', 'car') : t('sim_cars_unit_lowercase', 'cars')}</span>
-              </div>
-            ) : (
-              <div 
-                id="hud-circling-traffic-indicator"
-                className="w-full mt-0.5 pt-0.5 border-t border-white/10 flex items-center justify-center gap-0.5 text-[8px] sm:text-[8.5px] font-medium text-emerald-300/90 leading-tight"
-                title={t('sim_curb_open_title', 'Curbside parking open - through traffic flowing smoothly')}
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block flex-shrink-0" />
-                <span className="truncate">{t('sim_traffic_open', 'Open')}</span>
-              </div>
-            )}
+                setHudGaugeMode('led');
+              }}
+              title="Switch to LED Bar Space Availability Gauge"
+              className={`px-1.5 py-0.5 text-[8px] font-bold rounded transition-colors cursor-pointer ${
+                hudGaugeMode === 'led'
+                  ? 'bg-cyan-600 text-white shadow-xs'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              LED Bars
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                triggerFeedback('button');
+                setHudGaugeMode('dial');
+              }}
+              title="Switch to Circular Dial Gauge"
+              className={`px-1.5 py-0.5 text-[8px] font-bold rounded transition-colors cursor-pointer ${
+                hudGaugeMode === 'dial'
+                  ? 'bg-[#0081BC] text-white shadow-xs'
+                  : 'text-gray-400 hover:text-white'
+              }`}
+            >
+              Dial
+            </button>
           </div>
 
-          {/* Garage Status - Positioned directly below Curbside Dial Gauge */}
-          <div
-            id="hud-garage-status"
-            role="button"
-            tabIndex={0}
-            onClick={() => {
-              triggerFeedback('button');
-              setShowGarageIndicators((prev) => !prev);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                triggerFeedback('button');
-                setShowGarageIndicators((prev) => !prev);
-              }
-            }}
-            className={`w-[82px] sm:w-[94px] bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-1.5 rounded-md sm:rounded-lg shadow-md text-white pointer-events-auto transition-all cursor-pointer select-none active:scale-95 flex flex-col items-center gap-0.5 ${
-              hideGaragePill ? 'hidden lg:flex' : 'flex'
-            }`}
-            title={t('sim_garages_tooltip', 'Private/Garage Use: Real-time off-street vehicle parking across all 12 properties ({occupied} vehicles parked / {capacity} spaces available). Click to toggle garage roof indicators.').replace('{occupied}', String(occupiedGaragesCount)).replace('{capacity}', '12')}
-            aria-label={t('sim_garages_aria', 'Private/Garage Use: {count} of 12 spaces occupied ({available} spaces available). Click to toggle garage badges.').replace('{count}', String(occupiedGaragesCount)).replace('{available}', String(12 - occupiedGaragesCount))}
-          >
-            <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200">
-              <span className="truncate">{t('sim_garage_use_label', 'Private/Garage Use')}</span>
-              <span className="text-[8px] sm:text-[9px] text-[#34D399] font-bold">
-                {Math.round((occupiedGaragesCount / 12) * 100)}%
-              </span>
-            </div>
-            <div className="flex items-center justify-between w-full text-[8px] sm:text-[9px] font-semibold text-gray-200 mt-0.5">
-              <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1 py-0.2 rounded text-[8.5px] sm:text-[9.5px] font-bold leading-none" title="Vehicles parked / spaces available">
-                {occupiedGaragesCount}/12
-              </span>
-              <span className="text-gray-300 font-semibold leading-none truncate" title="Spaces available">
-                {12 - occupiedGaragesCount} {t('sim_vacant_label', 'Vacant')}
-              </span>
-            </div>
-          </div>
+          {hudGaugeMode === 'led' ? (
+            <LedBarIndicatorGauge
+              compact
+              curbsideDemandCount={curbsideDemandCount}
+              curbsideStallsCapacity={curbsideStallsCapacity || totalLegalCurbsideStalls}
+              occupiedGaragesCount={occupiedGaragesCount}
+              totalGarageSpacesCapacity={12}
+              circlingCarCount={circlingCarCount}
+              onOpenMagnified={onToggleMagnifiedGauge}
+              className={curbsidePct >= 150 ? 'animate-bounce border-[#E8552D]' : ''}
+            />
+          ) : (
+            <>
+              {/* Compact Curbside Dial Gauge - with clear legible typography and interactive magnified gauge toggle */}
+              <div
+                id="hud-gauge-widget"
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  triggerFeedback('button');
+                  if (onToggleMagnifiedGauge) {
+                    onToggleMagnifiedGauge();
+                  } else {
+                    setShowControls((prev) => !prev);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    triggerFeedback('button');
+                    if (onToggleMagnifiedGauge) {
+                      onToggleMagnifiedGauge();
+                    } else {
+                      setShowControls((prev) => !prev);
+                    }
+                  }
+                }}
+                title={t('sim_curb_gauge_title', 'Curbside Parking Gauge: Click to view magnified gauge analysis')}
+                aria-label={t('sim_curb_gauge_title', 'Curbside Parking Gauge: Click to view magnified gauge analysis')}
+                aria-haspopup="dialog"
+                className={`bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-1.5 rounded-md sm:rounded-lg shadow-md flex flex-col items-center transition-all self-end w-[82px] sm:w-[94px] cursor-pointer select-none active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C] group ${
+                  curbsidePct >= 150 ? 'animate-bounce border-[#E8552D]' : ''
+                }`}
+              >
+                <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200 mb-0.5 gap-0.5">
+                  <span className="truncate">{t('sim_curb_label', 'Curb')}</span>
+                  <span className={`px-1 py-0.2 rounded border text-[8px] sm:text-[9px] font-bold leading-none ${getGaugeStatusColor()}`}>
+                    {curbsidePct}%
+                  </span>
+                </div>
+                <canvas ref={gaugeCanvasRef} width={84} height={44} className="w-full h-auto block" />
+                <span className="text-[8.5px] sm:text-[9.5px] font-semibold text-gray-200 mt-0.5 whitespace-nowrap leading-tight">
+                  {curbsideDemandCount}/{curbsideStallsCapacity || totalLegalCurbsideStalls} {t('sim_cars_unit', 'Cars')}
+                </span>
+
+                {/* Circling / Cruising Traffic Indicator */}
+                {circlingCarCount > 0 ? (
+                  <div 
+                    id="hud-circling-traffic-indicator"
+                    className="w-full mt-0.5 pt-0.5 border-t border-white/10 flex items-center justify-center gap-0.5 text-[8px] sm:text-[8.5px] font-semibold text-amber-300 leading-tight"
+                    title={`${circlingCarCount} vehicles circling looking for parking as curbside fills up`}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse inline-block flex-shrink-0" />
+                    <span className="truncate">{circlingCarCount} {circlingCarCount === 1 ? t('sim_car_unit_singular', 'car') : t('sim_cars_unit_lowercase', 'cars')}</span>
+                  </div>
+                ) : (
+                  <div 
+                    id="hud-circling-traffic-indicator"
+                    className="w-full mt-0.5 pt-0.5 border-t border-white/10 flex items-center justify-center gap-0.5 text-[8px] sm:text-[8.5px] font-medium text-emerald-300/90 leading-tight"
+                    title={t('sim_curb_open_title', 'Curbside parking open - through traffic flowing smoothly')}
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block flex-shrink-0" />
+                    <span className="truncate">{t('sim_traffic_open', 'Open')}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Garage Status - Positioned directly below Curbside Dial Gauge */}
+              <div
+                id="hud-garage-status"
+                role="button"
+                tabIndex={0}
+                onClick={() => {
+                  triggerFeedback('button');
+                  setShowGarageIndicators((prev) => !prev);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    triggerFeedback('button');
+                    setShowGarageIndicators((prev) => !prev);
+                  }
+                }}
+                className={`w-[82px] sm:w-[94px] bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-1.5 rounded-md sm:rounded-lg shadow-md text-white pointer-events-auto transition-all cursor-pointer select-none active:scale-95 flex flex-col items-center gap-0.5 ${
+                  hideGaragePill ? 'hidden lg:flex' : 'flex'
+                }`}
+                title={t('sim_garages_tooltip', 'Private/Garage Use: Real-time off-street vehicle parking across all 12 properties ({occupied} vehicles parked / {capacity} spaces available). Click to toggle garage roof indicators.').replace('{occupied}', String(occupiedGaragesCount)).replace('{capacity}', '12')}
+                aria-label={t('sim_garages_aria', 'Private/Garage Use: {count} of 12 spaces occupied ({available} spaces available). Click to toggle garage badges.').replace('{count}', String(occupiedGaragesCount)).replace('{available}', String(12 - occupiedGaragesCount))}
+              >
+                <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200">
+                  <span className="truncate">{t('sim_garage_use_label', 'Private/Garage Use')}</span>
+                  <span className="text-[8px] sm:text-[9px] text-[#34D399] font-bold">
+                    {Math.round((occupiedGaragesCount / 12) * 100)}%
+                  </span>
+                </div>
+                <div className="flex items-center justify-between w-full text-[8px] sm:text-[9px] font-semibold text-gray-200 mt-0.5">
+                  <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1 py-0.2 rounded text-[8.5px] sm:text-[9.5px] font-bold leading-none" title="Vehicles parked / spaces available">
+                    {occupiedGaragesCount}/12
+                  </span>
+                  <span className="text-gray-300 font-semibold leading-none truncate" title="Spaces available">
+                    {12 - occupiedGaragesCount} {t('sim_vacant_label', 'Vacant')}
+                  </span>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Zoom Controls (Bottom Left) */}
