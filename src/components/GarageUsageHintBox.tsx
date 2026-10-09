@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
-import { Warehouse, Sliders, X } from 'lucide-react';
+import { Warehouse, X } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
 
-interface GarageUsageHintBoxProps {
+export interface GarageUsageHintBoxProps {
   curbsidePct: number;
   drivewayCapacity?: number;
   occupiedGaragesCount?: number;
   totalGarageSpacesCapacity?: number;
-  onOpenControlSliders: () => void;
+  onDrivewayCapacityChange?: (newCapacity: number) => void;
+  onOpenControlSliders?: () => void;
   className?: string;
   variant?: 'floating' | 'inline';
 }
@@ -16,30 +17,21 @@ interface GarageUsageHintBoxProps {
 export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
   curbsidePct,
   drivewayCapacity = 1,
-  occupiedGaragesCount,
-  totalGarageSpacesCapacity = 12,
-  onOpenControlSliders,
+  onDrivewayCapacityChange,
   className = '',
   variant = 'floating'
 }) => {
   const { t } = useAppText();
   const [isDismissed, setIsDismissed] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
-  // Requirement: If Curbside Utilization is above 80% and the number of vehicles per garage is 1 or fewer
-  const shouldShow = curbsidePct > 80 && drivewayCapacity <= 1 && !isDismissed;
+  const currentCap = drivewayCapacity ?? 1;
+
+  // Requirement: Trigger if Curbside Utilization is above 80% and vehicles per garage is 1 or fewer.
+  // Once the user interacts with the slider, keep it open until dismissed so they can adjust and see the immediate effect.
+  const shouldShow = ((curbsidePct > 80 && drivewayCapacity <= 1) || hasInteracted) && !isDismissed;
 
   if (!shouldShow) return null;
-
-  const occupied = occupiedGaragesCount ?? (drivewayCapacity ? drivewayCapacity * 10 : 10);
-  const totalCapacity = totalGarageSpacesCapacity || 12;
-  const availableSpaces = Math.max(0, totalCapacity - occupied);
-  const usagePct = Math.min(100, Math.round((occupied / Math.max(1, totalCapacity)) * 100));
-
-  const handleOpenSliders = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    triggerFeedback('button');
-    onOpenControlSliders();
-  };
 
   if (variant === 'inline') {
     return (
@@ -60,13 +52,10 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
                 <h4 className="text-sm font-bold text-white leading-tight">
                   {t('sim_garage_use_label', 'Private/Garage Use')}
                 </h4>
-                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 leading-none">
-                  {usagePct}% Utilized
+                <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-[#FFC72C] border border-amber-400/30 leading-none">
+                  {currentCap} {currentCap === 1 ? 'stall/home' : 'stalls/home'}
                 </span>
               </div>
-              <span className="text-[11px] text-gray-300 font-medium mt-0.5">
-                Vehicles parked / spaces available
-              </span>
             </div>
           </div>
 
@@ -84,56 +73,45 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
           </button>
         </div>
 
-        {/* Measurement Grid: Vehicles Parked & Spaces Available */}
-        <div className="grid grid-cols-2 gap-2 bg-[#142e47] p-2.5 rounded-lg border border-white/10">
-          <div className="flex flex-col">
-            <span className="text-[10px] text-gray-300 font-semibold uppercase tracking-wider">
-              Vehicles Parked
-            </span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-base sm:text-lg font-black text-[#4ade80]">
-                {occupied}
-              </span>
-              <span className="text-[11px] text-gray-400 font-medium">
-                / {totalCapacity} spaces
-              </span>
-            </div>
-          </div>
-
-          <div className="flex flex-col border-l border-white/10 pl-2.5">
-            <span className="text-[10px] text-gray-300 font-semibold uppercase tracking-wider">
-              Spaces Available
-            </span>
-            <div className="flex items-baseline gap-1 mt-0.5">
-              <span className="text-base sm:text-lg font-black text-[#FFC72C]">
-                {availableSpaces}
-              </span>
-              <span className="text-[11px] text-gray-400 font-medium">
-                free {availableSpaces === 1 ? 'stall' : 'stalls'}
-              </span>
-            </div>
-          </div>
-        </div>
-
         {/* Narrative / Contextual Hint */}
         <p className="text-xs text-gray-200 leading-relaxed">
-          Curbside demand is high at <span className="font-bold text-amber-300">{curbsidePct}%</span>, while <span className="font-bold text-white">{availableSpaces}</span> private garage {availableSpaces === 1 ? 'space remains' : 'spaces remain'} available. Utilizing private garages shifts parking off-street to keep lanes clear.
+          Curbside demand is high at <span className="font-bold text-amber-300">{curbsidePct}%</span>. Increasing private garage usage shifts parking off-street to keep lanes clear.
         </p>
 
-        {/* Action Row */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-2 border-t border-white/10 gap-2">
-          <span className="text-xs text-gray-300 font-medium">
-            Adjust garage allocation with control sliders:
-          </span>
-          <button
-            type="button"
-            onClick={handleOpenSliders}
-            className="px-3.5 py-1.5 bg-[#FFC72C] hover:bg-[#ffe066] active:bg-[#f5bc20] text-[#004B8D] font-black rounded-lg text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 shrink-0"
-            title="Open control sliders to adjust garage usage"
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>Control Sliders &rarr;</span>
-          </button>
+        {/* Garage Use Slider */}
+        <div className="flex flex-col gap-1.5 pt-2 border-t border-white/10">
+          <div className="flex items-center justify-between text-xs">
+            <label htmlFor="inline-garage-slider" className="text-gray-200 font-bold flex items-center gap-1.5 cursor-pointer">
+              <span>Garage Use Slider:</span>
+            </label>
+            <span className="font-mono font-black text-xs text-[#FFC72C] bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded">
+              {currentCap} {currentCap === 1 ? 'stall / home' : 'stalls / home'}
+            </span>
+          </div>
+
+          <input
+            id="inline-garage-slider"
+            type="range"
+            min="0"
+            max="3"
+            step="1"
+            value={currentCap}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              setHasInteracted(true);
+              triggerFeedback('choice');
+              onDrivewayCapacityChange?.(val);
+            }}
+            aria-label={t('drawer_sliders_driveway_aria', 'Private off-street parking stalls per home')}
+            className="accent-[#FFC72C] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
+          />
+
+          <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium">
+            <span>0 (Street only)</span>
+            <span>1 (Default)</span>
+            <span>2</span>
+            <span>3 (Max garage)</span>
+          </div>
         </div>
       </div>
     );
@@ -147,6 +125,7 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
       onClick={(e) => e.stopPropagation()}
       className={`absolute z-30 max-w-[340px] w-[calc(100%-1.5rem)] sm:w-auto bg-[#0e263d]/95 backdrop-blur-md border-2 border-[#FFC72C] text-white p-3 rounded-xl shadow-2xl animate-in fade-in slide-in-from-bottom-2 duration-300 flex flex-col gap-2.5 ${className}`}
     >
+      {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 text-[#FFC72C]">
           <div className="p-1 rounded-md bg-[#FFC72C]/20 shrink-0">
@@ -170,32 +149,45 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
         </button>
       </div>
 
-      <div className="flex items-center justify-between text-xs bg-[#142e47] p-2 rounded-lg border border-white/10">
-        <span className="text-gray-300 text-[11px]">
-          Vehicles parked / spaces:
-        </span>
-        <span className="font-bold text-white">
-          <span className="text-[#4ade80]">{occupied}</span> / {totalCapacity} ({availableSpaces} free)
-        </span>
-      </div>
-
+      {/* Explainer / Prompt */}
       <p className="text-xs text-gray-200 leading-snug">
-        Curbside is at <span className="font-bold text-amber-300">{curbsidePct}%</span>. Would you like to increase private garage usage?
+        Curbside is at <span className="font-bold text-amber-300">{curbsidePct}%</span>. Adjust private garage usage to shift cars off-street:
       </p>
 
-      <div className="flex items-center justify-between pt-1 border-t border-white/10">
-        <span className="text-[10px] text-gray-300 font-medium">
-          {availableSpaces} spaces open
-        </span>
-        <button
-          type="button"
-          onClick={handleOpenSliders}
-          className="text-xs font-bold text-[#FFC72C] hover:text-amber-200 underline inline-flex items-center gap-1.5 cursor-pointer transition-colors active:scale-95"
-          title="Open control sliders"
-        >
-          <Sliders className="w-3.5 h-3.5" />
-          <span>Control Sliders &rarr;</span>
-        </button>
+      {/* Garage Use Slider: replaces link to controls and removed vehicles parked/space container */}
+      <div className="flex flex-col gap-1.5 pt-2 border-t border-white/10">
+        <div className="flex items-center justify-between text-xs">
+          <label htmlFor="hint-garage-slider" className="text-gray-200 font-bold flex items-center gap-1.5 cursor-pointer">
+            <span>Garage Use Slider:</span>
+          </label>
+          <span className="font-mono font-black text-xs text-[#FFC72C] bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded">
+            {currentCap} {currentCap === 1 ? 'stall / home' : 'stalls / home'}
+          </span>
+        </div>
+
+        <input
+          id="hint-garage-slider"
+          type="range"
+          min="0"
+          max="3"
+          step="1"
+          value={currentCap}
+          onChange={(e) => {
+            const val = parseInt(e.target.value, 10);
+            setHasInteracted(true);
+            triggerFeedback('choice');
+            onDrivewayCapacityChange?.(val);
+          }}
+          aria-label={t('drawer_sliders_driveway_aria', 'Private off-street parking stalls per home')}
+          className="accent-[#FFC72C] cursor-pointer h-2 bg-gray-700 rounded-lg w-full"
+        />
+
+        <div className="flex items-center justify-between text-[10px] text-gray-400 font-medium">
+          <span>0 (Street only)</span>
+          <span>1 (Default)</span>
+          <span>2</span>
+          <span>3 (Max garage)</span>
+        </div>
       </div>
     </div>
   );

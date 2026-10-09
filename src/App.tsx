@@ -488,6 +488,7 @@ export default function App() {
           drivewayCapacity={simConfig.drivewayCapacity}
           occupiedGaragesCount={simulationMetrics.occupiedGaragesCount}
           totalGarageSpacesCapacity={simulationMetrics.totalGarageSpacesCapacity}
+          onDrivewayCapacityChange={(newCap) => handleConfigChange({ drivewayCapacity: newCap })}
           onOpenManualSliders={() => {
             setShowMagnifiedGauge(false);
             setIsSimExpanded(false);
@@ -580,6 +581,7 @@ export default function App() {
             drivewayCapacity={simConfig.drivewayCapacity}
             occupiedGaragesCount={simulationMetrics.occupiedGaragesCount}
             totalGarageSpacesCapacity={simulationMetrics.totalGarageSpacesCapacity}
+            onDrivewayCapacityChange={(newCap) => handleConfigChange({ drivewayCapacity: newCap })}
             onOpenControlSliders={() => {
               setIsSimExpanded(false);
               setShowManualSliders(true);

@@ -19,6 +19,7 @@ interface MagnifiedGaugeDrawerProps {
   drivewayCapacity?: number;
   occupiedGaragesCount?: number;
   totalGarageSpacesCapacity?: number;
+  onDrivewayCapacityChange?: (newCapacity: number) => void;
   onOpenManualSliders?: () => void;
 }
 
@@ -36,6 +37,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
   drivewayCapacity = 1,
   occupiedGaragesCount = 0,
   totalGarageSpacesCapacity = 12,
+  onDrivewayCapacityChange,
   onOpenManualSliders
 }) => {
   const { t } = useAppText();
@@ -522,6 +524,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
               drivewayCapacity={drivewayCapacity}
               occupiedGaragesCount={occupiedGaragesCount}
               totalGarageSpacesCapacity={totalGarageSpacesCapacity}
+              onDrivewayCapacityChange={onDrivewayCapacityChange}
               onOpenControlSliders={() => {
                 onClose();
                 onOpenManualSliders?.();
