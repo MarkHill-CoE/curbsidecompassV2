@@ -2,7 +2,7 @@ import { SurveyQuestion, PersonaResult, SimulationConfig, StreetLayoutTypology }
 import { getTypologyFromPostalCode, getStreetLayoutInfo } from './edmontonNeighbourhoods';
 
 export const INITIAL_SIM_CONFIG: SimulationConfig = {
-  drivewayCapacity: 2,
+  drivewayCapacity: 1,
   householdCarsPerHome: 2.0,
   visitorPassesPerHome: 0, // Calibrated to 0% default starting curbside occupancy across all neighbourhood typologies
   splitInfillLots: 0,
@@ -26,28 +26,48 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         label: 'Mature Laned (1950s)',
         hint: 'Detached garages with back lanes. 12 legal curbside stalls.',
         x: 0,
-        y: 0
+        y: 0,
+        simEffects: {
+          householdCarsPerHome: 2.0,
+          drivewayCapacity: 1,
+          visitorPassesPerHome: 0
+        }
       },
       {
         id: 'infill_skinny',
         label: 'Infill & Skinny Homes',
         hint: 'Subdivided narrow lots with detached rear garages. 12 legal curbside stalls.',
         x: 0,
-        y: 0
+        y: 0,
+        simEffects: {
+          householdCarsPerHome: 2.0,
+          drivewayCapacity: 1,
+          visitorPassesPerHome: 0
+        }
       },
       {
         id: 'suburban_front_driveway',
         label: 'Suburban Front Driveway (1980s)',
         hint: 'Attached front driveways with 1.5m yellow curb setbacks (Bylaw 5590). 10 base stalls; each 8-plex removes a driveway to add a curbside stall back (except at the ETS bus stop).',
         x: 0,
-        y: 0
+        y: 0,
+        simEffects: {
+          householdCarsPerHome: 2.0,
+          drivewayCapacity: 1,
+          visitorPassesPerHome: 0
+        }
       },
       {
         id: 'contemporary_townhomes',
         label: 'Contemporary Townhomes',
         hint: 'Multi-unit rows with rear garage lane and front pocket bays. 9 legal curbside stalls.',
         x: 0,
-        y: 0
+        y: 0,
+        simEffects: {
+          householdCarsPerHome: 2.0,
+          drivewayCapacity: 1,
+          visitorPassesPerHome: 0
+        }
       }
     ]
   },
@@ -255,6 +275,7 @@ export interface ComputedSimulationMetrics {
   curbsideStallsCapacity: number;
   curbsidePct: number;
   occupiedGaragesCount: number;
+  totalGarageSpacesCapacity: number;
   simConfig: SimulationConfig;
 }
 
@@ -289,22 +310,18 @@ export function calculateSimulationMetricsFromAnswers(
   const curbsideStallsCapacity = baseCurbsideCapacity;
 
   // Household Cars:
-  // Baseline cars per home (~2.0, modified by q3 unlimited permits - formerly q2)
-  let baseCarsPerHome = 2.0;
-  if (answers['q3'] === 'q3_b') baseCarsPerHome += 0.33;
-  if (answers['q3'] === 'q3_a') baseCarsPerHome -= 0.17;
-
+  // Starts initially with 2 Vehicles per Home (householdCarsPerHome = 2.0)
   const householdCarsPerHome = overrides.householdCarsPerHome !== undefined
     ? overrides.householdCarsPerHome
-    : baseCarsPerHome;
+    : 2.0;
 
   const householdCars = Math.round(householdCarsPerHome * totalDwellings);
 
   // Private Off-Street Parking (Driveway / Garage Capacity):
-  const baseDrivewayCap = activeLayout === 'suburban_front_driveway' ? 2 : (activeLayout === 'contemporary_townhomes' ? 1 : 2);
+  // Starts initially with 1 Vehicle per Garage (drivewayCapacity = 1)
   const drivewayCap = overrides.drivewayCapacity !== undefined
     ? overrides.drivewayCapacity
-    : baseDrivewayCap;
+    : 1;
 
   // Private off-street capacity (garages / private driveways)
   // 8-Plex lots have zero garage parking (100% transit/curbside oriented under Edmonton missing-middle zoning)
@@ -312,40 +329,35 @@ export function calculateSimulationMetricsFromAnswers(
   const totalOffStreetStalls = drivewayCap * singleFamilyHomes;
   const occupiedGarages = drivewayCap === 0
     ? 0
-    : Math.min(householdCars, Math.round(totalOffStreetStalls * 0.85));
+    : Math.min(householdCars, totalOffStreetStalls);
 
-  // Overflow household vehicles parked along the curb
+  // Overflow household vehicles needing curbside parking:
   const residentCurbOverflow = Math.max(0, householdCars - occupiedGarages);
-  // Plus baseline daytime active convenience/errand curb parking
-  const residentCurbConvenience = drivewayCap === 0 ? 0 : Math.min(Math.round(householdCars * 0.08), Math.round(curbsideStallsCapacity * 0.25));
-  const residentCurbsideDemand = residentCurbOverflow + residentCurbConvenience;
 
-  // Visitor passes and visitor cars: (Q5 Parking Proximity to Destination - formerly q4)
-  const baseVisitorPasses = answers['q5'] === 'q5_a' ? 2 : (answers['q5'] === 'q5_b' ? 1 : 0);
+  // Visitor passes and visitor cars:
+  // Starts initially with 0 Visitor passes per home
   const visitorPassesPerHome = overrides.visitorPassesPerHome !== undefined
     ? Math.min(2, Math.max(0, Math.round(overrides.visitorPassesPerHome)))
-    : baseVisitorPasses;
+    : 0;
 
   const visitorDemand = Math.round(visitorPassesPerHome * totalDwellings);
-  // Visitors park on the street
-  const visitorCurbsideDemand = visitorDemand;
 
-  // Deliveries: (Q4 Visitor Access - formerly q3)
+  // Deliveries:
   const numThree8PlexTiers = Math.floor(num8Plex / 3);
-  let baseDeliveriesPerWeek = 1.0;
-  if (answers['q4'] === 'q4_a') baseDeliveriesPerWeek += 1.5;
-  if (answers['q4'] === 'q4_b') baseDeliveriesPerWeek = 1.0;
+  let defaultDeliveries = 1.0;
   if (numThree8PlexTiers >= 1) {
-    baseDeliveriesPerWeek = Math.max(baseDeliveriesPerWeek, 2.0 + (numThree8PlexTiers - 1) * 1.0);
+    defaultDeliveries = Math.max(defaultDeliveries, 2.0 + (numThree8PlexTiers - 1) * 1.0);
   }
-
   const deliveriesPerWeek = overrides.deliveriesPerHomePerWeek !== undefined
-    ? (numThree8PlexTiers >= 1 ? Math.max(overrides.deliveriesPerHomePerWeek, 2.0 + (numThree8PlexTiers - 1) * 1.0) : overrides.deliveriesPerHomePerWeek)
-    : baseDeliveriesPerWeek;
+    ? overrides.deliveriesPerHomePerWeek
+    : defaultDeliveries;
 
   const totalWeeklyDeliveries = Math.round(deliveriesPerWeek * totalDwellings);
-  // Delivery vans active curb turnover impact
-  const deliveryCurbsideDemand = totalWeeklyDeliveries / 16;
+  // Delivery vans active curb turnover: deliveries above 1.0/week add curbside turnover
+  const deliveryCurbsideDemand = Math.max(0, (deliveriesPerWeek - 1.0) * totalDwellings / 8);
+
+  // Physical unadjusted curbside baseline demand:
+  const baseCurbsideDemand = residentCurbOverflow + visitorDemand + deliveryCurbsideDemand;
 
   // Policy shifts from survey answers (Q1 to Q6)
   let policyDemandShift = 0;
@@ -362,7 +374,7 @@ export function calculateSimulationMetricsFromAnswers(
     feeModel = 'free';
   }
 
-  // Q2: Parking Proximity to Home (formerly Q5)
+  // Q2: Parking Proximity to Home
   if (answers['q2'] === 'q2_a') {
     policyDemandShift += 2.0;
     feeModel = 'permit';
@@ -370,7 +382,7 @@ export function calculateSimulationMetricsFromAnswers(
     policyDemandShift -= 2.0;
   }
 
-  // Q3: Residential Parking Permit Limit (formerly Q2)
+  // Q3: Residential Parking Permit Limit
   if (answers['q3'] === 'q3_a') {
     policyDemandShift -= 2.0;
   } else if (answers['q3'] === 'q3_b') {
@@ -388,7 +400,7 @@ export function calculateSimulationMetricsFromAnswers(
     cruisingLevel = 'low';
   }
 
-  // Q5: Parking Proximity to Destination (formerly Q4)
+  // Q5: Parking Proximity to Destination
   if (answers['q5'] === 'q5_a') {
     policyDemandShift += 2.0;
     enforcement = 'lenient';
@@ -424,52 +436,22 @@ export function calculateSimulationMetricsFromAnswers(
     policyDemandShift += 1.5;
   }
 
-  // Baseline calibration: The default parking occupancy on street stalls to start is strictly zero percent (0%)
-  const baselineCurbsideDemand = 0;
-
-  // Compute the baseline unadjusted demand for this typology at its default starting parameters
-  const defaultNum8Plex = 0;
-  const defaultDwellings = 12 + defaultNum8Plex * 7;
-  const defaultCarsPerHome = 2.0;
-  const defaultDrivewayCap = activeLayout === 'suburban_front_driveway' ? 2 : (activeLayout === 'contemporary_townhomes' ? 1 : 2);
-  const defaultSingleFamilyHomes = Math.max(0, 12 - defaultNum8Plex);
-  const defaultTotalOffStreet = defaultDrivewayCap * defaultSingleFamilyHomes;
-  const defaultHouseholdCars = Math.round(defaultCarsPerHome * defaultDwellings);
-  const defaultOccupiedGarages = Math.min(defaultHouseholdCars, Math.round(defaultTotalOffStreet * 0.85));
-  const defaultResidentOverflow = Math.max(0, defaultHouseholdCars - defaultOccupiedGarages);
-  const defaultConvenience = Math.min(Math.round(defaultHouseholdCars * 0.08), Math.round(curbsideStallsCapacity * 0.25));
-  const defaultResidentDemand = defaultResidentOverflow + defaultConvenience;
-  const defaultVisitorDemand = 0;
-  const defaultDeliveries = 1.0;
-  const defaultDeliveryDemand = Math.round(defaultDeliveries * defaultDwellings) / 16;
-  const defaultRawDemand = defaultResidentDemand + defaultVisitorDemand + defaultDeliveryDemand;
-
-  // Net shift resulting from manual slider adjustments away from the default baseline
-  const currentRawDemand = residentCurbsideDemand + visitorCurbsideDemand + deliveryCurbsideDemand;
-  const sliderDemandDelta = currentRawDemand - defaultRawDemand;
-
-  // Total curbside demand: starts at exactly 0% baseline capacity, shifting with policy and slider choices
+  // Total curbside demand: baseline physical demand + policy shifts
   const totalCalculatedDemand = overrides.curbsideDemandOverride !== undefined
     ? overrides.curbsideDemandOverride
-    : (baselineCurbsideDemand + sliderDemandDelta + policyDemandShift);
+    : Math.max(0, baseCurbsideDemand + policyDemandShift);
 
   // Clamp demand between 0 and realistic upper bound
-  const roundedDemand = Math.max(0, Math.min(36, Math.round(totalCalculatedDemand)));
-  // Calculate percentage: exactly 0% at start, scaling smoothly with demand shifts (0% when stalls converted to bike lane)
+  const roundedDemand = Math.max(0, Math.min(48, Math.round(totalCalculatedDemand)));
+  // Calculate percentage: scales smoothly with demand additions and subtractions
   const curbsidePct = curbsideStallsCapacity > 0
-    ? Math.max(0, Math.round((totalCalculatedDemand / curbsideStallsCapacity) * 100))
+    ? Math.max(0, Math.round((roundedDemand / curbsideStallsCapacity) * 100))
     : 0;
 
   // Circling vehicles: when demand approaches or exceeds capacity
   let circlingCarCount = 0;
-  if (curbsideStallsCapacity > 0 && roundedDemand >= curbsideStallsCapacity + 4) {
-    circlingCarCount = 5;
-  } else if (roundedDemand >= curbsideStallsCapacity + 2) {
-    circlingCarCount = 4;
-  } else if (roundedDemand >= curbsideStallsCapacity + 1) {
-    circlingCarCount = 3;
-  } else if (roundedDemand >= curbsideStallsCapacity) {
-    circlingCarCount = 2;
+  if (curbsideStallsCapacity > 0 && roundedDemand > curbsideStallsCapacity) {
+    circlingCarCount = Math.min(5, Math.max(1, roundedDemand - curbsideStallsCapacity));
   } else if (roundedDemand >= Math.round(curbsideStallsCapacity * 0.85)) {
     circlingCarCount = 1;
   }
@@ -504,6 +486,7 @@ export function calculateSimulationMetricsFromAnswers(
     curbsideStallsCapacity,
     curbsidePct,
     occupiedGaragesCount: occupiedGarages,
+    totalGarageSpacesCapacity: totalOffStreetStalls,
     simConfig
   };
 }
@@ -565,8 +548,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'People who use parking through fees and parking permits',
-        deltaStallsText: '-1.5 stalls (-10%)',
-        deltaStallsValue: -1.5,
+        deltaStallsText: '-2.0 vehicles (-15%)',
+        deltaStallsValue: -2.0,
         tradeoffRationale: 'Ensures program operating costs are paid directly by users rather than through property taxes',
         curbsideImpactSummary: 'Drivers who park on the street pay permit fees. This covers program costs and encourages people with driveways to park off the street.',
         benefitText: 'Costs are covered by people using the program, rather than through property taxes.',
@@ -579,8 +562,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'All residents through property taxes',
-        deltaStallsText: '+1.5 stalls (+10%)',
-        deltaStallsValue: 1.5,
+        deltaStallsText: '+2.0 vehicles (+15%)',
+        deltaStallsValue: 2.0,
         tradeoffRationale: 'Reduces direct costs to users by funding the program through property taxes instead of separate fees',
         curbsideImpactSummary: 'Because street parking is free, more vehicles park on the street.',
         benefitText: 'People can use the program without paying separate parking fees, reducing the cost of access.',
@@ -725,8 +708,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'Yes',
-        deltaStallsText: '+2.5 stalls (+16%)',
-        deltaStallsValue: 2.5,
+        deltaStallsText: '+2.0 vehicles (+15%)',
+        deltaStallsValue: 2.0,
         tradeoffRationale: 'Expands parking options for patients, students, visitors, and event attendees near major destinations',
         curbsideImpactSummary: 'Expands parking choices on nearby residential streets for patients, students, and event attendees.',
         benefitText: 'Patients, students and event attendees have more parking options within a few blocks of their destination.',
@@ -739,8 +722,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'No',
-        deltaStallsText: '-2.5 stalls (-16%)',
-        deltaStallsValue: -2.5,
+        deltaStallsText: '-2.0 vehicles (-15%)',
+        deltaStallsValue: -2.0,
         tradeoffRationale: 'Protects residential street parking from institutional and event venue visitor spillover',
         curbsideImpactSummary: 'Protects nearby residential street parking for residents and guests near major destinations.',
         benefitText: 'Residents and their visitors face less competition for nearby spaces from people visiting these destinations.',
@@ -765,8 +748,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'Yes, housing types with no private parking should get priority for permits',
-        deltaStallsText: '-3.5 stalls (-22%)',
-        deltaStallsValue: -3.5,
+        deltaStallsText: '-2.5 vehicles (-20%)',
+        deltaStallsValue: -2.5,
         tradeoffRationale: 'Prioritizes street parking permits for households with no private off-street parking options',
         curbsideImpactSummary: 'Prioritizes street parking permits for households with fewer off-street parking alternatives.',
         benefitText: 'Prioritizes households with fewer alternatives to street parking, regardless of housing type.',
@@ -779,8 +762,8 @@ export function getQuestionTradeoffImpact(
         questionTitle: question.text,
         hasAnswer: true,
         selectedOptionLabel: selectedOption?.label || 'No, all housing types should have the same eligibility, whether or not they have private parking.',
-        deltaStallsText: '+3.5 stalls (+22%)',
-        deltaStallsValue: 3.5,
+        deltaStallsText: '+2.5 vehicles (+20%)',
+        deltaStallsValue: 2.5,
         tradeoffRationale: 'Ensures equal permit eligibility for all households regardless of private parking availability',
         curbsideImpactSummary: 'Ensures equal permit eligibility for all households regardless of their private parking arrangements.',
         benefitText: 'Households have the same opportunity to obtain permits, regardless of their private parking options.',

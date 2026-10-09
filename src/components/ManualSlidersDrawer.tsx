@@ -176,14 +176,14 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
         </div>
 
         {/* Private Off-Street Parking (Driveway / Rear Garage Capacity) */}
-        <div className="flex flex-col gap-1 bg-black/20 p-2.5 rounded-lg border border-white/10 hover:border-white/20 transition-colors">
+        <div id="slider-garage-capacity" className="flex flex-col gap-1 bg-black/20 p-2.5 rounded-lg border border-white/10 hover:border-[#FFC72C]/40 transition-colors">
           <div className="flex justify-between">
             <span className="text-gray-200 font-bold flex items-center gap-1.5">
               <span>🏠</span>
               <span>{t('sim_private_parking_label', 'Private Off-Street Stalls (Driveway / Garage)')}</span>
             </span>
             <span className="font-bold text-emerald-400">
-              {config.drivewayCapacity ?? 2} {t('sim_stalls_per_home', 'stalls/home')}
+              {config.drivewayCapacity ?? 1} {t('sim_stalls_per_home', 'stalls/home')}
             </span>
           </div>
           <input
@@ -192,7 +192,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
             min="0"
             max="3"
             step="1"
-            value={config.drivewayCapacity ?? 2}
+            value={config.drivewayCapacity ?? 1}
             onChange={(e) =>
               onConfigChange?.({ drivewayCapacity: parseInt(e.target.value, 10) })
             }

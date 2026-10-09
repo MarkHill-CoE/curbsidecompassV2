@@ -1580,7 +1580,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       const typesY = ['sedanY', 'suvY', 'pickupY'];
       const typesX = ['sedan', 'suv', 'pickup'];
       const lotWidth = 30.5;
-      const effectiveCap = Math.min(2, Math.max(1, drivewayCap));
+      const effectiveCap = Math.min(3, Math.max(1, drivewayCap));
 
       // 1. Off-Street Parking: based on layout
       for (let h = 0; h < TOTAL_MIDCENTURY_HOMES; h++) {
@@ -1605,18 +1605,20 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             homeIndex: h
           });
           // Spot 2: In private double concrete driveway (Left stall: parked safely back at y: 49.5, ending at y: 64.5 — 5.5m clear buffer before sidewalk at y: 70)
-          assignments.push({
-            type: typesY[(h + 1) % 3],
-            x: startX + 14.5,
-            y: 49.5,
-            w: 6.5,
-            d: 12,
-            color,
-            isGarage: false,
-            homeIndex: h
-          });
-          // Spot 3: In private double concrete driveway (Right stall: parked safely back at y: 49.5, side-by-side — NEVER blocks pedestrian sidewalk!)
           if (effectiveCap >= 2) {
+            assignments.push({
+              type: typesY[(h + 1) % 3],
+              x: startX + 14.5,
+              y: 49.5,
+              w: 6.5,
+              d: 12,
+              color,
+              isGarage: false,
+              homeIndex: h
+            });
+          }
+          // Spot 3: In private double concrete driveway (Right stall: parked safely back at y: 49.5, side-by-side — NEVER blocks pedestrian sidewalk!)
+          if (effectiveCap >= 3) {
             assignments.push({
               type: typesY[(h + 2) % 3],
               x: startX + 21.5,
@@ -1770,8 +1772,15 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     let activeIndices = Array.from({ length: houseCarAssignments.length }, (_, i) => i);
 
     function shuffleSlots() {
-      for (let i = activeIndices.length - 1; i > 0; i--) {
+      const numGarage = houseCarAssignments.filter(a => a.isGarage).length;
+      // Shuffle garage slots among themselves
+      for (let i = numGarage - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
+        [activeIndices[i], activeIndices[j]] = [activeIndices[j], activeIndices[i]];
+      }
+      // Shuffle curb slots among themselves
+      for (let i = activeIndices.length - 1; i > numGarage; i--) {
+        const j = numGarage + Math.floor(Math.random() * (i - numGarage + 1));
         [activeIndices[i], activeIndices[j]] = [activeIndices[j], activeIndices[i]];
       }
     }
@@ -2919,12 +2928,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     const microMobility = Array.from({ length: 24 }, (_, i) => {
       const isInnerLane = i % 2 === 0;
       const dir = isInnerLane ? -1 : 1;
+      const roadY = isInnerLane ? 105.5 : 132.0;
       return {
         type: i % 2 === 0 ? 'bike' : 'scooter',
         x: dir === -1 ? blockLength + 40 + i * 35 : -50 - i * 42,
-        y: isInnerLane ? 110 : 124,
-        baseY: isInnerLane ? 110 : 124,
-        targetY: isInnerLane ? 110 : 124,
+        y: roadY,
+        baseY: roadY,
+        targetY: roadY,
         w: i % 2 === 0 ? 8 : 7,
         d: 4,
         direction: dir,
@@ -3541,15 +3551,21 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         const B = obstacles[j];
         if (A === B) continue;
 
+        // Static parked curbside stalls never block moving travel lane traffic
+        if (B.isStatic && A.y >= 104) continue;
+
+        // Delivery vans parked curbside at y <= 98 never block moving travel lane traffic
+        if (B.type === 'deliveryVan' && B.y <= 98 && A.y >= 104) continue;
+
         // ETS Buses run along transit routes and designated bus stop bays: static parked stalls never block transit vehicles
         if (A.type === 'etsBus') {
           if (B.isStatic) continue;
-          if (B.type === 'deliveryVan' && B.y <= 96 && A.y >= 104) continue;
+          if (B.type === 'deliveryVan' && B.y <= 98 && A.y >= 104) continue;
           if (B.direction === -1 && B.x >= A.x - 2) continue;
         }
 
-        // Passing traffic in standard travel lane (y >= 106) does not stop behind an ETS bus that is dwelling at the curb
-        if (B.type === 'etsBus' && B.busStopState === 'dwelling' && A.y >= 106) {
+        // Passing traffic in standard travel lane (y >= 106) does not stop behind an ETS bus dwelling or approaching at the curb
+        if (B.type === 'etsBus' && (B.busStopState === 'dwelling' || B.y <= 104) && A.y >= 106) {
           continue;
         }
 
@@ -3560,8 +3576,16 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           }
         }
 
+        // In a two-way street, traffic in opposing directions do not block each other unless deep lateral overlap
+        const bDir = B.direction !== undefined ? B.direction : 1;
+        if (!B.isStatic && bDir !== dir) {
+          if (Math.abs(A.y - B.y) >= 4.0) {
+            continue;
+          }
+        }
+
         // Check lateral overlap with standard safety margin
-        if (!hasLateralOverlap(A.y, A.d, B.y, B.d, 1.2)) continue;
+        if (!hasLateralOverlap(A.y, A.d, B.y, B.d, 1.0)) continue;
 
         const bWidth = B.w || 15;
 
@@ -3572,20 +3596,21 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if (A.x + aWidth >= B.x + bWidth && A.x > B.x) continue;
 
           const { minStopGap, followBuffer } = getSafetyBuffer(A, B);
-          const gap = B.x - (A.x + aWidth);
+          const gap = Math.max(0.01, B.x - (A.x + aWidth));
           const maxAllowedX = B.x - aWidth - minStopGap;
 
           if (targetX > maxAllowedX || gap < followBuffer) {
-            targetX = Math.min(targetX, maxAllowedX);
+            // Clamp targetX: never penetrate maxAllowedX, and NEVER teleport backwards!
+            targetX = Math.max(A.x, Math.min(targetX, maxAllowedX));
 
-            if (gap <= minStopGap + 0.1 || targetX <= A.x + 0.02) {
-              safeSpeed = 0;
-              targetX = Math.min(A.x, maxAllowedX);
+            if (gap <= minStopGap + 0.1) {
+              const leadSpeed = Math.max(0, B.speed || 0);
+              safeSpeed = leadSpeed < 0.1 ? 0 : Math.min(safeSpeed, leadSpeed * 0.85);
             } else {
               const ratio = Math.max(0, Math.min(1, (gap - minStopGap) / Math.max(1, followBuffer - minStopGap)));
               const leadSpeed = Math.max(0, B.speed || 0);
-              const matchedSpeed = leadSpeed * 0.8 + proposedSpeed * ratio * 0.2;
-              safeSpeed = Math.min(safeSpeed, Math.max(0, matchedSpeed), Math.max(0, targetX - A.x));
+              const matchedSpeed = leadSpeed * (1 - ratio * 0.4) + proposedSpeed * ratio * 0.6;
+              safeSpeed = Math.min(safeSpeed, Math.max(0.15, matchedSpeed));
             }
             blocking = B;
           }
@@ -3597,20 +3622,21 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           if (A.x <= B.x && A.x + aWidth < B.x + bWidth) continue;
 
           const { minStopGap, followBuffer } = getSafetyBuffer(A, B);
-          const gap = A.x - (B.x + bWidth);
+          const gap = Math.max(0.01, A.x - (B.x + bWidth));
           const minAllowedX = B.x + bWidth + minStopGap;
 
           if (targetX < minAllowedX || gap < followBuffer) {
-            targetX = Math.max(targetX, minAllowedX);
+            // Clamp targetX: never penetrate minAllowedX, and NEVER move backwards!
+            targetX = Math.min(A.x, Math.max(targetX, minAllowedX));
 
-            if (gap <= minStopGap + 0.1 || targetX >= A.x - 0.02) {
-              safeSpeed = 0;
-              targetX = Math.max(A.x, minAllowedX);
+            if (gap <= minStopGap + 0.1) {
+              const leadSpeed = Math.max(0, B.speed || 0);
+              safeSpeed = leadSpeed < 0.1 ? 0 : Math.min(safeSpeed, leadSpeed * 0.85);
             } else {
               const ratio = Math.max(0, Math.min(1, (gap - minStopGap) / Math.max(1, followBuffer - minStopGap)));
               const leadSpeed = Math.max(0, B.speed || 0);
-              const matchedSpeed = leadSpeed * 0.8 + proposedSpeed * ratio * 0.2;
-              safeSpeed = Math.min(safeSpeed, Math.max(0, matchedSpeed), Math.max(0, A.x - targetX));
+              const matchedSpeed = leadSpeed * (1 - ratio * 0.4) + proposedSpeed * ratio * 0.6;
+              safeSpeed = Math.min(safeSpeed, Math.max(0.15, matchedSpeed));
             }
             blocking = B;
           }
@@ -3627,12 +3653,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             const gap = ped.x - (A.x + aWidth);
             if (ped.x + 2 > A.x && gap < followBuffer) {
               const maxAllowedX = ped.x - aWidth - minStopGap;
-              targetX = Math.min(targetX, maxAllowedX);
-              if (gap <= minStopGap + 0.2 || targetX <= A.x + 0.05) {
-                targetX = Math.min(A.x, maxAllowedX);
+              targetX = Math.max(A.x, Math.min(targetX, maxAllowedX));
+              if (gap <= minStopGap + 0.2) {
                 safeSpeed = 0;
               } else {
-                safeSpeed = Math.min(safeSpeed, proposedSpeed * (gap / followBuffer) * 0.5);
+                safeSpeed = Math.min(safeSpeed, Math.max(0.12, proposedSpeed * (gap / followBuffer) * 0.6));
               }
               blocking = { x: ped.x, y: ped.y, w: 2, d: 2, type: 'protester' };
               break;
@@ -3641,12 +3666,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             const gap = A.x - (ped.x + 2);
             if (ped.x < A.x + aWidth && gap < followBuffer) {
               const minAllowedX = ped.x + 2 + minStopGap;
-              targetX = Math.max(targetX, minAllowedX);
-              if (gap <= minStopGap + 0.2 || targetX >= A.x - 0.05) {
-                targetX = Math.max(A.x, minAllowedX);
+              targetX = Math.min(A.x, Math.max(targetX, minAllowedX));
+              if (gap <= minStopGap + 0.2) {
                 safeSpeed = 0;
               } else {
-                safeSpeed = Math.min(safeSpeed, proposedSpeed * (gap / followBuffer) * 0.5);
+                safeSpeed = Math.min(safeSpeed, Math.max(0.12, proposedSpeed * (gap / followBuffer) * 0.6));
               }
               blocking = { x: ped.x, y: ped.y, w: 2, d: 2, type: 'protester' };
               break;
@@ -3666,16 +3690,13 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     ) {
       if (van.state === 'APPROACHING') {
         if (van.x < van.targetStopX + 60) {
-          const occupied = isCurbsideSpotOccupied(van.targetStopX, allObstacles);
-          van.targetY = occupied ? 104 : 94;
+          van.targetY = 94.0; // Always pull tight to curbside apron so travel lane remains free
         }
 
-        const targetY = van.targetY || 104;
+        const targetY = van.targetY || 94.0;
         if (Math.abs(van.y - targetY) > 0.05) {
-          const nextY = van.y + (targetY > van.y ? 1 : -1) * Math.min(0.35, Math.abs(targetY - van.y));
-          if (canChangeLane(van, nextY, allObstacles)) {
-            van.y = nextY;
-          }
+          const nextY = van.y + (targetY > van.y ? 1 : -1) * Math.min(0.4, Math.abs(targetY - van.y));
+          van.y = nextY;
         } else {
           van.y = targetY;
         }
@@ -3719,9 +3740,9 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             walkwayX = is8Plex ? houseBaseX + 14.5 : houseBaseX + 6.0;
           }
 
-          // Driver cab door facing curb (for isFlipped: true, cab is in front at x..x+6)
+          // Driver cab door facing curb
           const cabX = van.x + 3;
-          const cabY = van.y >= 100 ? 102.5 : 92.5;
+          const cabY = 92.5;
 
           van.driver.active = true;
           van.driver.x = cabX;
@@ -3732,26 +3753,20 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           van.driver.targetDoorX = doorX;
           van.driver.targetDoorY = doorY;
 
-          // Pedestrian courier path:
-          // Delivery drivers always walk strictly on the sidewalk and front pathways to the door:
-          // 1. Step across curb to the continuous sidewalk (y = 74.0)
-          // 2. Walk along sidewalk to the front pathway entrance (x = walkwayX)
-          // 3. Walk up the paved pathway to the porch/entrance
-          // 4. Step up to front door
           if (is8Plex) {
             van.driver.path = [
               { x: cabX, y: cabY },
-              { x: cabX, y: 74.0 },     // step onto sidewalk
-              { x: doorX, y: 74.0 },    // follow sidewalk laterally to 8-plex entrance
-              { x: doorX, y: doorY }    // step up to front stoop (y = 70.8)
+              { x: cabX, y: 74.0 },
+              { x: doorX, y: 74.0 },
+              { x: doorX, y: doorY }
             ];
           } else {
             van.driver.path = [
               { x: cabX, y: cabY },
-              { x: cabX, y: 74.0 },     // step onto sidewalk
-              { x: walkwayX, y: 74.0 }, // follow sidewalk laterally to front pathway
-              { x: walkwayX, y: 50.0 }, // walk straight up the front pathway
-              { x: doorX, y: doorY }    // step to front door on porch
+              { x: cabX, y: 74.0 },
+              { x: walkwayX, y: 74.0 },
+              { x: walkwayX, y: 50.0 },
+              { x: doorX, y: doorY }
             ];
           }
           van.driver.pathIdx = 1;
@@ -3760,6 +3775,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
       } else if (van.state === 'STOPPED') {
         van.speed = 0;
+        van.stopTimer = (van.stopTimer || 0) + 1;
         const d = van.driver;
         if (d.path && d.pathIdx !== undefined && d.pathIdx < d.path.length) {
           const target = d.path[d.pathIdx];
@@ -3767,8 +3783,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const dy = target.y - d.y;
           const dist = Math.hypot(dx, dy);
           if (dist > 0.8) {
-            d.x += (dx / dist) * 0.45;
-            d.y += (dy / dist) * 0.45;
+            d.x += (dx / dist) * 0.75;
+            d.y += (dy / dist) * 0.75;
             if (Math.abs(dx) > 0.1) d.direction = dx >= 0 ? 1 : -1;
           } else {
             d.x = target.x;
@@ -3778,6 +3794,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         } else {
           van.state = 'AT_DOOR';
           van.stopTimer = 0;
+        }
+        if (van.stopTimer > 180) {
+          van.state = 'LEAVING';
+          d.active = false;
         }
       } else if (van.state === 'AT_DOOR') {
         van.speed = 0;
@@ -3800,7 +3820,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
 
         // 1. Delivery driver drops the package down at the door
-        if (van.stopTimer === 18) {
+        if (van.stopTimer === 10) {
           d.hasPackage = false;
           d.photoState = 'dropping_package';
 
@@ -3827,50 +3847,49 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         }
 
         // 2. Driver backs up away from the door onto the pathway/porch
-        if (van.stopTimer > 18 && van.stopTimer <= 42) {
+        if (van.stopTimer > 10 && van.stopTimer <= 22) {
           d.photoState = 'backing_up';
-          const backupFactor = (van.stopTimer - 18) / 24;
+          const backupFactor = (van.stopTimer - 10) / 12;
           if (is8Plex) {
-            d.y = doorY + backupFactor * 2.6; // Back up down the stoop toward sidewalk
+            d.y = doorY + backupFactor * 2.6;
           } else {
-            d.y = doorY + backupFactor * 4.2; // Back up down the front porch towards pathway
+            d.y = doorY + backupFactor * 4.2;
             d.x = doorX + (walkwayX - doorX) * (backupFactor * 0.4);
           }
         }
 
         // 3. Driver raises phone aiming camera at the package by the door
-        if (van.stopTimer > 42 && van.stopTimer < 54) {
+        if (van.stopTimer > 22 && van.stopTimer < 28) {
           d.photoState = 'aiming_camera';
           d.flashIntensity = 0;
         }
 
         // 4. FLASH! Camera flash photo of the delivered package
-        if (van.stopTimer === 54) {
+        if (van.stopTimer === 28) {
           d.photoState = 'flash';
           d.flashIntensity = 1.0;
           playCameraFlashSoundRef.current();
         }
 
         // 5. Flash decay & review photo on phone
-        if (van.stopTimer > 54 && van.stopTimer <= 66) {
+        if (van.stopTimer > 28 && van.stopTimer <= 34) {
           d.photoState = 'flash';
-          d.flashIntensity = Math.max(0, 1.0 - (van.stopTimer - 54) / 8);
-        } else if (van.stopTimer > 66 && van.stopTimer <= 80) {
+          d.flashIntensity = Math.max(0, 1.0 - (van.stopTimer - 28) / 6);
+        } else if (van.stopTimer > 34 && van.stopTimer <= 40) {
           d.photoState = 'lowering_camera';
           d.flashIntensity = 0;
         }
 
         // 6. Photo complete: Driver turns and walks back strictly along pathway and sidewalk to van
-        if (van.stopTimer > 80) {
+        if (van.stopTimer > 40) {
           d.photoState = 'none';
           d.flashIntensity = 0;
           van.state = 'RETURNING';
 
           const cabX = van.x + 3;
-          const cabY = van.y >= 100 ? 102.5 : 92.5;
+          const cabY = 92.5;
 
           if (is8Plex) {
-            // For 8-plex: stoop -> sidewalk -> van cab
             d.path = [
               { x: d.x, y: d.y },
               { x: doorX, y: 74.0 },
@@ -3878,7 +3897,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               { x: cabX, y: cabY }
             ];
           } else {
-            // For houses: porch -> pathway -> sidewalk -> van cab
             d.path = [
               { x: d.x, y: d.y },
               { x: walkwayX, y: 50.0 },
@@ -3887,10 +3905,11 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               { x: cabX, y: cabY }
             ];
           }
-          d.pathIdx = 1;
+          van.driver.pathIdx = 1;
         }
       } else if (van.state === 'RETURNING') {
         van.speed = 0;
+        van.stopTimer = (van.stopTimer || 0) + 1;
         const d = van.driver;
         if (d.path && d.pathIdx !== undefined && d.pathIdx < d.path.length) {
           const target = d.path[d.pathIdx];
@@ -3898,8 +3917,8 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           const dy = target.y - d.y;
           const dist = Math.hypot(dx, dy);
           if (dist > 0.8) {
-            d.x += (dx / dist) * 0.45;
-            d.y += (dy / dist) * 0.45;
+            d.x += (dx / dist) * 0.75;
+            d.y += (dy / dist) * 0.75;
             if (Math.abs(dx) > 0.1) d.direction = dx >= 0 ? 1 : -1;
           } else {
             d.x = target.x;
@@ -3907,26 +3926,30 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             d.pathIdx++;
           }
         } else {
-          // Driver has returned to delivery van and gets back inside
           d.active = false;
           van.state = 'LEAVING';
-          van.targetY = 104; // Merge back into travel lane
+          van.targetY = 110;
+          van.baseSpeed = 1.25;
           van.stopTimer = 0;
         }
+        if (van.stopTimer > 180) {
+          d.active = false;
+          van.state = 'LEAVING';
+          van.targetY = 110;
+          van.baseSpeed = 1.25;
+        }
       } else if (van.state === 'LEAVING') {
-        const targetY = 104;
+        const targetY = 110;
         if (Math.abs(van.y - targetY) > 0.05) {
-          const nextY = van.y + (targetY > van.y ? 1 : -1) * Math.min(0.28, Math.abs(targetY - van.y));
-          if (canChangeLane(van, nextY, allObstacles)) {
-            van.y = nextY;
-          }
+          const nextY = van.y + (targetY > van.y ? 1 : -1) * Math.min(0.35, Math.abs(targetY - van.y));
+          van.y = nextY;
         } else {
           van.y = targetY;
         }
 
         const { safeSpeed, targetX } = checkForwardObstacle(
           van,
-          van.baseSpeed,
+          van.baseSpeed || 1.25,
           allObstacles,
           activeRoadProtesters
         );
@@ -4042,7 +4065,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             else if (v.type === 'boxTruck') v.baseSpeed = 0.85;
             else if (v.type === 'etsBus') v.baseSpeed = 0.95;
             else if (v.type === 'suv') v.baseSpeed = 1.1;
-            else if (v.isCircling) v.baseSpeed = 0.7;
+            else if (v.isCircling) v.baseSpeed = 0.95;
             else v.baseSpeed = BASE_CAR_SPEED;
           }
         }
@@ -4051,20 +4074,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       const activeHouseholdCars = Math.round(configRef.current.householdCarsPerHome * simTotalDwellings);
       const activeVisitorCars = Math.round(configRef.current.visitorPassesPerHome * simTotalDwellings);
       const totalContinuousCars = (configRef.current.householdCarsPerHome + configRef.current.visitorPassesPerHome) * simTotalDwellings;
-      const totalParkedCars = Math.round(totalContinuousCars);
-      const totalToRender = Math.min(houseCarAssignments.length, totalParkedCars);
-
-      let occupiedGaragesNow = 0;
-      for (let i = 0; i < totalToRender; i++) {
-        const car = houseCarAssignments[activeIndices[i]];
-        if (car && car.isGarage) {
-          occupiedGaragesNow++;
-        }
-      }
-      if (occupiedGaragesNow !== lastReportedGarageOccupied) {
-        lastReportedGarageOccupied = occupiedGaragesNow;
-        setOccupiedGaragesCount(occupiedGaragesNow);
-      }
 
       // Deliveries: For every three 8-plexes, increase weekly deliveries to 2.0+
       const numThree8PlexTiers = Math.floor(num8PlexSim / 3);
@@ -4076,11 +4085,33 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
       // Off-street garage capacity: in detached garages & driveways for single-family homes (8-plexes have 0 garage parking)
       const singleFamilyLotsCount = Math.max(0, TOTAL_MIDCENTURY_HOMES - num8PlexSim);
-      const totalGarageSpots = Math.min(2, Math.max(1, currentDrivewayCap)) * singleFamilyLotsCount;
+      const totalGarageSpots = Math.min(3, Math.max(1, currentDrivewayCap)) * singleFamilyLotsCount;
+      const targetOccupiedGarages = propOccupiedGaragesRef.current !== undefined
+        ? propOccupiedGaragesRef.current
+        : Math.min(activeHouseholdCars, totalGarageSpots);
+
       const calculatedDemand = Math.max(0, totalContinuousCars - totalGarageSpots);
       const curbsideDemand = propCurbsideDemandRef.current !== undefined
         ? propCurbsideDemandRef.current
         : calculatedDemand;
+      const roundedDemand = Math.round(curbsideDemand);
+
+      // Total cars parked on street + in garages to render on canvas
+      const totalParkedCars = Math.round(targetOccupiedGarages + roundedDemand);
+      const totalToRender = Math.min(houseCarAssignments.length, totalParkedCars);
+
+      let occupiedGaragesNow = 0;
+      for (let i = 0; i < totalToRender; i++) {
+        const car = houseCarAssignments[activeIndices[i]];
+        if (car && car.isGarage) {
+          occupiedGaragesNow++;
+        }
+      }
+      if (targetOccupiedGarages !== lastReportedGarageOccupied) {
+        lastReportedGarageOccupied = targetOccupiedGarages;
+        setOccupiedGaragesCount(targetOccupiedGarages);
+      }
+
       let fallbackCurbsideCap = getStreetLayoutInfo(currentLayout).curbsideCapacity;
       if (currentLayout === 'suburban_front_driveway') {
         const activeLots = [2, 6, 4, 8, 1, 7, 10].slice(0, num8PlexSim);
@@ -4096,7 +4127,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           : (curbsideDemand / currentLegalCurbsideStalls) * 100)
         : 0;
 
-      const roundedDemand = Math.round(curbsideDemand);
       if (roundedDemand !== lastReportedDemand) {
         lastReportedDemand = roundedDemand;
         setCurbsideDemandCount(roundedDemand);
@@ -4111,14 +4141,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         setCurbsidePct(roundedPct);
       }
       drawGauge(curbsideDemand, currentLegalCurbsideStalls);
-
-      const targetOccupiedGarages = propOccupiedGaragesRef.current !== undefined
-        ? propOccupiedGaragesRef.current
-        : occupiedGaragesNow;
-      if (targetOccupiedGarages !== lastReportedGarageOccupied) {
-        lastReportedGarageOccupied = targetOccupiedGarages;
-        setOccupiedGaragesCount(targetOccupiedGarages);
-      }
 
       // Cruising Traffic Management: As parking fills up on the street, traffic increases as more cars circle looking for parking
       let targetCirclingCount = propCirclingCarCountRef.current !== undefined
@@ -4242,10 +4264,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       const baseMicroCount = Math.max(3, Math.floor(totalParkedCars * 0.35));
       const activeMicroCount = Math.min(microMobility.length, baseMicroCount * microMultiplier);
 
-      // Route all bikes and scooters along standard travel lanes
+      // Route all bikes and scooters along dedicated roadside corridors
       for (let i = 0; i < microMobility.length; i++) {
         const mm = microMobility[i];
-        const targetRoadY = (i % 2 === 0 ? 110 : 124);
+        const targetRoadY = (i % 2 === 0 ? 105.5 : 132.0);
         mm.baseY = targetRoadY;
         mm.targetY = targetRoadY;
         if (Math.abs(mm.y - targetRoadY) > 0.4) {
@@ -4471,7 +4493,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
                   A.parkingTargetSlot = stall;
                   A.spaceRatio = evaluatedRatio;
                   A.parkingState = 'found_spot';
-                  A.parkingTimer = 45; // Pause alongside open stall to inspect
+                  A.parkingTimer = 18; // Brief pause to signal and inspect open stall
                   A.parkingBubbleText = evaluatedRatio >= 1.5 ? t('sim_bubble_spot_fits', 'Spot fits (150%+) - Parking') : t('sim_bubble_spot_tight_try', 'Spot 80% size - Trying to park');
                   break;
                 }
@@ -4481,12 +4503,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
 
           if (A.parkingState === 'found_spot') {
             // Decelerate and signal parallel parking maneuver alongside the stall
-            targetLane = 104; // Pull alongside the curb stall
+            targetLane = 100; // Pull alongside the curb stall, keeping travel lane clear
             isPullingOver = true;
             A.parkingTimer = (A.parkingTimer || 0) - 1;
             if (A.parkingTimer <= 0) {
               A.parkingState = 'attempting_reverse';
-              A.parkingTimer = 90; // ~1.5s angle maneuver
+              A.parkingTimer = 35; // Snappy realistic reverse angle
               A.parkingBubbleText = A.spaceRatio! >= 1.5 ? t('sim_bubble_parallel_park', 'Reverse parallel parking...') : t('sim_bubble_reverse_tight', 'Reversing into tight spot...');
             }
           } else if (A.parkingState === 'attempting_reverse') {
@@ -4498,12 +4520,12 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
               if (A.spaceRatio! < 1.5) {
                 // 80% spot: too small to fit! Give up and rejoin traffic
                 A.parkingState = 'giving_up';
-                A.parkingTimer = 85;
+                A.parkingTimer = 22;
                 A.parkingBubbleText = t('sim_bubble_too_tight', 'Too tight (80%)! Giving up');
               } else {
                 // 150%+ spot: finish parking into the stall
                 A.parkingState = 'docking';
-                A.parkingTimer = 50;
+                A.parkingTimer = 20;
                 A.parkingBubbleText = t('sim_bubble_parked', 'Parked!');
               }
             }
@@ -4589,61 +4611,38 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             }
           }
         } else if (!A.parkingState || A.parkingState === 'cruising') {
-          let isBlockedInLane = false;
+          // Keep vehicles in their dedicated travel corridor (110 for westbound dir -1, 124 for eastbound dir 1)
+          targetLane = A.baseY || (A.direction === -1 ? 110 : 124);
+
+          // If a vehicle or van along the curb is slightly protruding, smoothly bias slightly toward lane center
+          let isCurbsideImpedance = false;
           const aDir = A.direction !== undefined ? A.direction : 1;
-          const aWidth = A.w || 15;
           for (let j = 0; j < roadObstacleCount; j++) {
             const B = allRoadObstacles[j];
-            if (A === B || (B.speed || 0) > 0.3) continue;
-            if (hasLateralOverlap(A.y, A.d, B.y, B.d, 1.2)) {
-              if (aDir === -1) {
-                if (B.x < A.x && A.x - (B.x + (B.w || 15)) < 45 && A.x - (B.x + (B.w || 15)) > -5) {
-                  isBlockedInLane = true;
-                  break;
-                }
-              } else {
-                if (B.x > A.x && B.x - (A.x + aWidth) < 45 && B.x - (A.x + aWidth) > -5) {
-                  isBlockedInLane = true;
-                  break;
-                }
+            if (A === B) continue;
+            if (B.y <= 102 && B.y >= 92) {
+              if (aDir === -1 && B.x < A.x && A.x - B.x < 35 && A.x - B.x > -5) {
+                isCurbsideImpedance = true;
+                break;
               }
             }
           }
-
-          if (isBlockedInLane && !A.isEmergency) {
-            const altLane = (A.baseY || 110) < 118 ? 124 : 110;
-            let altClear = true;
-            for (let j = 0; j < roadObstacleCount; j++) {
-              const B = allRoadObstacles[j];
-              if (A === B) continue;
-              if (hasLateralOverlap(altLane, A.d, B.y, B.d, 1.2)) {
-                if (B.x < A.x + (A.w || 15) + 24 && B.x + (B.w || 15) > A.x - 20) {
-                  altClear = false;
-                  break;
-                }
-              }
-            }
-            if (altClear) targetLane = altLane;
+          if (isCurbsideImpedance && (A.baseY || 110) < 118) {
+            targetLane = 111.5; // Slight polite clearance, remaining safely in westbound lane
           }
         }
 
-        // Yield right-hand lane to approaching emergency police cruiser
+        // Yield right-hand lane to approaching emergency police cruiser by pulling toward the right shoulder
         if (policeBlockageUnit.active && policeBlockageUnit.state === 'dispatched' && !A.isEmergency) {
           if (Math.abs(A.y - 124) < 6 && A.x > policeTrafficCar.x && (A.x - policeTrafficCar.x) < 140) {
-            targetLane = 110; // Shift to left lane to keep the right-hand lane clear for police
+            targetLane = 126.5; // Shift safely to the right shoulder to keep the right-hand lane clear
           }
         }
 
         const isChangingLanes = Math.abs(A.y - targetLane) > 0.05;
         if (isChangingLanes) {
-          const step = A.type === 'etsBus' ? Math.min(0.55, Math.abs(targetLane - A.y)) : Math.min(0.36, Math.abs(targetLane - A.y));
-          const nextY = A.y + (targetLane > A.y ? 1 : -1) * step;
-          if (canChangeLane(A, nextY, allRoadObstacles)) {
-            A.y = nextY;
-          } else if (A.type === 'etsBus') {
-            // Bus has right-of-way to smoothly merge back to travel lane or pull into transit bay
-            A.y = nextY;
-          }
+          const step = A.type === 'etsBus' ? Math.min(0.45, Math.abs(targetLane - A.y)) : Math.min(0.35, Math.abs(targetLane - A.y));
+          A.y += (targetLane > A.y ? 1 : -1) * step;
         } else {
           A.y = targetLane;
         }
@@ -4756,7 +4755,17 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           activeRoadProtesters
         );
 
-        A.speed = safeSpeed;
+        // Smooth progressive acceleration and deceleration damping
+        const currentSpeed = A.speed !== undefined ? A.speed : (A.baseSpeed || 1.0);
+        let smoothedSpeed = currentSpeed;
+        if (safeSpeed < currentSpeed) {
+          // Smooth, natural braking without jarring stops
+          smoothedSpeed = Math.max(safeSpeed, currentSpeed - 0.08);
+        } else if (safeSpeed > currentSpeed) {
+          // Smooth progressive acceleration
+          smoothedSpeed = Math.min(safeSpeed, currentSpeed + 0.04);
+        }
+        A.speed = smoothedSpeed;
         A.x = targetX;
         const blockingObstacle: RoadObstacle | null = blocking;
 
@@ -4795,32 +4804,44 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           }
         }
 
-        // Honk and stuck logic
-        if (isCar_A && A.stuckTimer !== undefined && (!A.parkingState || A.parkingState === 'cruising')) {
-          const isBlockedByObstacle =
-            blockingObstacle &&
-            (blockingObstacle.type === 'deliveryVan' ||
-              blockingObstacle.isStuckBehindVan ||
-              (blockingObstacle.speed || 0) < 0.2);
+        // Universal Proactive Anti-Stuck Watchdog for all vehicles
+        if ((A.speed || 0) < 0.2) {
+          A.stuckTimer = (A.stuckTimer || 0) + 1 / 60;
 
-          if (isBlockedByObstacle && A.speed < 0.15) {
-            A.isStuckBehindVan = true;
-            A.stuckTimer += 1 / 60;
-            if (A.stuckTimer >= 1.8 && A.stuckTimer < 18.0) {
-              if ((A.honkCooldown || 0) <= 0) {
-                playHonk(A.type);
-                A.honkBubbleTimer = 45;
-                A.honkCooldown = 2.0 + Math.random();
-              }
-            }
-          } else {
-            A.isStuckBehindVan = false;
-            A.stuckTimer = 0;
+          // If car is stuck mid-parking, abort and resume smooth cruising
+          if (A.parkingState && A.parkingState !== 'cruising' && A.stuckTimer > 1.2) {
+            A.parkingState = 'cruising';
+            A.parkingTargetSlot = null;
+            A.parkingBubbleText = undefined;
+            A.targetY = A.baseY || 110;
           }
 
-          if ((A.honkCooldown || 0) > 0) A.honkCooldown! -= 1 / 60;
-          if ((A.honkBubbleTimer || 0) > 0) A.honkBubbleTimer!--;
+          // Gentle courtesy honk if queued
+          if (isCar_A && A.stuckTimer >= 1.5 && A.stuckTimer < 2.2) {
+            if ((A.honkCooldown || 0) <= 0) {
+              playHonk(A.type);
+              A.honkBubbleTimer = 35;
+              A.honkCooldown = 2.5 + Math.random();
+            }
+          }
+
+          // At 2.0s: Active Flow Resolution - clear roadblock, re-center, advance smoothly
+          if (A.stuckTimer > 2.0) {
+            const laneCenter = A.baseY || (A.direction === -1 ? 110 : 124);
+            A.targetY = laneCenter;
+            A.y += (laneCenter - A.y) * 0.35;
+            A.speed = Math.max(0.75, A.baseSpeed || 0.9);
+            A.x += (A.direction !== undefined ? A.direction : 1) * 1.0;
+            A.stuckTimer = 0;
+            A.isStuckBehindVan = false;
+          }
+        } else {
+          A.stuckTimer = Math.max(0, (A.stuckTimer || 0) - 2 / 60);
+          A.isStuckBehindVan = false;
         }
+
+        if ((A.honkCooldown || 0) > 0) A.honkCooldown! -= 1 / 60;
+        if ((A.honkBubbleTimer || 0) > 0) A.honkBubbleTimer!--;
 
         const vehicleDir = A.direction !== undefined ? A.direction : 1;
         const reachedBoundary = vehicleDir === 1 
@@ -4923,10 +4944,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       let leadStopped2: RoadObstacle | null = null;
       let maxStuckTime = 0;
 
-      // 1. Check delivery vans
+      // 1. Check delivery vans (only if parked inside travel lane y > 102, not at curb)
       for (let j = 0; j < deliveryVansList.length; j++) {
         const v = deliveryVansList[j];
-        if (v.x >= 15 && v.x <= blockLength - 10 && (v.state === 'STOPPED' || v.state === 'AT_DOOR' || v.state === 'RETURNING') && (v.speed || 0) < 0.2) {
+        if (v.y > 102 && v.x >= 15 && v.x <= blockLength - 10 && (v.state === 'STOPPED' || v.state === 'AT_DOOR' || v.state === 'RETURNING') && (v.speed || 0) < 0.2) {
           if (v.y < 118) {
             lane1Stopped = true;
             if (!leadStopped1 || v.x < leadStopped1.x) leadStopped1 = v;
@@ -6139,20 +6160,20 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             className={`w-[82px] sm:w-[94px] bg-[#193A5A]/95 backdrop-blur-md border border-[#0081BC]/40 hover:border-[#FFC72C]/80 hover:bg-[#1f476e]/95 p-1 sm:p-1.5 rounded-md sm:rounded-lg shadow-md text-white pointer-events-auto transition-all cursor-pointer select-none active:scale-95 flex flex-col items-center gap-0.5 ${
               hideGaragePill ? 'hidden lg:flex' : 'flex'
             }`}
-            title={t('sim_garages_tooltip', 'Detached Laned Garages: Real-time off-street vehicle parking across all 12 properties (Click to toggle garage roof indicators)')}
-            aria-label={t('sim_garages_aria', 'Rear Garages Status: {count} of 12 occupied. Click to toggle garage badges.').replace('{count}', String(occupiedGaragesCount))}
+            title={t('sim_garages_tooltip', 'Private/Garage Use: Real-time off-street vehicle parking across all 12 properties ({occupied} vehicles parked / {capacity} spaces available). Click to toggle garage roof indicators.').replace('{occupied}', String(occupiedGaragesCount)).replace('{capacity}', '12')}
+            aria-label={t('sim_garages_aria', 'Private/Garage Use: {count} of 12 spaces occupied ({available} spaces available). Click to toggle garage badges.').replace('{count}', String(occupiedGaragesCount)).replace('{available}', String(12 - occupiedGaragesCount))}
           >
             <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200">
-              <span className="truncate">{t('sim_garage_use_label', 'Garage Use')}</span>
+              <span className="truncate">{t('sim_garage_use_label', 'Private/Garage Use')}</span>
               <span className="text-[8px] sm:text-[9px] text-[#34D399] font-bold">
                 {Math.round((occupiedGaragesCount / 12) * 100)}%
               </span>
             </div>
             <div className="flex items-center justify-between w-full text-[8px] sm:text-[9px] font-semibold text-gray-200 mt-0.5">
-              <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1 py-0.2 rounded text-[8.5px] sm:text-[9.5px] font-bold leading-none">
+              <span className="bg-[#059669] text-white border border-[#34D399]/60 px-1 py-0.2 rounded text-[8.5px] sm:text-[9.5px] font-bold leading-none" title="Vehicles parked / spaces available">
                 {occupiedGaragesCount}/12
               </span>
-              <span className="text-gray-300 font-semibold leading-none truncate">
+              <span className="text-gray-300 font-semibold leading-none truncate" title="Spaces available">
                 {12 - occupiedGaragesCount} {t('sim_vacant_label', 'Vacant')}
               </span>
             </div>

@@ -7,6 +7,7 @@ import { SurveyStage } from './components/SurveyStage';
 import { ResultsView } from './components/ResultsView';
 import { ManualSlidersDrawer } from './components/ManualSlidersDrawer';
 import { MagnifiedGaugeDrawer } from './components/MagnifiedGaugeDrawer';
+import { GarageUsageHintBox } from './components/GarageUsageHintBox';
 import { DeviceBrowserCheck } from './components/DeviceBrowserCheck';
 import { safeStorage, checkBrowserCompatibility } from './utils/browserCheck';
 
@@ -113,6 +114,7 @@ export default function App() {
     curbsideStallsCapacity: computedMetrics.curbsideStallsCapacity,
     curbsidePct: computedMetrics.curbsidePct,
     occupiedGaragesCount: computedMetrics.occupiedGaragesCount,
+    totalGarageSpacesCapacity: computedMetrics.totalGarageSpacesCapacity,
     onReshuffle: () => {}
   }), [computedMetrics]);
 
@@ -213,6 +215,9 @@ export default function App() {
     setManualOverride((prev) => ({
       ...(prev || {}),
       streetLayout: layout,
+      householdCarsPerHome: 2.0,
+      drivewayCapacity: 1,
+      visitorPassesPerHome: 0,
       neighbourhoodName: neighbourhoodName || prev?.neighbourhoodName,
       postalCode: postalCode || prev?.postalCode
     }));
@@ -235,7 +240,10 @@ export default function App() {
       setSelectedAnswers((prev) => ({ ...prev, q0: layout, q0_layout: layout }));
       setManualOverride((prev) => ({
         ...(prev || {}),
-        streetLayout: layout
+        streetLayout: layout,
+        householdCarsPerHome: 2.0,
+        drivewayCapacity: 1,
+        visitorPassesPerHome: 0
       }));
       setPolicyNote(`Selected model street: ${layoutInfo.title} (${layoutInfo.shortTitle}) with ${layoutInfo.curbsideCapacity} legal curbside stalls.`);
       return;
@@ -476,6 +484,10 @@ export default function App() {
           activeHouseholdCars={simulationMetrics.activeHouseholdCars}
           activeVisitorCars={simulationMetrics.activeVisitorCars}
           totalDwellings={simulationMetrics.totalDwellings}
+          householdCarsPerHome={simConfig.householdCarsPerHome}
+          drivewayCapacity={simConfig.drivewayCapacity}
+          occupiedGaragesCount={simulationMetrics.occupiedGaragesCount}
+          totalGarageSpacesCapacity={simulationMetrics.totalGarageSpacesCapacity}
           onOpenManualSliders={() => {
             setShowMagnifiedGauge(false);
             setIsSimExpanded(false);
@@ -561,6 +573,19 @@ export default function App() {
               onSimulationMetricsChange={() => {}}
             />
           )}
+
+          {/* Pop-up Hint Box: If Curbside Utilization > 80% and vehicles per garage <= 1 */}
+          <GarageUsageHintBox
+            curbsidePct={simulationMetrics.curbsidePct}
+            drivewayCapacity={simConfig.drivewayCapacity}
+            occupiedGaragesCount={simulationMetrics.occupiedGaragesCount}
+            totalGarageSpacesCapacity={simulationMetrics.totalGarageSpacesCapacity}
+            onOpenControlSliders={() => {
+              setIsSimExpanded(false);
+              setShowManualSliders(true);
+            }}
+            className="bottom-2.5 right-2.5 sm:bottom-3 sm:right-3"
+          />
         </section>
 
         {/* Interactive Survey or Results View: slides down to lower 33% when simulation is expanded, restored when clicked */}

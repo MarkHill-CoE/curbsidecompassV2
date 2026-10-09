@@ -364,7 +364,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "gauge_curb_availability_label",
     "category": "Metrics Gauge Drawer",
     "container": "Magnified Gauge Drawer",
-    "defaultText": "Curb Availability",
+    "defaultText": "Curbside Availability",
     "guidance": "Live score explanation, tradeoff impact tag, or zone badge"
   },
   {
@@ -406,7 +406,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "gauge_homes_block_label",
     "category": "Metrics Gauge Drawer",
     "container": "Magnified Gauge Drawer",
-    "defaultText": "Homes on Block",
+    "defaultText": "Homes on the Block",
     "guidance": "Live score explanation, tradeoff impact tag, or zone badge"
   },
   {
@@ -463,6 +463,13 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "category": "Metrics Gauge Drawer",
     "container": "Magnified Gauge Drawer",
     "defaultText": "Legal Curbside Stalls Occupied",
+    "guidance": "Live score explanation, tradeoff impact tag, or zone badge"
+  },
+  {
+    "key": "gauge_garage_occupied_suffix",
+    "category": "Metrics Gauge Drawer",
+    "container": "Magnified Gauge Drawer",
+    "defaultText": "Garage Parking Spaces Occupied",
     "guidance": "Live score explanation, tradeoff impact tag, or zone badge"
   },
   {
