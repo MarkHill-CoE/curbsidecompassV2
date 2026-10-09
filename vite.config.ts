@@ -98,7 +98,9 @@ async function handleSheetProxy(req: IncomingMessage, res: ServerResponse): Prom
 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/csv; charset=utf-8');
-    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
     res.end(text);
   } catch (err: unknown) {
     res.statusCode = 500;
@@ -129,19 +131,39 @@ function securityHeadersPlugin(): Plugin {
     name: 'security-headers-plugin',
     configureServer(server) {
       server.middlewares.use((_req, res, next) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('X-XSS-Protection', '1; mode=block');
-        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-        res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+        const origSetHeader = res.setHeader.bind(res);
+        res.setHeader = (name: string, value: any) => {
+          if (name.toLowerCase() === 'cache-control') {
+            return origSetHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+          }
+          return origSetHeader(name, value);
+        };
+        origSetHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+        origSetHeader('Pragma', 'no-cache');
+        origSetHeader('Expires', '0');
+        origSetHeader('X-Content-Type-Options', 'nosniff');
+        origSetHeader('X-XSS-Protection', '1; mode=block');
+        origSetHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        origSetHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
         next();
       });
     },
     configurePreviewServer(server) {
       server.middlewares.use((_req, res, next) => {
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        res.setHeader('X-XSS-Protection', '1; mode=block');
-        res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-        res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+        const origSetHeader = res.setHeader.bind(res);
+        res.setHeader = (name: string, value: any) => {
+          if (name.toLowerCase() === 'cache-control') {
+            return origSetHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+          }
+          return origSetHeader(name, value);
+        };
+        origSetHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+        origSetHeader('Pragma', 'no-cache');
+        origSetHeader('Expires', '0');
+        origSetHeader('X-Content-Type-Options', 'nosniff');
+        origSetHeader('X-XSS-Protection', '1; mode=block');
+        origSetHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+        origSetHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
         next();
       });
     }
@@ -163,11 +185,23 @@ export default defineConfig(() => {
       sourcemap: false,
     },
     server: {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modifyâfile watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+    },
+    preview: {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     },
   };
 });
