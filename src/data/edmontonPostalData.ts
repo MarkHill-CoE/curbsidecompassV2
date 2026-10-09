@@ -437,7 +437,7 @@ export const ALL_EDMONTON_NEIGHBOURHOODS: NeighbourhoodMeta[] = [
   // Central / Core
   { name: 'Strathcona', fsa: 'T6E', ward: 'papastew', typology: 'mature_laned', aliases: ['Old Strathcona', 'Whyte', 'Whyte Ave', 'Whyte Avenue', '82 Ave', '82 Avenue', '104 St', 'Gateway Blvd'] },
   { name: 'Garneau', fsa: 'T6G', ward: 'papastew', typology: 'infill_skinny', aliases: ['109 St', '88 Ave', 'University', 'U of A', 'Hub Mall'] },
-  { name: 'Oliver (Wîhkwêntôwin)', fsa: 'T5K', ward: 'O-day\'min', typology: 'infill_skinny', aliases: ['Oliver', 'Wihkwentowin', 'Wîhkwêntôwin', '124 St', '104 Ave', 'Jasper Ave West', 'Unity Square'] },
+  { name: 'Wîhkwêntôwin (Oliver)', fsa: 'T5K', ward: 'O-day\'min', typology: 'infill_skinny', aliases: ['Oliver', 'Wihkwentowin', 'Wîhkwêntôwin', '124 St', '104 Ave', 'Jasper Ave West', 'Unity Square'] },
   { name: 'Downtown', fsa: 'T5J', ward: 'O-day\'min', typology: 'infill_skinny', aliases: ['Jasper Ave', 'Jasper Avenue', '104 St', 'Ice District', 'Rogers Place', 'Rice Howard Way', 'City Centre'] },
   { name: 'Westmount', fsa: 'T5N', ward: 'O-day\'min', typology: 'mature_laned', aliases: ['124 St', '124 Street', '107 Ave', 'Westmount Mall'] },
   { name: 'Glenora', fsa: 'T5N', ward: 'Nakota Isga', typology: 'mature_laned', aliases: ['142 St', 'Stony Plain Rd', 'Alexander Circle'] },
@@ -641,7 +641,7 @@ export const EDMONTON_ADDRESS_LANDMARKS: Array<{
   { pattern: /whyte\s*(ave|avenue)?|82\s*(ave|avenue)/i, neighbourhood: 'Strathcona', fsa: 'T6E', ward: 'papastew', typology: 'mature_laned', description: 'Whyte (82) Avenue Corridor' },
   { pattern: /jasper\s*(ave|avenue)?/i, neighbourhood: 'Downtown', fsa: 'T5J', ward: 'O-day\'min', typology: 'infill_skinny', description: 'Jasper Avenue Downtown Core' },
   { pattern: /104\s*st(reet)?\s*(downtown|promenade)?/i, neighbourhood: 'Downtown', fsa: 'T5J', ward: 'O-day\'min', typology: 'infill_skinny', description: '104 Street Promenade' },
-  { pattern: /124\s*st(reet)?/i, neighbourhood: 'Oliver (Wîhkwêntôwin)', fsa: 'T5K', ward: 'O-day\'min', typology: 'infill_skinny', description: '124 Street Gallery / Dining District' },
+  { pattern: /124\s*st(reet)?/i, neighbourhood: 'Wîhkwêntôwin (Oliver)', fsa: 'T5K', ward: 'O-day\'min', typology: 'infill_skinny', description: '124 Street Gallery / Dining District' },
   { pattern: /109\s*st(reet)?/i, neighbourhood: 'Garneau', fsa: 'T6G', ward: 'papastew', typology: 'infill_skinny', description: '109 Street Corridor' },
   { pattern: /118\s*(ave|avenue)/i, neighbourhood: 'Alberta Avenue', fsa: 'T5G', ward: 'Métis', typology: 'mature_laned', description: '118 Avenue Arts on the Ave' },
   { pattern: /127\s*st(reet)?/i, neighbourhood: 'Calder', fsa: 'T5L', ward: 'Anirniq', typology: 'mature_laned', description: '127 Street Northwest' },

@@ -42,7 +42,7 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
   onClose,
   activePersonaId
 }) => {
-  const [activeTab, setActiveTab] = useState<'merger' | 'csv_import' | 'all_8'>('merger');
+  const [activeTab, setActiveTab] = useState<'merger' | 'csv_import' | 'all_4'>('merger');
   const [selectedQuadrant, setSelectedQuadrant] = useState<'ALL' | 'Q1' | 'Q2' | 'Q3' | 'Q4'>('ALL');
   const [hoveredLegacyId, setHoveredLegacyId] = useState<string | null>(null);
   const [hoveredActiveId, setHoveredActiveId] = useState<string | null>(null);
@@ -85,7 +85,7 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
     } else {
       setImportStatus({
         type: 'success',
-        message: `Parsed ${result.parsedRows?.length || 8} personas successfully! Ready to apply.`,
+        message: `Parsed ${result.parsedRows?.length || 4} personas successfully! Ready to apply.`,
         parsedCount: result.parsedRows?.length
       });
     }
@@ -102,7 +102,7 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
     setIsCustomActive(true);
     setImportStatus({
       type: 'success',
-      message: 'Successfully applied and saved 8 updated personas across the application!'
+      message: 'Successfully applied and saved 4 updated personas across the application!'
     });
     triggerFeedback('submit');
   };
@@ -114,7 +114,7 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
     setCsvText('');
     setImportStatus({
       type: 'idle',
-      message: 'Reset to official City of Edmonton default 8 personas.'
+      message: 'Reset to official City of Edmonton default 4 personas.'
     });
     triggerFeedback('button');
   };
@@ -125,7 +125,7 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'Curbside_Compass_8_Personas.csv');
+    link.setAttribute('download', 'Curbside_Compass_4_Personas.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -182,7 +182,7 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
                 )}
               </div>
               <p className="text-xs sm:text-sm text-white/80">
-                Consolidated 2-axis Policy Compass model (2 personas per quadrant: Moderate vs. Strong)
+                Simplified 4-quadrant Policy Compass model (one persona per quadrant)
               </p>
             </div>
           </div>
@@ -206,17 +206,17 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Side-by-Side 16 → 8 Mapping
+              Side-by-Side 16 → 4 Mapping
             </button>
             <button
-              onClick={() => { setActiveTab('all_8'); triggerFeedback('toggle'); }}
+              onClick={() => { setActiveTab('all_4'); triggerFeedback('toggle'); }}
               className={`px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all ${
-                activeTab === 'all_8'
+                activeTab === 'all_4'
                   ? 'bg-white text-[#005087] shadow-xs'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              The 8 Active Archetypes
+              The 4 Simplified Personas
             </button>
             <button
               onClick={() => { setActiveTab('csv_import'); triggerFeedback('toggle'); }}
@@ -356,14 +356,14 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
                 </div>
               </div>
 
-              {/* Right Column: 8 Successor Personas (6 cols) */}
+              {/* Right Column: 4 Simplified Personas (6 cols) */}
               <div className="lg:col-span-6 flex flex-col gap-2.5">
                 <div className="flex items-center justify-between pb-1 border-b border-gray-200">
                   <h3 className="text-xs sm:text-sm font-bold text-[#005087] uppercase tracking-wider flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#0081BC]"></span>
-                    Successor 8 Archetypes ({activePersonaList.length})
+                    Simplified 4 Personas ({activePersonaList.length})
                   </h3>
-                  <span className="text-[11px] text-gray-500">2 per Quadrant (Moderate vs Strong)</span>
+                  <span className="text-[11px] text-gray-500">1 per Quadrant (Full Coverage)</span>
                 </div>
 
                 <div className="space-y-2.5 max-h-[60dvh] overflow-y-auto pr-1">
@@ -452,15 +452,15 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
           </div>
         )}
 
-        {/* Tab 2: The 8 Active Archetypes Grid */}
-        {activeTab === 'all_8' && (
+        {/* Tab 2: The 4 Simplified Personas Grid */}
+        {activeTab === 'all_4' && (
           <div className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-4">
             <div className="bg-blue-50/60 border border-blue-200 p-3.5 rounded-xl flex items-start gap-3 text-xs text-blue-900">
               <Info className="w-5 h-5 text-[#0081BC] flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold">The Streamlined 8-Persona Architecture</p>
+                <p className="font-bold">The Simplified 4-Persona Architecture</p>
                 <p className="text-blue-800/80 mt-0.5">
-                  Each quadrant contains exactly 2 archetypes: one <strong>Moderate</strong> (closer to the center axis) and one <strong>Strong</strong> (higher conviction / intensity).
+                  Each quadrant contains exactly 1 simplified resident persona: <strong>Permit Planner</strong> (Q1), <strong>Community Coordinator</strong> (Q2), <strong>Community Cruiser</strong> (Q3), and <strong>Casual Cruiser</strong> (Q4).
                 </p>
               </div>
             </div>
@@ -611,7 +611,7 @@ export const PersonaMergerViewer: React.FC<PersonaMergerViewerProps> = ({
                 className="px-4 py-2 text-xs font-bold bg-[#005087] hover:bg-[#003B64] disabled:opacity-50 text-white rounded-xl shadow-xs transition-all flex items-center gap-1.5"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                Apply 8 Personas to App
+                Apply 4 Personas to App
               </button>
             </div>
           </div>

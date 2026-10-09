@@ -75,7 +75,7 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
 
         {/* Narrative / Contextual Hint */}
         <p className="text-xs text-gray-200 leading-relaxed">
-          Curbside demand is high at <span className="font-bold text-amber-300">{curbsidePct}%</span>. Increasing private garage usage shifts parking off-street to keep lanes clear.
+          Curbside street parking is at <span className="font-bold text-amber-300">{curbsidePct}%</span>. Encourage private driveway and garage use to reduce street parking demand.
         </p>
 
         {/* Garage Use Slider */}
@@ -151,7 +151,9 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
 
       {/* Explainer / Prompt */}
       <p className="text-xs text-gray-200 leading-snug">
-        Curbside is at <span className="font-bold text-amber-300">{curbsidePct}%</span>. Adjust private garage usage to shift cars off-street:
+        Curbside street parking is at <span className="font-bold text-amber-300">{curbsidePct}%</span>.
+        <br />
+        Encourage private driveway and garage use to reduce street parking demand.
       </p>
 
       {/* Garage Use Slider: replaces link to controls and removed vehicles parked/space container */}

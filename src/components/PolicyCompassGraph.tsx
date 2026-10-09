@@ -66,10 +66,13 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
           }`}
         >
           {persona.quadrant === 'Q1' && (
-            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#0081BC] text-white rounded-full shadow-2xs">
+            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#0081BC] text-white rounded-full shadow-2xs mb-1">
               {t('compass_badge_your_result', 'Your Result')}
             </span>
           )}
+          <span className={`text-[10px] sm:text-xs font-extrabold tracking-tight ${persona.quadrant === 'Q1' ? 'text-[#004B8D]' : 'text-gray-400'}`}>
+            Permit Planner
+          </span>
         </div>
 
         {/* Quadrant 2: Top-Left (Protective & Taxpayer) */}
@@ -81,10 +84,13 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
           }`}
         >
           {persona.quadrant === 'Q2' && (
-            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#005087] text-white rounded-full shadow-2xs">
+            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#005087] text-white rounded-full shadow-2xs mb-1">
               {t('compass_badge_your_result', 'Your Result')}
             </span>
           )}
+          <span className={`text-[10px] sm:text-xs font-extrabold tracking-tight ${persona.quadrant === 'Q2' ? 'text-[#005087]' : 'text-gray-400'}`}>
+            Community Coordinator
+          </span>
         </div>
 
         {/* Quadrant 3: Bottom-Left (Free/Open & Taxpayer) */}
@@ -96,10 +102,13 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
           }`}
         >
           {persona.quadrant === 'Q3' && (
-            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#009A44] text-white rounded-full shadow-2xs">
+            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#009A44] text-white rounded-full shadow-2xs mb-1">
               {t('compass_badge_your_result', 'Your Result')}
             </span>
           )}
+          <span className={`text-[10px] sm:text-xs font-extrabold tracking-tight ${persona.quadrant === 'Q3' ? 'text-[#007a36]' : 'text-gray-400'}`}>
+            Community Cruiser
+          </span>
         </div>
 
         {/* Quadrant 4: Bottom-Right (Flat Rate & User-Fee) */}
@@ -111,10 +120,13 @@ const PolicyCompassGraphComponent: React.FC<PolicyCompassGraphProps> = ({
           }`}
         >
           {persona.quadrant === 'Q4' && (
-            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#d49b00] text-white rounded-full shadow-2xs">
+            <span className="text-[9px] sm:text-xs md:text-sm font-black uppercase px-2 py-0.5 bg-[#d49b00] text-white rounded-full shadow-2xs mb-1">
               {t('compass_badge_your_result', 'Your Result')}
             </span>
           )}
+          <span className={`text-[10px] sm:text-xs font-extrabold tracking-tight ${persona.quadrant === 'Q4' ? 'text-[#996500]' : 'text-gray-400'}`}>
+            Casual Cruiser
+          </span>
         </div>
 
         {/* Bold Main Center Axis Lines */}

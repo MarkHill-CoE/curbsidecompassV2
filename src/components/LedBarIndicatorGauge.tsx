@@ -89,30 +89,16 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
           .replace('{sCap}', String(streetCap))
           .replace('{gUsed}', String(garageUsed))
           .replace('{gCap}', String(garageCap))}
-        className={`bg-[#0d2135]/95 backdrop-blur-md border border-[#0081BC]/50 hover:border-[#FFC72C]/80 hover:bg-[#132c45]/95 p-1.5 sm:p-2 rounded-lg shadow-xl flex flex-col items-center gap-1.5 cursor-pointer select-none active:scale-95 transition-all w-[116px] sm:w-[130px] group ${className}`}
+        className={`bg-[#0d2135]/95 backdrop-blur-md border border-[#0081BC]/50 hover:border-[#FFC72C]/80 hover:bg-[#132c45]/95 p-1 sm:p-1.5 rounded-lg shadow-xl flex flex-col items-center cursor-pointer select-none active:scale-95 transition-all w-[58px] sm:w-[65px] group ${className}`}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between w-full text-[9px] sm:text-[10px] font-bold text-gray-200 border-b border-white/10 pb-0.5">
-          <span className="flex items-center gap-1 truncate text-white">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            LED Bar
-          </span>
-          <span className="text-[8px] text-amber-300 font-mono font-black">
-            Occupancy
-          </span>
-        </div>
-
-        {/* Side-by-side Dual LED Bars */}
-        <div className="grid grid-cols-2 gap-2 w-full px-0.5">
+        {/* Dual LED Bars: Street & Garage */}
+        <div className="grid grid-cols-2 gap-1 w-full">
           {/* Channel 1: Street Parking */}
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-[8px] font-black uppercase text-sky-300 flex items-center gap-0.5">
-              <Car className="w-2.5 h-2.5" />
-              Street
-            </span>
+          <div className="flex flex-col items-center gap-1 w-full" title={`Street Parking: ${streetUsed}/${streetCap} occupied (${streetAvail} open)`}>
+            <Car className="w-3 h-3 text-sky-400 shrink-0" />
 
             {/* LED Ladder Stack (Top to Bottom: index 9 down to 0) */}
-            <div className="flex flex-col gap-[2px] w-full p-1 bg-[#07131f] border border-white/10 rounded-[4px] shadow-inner">
+            <div className="flex flex-col gap-[2px] w-full p-0.5 bg-[#07131f] border border-white/10 rounded-[3px] shadow-inner">
               {Array.from({ length: 10 }).map((_, idx) => {
                 const segIdx = 9 - idx; // 9 at top (100%), 0 at bottom (10%)
                 const isLit = segIdx < streetLitCount;
@@ -131,27 +117,14 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
                 );
               })}
             </div>
-
-            {/* Readout */}
-            <div className="flex flex-col items-center leading-none mt-0.5">
-              <span className={`text-[9px] font-black ${streetUsed >= streetCap ? 'text-rose-400' : 'text-[#FFC72C]'}`}>
-                {streetUsed}/{streetCap} Used
-              </span>
-              <span className="text-[7.5px] text-gray-400 font-medium">
-                {streetAvail} Open
-              </span>
-            </div>
           </div>
 
           {/* Channel 2: Private / Garage Use */}
-          <div className="flex flex-col items-center gap-0.5">
-            <span className="text-[8px] font-black uppercase text-amber-300 flex items-center gap-0.5">
-              <Warehouse className="w-2.5 h-2.5" />
-              Garage
-            </span>
+          <div className="flex flex-col items-center gap-1 w-full" title={`Garage Parking: ${garageUsed}/${garageCap} occupied (${garageAvail} open)`}>
+            <Warehouse className="w-3 h-3 text-amber-400 shrink-0" />
 
             {/* LED Ladder Stack (Top to Bottom: index 9 down to 0) */}
-            <div className="flex flex-col gap-[2px] w-full p-1 bg-[#07131f] border border-white/10 rounded-[4px] shadow-inner">
+            <div className="flex flex-col gap-[2px] w-full p-0.5 bg-[#07131f] border border-white/10 rounded-[3px] shadow-inner">
               {Array.from({ length: 10 }).map((_, idx) => {
                 const segIdx = 9 - idx; // 9 at top (100%), 0 at bottom (10%)
                 const isLit = segIdx < garageLitCount;
@@ -170,31 +143,8 @@ export const LedBarIndicatorGauge: React.FC<LedBarIndicatorGaugeProps> = ({
                 );
               })}
             </div>
-
-            {/* Readout */}
-            <div className="flex flex-col items-center leading-none mt-0.5">
-              <span className={`text-[9px] font-black ${garageUsed >= garageCap ? 'text-rose-400' : 'text-[#4ade80]'}`}>
-                {garageUsed}/{garageCap} Used
-              </span>
-              <span className="text-[7.5px] text-gray-400 font-medium">
-                {garageAvail} Open
-              </span>
-            </div>
           </div>
         </div>
-
-        {/* Circling traffic alert if congested */}
-        {circlingCarCount > 0 && (
-          <div className="w-full pt-0.5 border-t border-white/10 flex items-center justify-center gap-1 text-[7.5px] font-bold text-amber-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            <span>{circlingCarCount} Cruising</span>
-          </div>
-        )}
-
-        {/* Footer Hint */}
-        <span className="text-[7.5px] text-gray-300 font-medium leading-none tracking-tight">
-          Click for details &rarr;
-        </span>
       </div>
     );
   }

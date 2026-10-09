@@ -117,7 +117,10 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
                   {persona.title}
                 </span>
                 <span className="text-xs font-semibold text-gray-500">
-                  {persona.quadrant} • {persona.intensity ? (persona.intensity === 'strong' ? 'Strong Conviction' : 'Moderate Balance') : 'Curbside Archetype'}
+                  {persona.quadrant === 'Q1' && 'Q1 - User-Paid & Regulated'}
+                  {persona.quadrant === 'Q2' && 'Q2 - Taxpayer-Funded & Regulated'}
+                  {persona.quadrant === 'Q3' && 'Q3 - Taxpayer-Funded & Open Access'}
+                  {persona.quadrant === 'Q4' && 'Q4 - User-Paid & Open Access'}
                 </span>
               </div>
             </div>

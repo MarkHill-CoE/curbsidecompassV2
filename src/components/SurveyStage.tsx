@@ -178,7 +178,7 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       era: 'Post-2015 Redeveloping',
       tag: 'More households sharing the block; private parking varies',
       stalls: getStreetLayoutInfo('infill_skinny').curbsideCapacity,
-      desc: 'Garneau, Oliver (Wîhkwêntôwin), Downtown, Queen Alex, McKernan'
+      desc: 'Garneau, Wîhkwêntôwin (Oliver), Downtown, Queen Alex, McKernan'
     },
     {
       id: 'suburban_front_driveway',

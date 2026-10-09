@@ -1250,38 +1250,171 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "guidance": "City policy persona profile details"
   },
   {
+    "key": "persona_permit_planner_title",
+    "category": "Results & Personas",
+    "container": "Persona Title",
+    "defaultText": "Permit Planner",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_permit_planner_subtitle",
+    "category": "Results & Personas",
+    "container": "Persona Subtitle / Motto",
+    "defaultText": "More Rules • User Fees & Permits",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_permit_planner_desc",
+    "category": "Results & Personas",
+    "container": "Profile Description Narrative",
+    "defaultText": "Your choices suggest you favour more rules to manage competing parking needs, with program costs covered through user fees.",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_permit_planner_priority_1",
+    "category": "Results & Personas",
+    "container": "Key Priority Pill 1",
+    "defaultText": "More parking rules to manage demand",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_permit_planner_priority_2",
+    "category": "Results & Personas",
+    "container": "Key Priority Pill 2",
+    "defaultText": "Program costs covered through user fees",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_permit_planner_outcome",
+    "category": "Results & Personas",
+    "container": "Trade-off Outcomes",
+    "defaultText": "More rules can help manage competition for street parking, but may limit when or how people can park. User fees place program costs on those who use it, adding an expense for people who rely on street parking.",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_coordinator_title",
+    "category": "Results & Personas",
+    "container": "Persona Title",
+    "defaultText": "Community Coordinator",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_coordinator_subtitle",
+    "category": "Results & Personas",
+    "container": "Persona Subtitle / Motto",
+    "defaultText": "More Rules • Property Taxes",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_coordinator_desc",
+    "category": "Results & Personas",
+    "container": "Profile Description Narrative",
+    "defaultText": "Your choices suggest you favour more rules to manage competing parking needs, with program costs shared through property taxes.",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_coordinator_priority_1",
+    "category": "Results & Personas",
+    "container": "Key Priority Pill 1",
+    "defaultText": "More parking rules to manage demand",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_coordinator_priority_2",
+    "category": "Results & Personas",
+    "container": "Key Priority Pill 2",
+    "defaultText": "Program costs covered through property taxes",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_coordinator_outcome",
+    "category": "Results & Personas",
+    "container": "Trade-off Outcomes",
+    "defaultText": "More rules can help manage competition for street parking, but may limit when or how people can park. Property tax funding spreads program costs across taxpayers, including those who do not use the program.",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_cruiser_title",
+    "category": "Results & Personas",
+    "container": "Persona Title",
+    "defaultText": "Community Cruiser",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_cruiser_subtitle",
+    "category": "Results & Personas",
+    "container": "Persona Subtitle / Motto",
+    "defaultText": "Fewer Rules • Property Taxes",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_cruiser_desc",
+    "category": "Results & Personas",
+    "container": "Profile Description Narrative",
+    "defaultText": "Your choices suggest you favour fewer parking restrictions, with program costs shared through property taxes.",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_cruiser_priority_1",
+    "category": "Results & Personas",
+    "container": "Key Priority Pill 1",
+    "defaultText": "Fewer parking restrictions",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_cruiser_priority_2",
+    "category": "Results & Personas",
+    "container": "Key Priority Pill 2",
+    "defaultText": "Program costs covered through property taxes",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_community_cruiser_outcome",
+    "category": "Results & Personas",
+    "container": "Trade-off Outcomes",
+    "defaultText": "Fewer restrictions give people more flexibility to park, but can increase competition for spaces where demand is high. Property tax funding spreads program costs across taxpayers, including those who do not use the program.",
+    "guidance": "City policy persona profile details"
+  },
+  {
     "key": "persona_casual_cruiser_desc",
     "category": "Results & Personas",
     "container": "Profile Description Narrative",
-    "defaultText": "You like very few parking rules on our streets. You strongly believe car owners must pay for their own parking, not everyone.",
+    "defaultText": "Your choices suggest you favour fewer parking restrictions, with program costs covered through user fees.",
     "guidance": "City policy persona profile details"
   },
   {
     "key": "persona_casual_cruiser_edmonton_fit",
     "category": "Results & Personas",
     "container": "Edmonton Policy Alignment",
-    "defaultText": "Aligns with unregulated paid public lots.",
+    "defaultText": "Aligns with flexible street parking with minimal restrictions, where administrative and maintenance costs are paid directly by users.",
     "guidance": "City policy persona profile details"
   },
   {
     "key": "persona_casual_cruiser_priority_1",
     "category": "Results & Personas",
     "container": "Key Priority Pill 1",
-    "defaultText": "Unrestricted access",
+    "defaultText": "Fewer parking restrictions",
     "guidance": "City policy persona profile details"
   },
   {
     "key": "persona_casual_cruiser_priority_2",
     "category": "Results & Personas",
     "container": "Key Priority Pill 2",
-    "defaultText": "Direct user payments",
+    "defaultText": "Program costs covered through user fees",
+    "guidance": "City policy persona profile details"
+  },
+  {
+    "key": "persona_casual_cruiser_outcome",
+    "category": "Results & Personas",
+    "container": "Trade-off Outcomes",
+    "defaultText": "Fewer restrictions give people more flexibility to park, but can increase competition for spaces where demand is high. User fees place program costs on those who use it, adding an expense for people who rely on street parking.",
     "guidance": "City policy persona profile details"
   },
   {
     "key": "persona_casual_cruiser_subtitle",
     "category": "Results & Personas",
     "container": "Persona Subtitle / Motto",
-    "defaultText": "Very Few Rules • Strong User-Fee",
+    "defaultText": "Fewer Rules • User Fees & Permits",
     "guidance": "City policy persona profile details"
   },
   {

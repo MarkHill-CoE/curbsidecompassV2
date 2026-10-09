@@ -24,7 +24,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
     options: [
       {
         id: 'mature_laned',
-        label: 'Mature Laned (1950s)',
+        label: 'Homes with Rear-lane Access',
         hint: 'Detached garages with back lanes. 12 legal curbside stalls.',
         x: 0,
         y: 0,
@@ -36,7 +36,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'infill_skinny',
-        label: 'Infill & Skinny Homes',
+        label: 'Multiple Homes on Smaller Lots',
         hint: 'Subdivided narrow lots with detached rear garages. 12 legal curbside stalls.',
         x: 0,
         y: 0,
@@ -48,7 +48,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'suburban_front_driveway',
-        label: 'Suburban Front Driveway (1980s)',
+        label: 'Homes with Front Driveways',
         hint: 'Attached front driveways with 1.5m yellow curb setbacks (Bylaw 5590). 10 base stalls; each 8-plex removes a driveway to add a curbside stall back (except at the ETS bus stop).',
         x: 0,
         y: 0,
@@ -60,7 +60,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
       },
       {
         id: 'contemporary_townhomes',
-        label: 'Contemporary Townhomes',
+        label: 'Townhomes',
         hint: 'Multi-unit rows with rear garage lane and front pocket bays. 9 legal curbside stalls.',
         x: 0,
         y: 0,
@@ -859,39 +859,45 @@ export function validatePostalCode(val: string): { isValid: boolean; message?: s
 }
 
 import {
-  DEFAULT_8_PERSONAS,
-  getActive8Personas,
-  calculate8Persona
+  DEFAULT_4_PERSONAS,
+  getActive4Personas,
+  calculate4Persona
 } from './personaData8';
 
 export const PERSONA_PROFILES: Record<string, PersonaResult> = {
-  // === The 8 Active Curbside Policy Archetypes ===
-  user_funded_parker: DEFAULT_8_PERSONAS.user_funded_parker,
-  practical_parker: DEFAULT_8_PERSONAS.practical_parker,
-  city_funded_parker: DEFAULT_8_PERSONAS.city_funded_parker,
-  flexible_parker: DEFAULT_8_PERSONAS.flexible_parker,
-  chill_neighbour: DEFAULT_8_PERSONAS.chill_neighbour,
-  balanced_resident: DEFAULT_8_PERSONAS.balanced_resident,
-  casual_cruiser: DEFAULT_8_PERSONAS.casual_cruiser,
-  balanced_neighbour: DEFAULT_8_PERSONAS.balanced_neighbour,
+  // === The 4 Simplified Curbside Policy Personas (One per Quadrant) ===
+  permit_planner: DEFAULT_4_PERSONAS.permit_planner,
+  community_coordinator: DEFAULT_4_PERSONAS.community_coordinator,
+  community_cruiser: DEFAULT_4_PERSONAS.community_cruiser,
+  casual_cruiser: DEFAULT_4_PERSONAS.casual_cruiser,
 
   // === Legacy Profile Aliases (Backwards compatibility & smooth migration) ===
-  safety_parker: DEFAULT_8_PERSONAS.user_funded_parker,
-  block_resident: DEFAULT_8_PERSONAS.city_funded_parker,
-  zen_neighbour: DEFAULT_8_PERSONAS.chill_neighbour,
-  simple_driver: DEFAULT_8_PERSONAS.balanced_neighbour,
-  tidy_resident: DEFAULT_8_PERSONAS.flexible_parker,
-  rule_resident: DEFAULT_8_PERSONAS.city_funded_parker,
-  picky_parker: DEFAULT_8_PERSONAS.practical_parker,
-  sensible_parker: DEFAULT_8_PERSONAS.practical_parker,
-  fair_parker: DEFAULT_8_PERSONAS.user_funded_parker,
-  easy_neighbor: DEFAULT_8_PERSONAS.balanced_resident,
-  happy_neighbor: DEFAULT_8_PERSONAS.chill_neighbour,
-  zen_neighbor: DEFAULT_8_PERSONAS.chill_neighbour,
-  happy_driver: DEFAULT_8_PERSONAS.balanced_neighbour,
-  free_wheeler: DEFAULT_8_PERSONAS.casual_cruiser
+  user_funded_parker: DEFAULT_4_PERSONAS.permit_planner,
+  practical_parker: DEFAULT_4_PERSONAS.permit_planner,
+  safety_parker: DEFAULT_4_PERSONAS.permit_planner,
+  picky_parker: DEFAULT_4_PERSONAS.permit_planner,
+  sensible_parker: DEFAULT_4_PERSONAS.permit_planner,
+  fair_parker: DEFAULT_4_PERSONAS.permit_planner,
+
+  city_funded_parker: DEFAULT_4_PERSONAS.community_coordinator,
+  flexible_parker: DEFAULT_4_PERSONAS.community_coordinator,
+  block_resident: DEFAULT_4_PERSONAS.community_coordinator,
+  rule_resident: DEFAULT_4_PERSONAS.community_coordinator,
+  tidy_resident: DEFAULT_4_PERSONAS.community_coordinator,
+
+  chill_neighbour: DEFAULT_4_PERSONAS.community_cruiser,
+  balanced_resident: DEFAULT_4_PERSONAS.community_cruiser,
+  zen_neighbour: DEFAULT_4_PERSONAS.community_cruiser,
+  easy_neighbor: DEFAULT_4_PERSONAS.community_cruiser,
+  happy_neighbor: DEFAULT_4_PERSONAS.community_cruiser,
+  zen_neighbor: DEFAULT_4_PERSONAS.community_cruiser,
+
+  balanced_neighbour: DEFAULT_4_PERSONAS.casual_cruiser,
+  simple_driver: DEFAULT_4_PERSONAS.casual_cruiser,
+  free_wheeler: DEFAULT_4_PERSONAS.casual_cruiser,
+  happy_driver: DEFAULT_4_PERSONAS.casual_cruiser
 };
 
 export function calculatePersona(totalX: number, totalY: number): PersonaResult {
-  return calculate8Persona(totalX, totalY);
+  return calculate4Persona(totalX, totalY);
 }

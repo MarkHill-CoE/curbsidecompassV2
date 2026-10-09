@@ -23,8 +23,8 @@ export interface StreetLayoutInfo {
 export const STREET_LAYOUTS: Record<StreetLayoutTypology, StreetLayoutInfo> = {
   mature_laned: {
     id: 'mature_laned',
-    title: 'Mature Laned Neighbourhood',
-    shortTitle: 'Mature Laned',
+    title: 'Homes with Rear-lane Access',
+    shortTitle: 'Rear-lane Access',
     era: '1950s–1960s Mid-Century Heritage',
     subtitle: 'Rear gravel/paved lane, detached backyard garages, zero front curb cuts',
     description:
@@ -56,8 +56,8 @@ export const STREET_LAYOUTS: Record<StreetLayoutTypology, StreetLayoutInfo> = {
   },
   infill_skinny: {
     id: 'infill_skinny',
-    title: 'Infill & Redeveloping Core',
-    shortTitle: 'Infill & Duplex',
+    title: 'Multiple Homes on Smaller Lots',
+    shortTitle: 'Multiple Homes on Smaller Lots',
     era: 'Post-2015 Urban Infill & Lot Splits',
     subtitle: 'Narrow skinny homes, semi-detached duplexes, rear garden suites',
     description:
@@ -74,7 +74,7 @@ export const STREET_LAYOUTS: Record<StreetLayoutTypology, StreetLayoutInfo> = {
     accentBorder: 'border-amber-500',
     sampleNeighbourhoods: [
       'Garneau',
-      'Oliver (Wîhkwêntôwin)',
+      'Wîhkwêntôwin (Oliver)',
       'Downtown',
       'Central McDougall',
       'McCauley',
@@ -87,8 +87,8 @@ export const STREET_LAYOUTS: Record<StreetLayoutTypology, StreetLayoutInfo> = {
   },
   suburban_front_driveway: {
     id: 'suburban_front_driveway',
-    title: 'Suburban Front-Garage Driveway',
-    shortTitle: 'Front Driveway',
+    title: 'Homes with Front Driveways',
+    shortTitle: 'Front Driveways',
     era: '1980s–2000s Curvilinear Subdivisions',
     subtitle: 'Front-attached double garages, unmarked residential road, light traffic (35–55 km/h)',
     description:
@@ -119,8 +119,8 @@ export const STREET_LAYOUTS: Record<StreetLayoutTypology, StreetLayoutInfo> = {
   },
   contemporary_townhomes: {
     id: 'contemporary_townhomes',
-    title: 'Contemporary Dense Developing',
-    shortTitle: 'Modern Townhomes',
+    title: 'Townhomes',
+    shortTitle: 'Townhomes',
     era: '2020s City Plan Transit-Oriented',
     subtitle: 'Modern townhome blocks, integrated pocket parking bays, bioswales',
     description:
@@ -164,7 +164,7 @@ export const EDMONTON_NEIGHBOURHOODS: EdmontonNeighbourhood[] = [
   // Central / Mature Laned & Infill
   { name: 'Strathcona', typology: 'mature_laned', sector: 'Central', postalFSA: ['T6E'] },
   { name: 'Garneau', typology: 'infill_skinny', sector: 'Central', postalFSA: ['T6G'] },
-  { name: 'Oliver (Wîhkwêntôwin)', typology: 'infill_skinny', sector: 'Central', postalFSA: ['T5K'] },
+  { name: 'Wîhkwêntôwin (Oliver)', typology: 'infill_skinny', sector: 'Central', postalFSA: ['T5K'] },
   { name: 'Downtown', typology: 'infill_skinny', sector: 'Central', postalFSA: ['T5J'] },
   { name: 'Westmount', typology: 'mature_laned', sector: 'Central', postalFSA: ['T5N'] },
   { name: 'Glenora', typology: 'mature_laned', sector: 'Central', postalFSA: ['T5N'] },
@@ -292,7 +292,7 @@ export function getStreetLayoutInfo(typology?: StreetLayoutTypology | string): S
 export const POPULAR_EDMONTON_NEIGHBOURHOODS = [
   'Strathcona',
   'Garneau',
-  'Oliver (Wîhkwêntôwin)',
+  'Wîhkwêntôwin (Oliver)',
   'Mill Woods',
   'Windermere',
   'Callingwood',

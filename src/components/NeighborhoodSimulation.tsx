@@ -258,7 +258,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
       let f2 = 510;
       let duration = 0.35;
       let wave: OscillatorType = 'sawtooth';
-      const volume = 0.15; // 15% procedural sound volume as requested
+      let volume = 0.15; // 15% procedural sound volume as requested
 
       if (type === 'boxTruck') {
         f1 = 130 + Math.random() * 15;
@@ -274,6 +274,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         f2 = 780 + Math.random() * 30;
         duration = 0.35;
         wave = 'sawtooth';
+        volume = 0.08; // 8% sound volume for police car
       } else if (type === 'firetruck') {
         f1 = 160 + Math.random() * 20;
         f2 = 210 + Math.random() * 20;
@@ -361,7 +362,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         osc.frequency.setValueAtTime(600, now);
         osc.frequency.exponentialRampToValueAtTime(1400, now + 0.12);
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.18, now + 0.02);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.02); // 8% procedural police siren volume
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -373,7 +374,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         osc.frequency.linearRampToValueAtTime(1250, now + 0.14);
         osc.frequency.linearRampToValueAtTime(750, now + 0.28);
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.16, now + 0.02);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.02); // 8% procedural police siren volume
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -391,7 +392,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
         osc2.frequency.exponentialRampToValueAtTime(625, now + 0.58);
 
         gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.12, now + 0.03);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.03); // 8% procedural police siren volume
         gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
         osc.connect(gain);
         osc2.connect(gain);

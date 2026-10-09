@@ -162,14 +162,9 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
               <Gauge className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 id="magnified-gauge-title" className="font-bold text-white text-base sm:text-lg leading-none tracking-tight">
-                  {t('gauge_drawer_title', 'Curbside Parking Demand Gauge')}
-                </h3>
-                <span className="text-[10px] font-mono font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-cyan-950/80 border border-cyan-500/30 text-cyan-300">
-                  Executive Dashboard
-                </span>
-              </div>
+              <h3 id="magnified-gauge-title" className="font-bold text-white text-base sm:text-lg leading-none tracking-tight">
+                {t('gauge_drawer_title', 'Curbside Parking Demand Gauge')}
+              </h3>
               <p className="text-xs text-slate-400 mt-1">
                 {t('gauge_drawer_subtitle', 'Live street utilization & capacity analysis')} &bull; Smart Mobility Management
               </p>
@@ -295,7 +290,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 {curbsidePct}%
               </span>
               <span className={`text-xs font-bold px-2.5 py-1 rounded-full border uppercase tracking-wider ${statusColorClasses.badge}`}>
-                {statusLabel}
+                Parking Demand
               </span>
             </div>
 
@@ -317,94 +312,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
           )}
         </div>
 
-        {/* High-Level KPI Summary Grid (Block Overview) */}
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400">
-              Block Overview &bull; High-Level KPIs
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
-            {/* KPI 1: Total Dwellings */}
-            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
-              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                <Home className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                Total Dwellings
-              </span>
-              <span className="text-base sm:text-lg font-black text-white mt-1">
-                {totalDwellings}
-              </span>
-            </div>
-
-            {/* KPI 2: Resident Vehicles */}
-            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
-              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                <Car className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                Resident Vehicles
-              </span>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-base sm:text-lg font-black text-white">
-                  {activeHouseholdCars}
-                </span>
-                <span className="text-[10px] text-slate-400 font-medium truncate">
-                  (Avg {Number(householdCarsPerHome).toFixed(1)} / Home)
-                </span>
-              </div>
-            </div>
-
-            {/* KPI 3: Visitor Vehicles */}
-            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
-              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-pink-400 shrink-0" />
-                Visitor Vehicles
-              </span>
-              <span className="text-base sm:text-lg font-black text-white mt-1">
-                {activeVisitorCars}
-              </span>
-            </div>
-
-            {/* KPI 4: Street Parking Stalls */}
-            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
-              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                <Car className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                Street Stalls
-              </span>
-              <span className="text-base sm:text-lg font-black text-white mt-1">
-                {streetCap}
-              </span>
-            </div>
-
-            {/* KPI 5: Garage Parking Spaces */}
-            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
-              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
-                <Warehouse className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                Garage Spaces
-              </span>
-              <span className="text-xs sm:text-sm font-bold text-white mt-1 truncate" title={`${drivewayCapacity === 1 ? '1 Space' : `${drivewayCapacity} Spaces`} / Garage`}>
-                {drivewayCapacity === 1 ? '1 Space / Garage' : `${drivewayCapacity} Spaces / Garage`}
-              </span>
-            </div>
-
-            {/* KPI 6: Total Active Vehicles Parked */}
-            <div className="bg-[#112438] border border-emerald-500/30 rounded-xl p-2.5 flex flex-col justify-between">
-              <span className="text-[10px] text-emerald-300 font-semibold flex items-center gap-1.5">
-                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                Total Parked
-              </span>
-              <div className="flex flex-col mt-0.5">
-                <span className="text-base sm:text-lg font-black text-emerald-400 leading-tight">
-                  {totalActiveVehiclesParked}
-                </span>
-                <span className="text-[9px] text-slate-400 font-medium truncate">
-                  ({streetUsed} Street + {garageUsed} Garage)
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Middle / Main Section: Dedicated Dual Breakdown (Street vs. Private/Garage) */}
+        {/* Dedicated Dual Breakdown (Street vs. Private/Garage) - Directly below Curbside Demand vs Legal Capacity */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4 items-stretch">
           {/* Panel A: Street Parking */}
           <div className="bg-[#0f233a] border border-white/10 rounded-xl p-4 flex flex-col justify-between gap-3 shadow-inner">
@@ -594,6 +502,93 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 <>Off-street garages have <strong className="text-white">{garageFree} free spaces</strong> to absorb curbside overflow.</>
               )}
             </p>
+          </div>
+        </div>
+
+        {/* High-Level KPI Summary Grid (Block Overview) */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] uppercase font-bold tracking-wider text-slate-400">
+              Block Overview &bull; High-Level KPIs
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+            {/* KPI 1: Total Dwellings */}
+            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
+              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
+                <Home className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                Total Dwellings
+              </span>
+              <span className="text-base sm:text-lg font-black text-white mt-1">
+                {totalDwellings}
+              </span>
+            </div>
+
+            {/* KPI 2: Resident Vehicles */}
+            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
+              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
+                <Car className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                Resident Vehicles
+              </span>
+              <div className="flex items-baseline gap-1 mt-1">
+                <span className="text-base sm:text-lg font-black text-white">
+                  {activeHouseholdCars}
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium truncate">
+                  (Avg {Number(householdCarsPerHome).toFixed(1)} / Home)
+                </span>
+              </div>
+            </div>
+
+            {/* KPI 3: Visitor Vehicles */}
+            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
+              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-pink-400 shrink-0" />
+                Visitor Vehicles
+              </span>
+              <span className="text-base sm:text-lg font-black text-white mt-1">
+                {activeVisitorCars}
+              </span>
+            </div>
+
+            {/* KPI 4: Street Parking Stalls */}
+            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
+              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
+                <Car className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                Street Stalls
+              </span>
+              <span className="text-base sm:text-lg font-black text-white mt-1">
+                {streetCap}
+              </span>
+            </div>
+
+            {/* KPI 5: Garage Parking Spaces */}
+            <div className="bg-[#112438] border border-white/10 rounded-xl p-2.5 flex flex-col justify-between">
+              <span className="text-[10px] text-slate-400 font-semibold flex items-center gap-1.5">
+                <Warehouse className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                Garage Spaces
+              </span>
+              <span className="text-xs sm:text-sm font-bold text-white mt-1 truncate" title={`${drivewayCapacity === 1 ? '1 Space' : `${drivewayCapacity} Spaces`} / Garage`}>
+                {drivewayCapacity === 1 ? '1 Space / Garage' : `${drivewayCapacity} Spaces / Garage`}
+              </span>
+            </div>
+
+            {/* KPI 6: Total Active Vehicles Parked */}
+            <div className="bg-[#112438] border border-emerald-500/30 rounded-xl p-2.5 flex flex-col justify-between">
+              <span className="text-[10px] text-emerald-300 font-semibold flex items-center gap-1.5">
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                Total Parked
+              </span>
+              <div className="flex flex-col mt-0.5">
+                <span className="text-base sm:text-lg font-black text-emerald-400 leading-tight">
+                  {totalActiveVehiclesParked}
+                </span>
+                <span className="text-[9px] text-slate-400 font-medium truncate">
+                  ({streetUsed} Street + {garageUsed} Garage)
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

@@ -27,8 +27,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: 'Y < -9 (Strict Rules)',
     keyPriorities: ['Strict safety enforcement', 'Direct user fees'],
     edmontonPolicyFit: 'Aligns with high-traffic pedestrian safety corridors.',
-    mergedIntoPersonaId: 'user_funded_parker_8',
-    mergedIntoPersonaTitle: 'User-Funded Parker',
+    mergedIntoPersonaId: 'permit_planner',
+    mergedIntoPersonaTitle: 'Permit Planner',
     badgeColor: '#0081BC'
   },
   {
@@ -42,8 +42,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: '-9 <= Y < 0 (Fair Balance)',
     keyPriorities: ['Fair access', 'Full cost-recovery from drivers'],
     edmontonPolicyFit: 'Aligns with self-sustaining parking districts.',
-    mergedIntoPersonaId: 'user_funded_parker_8',
-    mergedIntoPersonaTitle: 'User-Funded Parker',
+    mergedIntoPersonaId: 'permit_planner',
+    mergedIntoPersonaTitle: 'Permit Planner',
     badgeColor: '#0081BC'
   },
   {
@@ -57,8 +57,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: 'Y < -9 (Strict Rules)',
     keyPriorities: ['Clear restrictions', 'User-pay model'],
     edmontonPolicyFit: 'Aligns with targeted permit zones.',
-    mergedIntoPersonaId: 'practical_parker_8',
-    mergedIntoPersonaTitle: 'Practical Parker',
+    mergedIntoPersonaId: 'permit_planner',
+    mergedIntoPersonaTitle: 'Permit Planner',
     badgeColor: '#0081BC'
   },
   {
@@ -72,8 +72,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: '-9 <= Y < 0 (Fair Balance)',
     keyPriorities: ['Balanced enforcement', 'Driver-paid infrastructure'],
     edmontonPolicyFit: 'Aligns with hybrid paid-parking zones.',
-    mergedIntoPersonaId: 'practical_parker_8',
-    mergedIntoPersonaTitle: 'Practical Parker',
+    mergedIntoPersonaId: 'permit_planner',
+    mergedIntoPersonaTitle: 'Permit Planner',
     badgeColor: '#0081BC'
   },
 
@@ -89,8 +89,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: 'Y < -9 (Strict Rules)',
     keyPriorities: ['Strict enforcement', 'General tax funding'],
     edmontonPolicyFit: 'Aligns with highly regulated mature neighbourhoods.',
-    mergedIntoPersonaId: 'city_funded_parker_8',
-    mergedIntoPersonaTitle: 'City-Funded Parker',
+    mergedIntoPersonaId: 'community_coordinator',
+    mergedIntoPersonaTitle: 'Community Coordinator',
     badgeColor: '#005087'
   },
   {
@@ -104,8 +104,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: '-9 <= Y < 0 (Clear Rules)',
     keyPriorities: ['Defined zones', 'Tax-supported maintenance'],
     edmontonPolicyFit: 'Aligns with protected residential areas.',
-    mergedIntoPersonaId: 'city_funded_parker_8',
-    mergedIntoPersonaTitle: 'City-Funded Parker',
+    mergedIntoPersonaId: 'community_coordinator',
+    mergedIntoPersonaTitle: 'Community Coordinator',
     badgeColor: '#005087'
   },
   {
@@ -119,8 +119,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: 'Y < -9 (Some Rules)',
     keyPriorities: ['Clear guidelines', 'Shared costs'],
     edmontonPolicyFit: 'Aligns with standard residential parking guidelines.',
-    mergedIntoPersonaId: 'flexible_parker_8',
-    mergedIntoPersonaTitle: 'Flexible Parker',
+    mergedIntoPersonaId: 'community_coordinator',
+    mergedIntoPersonaTitle: 'Community Coordinator',
     badgeColor: '#005087'
   },
   {
@@ -134,8 +134,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: '-9 <= Y < 0 (Fair Balance)',
     keyPriorities: ['Balanced access', 'Community funding'],
     edmontonPolicyFit: 'Aligns with flexible neighbourhood parking.',
-    mergedIntoPersonaId: 'flexible_parker_8',
-    mergedIntoPersonaTitle: 'Flexible Parker',
+    mergedIntoPersonaId: 'community_coordinator',
+    mergedIntoPersonaTitle: 'Community Coordinator',
     badgeColor: '#005087'
   },
 
@@ -151,8 +151,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: 'Y > +9 (Almost No Rules)',
     keyPriorities: ['Complete freedom', 'Fully public funding'],
     edmontonPolicyFit: 'Aligns with historically unregulated rural/suburban edges.',
-    mergedIntoPersonaId: 'chill_neighbour_8',
-    mergedIntoPersonaTitle: 'Chill Neighbour',
+    mergedIntoPersonaId: 'community_cruiser',
+    mergedIntoPersonaTitle: 'Community Cruiser',
     badgeColor: '#009A44'
   },
   {
@@ -166,8 +166,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: 'Y > +9 (Very Few Rules)',
     keyPriorities: ['High freedom', 'Shared municipal cost'],
     edmontonPolicyFit: 'Aligns with unenforced open streets.',
-    mergedIntoPersonaId: 'chill_neighbour_8',
-    mergedIntoPersonaTitle: 'Chill Neighbour',
+    mergedIntoPersonaId: 'community_cruiser',
+    mergedIntoPersonaTitle: 'Community Cruiser',
     badgeColor: '#009A44'
   },
   {
@@ -181,8 +181,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: '0 <= Y <= +9 (Fewer Rules)',
     keyPriorities: ['Easy access', 'Taxpayer funding'],
     edmontonPolicyFit: 'Aligns with open suburban parking.',
-    mergedIntoPersonaId: 'balanced_resident_8',
-    mergedIntoPersonaTitle: 'Balanced Resident',
+    mergedIntoPersonaId: 'community_cruiser',
+    mergedIntoPersonaTitle: 'Community Cruiser',
     badgeColor: '#009A44'
   },
   {
@@ -196,8 +196,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: '0 <= Y <= +9 (Few Rules)',
     keyPriorities: ['Minimal restrictions', 'Publicly funded'],
     edmontonPolicyFit: 'Aligns with low-density residential guidelines.',
-    mergedIntoPersonaId: 'balanced_resident_8',
-    mergedIntoPersonaTitle: 'Balanced Resident',
+    mergedIntoPersonaId: 'community_cruiser',
+    mergedIntoPersonaTitle: 'Community Cruiser',
     badgeColor: '#009A44'
   },
 
@@ -213,7 +213,7 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: 'Y > +9 (Almost No Rules)',
     keyPriorities: ['Absolute freedom', '100% user-funded'],
     edmontonPolicyFit: 'Aligns with private unregulated toll/parking models.',
-    mergedIntoPersonaId: 'casual_cruiser_8',
+    mergedIntoPersonaId: 'casual_cruiser',
     mergedIntoPersonaTitle: 'Casual Cruiser',
     badgeColor: '#FFC72C'
   },
@@ -228,7 +228,7 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: '0 <= Y <= +9 (Very Few Rules)',
     keyPriorities: ['Unrestricted access', 'Direct user payments'],
     edmontonPolicyFit: 'Aligns with unregulated paid public lots.',
-    mergedIntoPersonaId: 'casual_cruiser_8',
+    mergedIntoPersonaId: 'casual_cruiser',
     mergedIntoPersonaTitle: 'Casual Cruiser',
     badgeColor: '#FFC72C'
   },
@@ -243,8 +243,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: '0 <= Y <= +9 (Fewer Rules)',
     keyPriorities: ['Simple access', 'Light user fees'],
     edmontonPolicyFit: 'Aligns with simplified flat-rate zones.',
-    mergedIntoPersonaId: 'balanced_neighbour_8',
-    mergedIntoPersonaTitle: 'Balanced Neighbour',
+    mergedIntoPersonaId: 'casual_cruiser',
+    mergedIntoPersonaTitle: 'Casual Cruiser',
     badgeColor: '#FFC72C'
   },
   {
@@ -258,8 +258,8 @@ export const LEGACY_16_PERSONAS: LegacyPersona[] = [
     yRangeText: 'Y > +9 (Almost No Rules)',
     keyPriorities: ['No restrictions', 'Flat user fees'],
     edmontonPolicyFit: 'Aligns with open flat-rate parking regions.',
-    mergedIntoPersonaId: 'balanced_neighbour_8',
-    mergedIntoPersonaTitle: 'Balanced Neighbour',
+    mergedIntoPersonaId: 'casual_cruiser',
+    mergedIntoPersonaTitle: 'Casual Cruiser',
     badgeColor: '#FFC72C'
   }
 ];
