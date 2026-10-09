@@ -43,7 +43,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
   activeHouseholdCars,
   activeVisitorCars,
   totalDwellings,
-  householdCarsPerHome = 2.0,
+  householdCarsPerHome = 1.8,
   drivewayCapacity = 1,
   occupiedGaragesCount = 0,
   totalGarageSpacesCapacity = 12,

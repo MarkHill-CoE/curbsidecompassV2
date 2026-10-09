@@ -183,7 +183,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
               <span>{t('sim_private_parking_label', 'Private Off-Street Stalls (Driveway / Garage)')}</span>
             </span>
             <span className="font-bold text-emerald-400">
-              {config.drivewayCapacity ?? 1} {t('sim_stalls_per_home', 'stalls/home')}
+              {config.drivewayCapacity ?? 1} {(config.drivewayCapacity ?? 1) === 1 ? 'stall/home' : 'stalls/home'}
             </span>
           </div>
           <input

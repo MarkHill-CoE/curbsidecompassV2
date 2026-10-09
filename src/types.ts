@@ -25,7 +25,7 @@ export type StreetLayoutTypology =
   | 'contemporary_townhomes';
 
 export interface SimulationConfig {
-  householdCarsPerHome: number; // 0 - 4 (default 2.0)
+  householdCarsPerHome: number; // 0 - 4 (default 1.8)
   visitorPassesPerHome: number; // 0 - 2 (whole numbers: 0, 1, 2, default 0)
   drivewayCapacity: number; // 0 - 3 (default 1 space per garage)
   splitInfillLots?: number; // 0 - 3 (number of 8-plex multi-unit infill buildings replacing houses, default 0)

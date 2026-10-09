@@ -215,7 +215,7 @@ export default function App() {
     setManualOverride((prev) => ({
       ...(prev || {}),
       streetLayout: layout,
-      householdCarsPerHome: 2.0,
+      householdCarsPerHome: 1.8,
       drivewayCapacity: 1,
       visitorPassesPerHome: 0,
       neighbourhoodName: neighbourhoodName || prev?.neighbourhoodName,
@@ -241,7 +241,7 @@ export default function App() {
       setManualOverride((prev) => ({
         ...(prev || {}),
         streetLayout: layout,
-        householdCarsPerHome: 2.0,
+        householdCarsPerHome: 1.8,
         drivewayCapacity: 1,
         visitorPassesPerHome: 0
       }));
@@ -337,7 +337,8 @@ export default function App() {
     }
   }, [currentStep, selectedAnswers]);
 
-  // Reset the survey back to the start and restore initial settings
+  // Reset the survey back to the start and restore initial settings:
+  // Clears the street to zero cars, putting 1 vehicle per garage and 1.8 vehicles per dwelling
   const handleRetake = useCallback(() => {
     triggerFeedback('button');
     setSelectedAnswers({});
@@ -349,7 +350,11 @@ export default function App() {
     setValidationErrorMsg(null);
     setShowManualSliders(false);
     setShowMagnifiedGauge(false);
-    setPolicyNote('Simulation reset to baseline configuration.');
+    safeStorage.removeItem('curbsideCompass_step');
+    safeStorage.removeItem('curbsideCompass_answers');
+    safeStorage.removeItem('curbsideCompass_simConfig');
+    safeStorage.removeItem('curbsideCompass_completed');
+    setPolicyNote('Simulation reset: Street cleared to 0 cars, 1 vehicle per garage, and 1.8 vehicles per dwelling.');
   }, []);
 
   const handleConfigChange = useCallback((updated: Partial<SimulationConfig>) => {

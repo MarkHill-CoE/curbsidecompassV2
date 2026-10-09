@@ -3,14 +3,15 @@ import { getTypologyFromPostalCode, getStreetLayoutInfo } from './edmontonNeighb
 
 export const INITIAL_SIM_CONFIG: SimulationConfig = {
   drivewayCapacity: 1,
-  householdCarsPerHome: 2.0,
+  householdCarsPerHome: 1.8,
   visitorPassesPerHome: 0, // Calibrated to 0% default starting curbside occupancy across all neighbourhood typologies
   splitInfillLots: 0,
   deliveriesPerHomePerWeek: 1.0,
   enforcementLevel: 'standard',
   cruisingTrafficLevel: 'moderate',
   curbsideFeeModel: 'free',
-  streetLayout: 'mature_laned'
+  streetLayout: 'mature_laned',
+  curbsideDemandOverride: 0
 };
 
 export const SURVEY_QUESTIONS: SurveyQuestion[] = [
@@ -28,7 +29,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         x: 0,
         y: 0,
         simEffects: {
-          householdCarsPerHome: 2.0,
+          householdCarsPerHome: 1.8,
           drivewayCapacity: 1,
           visitorPassesPerHome: 0
         }
@@ -40,7 +41,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         x: 0,
         y: 0,
         simEffects: {
-          householdCarsPerHome: 2.0,
+          householdCarsPerHome: 1.8,
           drivewayCapacity: 1,
           visitorPassesPerHome: 0
         }
@@ -52,7 +53,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         x: 0,
         y: 0,
         simEffects: {
-          householdCarsPerHome: 2.0,
+          householdCarsPerHome: 1.8,
           drivewayCapacity: 1,
           visitorPassesPerHome: 0
         }
@@ -64,7 +65,7 @@ export const SURVEY_QUESTIONS: SurveyQuestion[] = [
         x: 0,
         y: 0,
         simEffects: {
-          householdCarsPerHome: 2.0,
+          householdCarsPerHome: 1.8,
           drivewayCapacity: 1,
           visitorPassesPerHome: 0
         }
@@ -310,10 +311,10 @@ export function calculateSimulationMetricsFromAnswers(
   const curbsideStallsCapacity = baseCurbsideCapacity;
 
   // Household Cars:
-  // Starts initially with 2 Vehicles per Home (householdCarsPerHome = 2.0)
+  // Starts initially with 1.8 Vehicles per Home (householdCarsPerHome = 1.8)
   const householdCarsPerHome = overrides.householdCarsPerHome !== undefined
     ? overrides.householdCarsPerHome
-    : 2.0;
+    : 1.8;
 
   const householdCars = Math.round(householdCarsPerHome * totalDwellings);
 
@@ -332,7 +333,13 @@ export function calculateSimulationMetricsFromAnswers(
     : Math.min(householdCars, totalOffStreetStalls);
 
   // Overflow household vehicles needing curbside parking:
-  const residentCurbOverflow = Math.max(0, householdCars - occupiedGarages);
+  // Baseline vehicle ownership is calibrated at 1.8 vehicles per dwelling with 1 space per garage.
+  // At baseline, the street is cleared to 0 cars. Additional resident street parking is generated
+  // when vehicles per home exceed the 1.8 baseline, or if private garage stalls are reduced (drivewayCap < 1).
+  const extraVehiclesPerHome = Math.max(0, householdCarsPerHome - 1.8);
+  const extraHouseholdCars = Math.round(extraVehiclesPerHome * totalDwellings);
+  const displacedGarageCars = drivewayCap === 0 ? singleFamilyHomes : 0;
+  const residentCurbOverflow = extraHouseholdCars + displacedGarageCars;
 
   // Visitor passes and visitor cars:
   // Starts initially with 0 Visitor passes per home
