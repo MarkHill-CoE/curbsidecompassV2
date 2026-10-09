@@ -6081,7 +6081,6 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
             totalGarageSpacesCapacity={12}
             circlingCarCount={circlingCarCount}
             onOpenMagnified={onToggleMagnifiedGauge}
-            className={curbsidePct >= 150 ? 'animate-bounce border-[#E8552D]' : ''}
           />
         </div>
 
