@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
+import { trackFunnelStep } from '../lib/analytics';
 
 interface ThankYouViewProps {
   persona: PersonaResult;
@@ -97,6 +98,10 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
   const [copied, setCopied] = useState<boolean>(false);
   const [platformNotice, setPlatformNotice] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    trackFunnelStep(5, 'thank_you_view', { persona: persona.title });
+  }, [persona.title]);
+
   const curbsideSocialImg = '/CurbsideCompass_Social_Media_IMG.jpg';
 
   const defaultAppUrl = 'https://curbsidecompass-v-2.replit.app/';
@@ -139,6 +144,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
 
   const handleCopyLink = async () => {
     triggerFeedback('button');
+    trackFunnelStep(6, 'copy_full_post_text', { share_mode: shareMode });
     try {
       if (navigator.clipboard) {
         // Attempt rich HTML + plain text copy for destinations that support embedded image pastes
@@ -533,6 +539,7 @@ const ThankYouViewComponent: React.FC<ThankYouViewProps> = ({
             type="button"
             onClick={() => {
               triggerFeedback('button');
+              trackFunnelStep(6, 'retake_survey', { source: 'thank_you_view' });
               onRetake();
             }}
             className="text-xs sm:text-sm font-bold text-gray-600 hover:text-gray-900 flex items-center gap-1.5 py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer active:scale-95 min-h-[44px]"

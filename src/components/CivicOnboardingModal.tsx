@@ -17,6 +17,7 @@ import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
 import { StreetLayoutTypology, SimulationConfig } from '../types';
 import { getStreetLayoutInfo } from '../data/edmontonNeighbourhoods';
+import { trackFunnelStep } from '../lib/analytics';
 
 interface CivicOnboardingModalProps {
   isOpen: boolean;
@@ -123,10 +124,11 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
     });
   };
 
-  // Focus start button when opened
+  // Focus start button when opened and track Funnel Step 1
   useEffect(() => {
     if (isOpen) {
       startButtonRef.current?.focus();
+      trackFunnelStep(1, 'how_to_use_view');
     }
   }, [isOpen]);
 
@@ -136,7 +138,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         e.preventDefault();
-        handleFinish();
+        handleFinish('escape_key');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -187,8 +189,9 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
     }
   };
 
-  const handleFinish = () => {
+  const handleFinish = (method: string = 'start_exploring') => {
     triggerFeedback('button');
+    trackFunnelStep(2, 'how_to_use_start', { method });
     try {
       localStorage.setItem('curbside_compass_onboarding_completed', 'true');
     } catch {
@@ -231,7 +234,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              onClick={handleFinish}
+              onClick={() => handleFinish('close')}
               className="p-2 text-white/80 hover:text-white hover:bg-white/15 rounded-xl transition-colors cursor-pointer min-h-[44px] min-w-[44px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
               title={t('intro_btn_close_title', 'Close guide')}
               aria-label={t('intro_btn_close_aria', 'Close guide')}
@@ -544,7 +547,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             <div className="pt-2">
               <button
                 type="button"
-                onClick={handleFinish}
+                onClick={() => handleFinish('start_exploring')}
                 className="w-full py-3 sm:py-3.5 px-6 bg-[#059669] hover:bg-[#047857] active:bg-[#065f46] text-white font-black text-lg sm:text-xl rounded-xl shadow-lg transition-all cursor-pointer min-h-[52px] flex items-center justify-center gap-2.5 border-2 border-emerald-600 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
               >
                 <Sparkles className="w-5 h-5 text-[#FFC72C]" />
@@ -560,7 +563,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
           {/* Prominent Yellow Skip Intro button */}
           <button
             type="button"
-            onClick={handleFinish}
+            onClick={() => handleFinish('skip_intro')}
             className="flex items-center gap-2 px-4 sm:px-5 py-2.5 bg-[#FFC72C] hover:bg-[#ffe066] active:bg-[#f5bc20] text-[#004B8D] font-black text-sm sm:text-base rounded-xl shadow-md transition-all cursor-pointer min-h-[46px] border-2 border-[#003566]/20 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D]"
             title={t('intro_btn_skip_title', 'Skip this guide and start the survey right now')}
             aria-label={t('intro_btn_skip_aria', 'Skip introduction and start survey')}
@@ -573,7 +576,7 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
           <button
             ref={startButtonRef}
             type="button"
-            onClick={handleFinish}
+            onClick={() => handleFinish('start_exploring')}
             className="px-6 sm:px-8 py-2.5 text-base sm:text-lg font-black bg-[#059669] hover:bg-[#047857] text-white rounded-xl shadow-md transition-all cursor-pointer min-h-[46px] flex items-center gap-2 active:scale-95 ring-2 ring-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFC72C]"
           >
             <span>{t('intro_btn_start', 'Start Exploring')}</span>

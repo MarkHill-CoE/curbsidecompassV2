@@ -7,6 +7,7 @@ import { triggerFeedback } from '../utils/feedback';
 import { useAppText } from '../context/TextContentContext';
 import { saveSurveyResponse } from '../services/firebaseService';
 import { detectPII, sanitizeOpenTextInput } from '../utils/securitySanitizer';
+import { trackFunnelStep } from '../lib/analytics';
 
 interface ResultsViewProps {
   persona: PersonaResult;
@@ -34,8 +35,9 @@ const ResultsViewComponent: React.FC<ResultsViewProps> = ({
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
-  // Auto-save survey results to Firestore on initial render of ResultsView
+  // Auto-save survey results to Firestore on initial render of ResultsView and track Funnel Step 4
   React.useEffect(() => {
+    trackFunnelStep(4, 'results_view', { persona: persona.title });
     saveSurveyResponse({
       persona,
       totalX,

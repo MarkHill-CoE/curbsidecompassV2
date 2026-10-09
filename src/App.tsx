@@ -32,6 +32,16 @@ import {
 } from 'lucide-react';
 import { feedback, triggerFeedback } from './utils/feedback';
 import { ambientAudio } from './utils/ambientAudio';
+import {
+  initAnalytics,
+  trackEvent,
+  trackSurveyStep,
+  trackSurveyComplete,
+  trackStreetLayoutSelected,
+  trackSimulationAdjusted,
+  trackPageView,
+  trackFunnelStep
+} from './lib/analytics';
 
 export default function App() {
   const { t } = useAppText();
@@ -64,6 +74,7 @@ export default function App() {
     setIsSimplifiedMode((prev) => {
       const nextVal = simplified !== undefined ? simplified : !prev;
       safeStorage.setItem('curbside_compass_simplified_mode', String(nextVal));
+      trackEvent('view_mode_toggled', { mode: nextVal ? 'simplified' : 'live' });
       return nextVal;
     });
   }, []);
@@ -205,6 +216,28 @@ export default function App() {
     return calculatePersona(totalX, totalY);
   }, [totalX, totalY]);
 
+  // Initialize Google Analytics 4 (GA4) on mount
+  useEffect(() => {
+    initAnalytics();
+    trackPageView('Curbside Compass');
+  }, []);
+
+  // Track survey progress and completion events in GA4 Funnel
+  useEffect(() => {
+    if (isCompleted) {
+      trackSurveyComplete(currentPersona?.name || 'completed', simConfig.streetLayout || 'mature_laned');
+      trackFunnelStep(4, 'survey_completed', { persona: currentPersona?.name || 'completed' });
+      trackPageView('Curbside Compass - Results');
+    } else {
+      const q = SURVEY_QUESTIONS[currentStep];
+      if (q) {
+        trackSurveyStep(currentStep, q.id, q.category);
+        trackFunnelStep(3, 'survey_step_progress', { step_index: currentStep, question_id: q.id });
+        trackPageView(`Curbside Compass - Step ${currentStep + 1}: ${q.category || q.id}`);
+      }
+    }
+  }, [currentStep, isCompleted, currentPersona, simConfig.streetLayout]);
+
   // Update the simulation when the user chooses a different street type or neighbourhood
   const handleLayoutChange = useCallback((layout: StreetLayoutTypology, neighbourhoodName?: string, postalCode?: string) => {
     setSelectedAnswers((prev) => ({
@@ -237,6 +270,7 @@ export default function App() {
     if (questionId === 'q0') {
       const layout = (optionId as StreetLayoutTypology) || 'mature_laned';
       const layoutInfo = getStreetLayoutInfo(layout);
+      trackStreetLayoutSelected(layout, layoutInfo.curbsideCapacity);
       setSelectedAnswers((prev) => ({ ...prev, q0: layout, q0_layout: layout }));
       setManualOverride((prev) => ({
         ...(prev || {}),
@@ -252,6 +286,7 @@ export default function App() {
     // Step 7: Location question (Postal code / neighbourhood)
     if (questionId === 'q7' || question?.type === 'text') {
       const trimmed = optionId.trim();
+      trackEvent('survey_location_entered', { opt_out: trimmed === 'OPT_OUT' });
       if (trimmed && trimmed !== 'OPT_OUT') {
         const detection = detectLayoutAndNeighbourhood(trimmed);
         const neighbourhoodName = detection.neighbourhood?.name;
@@ -270,6 +305,7 @@ export default function App() {
 
     const option = question?.options.find((opt) => opt.id === optionId);
     if (option) {
+      trackEvent('survey_option_selected', { question_id: questionId, option_id: optionId });
       // Clear manual slider adjustments so the user's policy choice directly sets the simulation
       setManualOverride((prev) => {
         if (!prev) return null;
@@ -341,6 +377,8 @@ export default function App() {
   // Clears the street to zero cars, putting 1 vehicle per garage and 1.8 vehicles per dwelling
   const handleRetake = useCallback(() => {
     triggerFeedback('button');
+    trackEvent('survey_retake');
+    trackFunnelStep(6, 'retake_survey', { source: 'reset_simulation' });
     setSelectedAnswers({});
     setManualOverride(null);
     setCurrentStep(0);
@@ -359,6 +397,14 @@ export default function App() {
 
   const handleConfigChange = useCallback((updated: Partial<SimulationConfig>) => {
     setManualOverride((prev) => ({ ...(prev || {}), ...updated }));
+    const keys = Object.keys(updated);
+    if (keys.length > 0) {
+      const firstKey = keys[0];
+      const val = (updated as Record<string, unknown>)[firstKey];
+      if (typeof val === 'number' || typeof val === 'string') {
+        trackSimulationAdjusted(firstKey, val);
+      }
+    }
   }, []);
 
 
