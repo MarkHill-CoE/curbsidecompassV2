@@ -52,7 +52,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
   return (
     <div
       id="manual-sliders-overlay-container"
-      className="absolute inset-0 z-40 bg-[#0c1f31]/75 backdrop-blur-md flex flex-col justify-start p-2 sm:p-4 md:p-5 overflow-y-auto animate-in fade-in duration-200"
+      className="absolute inset-0 z-40 bg-[#0c1f31]/75 backdrop-blur-md flex flex-col justify-start p-2 sm:p-4 md:p-5 overflow-y-auto animate-in fade-in duration-200 [@media(orientation:landscape)_and_(max-height:540px)]:p-1"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           triggerFeedback('button');
@@ -65,7 +65,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="manual-sliders-title"
-        className="relative bg-[#11283f]/95 border-2 border-[#0081BC] p-3 sm:p-4 rounded-xl shadow-2xl w-full max-w-md mx-auto my-1 sm:my-auto flex flex-col gap-2.5 text-xs text-white"
+        className="relative bg-[#11283f]/95 border-2 border-[#0081BC] p-3 sm:p-4 rounded-xl shadow-2xl w-full max-w-md mx-auto my-1 sm:my-auto flex flex-col gap-2.5 text-xs text-white [@media(orientation:landscape)_and_(max-height:540px)]:!w-full [@media(orientation:landscape)_and_(max-height:540px)]:!max-w-none [@media(orientation:landscape)_and_(max-height:540px)]:mx-0 [@media(orientation:landscape)_and_(max-height:540px)]:my-0"
       >
         {/* Header - Styled to match Parking Gauge container header */}
         <div className="flex items-center justify-between pb-1.5 sm:pb-2 border-b border-white/10 shrink-0">
@@ -78,7 +78,7 @@ export const ManualSlidersDrawer: React.FC<ManualSlidersDrawerProps> = ({
                 {t('drawer_sliders_title', 'Adjust the Neighbourhood')}
               </h3>
               <span className="text-[9px] sm:text-[10px] text-gray-300">
-                {t('drawer_sliders_subtitle', 'Live simulation controls & density factors')}
+                {t('drawer_sliders_subtitle', 'Live simulation controls')}
               </span>
             </div>
           </div>

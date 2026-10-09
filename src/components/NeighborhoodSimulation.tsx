@@ -148,14 +148,40 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     }
   }, [propOccupiedGaragesCount]);
 
-  // When the Neighborhood Simulation is expanded, zoom in to 1.75 (175%)
+  // Mobile horizontal (landscape) layout detection (height <= 540px and landscape orientation)
+  const [isMobileLandscape, setIsMobileLandscape] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(orientation: landscape) and (max-height: 540px)').matches;
+  });
+
   useEffect(() => {
-    if (isExpanded) {
+    if (typeof window === 'undefined') return;
+    const mediaQuery = window.matchMedia('(orientation: landscape) and (max-height: 540px)');
+    const update = (e: MediaQueryListEvent | MediaQueryList) => {
+      setIsMobileLandscape(e.matches);
+    };
+    update(mediaQuery);
+    try {
+      mediaQuery.addEventListener('change', update);
+      return () => mediaQuery.removeEventListener('change', update);
+    } catch {
+      // Fallback for older browsers
+      mediaQuery.addListener(update);
+      return () => mediaQuery.removeListener(update);
+    }
+  }, []);
+
+  // When in mobile horizontal, zoom in to 1.85x to fill the left half and center on neighborhood;
+  // when expanded in portrait/desktop, zoom to 1.75x; otherwise standard 1.33x
+  useEffect(() => {
+    if (isMobileLandscape) {
+      setZoomScale(1.85);
+    } else if (isExpanded) {
       setZoomScale(1.75);
     } else {
       setZoomScale(1.33);
     }
-  }, [isExpanded]);
+  }, [isExpanded, isMobileLandscape]);
 
   const triggerVisualAudioAlert = useCallback((_text: string, _icon: 'horn' | 'siren' | 'alarm' | 'medal' = 'horn') => {
     // Visual sound caption removed per user request
@@ -5956,7 +5982,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
     >
       {/* 2.5D Isometric Main Stage */}
       <div 
-        className="relative w-full h-full flex items-center justify-center p-0.5 sm:p-1 overflow-hidden touch-none"
+        className="relative w-full h-full flex items-center justify-center p-0.5 sm:p-1 [@media(orientation:landscape)_and_(max-height:540px)]:p-0 overflow-hidden touch-none"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -5968,7 +5994,7 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           id="cityCanvas"
           width={1200}
           height={800}
-          className="w-full h-full max-h-[100%] object-contain rounded-lg shadow-2xl block cursor-crosshair origin-center transition-transform duration-300 ease-out"
+          className="w-full h-full max-h-[100%] object-contain [@media(orientation:landscape)_and_(max-height:540px)]:object-cover [@media(orientation:landscape)_and_(max-height:540px)]:max-h-none [@media(orientation:landscape)_and_(max-height:540px)]:w-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full rounded-lg [@media(orientation:landscape)_and_(max-height:540px)]:rounded-none shadow-2xl block cursor-crosshair origin-center transition-transform duration-300 ease-out"
           style={{ transform: `scale(${zoomScale})` }}
           title={t('sim_canvas_title', 'Live Edmonton Multimodal Neighborhood Simulation - Click vehicles to honk')}
           role="img"
@@ -6098,10 +6124,10 @@ const NeighborhoodSimulationComponent: React.FC<NeighborhoodSimulationProps> = (
           </button>
           <button 
             type="button"
-            onClick={() => setZoomScale(isExpanded ? 1.75 : 1.33)}
+            onClick={() => setZoomScale(isMobileLandscape ? 1.85 : (isExpanded ? 1.75 : 1.33))}
             className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-300 hover:text-white hover:bg-white/20 active:bg-white/30 rounded font-bold text-xs sm:text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white transition-colors"
-            title={t('sim_zoom_reset', 'Reset Camera View (Default {scale}x)').replace('{scale}', isExpanded ? '1.75' : '1.33')}
-            aria-label={t('sim_zoom_reset', 'Reset Camera View (Default {scale}x)').replace('{scale}', isExpanded ? '1.75' : '1.33')}
+            title={t('sim_zoom_reset', 'Reset Camera View (Default {scale}x)').replace('{scale}', String(isMobileLandscape ? 1.85 : (isExpanded ? 1.75 : 1.33)))}
+            aria-label={t('sim_zoom_reset', 'Reset Camera View (Default {scale}x)').replace('{scale}', String(isMobileLandscape ? 1.85 : (isExpanded ? 1.75 : 1.33)))}
           >
             <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </button>

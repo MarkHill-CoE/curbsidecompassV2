@@ -231,7 +231,7 @@ export const TEXT_INVENTORY: TextInventoryItem[] = [
     "key": "drawer_sliders_subtitle",
     "category": "Manual Sliders Drawer",
     "container": "Policy Sliders Drawer",
-    "defaultText": "Live simulation controls & density factors",
+    "defaultText": "Live simulation controls",
     "guidance": "Direct policy slider label, description, or reset action"
   },
   {

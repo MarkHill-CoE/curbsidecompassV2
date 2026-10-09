@@ -499,18 +499,23 @@ export default function App() {
             setIsSimExpanded(false);
             setShowManualSliders(true);
           }}
+          onSwitchToStaticView={() => {
+            setShowMagnifiedGauge(false);
+            handleToggleSimplifiedMode(true);
+          }}
         />
 
         {/* Simulation Section: Calibrated vertical mobile-first height with interactive tap-to-expand */}
         <section
           id="simulation-section"
           onClick={() => {
-            if (!isSimExpanded && !isCompleted && !showManualSliders) {
+            const isLandscapeMobile = typeof window !== 'undefined' && window.matchMedia('(orientation: landscape) and (max-height: 540px)').matches;
+            if (!isLandscapeMobile && !isSimExpanded && !isCompleted && !showManualSliders) {
               setIsSimExpanded(true);
             }
           }}
           className={`relative bg-[#193A5A] flex-shrink-0 shadow-inner overflow-hidden border-[#004B8D] border-b-2 lg:border-b-0 lg:border-r-2 transition-all duration-300 ease-in-out ${
-            showManualSliders ? '' : 'cursor-pointer'
+            showManualSliders ? '' : 'cursor-pointer [@media(orientation:landscape)_and_(max-height:540px)]:cursor-default'
           } ${
             isCompleted
               ? "hidden lg:block lg:w-1/2"
@@ -518,8 +523,10 @@ export default function App() {
               ? "w-full h-[67vh] max-h-none sm:h-[67vh] sm:max-h-none md:h-[67vh] md:max-h-none lg:w-[65%] xl:w-[65%]"
               : showManualSliders
               ? "w-full h-[18vh] min-h-[105px] max-h-[135px] sm:h-[22vh] sm:max-h-[170px] md:h-[26vh] md:max-h-[220px] lg:w-[48%] xl:w-[50%] 2xl:w-[52%]"
+              : isSimplifiedMode
+              ? "w-full h-[33.33vh] min-h-[220px] sm:h-[33.33vh] md:h-[33.33vh] lg:w-[48%] xl:w-[50%] 2xl:w-[52%]"
               : "w-full h-[22vh] min-h-[120px] max-h-[170px] sm:h-[30vh] sm:max-h-[240px] md:h-[38vh] md:max-h-[360px] lg:w-[48%] xl:w-[50%] 2xl:w-[52%]"
-          } lg:h-full lg:max-h-none [@media(orientation:landscape)_and_(max-height:540px)]:h-full [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 [@media(orientation:landscape)_and_(max-height:540px)]:border-b-0 [@media(orientation:landscape)_and_(max-height:540px)]:border-r-2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
+          } lg:h-full lg:max-h-none [@media(orientation:landscape)_and_(max-height:540px)]:!h-full [@media(orientation:landscape)_and_(max-height:540px)]:!w-1/2 [@media(orientation:landscape)_and_(max-height:540px)]:!max-h-none [@media(orientation:landscape)_and_(max-height:540px)]:!min-h-0 [@media(orientation:landscape)_and_(max-height:540px)]:border-b-0 [@media(orientation:landscape)_and_(max-height:540px)]:border-r-2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
           aria-label={t('header_sim_view_aria', 'Neighborhood Parking Simulation View')}
         >
           {isSimplifiedMode ? (
@@ -533,6 +540,10 @@ export default function App() {
               activeVisitorCars={simulationMetrics.activeVisitorCars}
               totalDwellings={simulationMetrics.totalDwellings}
               totalWeeklyDeliveries={simulationMetrics.totalWeeklyDeliveries}
+              drivewayCapacity={simConfig.drivewayCapacity}
+              householdCarsPerHome={simConfig.householdCarsPerHome}
+              occupiedGaragesCount={simulationMetrics.occupiedGaragesCount}
+              totalGarageSpacesCapacity={simulationMetrics.totalGarageSpacesCapacity}
               tradeoffOutcome={currentTradeoffOutcome}
               currentStep={currentStep}
               policyNote={policyNote}
@@ -608,13 +619,13 @@ export default function App() {
               setIsSimExpanded(false);
             }
           }}
-          className={`relative w-full flex flex-col overflow-hidden min-h-0 bg-[#ffffff] lg:h-full [@media(orientation:landscape)_and_(max-height:540px)]:h-full transition-all duration-300 ease-in-out ${
+          className={`relative w-full flex flex-col overflow-hidden min-h-0 bg-[#ffffff] lg:h-full transition-all duration-300 ease-in-out ${
             isCompleted
               ? "w-full lg:w-1/2"
               : isSimExpanded && !showManualSliders
               ? "h-[33vh] min-h-[33vh] max-h-[33vh] flex-none overflow-hidden lg:h-full lg:max-h-none lg:w-[35%] xl:w-[35%]"
               : "flex-1 lg:w-[52%] xl:w-[50%] 2xl:w-[48%]"
-          } [@media(orientation:landscape)_and_(max-height:540px)]:w-1/2 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
+          } [@media(orientation:landscape)_and_(max-height:540px)]:!h-full [@media(orientation:landscape)_and_(max-height:540px)]:!w-1/2 [@media(orientation:landscape)_and_(max-height:540px)]:!max-h-none [@media(orientation:landscape)_and_(max-height:540px)]:!min-h-0 ${showMagnifiedGauge ? 'filter blur-[1.5px] pointer-events-none' : ''}`}
           aria-label={t('header_survey_aria', 'Parking Policy Persona Survey')}
         >
           {/* Middle bar: Larger Centre Button to Toggle between "Tap to Expand View" and "Tap to Restore View" */}
@@ -624,7 +635,7 @@ export default function App() {
                 isSimExpanded
                   ? 'bg-amber-50/90 border-amber-300 shadow-xs'
                   : 'bg-slate-100/95 border-slate-300 lg:hidden shadow-2xs'
-              }`}
+              } [@media(orientation:landscape)_and_(max-height:540px)]:hidden`}
             >
               <button
                 type="button"

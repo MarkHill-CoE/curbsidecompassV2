@@ -318,18 +318,12 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                         : 'border-amber-200/90 bg-white/95 hover:border-[#004B8D]/50 hover:bg-white shadow-2xs'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-start gap-2 min-w-0 flex-1">
-                        <span className="text-2xl leading-none shrink-0 mt-0.5" role="img" aria-label={layout.title}>
-                          {layout.icon}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <h4 className={`font-bold text-sm sm:text-base leading-snug whitespace-normal break-words ${isSelected ? 'text-[#004B8D]' : 'text-gray-900'}`}>
-                            {layout.title}
-                          </h4>
-                        </div>
-                      </div>
-                      <div className="shrink-0 pt-0.5 flex items-center gap-1.5">
+                    {/* Top line with the icon, pill and the radio button */}
+                    <div className="flex items-center justify-between w-full gap-2">
+                      <span className="text-2xl leading-none shrink-0" role="img" aria-label={layout.title}>
+                        {layout.icon}
+                      </span>
+                      <div className="shrink-0 flex items-center gap-1.5">
                         <span className="text-[10px] font-bold bg-[#004B8D]/10 text-[#004B8D] px-2 py-0.5 rounded-full">
                           {layout.stalls} Stalls
                         </span>
@@ -342,6 +336,11 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
                         )}
                       </div>
                     </div>
+
+                    {/* h4 component below the line with icon, pill and radio button */}
+                    <h4 className={`font-bold text-sm sm:text-base leading-snug whitespace-normal break-words ${isSelected ? 'text-[#004B8D]' : 'text-gray-900'}`}>
+                      {layout.title}
+                    </h4>
 
                     <p className="text-xs text-gray-700 leading-snug">
                       {layout.tag}
@@ -359,31 +358,23 @@ export const CivicOnboardingModal: React.FC<CivicOnboardingModalProps> = ({
             {/* Home Density Slider Control */}
             <div className="mt-1 p-3.5 sm:p-4 bg-white/95 border-2 border-amber-200/90 rounded-xl flex flex-col gap-2.5 shadow-2xs">
               <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className="p-1.5 rounded-lg bg-[#004B8D]/10 text-[#004B8D] shrink-0">
-                    <Building2 className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <label htmlFor="modal-density-slider" className="text-xs sm:text-sm font-bold text-[#193A5A] block leading-tight cursor-pointer">
-                      {t('drawer_infill_label', 'Home Density')}
-                    </label>
-                    <p className="text-[11px] sm:text-xs text-gray-600 leading-tight mt-0.5">
-                      {t('drawer_density_explainer', 'Adds multi-unit housing to the street.')}
-                    </p>
-                  </div>
+                <div className="p-1.5 rounded-lg bg-[#004B8D]/10 text-[#004B8D] shrink-0">
+                  <Building2 className="w-4 h-4" />
                 </div>
                 <div className="flex items-center gap-1.5 shrink-0 text-right">
-                  <span className="text-xs font-bold text-[#004B8D] bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-full">
-                    {(() => {
-                      if (activeLots === 0) return 'Baseline (0 lots)';
-                      if (activeLots === 1) return '+1 Multi-unit lot';
-                      return `+${activeLots} Multi-unit lots`;
-                    })()}
-                  </span>
                   <span className="text-[11px] font-bold text-gray-700 bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-2xs">
                     {activeDwellings} {t('drawer_dwellings_unit', 'Dwellings')}
                   </span>
                 </div>
+              </div>
+
+              <div className="min-w-0">
+                <label htmlFor="modal-density-slider" className="text-xs sm:text-sm font-bold text-[#193A5A] block leading-tight cursor-pointer">
+                  {t('drawer_infill_label', 'Home Density')}
+                </label>
+                <p className="text-[11px] sm:text-xs text-gray-600 leading-tight mt-0.5">
+                  {t('drawer_density_explainer', 'Adds multi-unit housing to the street.')}
+                </p>
               </div>
 
               <div className="flex flex-col gap-1 pt-0.5">

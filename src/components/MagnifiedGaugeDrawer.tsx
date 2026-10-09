@@ -31,6 +31,7 @@ interface MagnifiedGaugeDrawerProps {
   totalGarageSpacesCapacity?: number;
   onDrivewayCapacityChange?: (newCapacity: number) => void;
   onOpenManualSliders?: () => void;
+  onSwitchToStaticView?: () => void;
 }
 
 export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
@@ -48,7 +49,8 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
   occupiedGaragesCount = 0,
   totalGarageSpacesCapacity = 12,
   onDrivewayCapacityChange,
-  onOpenManualSliders
+  onOpenManualSliders,
+  onSwitchToStaticView
 }) => {
   const { t } = useAppText();
 
@@ -166,7 +168,7 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 {t('gauge_drawer_title', 'Curbside Parking Demand Gauge')}
               </h3>
               <p className="text-xs text-slate-400 mt-1">
-                {t('gauge_drawer_subtitle', 'Live street utilization & capacity analysis')} &bull; Smart Mobility Management
+                {t('gauge_drawer_subtitle', 'Live street simulation variables')}
               </p>
             </div>
           </div>
@@ -293,14 +295,6 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 Parking Demand
               </span>
             </div>
-
-            <h4 className="text-sm font-bold text-slate-200">
-              {t('gauge_curbside_utilization_label', 'Curbside Demand vs Legal Capacity')}
-            </h4>
-
-            <p className="text-xs text-slate-300 max-w-xl leading-relaxed">
-              Real-time balance across the block: <strong className="text-white">{streetUsed} of {streetCap}</strong> legal curbside stalls occupied with <strong className="text-cyan-300">{streetFree} free stalls</strong> remaining.
-            </p>
           </div>
 
           {/* Circling traffic badge if active */}
@@ -326,9 +320,6 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                   <h5 className="font-bold text-white text-sm">
                     Street Parking
                   </h5>
-                  <span className="text-[10px] text-slate-400">
-                    Legal Curbside Capacity
-                  </span>
                 </div>
               </div>
 
@@ -400,15 +391,6 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 </span>
               </div>
             </div>
-
-            {/* Panel Note */}
-            <p className="text-xs text-slate-300 leading-snug">
-              {streetFree > 0 ? (
-                <>Curbside accommodates demand with <strong className="text-white">{streetFree} open stalls</strong>.</>
-              ) : (
-                <span className="text-rose-400 font-bold">Curbside reached 100% capacity. Overflow cars cruise lanes.</span>
-              )}
-            </p>
           </div>
 
           {/* Panel B: Private / Garage Parking */}
@@ -423,9 +405,6 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                   <h5 className="font-bold text-white text-sm">
                     Private / Garage Parking
                   </h5>
-                  <span className="text-[10px] text-slate-400">
-                    Off-Street Allocation
-                  </span>
                 </div>
               </div>
 
@@ -493,15 +472,6 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 </span>
               </div>
             </div>
-
-            {/* Panel Note */}
-            <p className="text-xs text-slate-300 leading-snug">
-              {garagePct >= 100 ? (
-                <>All off-street garage spaces are utilized (<strong className="text-white">12 of 12 full</strong>). Residual resident cars park on the curbside.</>
-              ) : (
-                <>Off-street garages have <strong className="text-white">{garageFree} free spaces</strong> to absorb curbside overflow.</>
-              )}
-            </p>
           </div>
         </div>
 
@@ -531,14 +501,9 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 <Car className="w-3.5 h-3.5 text-sky-400 shrink-0" />
                 Resident Vehicles
               </span>
-              <div className="flex items-baseline gap-1 mt-1">
-                <span className="text-base sm:text-lg font-black text-white">
-                  {activeHouseholdCars}
-                </span>
-                <span className="text-[10px] text-slate-400 font-medium truncate">
-                  (Avg {Number(householdCarsPerHome).toFixed(1)} / Home)
-                </span>
-              </div>
+              <span className="text-base sm:text-lg font-black text-white mt-1">
+                {activeHouseholdCars}
+              </span>
             </div>
 
             {/* KPI 3: Visitor Vehicles */}
@@ -584,9 +549,6 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
                 <span className="text-base sm:text-lg font-black text-emerald-400 leading-tight">
                   {totalActiveVehiclesParked}
                 </span>
-                <span className="text-[9px] text-slate-400 font-medium truncate">
-                  ({streetUsed} Street + {garageUsed} Garage)
-                </span>
               </div>
             </div>
           </div>
@@ -600,9 +562,6 @@ export const MagnifiedGaugeDrawer: React.FC<MagnifiedGaugeDrawerProps> = ({
             <div>
               <p>
                 <strong className="text-white">Approaching Capacity:</strong> Curb reaches ~85% occupancy. Minor cruising occurs during peak demand periods.
-              </p>
-              <p className="text-[11px] text-slate-400 mt-0.5">
-                Private garages absorb 12 resident vehicles off-street. Adjust household parking allocation to evaluate traffic calming impacts.
               </p>
             </div>
           </div>

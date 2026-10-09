@@ -50,7 +50,7 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h4 className="text-sm font-bold text-white leading-tight">
-                  {t('sim_garage_use_label', 'Private/Garage Use')}
+                  {t('sim_garage_use_label', 'Hint Tip')}
                 </h4>
                 <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-amber-500/20 text-[#FFC72C] border border-amber-400/30 leading-none">
                   {currentCap} {currentCap === 1 ? 'stall/home' : 'stalls/home'}
@@ -75,7 +75,7 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
 
         {/* Narrative / Contextual Hint */}
         <p className="text-xs text-gray-200 leading-relaxed">
-          Curbside street parking is at <span className="font-bold text-amber-300">{curbsidePct}%</span>. Encourage private driveway and garage use to reduce street parking demand.
+          Curbside street parking is a <span className="font-bold text-amber-300">{curbsidePct}%</span>. Increase neighbourhood private driveway and garage use to reduce street parking demand.
         </p>
 
         {/* Garage Use Slider */}
@@ -132,7 +132,7 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
             <Warehouse className="w-4 h-4" />
           </div>
           <span className="text-[11px] uppercase font-black tracking-wider text-white">
-            {t('sim_garage_use_label', 'Private/Garage Use')}
+            {t('sim_garage_use_label', 'Hint Tip')}
           </span>
         </div>
         <button
@@ -151,9 +151,9 @@ export const GarageUsageHintBox: React.FC<GarageUsageHintBoxProps> = ({
 
       {/* Explainer / Prompt */}
       <p className="text-xs text-gray-200 leading-snug">
-        Curbside street parking is at <span className="font-bold text-amber-300">{curbsidePct}%</span>.
+        Curbside street parking is a <span className="font-bold text-amber-300">{curbsidePct}%</span>.
         <br />
-        Encourage private driveway and garage use to reduce street parking demand.
+        Increase neighbourhood private driveway and garage use to reduce street parking demand.
       </p>
 
       {/* Garage Use Slider: replaces link to controls and removed vehicles parked/space container */}

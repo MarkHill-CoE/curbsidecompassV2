@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { SurveyQuestion, StreetLayoutTypology, SimulationConfig } from '../types';
 import {
   ChevronLeft,
@@ -85,13 +85,27 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
       'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 [@media(orientation:landscape)_and_(max-height:540px)]:grid-cols-2 gap-1 sm:gap-1.5 md:gap-2 w-full';
   }
 
-  const [locationInput, setLocationInput] = useState<string>(() => {
-    if (currentAnswer && currentAnswer !== 'OPT_OUT') return currentAnswer;
-    if (currentNeighbourhoodName) return currentNeighbourhoodName;
-    return '';
-  });
+  const [locationInput, setLocationInput] = useState<string>('');
   const [selectedDisambiguation, setSelectedDisambiguation] = useState<string | null>(null);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  // Ensure the open location text box is empty when this screen loads
+  useEffect(() => {
+    if (isLocationStep) {
+      const q7Ans = selectedAnswers['q7'];
+      const isAutoValue =
+        !q7Ans ||
+        q7Ans === 'OPT_OUT' ||
+        ['mature_laned', 'infill_skinny', 'suburban_front_driveway', 'contemporary_townhomes'].includes(q7Ans) ||
+        q7Ans === currentNeighbourhoodName;
+
+      if (isAutoValue) {
+        setLocationInput('');
+      } else {
+        setLocationInput(q7Ans);
+      }
+    }
+  }, [currentStep, isLocationStep, currentNeighbourhoodName]);
 
   // Input Intent Recognition
   const inputIntent = useMemo(() => {
@@ -387,22 +401,18 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                         role="radio"
                         aria-checked={isSelected}
                         onClick={() => handleSelectStreetModel(layout.id)}
-                        className={`text-left p-3 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-1.5 relative active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
+                        className={`text-left p-2.5 sm:p-3 [@media(orientation:landscape)_and_(max-height:540px)]:p-2 rounded-xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-1.5 [@media(orientation:landscape)_and_(max-height:540px)]:gap-1 relative active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
                           isSelected
                             ? 'border-[#004B8D] bg-blue-50/90 shadow-xs ring-2 ring-[#004B8D]'
                             : 'border-gray-200 bg-white hover:border-[#004B8D]/50 hover:bg-gray-50'
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2 min-w-0 flex-1">
-                            <span className="text-2xl leading-none shrink-0 mt-0.5" role="img" aria-label={layout.title}>{layout.icon}</span>
-                            <div className="min-w-0 flex-1">
-                              <h4 className={`font-bold text-xs sm:text-sm leading-snug whitespace-normal break-words ${isSelected ? 'text-[#004B8D]' : 'text-black'}`}>
-                                {layout.title}
-                              </h4>
-                            </div>
-                          </div>
-                          <div className="shrink-0 pt-0.5 flex items-center gap-1.5">
+                        {/* Top line with the icon, pill and the radio button */}
+                        <div className="flex items-center justify-between w-full gap-2">
+                          <span className="text-2xl [@media(orientation:landscape)_and_(max-height:540px)]:text-xl leading-none shrink-0" role="img" aria-label={layout.title}>
+                            {layout.icon}
+                          </span>
+                          <div className="shrink-0 flex items-center gap-1.5">
                             <span className="text-[10px] font-bold bg-[#004B8D]/10 text-[#004B8D] px-2 py-0.5 rounded-full">
                               {layout.stalls} Stalls
                             </span>
@@ -415,6 +425,11 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                             )}
                           </div>
                         </div>
+
+                        {/* h4 component below the line with icon, pill and radio button */}
+                        <h4 className={`font-bold text-xs sm:text-sm leading-snug whitespace-normal break-words ${isSelected ? 'text-[#004B8D]' : 'text-black'}`}>
+                          {layout.title}
+                        </h4>
 
                         <p className="text-[10.5px] sm:text-[11px] text-gray-600 leading-tight">
                           {layout.tag}
@@ -431,35 +446,26 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
 
                 {/* Home Density Slider Control */}
                 <div className="mt-1 p-3 sm:p-3.5 bg-slate-50 border border-slate-200 rounded-xl flex flex-col gap-2 shadow-2xs">
+                  {/* Top line with the icon on left and pill on right */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="p-1.5 rounded-lg bg-[#004B8D]/10 text-[#004B8D] shrink-0">
-                        <Building2 className="w-4 h-4" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <label htmlFor="home-density-slider" className="text-xs sm:text-sm font-bold text-[#193A5A] block leading-tight cursor-pointer">
-                            {t('drawer_infill_label', 'Home Density')}
-                          </label>
-                        </div>
-                        <p className="text-[11px] text-gray-600 leading-tight mt-0.5">
-                          {t('drawer_density_explainer', 'Adds multi-unit housing to the street.')}
-                        </p>
-                      </div>
+                    <div className="p-1.5 rounded-lg bg-[#004B8D]/10 text-[#004B8D] shrink-0">
+                      <Building2 className="w-4 h-4" />
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0 text-right">
-                      <span className="text-xs font-bold text-[#004B8D] bg-blue-100/70 border border-blue-200 px-2 py-0.5 rounded-full">
-                        {(() => {
-                          const lots = Math.min(3, Math.max(0, config?.splitInfillLots ?? 0));
-                          if (lots === 0) return 'Baseline (0 lots)';
-                          if (lots === 1) return '+1 Multi-unit lot';
-                          return `+${lots} Multi-unit lots`;
-                        })()}
-                      </span>
                       <span className="text-[11px] font-bold text-gray-700 bg-white border border-gray-200 px-2 py-0.5 rounded-full shadow-2xs">
                         {(totalDwellings ?? (12 + Math.min(3, Math.max(0, config?.splitInfillLots ?? 0)) * 7))} {t('drawer_dwellings_unit', 'Dwellings')}
                       </span>
                     </div>
+                  </div>
+
+                  {/* Components below the line with icon and pill: label and description */}
+                  <div className="min-w-0">
+                    <label htmlFor="home-density-slider" className="text-xs sm:text-sm font-bold text-[#193A5A] block leading-tight cursor-pointer">
+                      {t('drawer_infill_label', 'Home Density')}
+                    </label>
+                    <p className="text-[11px] text-gray-600 leading-tight mt-0.5">
+                      {t('drawer_density_explainer', 'Adds multi-unit housing to the street.')}
+                    </p>
                   </div>
 
                   <div className="flex flex-col gap-1 pt-0.5">
@@ -495,10 +501,6 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
             {/* Step 7: Choose your neighbourhood type? (Location) */}
             {isLocationStep && (
               <div className="w-full flex flex-col gap-2 pt-0.5">
-                <label htmlFor="location-smart-input" className="block text-xs sm:text-sm font-semibold text-[#193A5A] leading-snug">
-                  {t('q7_helper', 'Enter your full postal code or first three characters of your postal code:')}
-                </label>
-
                 {/* Single Smart Unified Search Input with explicit 48px touch target */}
                 <div className="relative flex flex-col gap-1 w-full">
                   {/* Mode Indicator Pill when typing */}
@@ -864,20 +866,20 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
         id="survey-navigation-container"
         role="navigation"
         aria-label="Question Navigation"
-        className="sticky bottom-0 z-30 bg-white pt-2 sm:pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] px-3 sm:px-4 md:px-6 border-t border-gray-200 flex flex-col gap-1.5 flex-shrink-0 shadow-[0_-3px_10px_rgba(0,0,0,0.04)]"
+        className="sticky bottom-0 z-30 bg-white py-0.5 pb-[max(0.2rem,env(safe-area-inset-bottom))] px-2.5 sm:px-3 md:px-4 border-t border-gray-200 flex flex-col gap-0.5 flex-shrink-0 shadow-[0_-1px_3px_rgba(0,0,0,0.02)]"
       >
         {showValidationError && (
           <div 
             role="alert" 
             aria-live="assertive"
-            className="text-xs sm:text-sm text-[#E8552D] bg-[#E8552D]/10 border border-[#E8552D]/30 px-3 py-1.5 rounded-md font-semibold flex items-center gap-2 animate-pulse"
+            className="text-[9px] sm:text-[10px] text-[#E8552D] bg-[#E8552D]/10 border border-[#E8552D]/30 px-2 py-0.5 rounded font-semibold flex items-center gap-1 animate-pulse"
           >
-            <span className="w-2 h-2 rounded-full bg-[#E8552D] flex-shrink-0" aria-hidden="true" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#E8552D] flex-shrink-0" aria-hidden="true" />
             {validationErrorMsg || (isLocationStep ? t('nav_alert_postal_format', 'Please enter your postal code or select the opt-out checkbox.') : t('nav_alert_select_option', 'Please select an option to advance.'))}
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-2 sm:gap-3">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-2">
           {/* Go Back button */}
           <button
             type="button"
@@ -889,13 +891,13 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                 onNavigate(-1);
               }
             }}
-            className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-1.5 border-2 transition-all min-h-[44px] sm:min-h-[48px] min-w-[48px] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#004B8D] ${
+            className={`px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-md font-bold text-[10px] sm:text-[11px] flex items-center gap-1 border transition-all min-h-[18px] sm:min-h-[20px] min-w-[28px] active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#004B8D] ${
               currentStep === 0
                 ? 'opacity-40 cursor-not-allowed border-gray-200 bg-gray-50 text-gray-400'
                 : 'border-gray-300 bg-white text-gray-800 hover:bg-gray-100 cursor-pointer shadow-2xs'
             }`}
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
             <span>{t('nav_btn_go_back', 'Go Back')}</span>
           </button>
 
@@ -908,10 +910,10 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                 triggerFeedback('submit');
                 onNavigate(1);
               }}
-              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-2 shadow-xs transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] min-w-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
+              className="px-2.5 py-0.5 sm:px-3 sm:py-0.5 rounded-md font-black text-[10px] sm:text-[11px] bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-1 shadow-xs transition-all cursor-pointer min-h-[18px] sm:min-h-[20px] min-w-[28px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:ring-[#004B8D]"
             >
-              <CheckCircle2 className="w-4 h-4 text-[#FFC72C] stroke-[2.5]" />
-              <span>{t('nav_btn_calc_persona', 'Calculate Resident Profile')}</span>
+              <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#FFC72C] stroke-[2.5]" />
+              <span>{t('nav_btn_calc_persona', 'Next')}</span>
             </button>
           ) : (
             <button
@@ -921,10 +923,10 @@ const SurveyStageComponent: React.FC<SurveyStageProps> = ({
                 triggerFeedback('button');
                 onNavigate(1);
               }}
-              className="px-5 py-2 sm:px-6 sm:py-2.5 rounded-xl font-black text-xs sm:text-sm bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-2 shadow-xs transition-all cursor-pointer min-h-[44px] sm:min-h-[48px] min-w-[48px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#004B8D]"
+              className="px-2.5 py-0.5 sm:px-3 sm:py-0.5 rounded-md font-black text-[10px] sm:text-[11px] bg-[#004B8D] hover:bg-[#003566] active:scale-95 text-white flex items-center gap-1 shadow-xs transition-all cursor-pointer min-h-[18px] sm:min-h-[20px] min-w-[28px] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-offset-1 focus-visible:ring-[#004B8D]"
             >
               <span>{t('nav_btn_next', 'Next')}</span>
-              <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+              <ChevronRight className="w-2.5 h-2.5 sm:w-3 sm:h-3 stroke-[2.5]" />
             </button>
           )}
         </div>
